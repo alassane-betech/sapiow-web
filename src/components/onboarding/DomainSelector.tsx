@@ -29,7 +29,7 @@ export const DomainSelector: React.FC<DomainSelectorProps> = ({
 
   return (
     <>
-      <h1 className="text-2xl sm:text-lg lg:text-xl font-bold text-center mb-2">
+      <h1 className="text-base sm:text-lg lg:text-xl font-bold text-center mb-2">
         {title}
       </h1>
       {subtitle && (

@@ -31,7 +31,7 @@ export default function Onboarding() {
         )}
         <div
           className={`flex flex-col justify-center items-center flex-1 px-6 py-8 lg:py-0 ${
-            step > 0 ? "-mt-11" : ""
+            step > 0 ? "sm:-mt-11" : ""
           }`}
         >
           {/* Étape 0 : Choix du type d'utilisateur */}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Figtree, Geist_Mono } from "next/font/google";
+import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import "./globals.css";
 
 const figtree = Figtree({
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        <FavoritesProvider>
+          {children}
+        </FavoritesProvider>
       </body>
     </html>
   );

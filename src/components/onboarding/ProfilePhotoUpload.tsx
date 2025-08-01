@@ -1,63 +1,108 @@
 "use client";
-import React from "react";
+import Image from "next/image";
+import React, { useRef, useState } from "react";
 
 interface ProfilePhotoUploadProps {
   onPhotoSelect?: (file: File) => void;
   className?: string;
+  isCompte?: boolean;
 }
 
 export const ProfilePhotoUpload: React.FC<ProfilePhotoUploadProps> = ({
   onPhotoSelect,
   className = "",
+  isCompte = false,
 }) => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && onPhotoSelect) {
-      onPhotoSelect(file);
+    if (file) {
+      // Créer une URL temporaire pour afficher l'image
+      const imageUrl = URL.createObjectURL(file);
+      setSelectedImage(imageUrl);
+
+      if (onPhotoSelect) {
+        onPhotoSelect(file);
+      }
     }
   };
 
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <div className={`flex flex-col items-center mb-8 ${className}`}>
+    <div className={`flex flex-col items-center mb-1 ${className}`}>
       <div className="relative mb-4">
-        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center border-2 border-gray-200">
-          <svg
-            className="w-12 h-12 text-gray-400"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
-        <label
-          htmlFor="photo-upload"
-          className="absolute -bottom-1 -right-1 w-8 h-8 bg-cobalt-blue rounded-full flex items-center justify-center border-2 border-white cursor-pointer hover:bg-blue-700 transition-colors"
+        <div
+          className={`w-24 h-24 rounded-full flex items-center justify-center border-2 border-light-blue-gray overflow-hidden ${
+            isCompte ? "ml-4" : ""
+          }`}
         >
-          <svg
-            className="w-4 h-4 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          {selectedImage ? (
+            <Image
+              src={selectedImage}
+              alt="photo-profile"
+              width={96}
+              height={96}
+              className="w-full h-full object-cover"
             />
-          </svg>
-        </label>
-        <input
-          id="photo-upload"
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileSelect}
-        />
+          ) : (
+            <div className="w-12 h-12">
+              <Image
+                src={"/assets/icons/user.svg"}
+                alt="user-icon"
+                width={30}
+                height={30}
+                className="mb-2 w-full h-full"
+              />
+            </div>
+          )}
+        </div>
+        {!isCompte && (
+          <>
+            {" "}
+            <label
+              htmlFor="photo-upload"
+              className="absolute -bottom-1 -right-1 w-9 h-9 flex items-center justify-center cursor-pointer"
+            >
+              <Image
+                src={"/assets/icons/camera.svg"}
+                alt="upload-icon"
+                width={30}
+                height={30}
+                className="mb-2"
+              />
+            </label>
+            <input
+              id="photo-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+          </>
+        )}
+        {isCompte && (
+          <>
+            <button
+              type="button"
+              className="text-sm mt-2 w-full max-w-[140px] text-exford-blue font-bold bg-white rounded-full px-3 py-2 border border-light-blue-gray"
+              onClick={handleButtonClick}
+            >
+              Changer de photo
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+          </>
+        )}
       </div>
     </div>
   );

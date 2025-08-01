@@ -87,7 +87,7 @@ export default function VerifyCode() {
       {/* Section image - cachée sur mobile et tablette, visible sur desktop */}
       <div className="hidden lg:block relative">
         <Image
-          src="/assets/bg_onboarding.png"
+          src="/assets/on_boarding.png"
           alt="Background"
           fill
           className="object-scale-down"

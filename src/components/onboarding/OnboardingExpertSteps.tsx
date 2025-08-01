@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
+import { Textarea } from "@/components/ui/textarea";
 import { useOnboardingExpert } from "@/hooks/useOnboardingExpert";
 import React from "react";
 import { DomainSelector } from "./DomainSelector";
@@ -129,7 +130,7 @@ export const OnboardingExpertSteps: React.FC = () => {
   // Étape 3 : Choix des spécialités
   if (step === 3 && selectedDomain) {
     return (
-      <>
+      <div className="w-full max-w-[343px] sm:max-w-[380px] lg:max-w-[343px]">
         <SpecialtySelector
           selectedDomain={selectedDomain}
           selectedSpecialties={selectedSpecialties}
@@ -150,7 +151,7 @@ export const OnboardingExpertSteps: React.FC = () => {
             onClick={nextStep}
           />
         </div>
-      </>
+      </div>
     );
   }
 
@@ -158,41 +159,43 @@ export const OnboardingExpertSteps: React.FC = () => {
   if (step === 4) {
     return (
       <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px]">
-        <h1 className="text-2xl sm:text-[26px] lg:text-[28px] leading-[32px] sm:leading-[34px] lg:leading-[36px] font-bold text-center lg:text-left mb-2">
+        <h1 className="text-base sm:text-lg lg:text-xl font-bold text-center mb-2 font-inter">
           Terminez votre profil !
         </h1>
-        <p className="text-base sm:text-lg font-normal my-4 text-center lg:text-left text-gray-600 mb-8">
-          Nous avons besoin de quelques informations pour personnaliser créer
-          votre compte Expert.
+        <p className="text-sm sm:text-base font-normal my-4 text-center text-gray-600 mb-8">
+          Nous avons besoin de quelques <br /> informations pour personnaliser
+          créer <br /> votre compte Expert.
         </p>
 
         <ProfilePhotoUpload />
 
         <div className="space-y-6 mb-8">
-          <textarea
+          <Textarea
             placeholder="À propos de vous"
             value={aboutMe}
             onChange={(e) => setAboutMe(e.target.value)}
-            rows={4}
-            className="w-full p-4 border-2 border-gray-300 rounded-[8px] focus:border-cobalt-blue focus:outline-none focus:ring-2 focus:ring-cobalt-blue/20 transition-all font-medium text-exford-blue placeholder-gray-500 resize-none"
+            rows={6}
+            className="w-full h-[190px] px-4 font-medium text-exford-blue placeholder-slate-gray"
           />
           <FormField
             type="url"
             placeholder="Lien de votre LinkedIn"
+            label="Lien de votre LinkedIn"
             value={linkedinUrl}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setLinkedinUrl(e.target.value)
             }
-            className="w-full h-[56px] px-4 border-2 border-gray-300 rounded-[8px] focus:border-cobalt-blue focus:outline-none focus:ring-2 focus:ring-cobalt-blue/20 transition-all font-medium text-exford-blue placeholder-gray-500"
+            className="w-full h-[56px] px-4 font-medium text-exford-blue placeholder-slate-gray"
           />
           <FormField
             type="url"
             placeholder="Lien de votre Siteweb"
+            label="Lien de votre Siteweb"
             value={websiteUrl}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setWebsiteUrl(e.target.value)
             }
-            className="w-full h-[56px] px-4 border-2 border-gray-300 rounded-[8px] focus:border-cobalt-blue focus:outline-none focus:ring-2 focus:ring-cobalt-blue/20 transition-all font-medium text-exford-blue placeholder-gray-500"
+            className="w-full h-[56px] px-4 font-medium text-exford-blue placeholder-slate-gray"
           />
         </div>
 
@@ -217,7 +220,7 @@ export const OnboardingExpertSteps: React.FC = () => {
   // Étape 5 : Ajout de la première visio
   if (step === 5) {
     return (
-      <>
+      <div className="w-full max-w-[343px] sm:max-w-[380px] lg:max-w-[343px]">
         <VisioConfiguration
           visioOptions={visioOptions}
           onUpdateVisioOption={updateVisioOption}
@@ -237,7 +240,7 @@ export const OnboardingExpertSteps: React.FC = () => {
             onClick={completeOnboarding}
           />
         </div>
-      </>
+      </div>
     );
   }
 

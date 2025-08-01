@@ -24,8 +24,8 @@ export const DOMAIN_ICONS = {
     active: "/assets/icons/Homeactif.svg",
   },
   business: {
-    inactive: "/assets/icons/graph.svg",
-    active: "/assets/icons/graphActif.svg",
+    inactive: "/assets/icons/business.svg",
+    active: "/assets/icons/businessActif.svg",
   },
   artisanat: {
     inactive: "/assets/icons/paintRoller.svg",
