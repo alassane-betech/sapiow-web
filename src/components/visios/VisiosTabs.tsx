@@ -10,9 +10,9 @@ interface VisiosTabsProps {
 
 export const VisiosTabs: React.FC<VisiosTabsProps> = ({ onStartVideoCall }) => {
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 mt-3">
+    <div className="w-full grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-4 mt-3 px-4 pb-20">
       <Tabs defaultValue="a-venir" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-transparent border-b-2 border-light-blue-gray h-auto p-0 rounded-none lg:ml-6 relative">
+        <TabsList className="grid w-full grid-cols-3 bg-transparent border-b-2 border-light-blue-gray h-auto p-0 rounded-none relative">
           <TabsTrigger
             value="a-venir"
             className="relative px-4 py-4 text-lg font-bold text-slate-400 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none hover:text-slate-900 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900"
@@ -34,8 +34,8 @@ export const VisiosTabs: React.FC<VisiosTabsProps> = ({ onStartVideoCall }) => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="a-venir" className="mt-6 px-6">
-          <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TabsContent value="a-venir" className="mt-6">
+          <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
             <SessionCard
               date="Aujourd'hui"
               time="10h30"
@@ -86,8 +86,8 @@ export const VisiosTabs: React.FC<VisiosTabsProps> = ({ onStartVideoCall }) => {
           </div>
         </TabsContent>
 
-        <TabsContent value="en-attente" className="mt-6 px-6">
-          <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TabsContent value="en-attente" className="mt-6">
+          <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
             <SessionCard
               date="Aujourd'hui"
               time="10h30"
@@ -128,7 +128,7 @@ export const VisiosTabs: React.FC<VisiosTabsProps> = ({ onStartVideoCall }) => {
           </div>
         </TabsContent>
       </Tabs>
-      <CustomCalendar className="hidden lg:block" />
+      <CustomCalendar className="hidden xl:block" />
     </div>
   );
 };

@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/layout/Sidebare";
 import { Badge } from "@/components/ui/badge";
 import { Button as ButtonUI } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -18,6 +19,8 @@ import { useEffect, useState } from "react";
 import OfferSelection from "../home/OfferSelection";
 import ProfessionalCard from "../home/ProfessionalCard";
 
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
 import { Professional } from "@/types/professional";
 
 // Données des professionnels (à déplacer dans un contexte ou API plus tard)
@@ -76,7 +79,7 @@ const professionals = [
   {
     id: 1,
     name: "Jean-Pierre Fauch",
-    image: "/assets/icons/pro2.png",
+    image: "/assets/product-image.png",
     verified: false,
     topExpertise: true,
     category: "business",
@@ -128,9 +131,12 @@ const professionals = [
 ];
 
 export default function ProfessionalDetail() {
+  const isMobile = useIsMobile();
+  const isMobileOrTablet = useIsMobileOrTablet();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [professional, setProfessional] = useState<Professional | null>(null);
+  const [isOfferSheetOpen, setIsOfferSheetOpen] = useState(false);
   const [likedProfs, setLikedProfs] = useState<Record<number, boolean>>({});
   const { isPaid } = usePayStore();
   const { isPlaning } = usePlaningStore();
@@ -143,11 +149,11 @@ export default function ProfessionalDetail() {
         setProfessional(prof);
       } else {
         // Rediriger vers la page d'accueil si le professionnel n'est pas trouvé
-        router.push("/home");
+        router.push("/");
       }
     } else {
       // Rediriger vers la page d'accueil si aucun ID n'est fourni
-      router.push("/home");
+      router.push("/");
     }
   }, [searchParams, router]);
 
@@ -168,34 +174,38 @@ export default function ProfessionalDetail() {
     "Leadership",
     "Négociation salariale",
   ];
-
   const isLiked = likedProfs[professional.id] || false;
+
+  // Dimensions responsive pour l'image
+  const imageWidth = isMobile ? 358 : 303;
+  const imageHeight = 378;
+  const maxWidth = isMobile ? "max-w-[358px]" : "max-w-[303px]";
   return (
     <div className="flex">
       <AppSidebar />
       <div className="w-full flex-1">
         <HeaderClient isBack />
         {/* <Expert /> */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-[1fr_386px] gap-6 pl-5 container">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[2fr_1fr] xl:grid-cols-[1fr_386px] gap-6 pl-5 container pb-20 lg:pb-0">
           <div className="">
-            <div className="flex flex-col md:flex-row gap-6 mt-3">
+            <div className="flex justify-center items-center flex-col md:flex-row gap-6 mt-3">
               <div className="relative">
                 <ProfessionalCard
                   professional={professional}
                   isLiked={isLiked}
                   onToggleLike={() => toggleLike(professional.id)}
-                  imageWidth={303}
-                  imageHeight={378}
-                  maxWidth="max-w-[303px]"
+                  imageWidth={imageWidth}
+                  imageHeight={imageHeight}
+                  maxWidth={maxWidth}
                 />
               </div>
 
               <div className="flex-1 space-y-4">
                 <div>
-                  <h2 className="text-base font-bold mb-1 font-figtree mt-3">
+                  <h2 className="xl:text-base text-sm font-bold mb-1 font-figtree mt-3">
                     À propos
                   </h2>
-                  <p className="text-gray-700 leading-relaxed font-figtree text-base">
+                  <p className="text-gray-700 leading-relaxed font-figtree xl:text-base text-sm">
                     Dermatologue chez L'Oréal, passionné par l'innovation en
                     soins de la peau. Avec une expertise de plus de 10 ans, je
                     me consacre à la recherche et au développement de produits
@@ -218,7 +228,7 @@ export default function ProfessionalDetail() {
                   <div className="max-w-[400px] flex gap-2 flex-wrap">
                     {expertise.map((expertise) => (
                       <Badge
-                        className="p-2 text-xs text-[#1F2937] font-medium bg-[#F3F4F6] hover:bg-[#F3F4F6] max-w-fit font-inter mb-2"
+                        className="p-2 text-xs lg:text-[10px] xl:text-xs text-[#1F2937] font-medium bg-[#F3F4F6] hover:bg-[#F3F4F6] max-w-fit font-inter mb-2"
                         variant="secondary"
                       >
                         {expertise}
@@ -229,9 +239,9 @@ export default function ProfessionalDetail() {
 
                 <Card className="bg-ice-blue border-ice-blue shadow-none h-[72px] p-0">
                   <CardContent className="p-4 text-center">
-                    <p className="text-base text-gray-700 font-figtree font-normal">
+                    <p className="text-[13px] lg:text-[11px] xl:text-base text-gray-700 font-figtree font-normal lg:font-medium xl:font-normal">
                       La totalité des revenus sera destinée à <br />
-                      <span className="text-base font-bold font-figtree">
+                      <span className="text-[13px] lg:text-[11px] xl:text-base font-bold font-figtree">
                         760 fondations.
                       </span>
                     </p>
@@ -315,7 +325,7 @@ export default function ProfessionalDetail() {
               <h2 className="text-lg font-bold mb-2.5 text-charcoal-blue font-inter">
                 Comment ça marche ?
               </h2>
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 <HowItWorksCard
                   iconSrc="/assets/icons/magnifer.svg"
                   iconAlt="magnifer"
@@ -350,7 +360,7 @@ export default function ProfessionalDetail() {
                     Tout voir <ChevronRight className="h-4 w-4 ml-1" />
                   </ButtonUI>
                 </div>
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(175px,1fr))] gap-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
                   {professionalsSimilar.map((professional) => (
                     <ProfessionalCard
                       key={professional.id}
@@ -404,7 +414,8 @@ export default function ProfessionalDetail() {
               />
             </div>
           </div>
-          <div className="lg:border-l lg:border-gray-200">
+          {/* Colonne de droite - Cachée en mobile/tablette, visible en desktop */}
+          <div className="hidden xl:block xl:border-l xl:border-gray-200">
             {isPaid ? (
               <aside className="w-full">
                 <Image
@@ -448,6 +459,71 @@ export default function ProfessionalDetail() {
           </div>
         </div>
       </div>
+
+      {/* Page de succès en pleine page pour mobile et tablette */}
+      {isMobileOrTablet && isPaid && (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col">
+          <HeaderClient isBack />
+          <div className="flex-1 overflow-y-auto">
+            <div className="min-h-full flex flex-col items-center justify-center px-6 py-8">
+              <Image
+                src="/assets/icons/congruation.svg"
+                alt="congruation"
+                width={300}
+                height={250}
+                className="mb-8"
+              />
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-charcoal-blue mb-4 font-inter">
+                  Félicitations !
+                </h2>
+                <p className="text-lg text-black font-medium mb-6 font-figtree">
+                  Votre session a été réservée <br /> avec succès !
+                </p>
+              </div>
+              <div className="w-full max-w-[358px] mb-6">
+                <BookedSessionCard
+                  date="Lundi, 26 juillet 2025"
+                  time="9h - 15h"
+                  duration="60 minutes"
+                  sessionType="Session rapide visio"
+                  professionalName="Dr. Mohamed Musad"
+                  professionalTitle="Expert en nutrition"
+                  profileImage="/assets/icons/pro2.png"
+                />
+              </div>
+              <Button
+                label="Ajouter au calendrier"
+                className="w-full h-[48px] text-base text-exford-blue font-bold bg-white hover:bg-white/20 border border-light-blue-gray shadow-none font-figtree"
+                icon="/assets/icons/calendar.svg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bouton fixe mobile/tablette pour ouvrir le modal des offres */}
+      {!isPaid && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50 xl:hidden">
+          <Sheet open={isOfferSheetOpen} onOpenChange={setIsOfferSheetOpen}>
+            <SheetTrigger asChild>
+              <Button
+                label="Réserver une séance"
+                className="w-full h-[48px] bg-exford-blue text-white font-bold font-figtree"
+              />
+            </SheetTrigger>
+            <SheetContent
+              side="bottom"
+              className="h-[90vh] overflow-y-auto bg-white"
+            >
+              <div className="mt-4">
+                {!isPlaning && <OfferSelection />}
+                {isPlaning && <VisioPlanningCalendar />}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      )}
     </div>
   );
 }

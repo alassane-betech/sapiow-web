@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
 
 const navItems = [
@@ -12,6 +13,11 @@ const navItems = [
     label: "Mes disponibilités",
     icon: "/assets/icons/calendar.svg",
     href: "/compte/disponibilites",
+  },
+  {
+    label: "Historique des paiements",
+    icon: "/assets/icons/card.svg",
+    href: "/compte/historique-paiements",
   },
   {
     label: "Mes offres",
@@ -34,7 +40,7 @@ const navItems = [
     href: "/compte/langue",
   },
   {
-    label: "Support",
+    label: "Besoin d'aide ?",
     icon: "/assets/icons/help.svg",
     href: "/compte/support",
   },
@@ -52,27 +58,56 @@ const navItems = [
 
 interface AccountSidebarProps {
   isMobile?: boolean;
+  userType?: "client" | "expert";
 }
 
-export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
+export function AccountSidebar({
+  isMobile = false,
+  userType = "expert",
+}: AccountSidebarProps) {
   const sidebarClasses = isMobile
     ? "w-full h-full flex flex-col px-4 py-4"
-    : "lg:w-[205px] xl:w-[302px] h-screen fixed top-[72px] lg:left-[90px] xl:left-[106px] z-30 flex flex-col px-4 py-4 border-r border-r-light-blue-gray";
+    : " w-[302px] h-[calc(100vh-72px)] sticky top-[72px] z-30 flex flex-col px-4 py-4 border-r border-r-light-blue-gray";
+
+  // Filtrer les éléments de navigation selon le type d'utilisateur
+  const getFilteredNavItems = () => {
+    if (userType === "client") {
+      // Client : Mon profil, Historique des paiements, Notifications, Langue, Besoin d'aide ?, Mentions légales, A propos
+      return navItems.filter((item) =>
+        [
+          "Mon profil",
+          "Historique des paiements",
+          "Notifications",
+          "Langue",
+          "Besoin d'aide ?",
+          "Mentions légales",
+          "A propos",
+        ].includes(item.label)
+      );
+    } else {
+      // Expert : Tous sauf Historique des paiements
+      return navItems.filter(
+        (item) => item.label !== "Historique des paiements"
+      );
+    }
+  };
+
+  const filteredNavItems = getFilteredNavItems();
 
   return (
-    <aside className={`${sidebarClasses} -mt-[16px]`}>
+    <aside className={`${sidebarClasses}`}>
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto">
+      <nav className="flex-1 overflow-y-auto z-50 -mt-4">
         <ul className="space-y-0">
           <ShareLinkButton className="mb-5" />
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <li key={item.label}>
               <Link
                 href={item.href}
                 className="flex items-center gap-3 px-2 py-0 mt-[3px] h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue"
               >
                 <Image src={item.icon} alt="" width={22} height={22} />
-                <span className="flex-1 text-[12px] xl:text-[15px] font-medium">
+                <span className="flex-1 text-[12px] lg:text-[15px] font-medium">
                   {item.label}
                 </span>
                 <svg
@@ -95,6 +130,29 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
           ))}
         </ul>
       </nav>
+      {userType === "client" && (
+        <div className="flex flex-col w-full max-w-[302px] h-[172px] bg-[#E8F2FF] rounded-[12px] p-4">
+          <h2 className="text-base font-bold text-exford-blue font-figtree">
+            Devenez expert
+          </h2>
+          <p className="text-sm text-exford-blue font-figtree font-normal">
+            Devenez expert et accédez à notre plateforme pour offrir des
+            consultations vidéo à votre audience.
+          </p>
+          <div className="flex mt-5">
+            <Link
+              href="/compte/devenir-expert"
+              className="w-full text-sm text-charcoal-blue font-semibold font-figtree py-2 rounded-xl hover:bg-[#F7F9FB] transition"
+            >
+              En savoir plus
+            </Link>
+            <Button
+              label="Devenir expert"
+              className="h-10 font-bold text-base font-figtree w-full max-w-[130px]"
+            />
+          </div>
+        </div>
+      )}
       {/* Déconnexion sticky en bas */}
       <div
         className={`${

@@ -1,6 +1,6 @@
 "use client";
-import ProfessionalCard from "./ProfessionalCard";
 import { Professional } from "@/types/professional";
+import ProfessionalCard from "./ProfessionalCard";
 
 interface CategorySectionProps {
   categoryName: string;

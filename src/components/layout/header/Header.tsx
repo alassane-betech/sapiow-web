@@ -8,7 +8,7 @@ export const Header: React.FC = () => {
   const [isExpertMode, setIsExpertMode] = useState(true);
 
   return (
-    <header className="bg-white px-6 py-4">
+    <header className="container bg-white px-6 py-4">
       <div className="flex items-center justify-between">
         {/* Section gauche - Photo de profil et message */}
         <div className="flex flex-col items-start gap-4">
@@ -21,10 +21,10 @@ export const Header: React.FC = () => {
 
           {/* Message de bienvenue */}
           <div>
-            <h1 className="text-xl font-semibold text-exford-blue">
+            <h1 className="text-xl font-semibold text-exford-blue font-figtree">
               Bonjour Dr. Pierre
             </h1>
-            <p className="text-sm font-medium text-exford-blue">
+            <p className="text-sm font-medium text-exford-blue font-figtree">
               Vous avez 3 visios à venir aujourd'hui
             </p>
           </div>

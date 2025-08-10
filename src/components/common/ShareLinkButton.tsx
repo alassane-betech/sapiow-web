@@ -31,9 +31,9 @@ export const ShareLinkButton = ({
   return (
     <button
       onClick={handleCopyLink}
-      className={`flex items-center gap-3 px-4 py-3 h-[40px] border border-light-blue-gray rounded-full transition-colors cursor-pointer ${className}`}
+      className={`flex items-center gap-3 px-3 py-3 h-[40px] border border-light-blue-gray rounded-full transition-colors cursor-pointer ${className}`}
     >
-      <span className="text-[10px] xl:text-sm font-medium text-exford-blue">
+      <span className="text-sm font-medium text-exford-blue font-figtree">
         {copied ? "Lien copié !" : linkText}
       </span>
       <Image src="/assets/icons/copy.svg" alt="copy" width={20} height={20} />

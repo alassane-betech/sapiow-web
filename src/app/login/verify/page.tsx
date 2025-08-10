@@ -99,14 +99,14 @@ export default function VerifyCode() {
       <div className="flex flex-col min-h-screen lg:min-h-auto">
         {/* Logo - responsive positioning */}
         <div className="mt-14 ml-[42px]">
-          <Image src="/assets/logo.jpg" alt="Logo" width={100} height={100} />
+          <Image src="/assets/logo.png" alt="Logo" width={175} height={38} />
         </div>
 
         {/* Contenu principal - centré verticalement */}
         <div className="flex flex-col justify-center items-center flex-1 px-6 py-8 lg:py-0">
           <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px]">
             {/* Titre */}
-            <h1 className="text-2xl sm:text-[26px] lg:text-[28px] leading-[32px] sm:leading-[34px] lg:leading-[36px] font-bold text-center lg:text-left">
+            <h1 className="text-2xl sm:text-[26px] lg:text-[28px] leading-[32px] sm:leading-[34px] lg:leading-[36px] font-bold text-center lg:text-left font-figtree">
               Entrez le code a 6 chiffres reçu par SMS
             </h1>
 
@@ -121,7 +121,7 @@ export default function VerifyCode() {
             </div>
 
             {/* Liens d'action */}
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-3 font-figtree">
               <p className="text-sm font-normal text-heather-gray mb-7">
                 Vous n&rsquo;avez pas reçu le code ?{" "}
                 <button

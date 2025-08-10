@@ -76,19 +76,19 @@ export default function Login() {
       </div>
       <div className="flex flex-col ">
         <div className="mt-14 ml-[42px]">
-          <Image src="/assets/logo.jpg" alt="Logo" width={100} height={100} />
+          <Image src="/assets/logo.png" alt="Logo" width={175} height={38} />
         </div>
 
         {/* Contenu principal - centré verticalement */}
         <div className="flex flex-col justify-center items-center flex-1 px-6 py-8 lg:py-0">
           <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px]">
             {/* Titre responsive */}
-            <h1 className="text-2xl sm:text-[26px] lg:text-[28px] leading-[32px] sm:leading-[34px] lg:leading-[36px] font-bold text-center lg:text-left">
+            <h1 className="text-2xl sm:text-[26px] lg:text-[28px] leading-[32px] sm:leading-[34px] lg:leading-[36px] font-bold text-center lg:text-left font-figtree">
               Entrez votre numéro de téléphone
             </h1>
 
             {/* Sous-titre responsive */}
-            <p className="text-base sm:text-lg font-normal my-4 text-center lg:text-left text-gray-600">
+            <p className="text-base sm:text-lg font-normal my-4 text-center lg:text-left text-gray-600 font-figtree">
               Vous allez recevoir un code pour vous connecter.
             </p>
 
@@ -111,7 +111,7 @@ export default function Login() {
             />
 
             {/* Texte légal responsive */}
-            <p className="text-xs sm:text-sm font-medium text-black mt-6 lg:mt-4 text-center lg:text-left leading-relaxed">
+            <p className="text-xs sm:text-sm font-medium text-black mt-6 lg:mt-4 text-center lg:text-left leading-relaxed font-figtree">
               En cliquant sur continuer, j&apos;accepte les{" "}
               <Link
                 href="/conditions-d-utilisation"

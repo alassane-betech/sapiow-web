@@ -91,8 +91,8 @@ export default function Notifications() {
 
   return (
     <AccountLayout>
-      <div className="w-full py-0">
-        <div>
+      <div className="container w-full py-0 px-5">
+        <div className="mt-8">
           <h2 className="text-xs font-bold text-gray-700 uppercase mb-2 font-figtree">
             Notifications par SMS
           </h2>

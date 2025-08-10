@@ -14,7 +14,7 @@ export default function Expert() {
   return (
     <div>
       {" "}
-      <div className="w-full flex px-6 gap-x-6 mt-5">
+      <div className="w-full flex gap-x-6 mt-5">
         <StatsCard title="Visios completées" value="78" className="w-full" />
         <StatsCard
           title="Résumer de gain"
@@ -36,29 +36,29 @@ export default function Expert() {
               3
             </span>
           </button>
-          <p className="text-sm font-bold text-cobalt-blue-500">
+          <p className="text-sm font-bold font-figtree text-cobalt-blue-500">
             Demandes en attente
           </p>
           <Link
             href="/home/requests"
-            className="flex items-center gap-2 text-black"
+            className="flex items-center gap-2 text-black font-figtree"
           >
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
-      <div className="hidden lg:flex w-full justify-between px-6 gap-2 mb-[10px] mt-[24px]">
-        <h1 className="text-lg font-bold text-cobalt-blue-500">
+      <div className="hidden lg:flex w-full justify-between gap-2 mb-[10px] mt-[24px]">
+        <h1 className="text-lg font-bold font-figtree text-cobalt-blue-500">
           Demandes en attente
         </h1>
         <Link
           href="/home/requests"
-          className="flex items-center gap-2 text-cobalt-blue"
+          className="flex items-center gap-2 text-cobalt-blue font-figtree"
         >
           Tout voir <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
-      <div className="w-full grid grid-cols-1 lg:grid-cols-3 px-6 gap-2 mt-5">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-5">
         <SessionCard
           date="Aujourd'hui"
           time="10h30"
@@ -67,6 +67,7 @@ export default function Expert() {
           sessionDescription="Session rapide de 30 minutes"
           onAccept={() => {}}
           onViewRequest={() => {}}
+          isFlex1={true}
         />
         <SessionCard
           date="Aujourd'hui"
@@ -76,6 +77,7 @@ export default function Expert() {
           sessionDescription="Session rapide de 30 minutes"
           onAccept={() => {}}
           onViewRequest={() => {}}
+          isFlex1={true}
         />
         <SessionCard
           date="Aujourd'hui"
@@ -85,13 +87,14 @@ export default function Expert() {
           sessionDescription="Session rapide de 30 minutes"
           onAccept={() => {}}
           onViewRequest={() => {}}
+          isFlex1={true}
         />
       </div>
-      <div className="w-full px-6 gap-2 mt-5">
-        <h1 className="text-2xl font-bold text-cobalt-blue-500 mb-[11px] mt-[19px]">
+      <div className="w-full gap-2 mt-5">
+        <h1 className="text-lg font-bold font-figtree text-cobalt-blue-500 mb-[11px] mt-[19px]">
           Prochaine visio
         </h1>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           <SessionCard
             date="Aujourd'hui"
             time="10h30"

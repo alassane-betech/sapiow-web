@@ -9,7 +9,7 @@ import AccountLayout from "../AccountLayout";
 export default function Profile() {
   return (
     <AccountLayout>
-      <div className="w-full max-w-[702px] mx-auto mt-10">
+      <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
         <div className="flex justify-center">
           <ProfilePhotoUpload isCompte />
         </div>

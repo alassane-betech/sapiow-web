@@ -54,8 +54,8 @@ export default function MentionsLegales() {
 
   return (
     <AccountLayout>
-      <div className="grid grid-cols-2 gap-x-6">
-        <nav className="flex-1 overflow-y-auto">
+      <div className="container grid grid-cols-2 gap-x-6">
+        <nav className="flex-1 overflow-y-auto mt-5">
           <ul className="space-y-1">
             {navItems.map((item, index) => (
               <li
@@ -97,7 +97,7 @@ export default function MentionsLegales() {
             ))}
           </ul>
         </nav>
-        <div className="col-span-1">
+        <div className="col-span-1 mt-5">
           <div className="bg-white rounded-2xl p-8 border border-light-blue-gray max-w-2xl mx-auto relative">
             <div className="flex items-start justify-between mb-4">
               <h2 className="text-xl font-bold">{activeTab.label}</h2>

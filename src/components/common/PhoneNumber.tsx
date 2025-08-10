@@ -26,7 +26,7 @@ const PhoneInput: FC<PhoneInputProps> = ({
   placeholder = "06 06 06 06 06",
   className = "",
   disabled = false,
-  defaultCountry = "SN",
+  defaultCountry = "FR",
   label,
   required = false,
 }) => {

@@ -25,8 +25,8 @@ export default function LanguePage() {
 
   return (
     <AccountLayout>
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">Langue</h1>
+      <div className="container space-y-6">
+        <h1 className="text-2xl font-bold text-gray-900 mt-5">Langue</h1>
 
         <div className="space-y-4">
           {availableLanguages.map((language, index) => (

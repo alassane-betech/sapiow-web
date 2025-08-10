@@ -197,7 +197,7 @@ export default function VisioPlanningCalendar({
 
         {/* Créneaux horaires */}
         <div className="mb-6">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 justify-center gap-2 time-slots-grid">
             {timeSlots.map((slot) => (
               <button
                 key={slot.time}

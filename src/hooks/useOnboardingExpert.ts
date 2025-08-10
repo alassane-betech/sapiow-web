@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export interface VisioOption {
@@ -8,6 +9,7 @@ export interface VisioOption {
 }
 
 export const useOnboardingExpert = () => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -67,19 +69,8 @@ export const useOnboardingExpert = () => {
 
   const completeOnboarding = () => {
     // Ici on pourrait envoyer les données à l'API
-    console.log("Données de l'onboarding expert:", {
-      firstName,
-      lastName,
-      profession,
-      email,
-      selectedDomain,
-      selectedSpecialties,
-      aboutMe,
-      linkedinUrl,
-      websiteUrl,
-      visioOptions: visioOptions.filter((v) => v.enabled),
-    });
-    alert("Onboarding expert terminé !");
+
+    router.push("/home");
   };
 
   return {

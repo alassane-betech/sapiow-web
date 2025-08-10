@@ -6,8 +6,10 @@ import { useState } from "react";
 
 export default function AccountLayout({
   children,
+  className,
 }: {
   children: React.ReactNode;
+  className?: string;
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -20,11 +22,11 @@ export default function AccountLayout({
   };
 
   return (
-    <div className="flex">
+    <div className={`flex ${className}`}>
       <AppSidebar />
 
       {/* Layout principal */}
-      <div className="w-full flex-1 lg:ml-[90px] xl:ml-[106px]">
+      <div className="w-full flex-1">
         {/* Header desktop */}
         <div className="hidden lg:flex justify-between items-center w-full bg-white px-6 border-b border-light-blue-gray h-[72px] sticky top-0 z-20">
           <h1 className="text-lg font-bold text-cobalt-blue-500">Compte</h1>
@@ -131,9 +133,7 @@ export default function AccountLayout({
           )}
 
           {/* Zone de contenu */}
-          <div className="w-full mt-0 lg:ml-[205px] xl:ml-[274px] px-4 lg:px-0 pb-20 lg:pb-0">
-            {children}
-          </div>
+          <div className="container mx-auto lg:px-0 pb-20">{children}</div>
         </div>
       </div>
     </div>

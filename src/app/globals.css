@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Classe personnalisée pour la grille des créneaux horaires sur très petits écrans */
+@media (min-width: 200px) and (max-width: 378px) {
+  .time-slots-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -71,6 +78,7 @@
   --color-gray-700: #333333;
   --color-cool-toned: #181d27;
   --color-platinum-platinum-700: #334155;
+  --color-slate-600: #475569;
 }
 
 /* Container réutilisable avec largeur max 1173px */
@@ -78,8 +86,15 @@
   width: 100%;
   max-width: 1173px;
   margin: 0 auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
+}
+
+/* Classe pour masquer la scrollbar */
+.scrollbar-none {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* Safari et Chrome */
 }
 
 :root {

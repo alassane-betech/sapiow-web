@@ -8,7 +8,7 @@ import type * as React from "react";
 const items = [
   {
     title: "Accueil",
-    url: "/home",
+    url: "/",
     icon: "/assets/iconSidebare/home.svg",
     iconActive: "/assets/iconSidebare/homeActif.svg",
   },

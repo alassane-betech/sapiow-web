@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export const useOnboardingSeeker = () => {
@@ -7,6 +8,7 @@ export const useOnboardingSeeker = () => {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
+  const router = useRouter();
 
   // Validations
   const isFormValid =
@@ -31,14 +33,7 @@ export const useOnboardingSeeker = () => {
   };
 
   const completeOnboarding = () => {
-    // Ici on pourrait envoyer les données à l'API
-    console.log("Données de l'onboarding seeker:", {
-      firstName,
-      lastName,
-      email,
-      selectedDomains,
-    });
-    alert("Onboarding terminé !");
+    router.push("/home");
   };
 
   return {

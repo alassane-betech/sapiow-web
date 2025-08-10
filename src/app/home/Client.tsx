@@ -6,6 +6,7 @@ import { useState } from "react";
 import CategoryFilter from "./CategoryFilter";
 import CategorySection from "./CategorySection";
 import ProfessionalCard from "./ProfessionalCard";
+import SubCategoryFilter from "./SubCategoryFilter";
 
 const professionals = [
   {
@@ -335,9 +336,9 @@ const professionals = [
 export default function Client() {
   const router = useRouter();
   const { likedProfs, toggleLike } = useFavorites();
-  const [selectedCategory, setSelectedCategory] = useState<string>("top");
-  const [selectedSubCategory, setSelectedSubCategory] =
-    useState<string>("tout");
+  const [selectedCategory, setSelectedCategory] = useState("top");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const [sortOption, setSortOption] = useState("recommended");
 
   const handleToggleLike = (profId: number) => {
     const professional = professionals.find((p) => p.id === profId);
@@ -354,6 +355,10 @@ export default function Client() {
 
   const handleSubCategoryChange = (subCategoryId: string) => {
     setSelectedSubCategory(subCategoryId);
+  };
+
+  const handleSortChange = (sortId: string) => {
+    setSortOption(sortId);
   };
 
   const handleProfessionalClick = (professional: Professional) => {
@@ -378,18 +383,21 @@ export default function Client() {
 
   return (
     <div className="min-h-screen">
-      <h2 className="my-2 text-2xl font-normal text-exford-blue font-figtree">
+      <h2 className="my-2 text-lg lg:text-2xl font-normal text-exford-blue font-figtree">
         Accélérez votre projet, Réservez une Visio.
       </h2>
       <CategoryFilter
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
       />
-      {/* <SubCategoryFilter
-        selectedCategory={selectedCategory}
-        selectedSubCategory={selectedSubCategory}
-        onSubCategoryChange={handleSubCategoryChange}
-      /> */}
+      {selectedCategory !== "top" && (
+        <SubCategoryFilter
+          selectedCategory={selectedCategory}
+          selectedSubCategory={selectedSubCategory}
+          onSubCategoryChange={handleSubCategoryChange}
+          onSortChange={handleSortChange}
+        />
+      )}
 
       {selectedCategory === "top" ? (
         // Affichage par sections pour "Top"

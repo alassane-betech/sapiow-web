@@ -65,16 +65,31 @@ export default function BookedSessionCard({
           </div>
 
           <div className="flex items-center gap-3">
-            <Image
-              src="/assets/icons/calendar.svg"
-              alt="calendar"
-              width={24}
-              height={24}
-            />
-            <span className="text-sm text-exford-blue font-medium">{date}</span>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/assets/icons/calendar.svg"
+                alt="calendar"
+                width={24}
+                height={24}
+              />
+              <span className="text-sm text-exford-blue font-medium">
+                {date}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Image
+                src="/assets/icons/clock.svg"
+                alt="clock"
+                width={24}
+                height={24}
+              />
+              <span className="text-sm text-exford-blue font-medium">
+                {time}
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <Image
               src="/assets/icons/clock.svg"
               alt="clock"
@@ -82,7 +97,7 @@ export default function BookedSessionCard({
               height={24}
             />
             <span className="text-sm text-exford-blue font-medium">{time}</span>
-          </div>
+          </div> */}
         </div>
       </CardContent>
     </Card>

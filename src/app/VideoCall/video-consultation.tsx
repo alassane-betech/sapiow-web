@@ -1,5 +1,4 @@
 "use client";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import VideoConsultationUI from "./video-consultation-ui";
 
 interface VideoConsultationProps {
@@ -7,17 +6,10 @@ interface VideoConsultationProps {
   onClose: () => void;
 }
 
-export default function VideoConsultation({
-  isOpen,
-  onClose,
-}: VideoConsultationProps) {
+export default function VideoConsultation({ onClose }: VideoConsultationProps) {
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full p-0 !bg-white border-none">
-        <div className="relative w-full h-full">
-          <VideoConsultationUI onClose={onClose} />
-        </div>
-      </SheetContent>
-    </Sheet>
+    <div className="container w-full h-[80vh] min-h-[700px] max-h-screen rounded-xl">
+      <VideoConsultationUI onClose={onClose} />
+    </div>
   );
 }

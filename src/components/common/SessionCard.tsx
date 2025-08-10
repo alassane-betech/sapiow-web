@@ -1,23 +1,15 @@
 "use client";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button as ButtonUI } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { ProfileAvatar } from "./ProfileAvatar";
+import { SessionModal } from "./SessionModal";
 
 interface SessionCardProps {
   date: string;
@@ -38,6 +30,7 @@ interface SessionCardProps {
     viewDisabled?: boolean;
   };
   isUpcoming?: boolean; // Pour distinguer l'onglet "A venir"
+  isFlex1?: boolean;
 }
 
 export const SessionCard: React.FC<SessionCardProps> = ({
@@ -56,6 +49,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   textButton = "Accepter",
   buttonStates = { acceptDisabled: false, viewDisabled: false },
   isUpcoming = false,
+  isFlex1 = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -68,15 +62,14 @@ export const SessionCard: React.FC<SessionCardProps> = ({
 
   // Détermine le texte du bouton et le titre du modal selon le contexte
   const viewButtonText = isUpcoming ? "Voir détails" : "Voir la demande";
-  const modalTitle = isUpcoming ? "Détail de la visio" : "Demande en attente";
 
   return (
     <Card
-      className={`w-full bg-white shadow-sm border border-soft-ice-gray rounded-[12px] ${className}`}
+      className={`w-full max-w-[370px] bg-snow-blue shadow-none border border-soft-ice-gray rounded-[12px] p-0 ${className}`}
     >
       {/* En-tête avec date et heure */}
-      <CardHeader>
-        <div className="flex items-center justify-between gap-2 border-b border-light-blue-gray pb-4">
+      <CardHeader className="m-0">
+        <div className="flex items-center justify-between gap-2 pt-3">
           <div className="flex items-center gap-2">
             <div className="w-4.5 h-4.5 flex items-center justify-center">
               <Image
@@ -86,7 +79,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                 height={18}
               />
             </div>
-            <span className="text-sm lg:text-base font-medium text-gray-900">
+            <span className="text-xs font-outfit  font-medium text-gray-900">
               {date}, {time}
             </span>
           </div>
@@ -100,7 +93,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                   height={18}
                 />
               </div>
-              <span className="text-sm lg:text-base font-medium text-gray-900">
+              <span className="text-xs font-outfit font-medium text-gray-900">
                 visio de {duration}
               </span>
             </div>
@@ -109,7 +102,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       </CardHeader>
 
       {/* Profil utilisateur */}
-      <CardContent>
+      <CardContent className="-mt-5">
         <div className="flex items-center gap-4">
           <ProfileAvatar
             src={profileImage}
@@ -118,15 +111,19 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             borderColor="border-gray-200"
             borderWidth="2"
           />
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-1">{name}</h3>
-            <p className="text-gray-600 text-base">{sessionDescription}</p>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-semibold text-gray-900 mb-1 lg:text-[16px] xl:text-xl font-figtree truncate">
+              {name}
+            </h3>
+            <p className="text-gray-600 text-base lg:text-[13px] xl:text-base font-figtree truncate">
+              {sessionDescription}
+            </p>
           </div>
         </div>
       </CardContent>
 
       {/* Boutons d'action */}
-      <CardFooter>
+      <CardFooter className="pb-3">
         <div
           className={`flex gap-4 w-full flex-col lg:flex-row ${classFooter}`}
         >
@@ -134,126 +131,30 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             onClick={onAccept}
             label={textButton}
             icon={icon}
-            className="flex-1 py-3 px-6 rounded-xl font-medium text-base"
+            className={`h-[40px] px-6 rounded-[8px] font-bold font-figtree text-base lg:text-[13px] xl:text-base ${
+              isFlex1 ? "flex-1" : ""
+            }`}
             disabled={buttonStates.acceptDisabled}
           />
 
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
+          <SessionModal
+            isOpen={isOpen}
+            onOpenChange={setIsOpen}
+            profileImage={profileImage}
+            name={name}
+            isUpcoming={isUpcoming}
+            onAccept={onAccept}
+            trigger={
               <Button
                 onClick={handleViewRequest}
                 label={viewButtonText}
-                className="flex-1 text-gray-700 py-3 px-6 rounded-xl font-medium border border-light-blue-gray bg-white text-base hover:bg-gray-200"
+                className={`text-exford-blue h-[40px] font-bold font-figtree px-6 rounded-[8px] border border-light-blue-gray bg-white text-base lg:text-[13px] xl:text-base hover:bg-gray-200 ${
+                  isFlex1 ? "flex-1" : ""
+                }`}
                 disabled={buttonStates.viewDisabled}
               />
-            </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="w-full sm:w-[400px] p-0 !bg-white"
-            >
-              <SheetHeader className="p-6 pb-4 border-b border-light-blue-gray bg-white">
-                <div className="flex items-center justify-between">
-                  <SheetTitle className="text-lg font-semibold text-gray-900">
-                    {modalTitle}
-                  </SheetTitle>
-                </div>
-              </SheetHeader>
-
-              <div className="p-6 space-y-6 bg-white min-h-[calc(100vh-200px)] overflow-y-auto">
-                {/* Requested by section */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-3">Requested by :</p>
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={profileImage} alt={name} />
-                      <AvatarFallback>
-                        {name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-gray-900">{name}</p>
-                      <p className="text-sm text-gray-600">Student, ESOC</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Session details */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">Session name :</p>
-                  <p className="font-medium text-gray-900">
-                    Session rapide visio - 60 minutes
-                  </p>
-                </div>
-
-                {/* Questions section */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Questions ou commentaires
-                  </p>
-                  <p className="text-sm text-gray-800 leading-relaxed">
-                    Je veux savoir comment transformer mon idée de SaaS B2B en
-                    100M $ ARR
-                  </p>
-                </div>
-              </div>
-
-              {/* Action buttons - Fixed at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-white border-none">
-                <div className="flex flex-col space-y-3">
-                  {isUpcoming ? (
-                    // Modal pour "A venir" - Bouton Commencer la visio + Annuler
-                    <>
-                      <ButtonUI
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
-                        onClick={() => {
-                          onAccept?.();
-                          setIsOpen(false);
-                        }}
-                      >
-                        <Image
-                          src="/assets/icons/videocamera.svg"
-                          alt="camera"
-                          width={24}
-                          height={24}
-                        />
-                        Commencer la visio
-                      </ButtonUI>
-                      <ButtonUI
-                        variant="outline"
-                        className="w-full text-gray-700 border-gray-300 hover:bg-gray-50 bg-transparent"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Annuler
-                      </ButtonUI>
-                    </>
-                  ) : (
-                    // Modal pour "En attente" - Refuser + Accepter côte à côte
-                    <div className="flex space-x-3">
-                      <ButtonUI
-                        variant="outline"
-                        className="flex-1 text-gray-700 border-gray-300 hover:bg-gray-50 bg-transparent"
-                        onClick={() => setIsOpen(false)}
-                      >
-                        Refuser la demande
-                      </ButtonUI>
-                      <ButtonUI
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                        onClick={() => {
-                          onAccept?.();
-                          setIsOpen(false);
-                        }}
-                      >
-                        Accepter la demande
-                      </ButtonUI>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+            }
+          />
         </div>
       </CardFooter>
     </Card>

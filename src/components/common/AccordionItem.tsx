@@ -44,7 +44,7 @@ export default function AccordionItem({
         </button>
         {isOpen && (
           <div className="px-4 pb-4">
-            <p className="text-sm font-medium text-[#535862]  leading-relaxed">
+            <p className="text-sm font-medium text-[#535862] font-figtree  leading-relaxed">
               {answer}
             </p>
           </div>

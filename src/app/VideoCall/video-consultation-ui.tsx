@@ -7,7 +7,8 @@ import {
   useCallStateHooks,
 } from "@stream-io/video-react-sdk";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
-import { Mic, MicOff, PhoneOff, Users, Video, VideoOff } from "lucide-react";
+import { MicOff, Users, VideoOff } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CallEndedScreen, ErrorScreen, LoadingScreen } from "./components";
 import { useTestData, useVideoCallSimple } from "./hooks";
@@ -169,7 +170,7 @@ export const CustomVideoCallLayout = ({
 
   // Layout principal : vidéo plein écran avec PiP et contrôles
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden">
+    <div className="relative w-full h-full bg-black overflow-hidden rounded-[12px] border border-white mt-[10px] mb-[50px]">
       {/* Titre en haut à gauche */}
 
       {/* Vidéo principale (participante distante) */}
@@ -205,8 +206,8 @@ export const CustomVideoCallLayout = ({
       )}
 
       {/* Timer au centre-bas */}
-      <div className="absolute bottom-32 left-1/2 transform -translate-x-1/2 z-10">
-        <div className="bg-black/50 backdrop-blur-sm rounded-full px-4 py-2 text-white font-mono text-lg">
+      <div className="absolute bottom-22 left-1/2 transform -translate-x-1/2 z-10">
+        <div className=" rounded-full px-4 py-2 text-white font-mono text-lg">
           {formatDuration(duration)}
         </div>
       </div>
@@ -226,7 +227,12 @@ export const CustomVideoCallLayout = ({
             {isMute ? (
               <MicOff className="w-6 h-6 text-white" />
             ) : (
-              <Mic className="w-6 h-6 text-white" />
+              <Image
+                src="/assets/icons/microphonevisio.svg"
+                alt="camera"
+                width={24}
+                height={24}
+              />
             )}
           </button>
 
@@ -236,7 +242,12 @@ export const CustomVideoCallLayout = ({
             disabled={isEndingCall}
             className="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-all duration-200 disabled:opacity-50"
           >
-            <PhoneOff className="w-6 h-6 text-white" />
+            <Image
+              src="/assets/icons/endCall.svg"
+              alt="phone"
+              width={24}
+              height={24}
+            />
           </button>
 
           {/* Bouton caméra */}
@@ -251,7 +262,12 @@ export const CustomVideoCallLayout = ({
             {isCameraOff ? (
               <VideoOff className="w-6 h-6 text-white" />
             ) : (
-              <Video className="w-6 h-6 text-white" />
+              <Image
+                src="/assets/icons/Videocameravisio.svg"
+                alt="camera"
+                width={24}
+                height={24}
+              />
             )}
           </button>
         </div>

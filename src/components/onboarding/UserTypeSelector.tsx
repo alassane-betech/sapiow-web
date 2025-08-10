@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/common/Button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup } from "@/components/ui/radio-group";
+import Image from "next/image";
 import React from "react";
 
 interface UserTypeSelectorProps {
@@ -26,36 +27,96 @@ export const UserTypeSelector: React.FC<UserTypeSelectorProps> = ({
           className="space-y-4"
         >
           <div
-            className={`flex items-center space-x-4 p-4 border-2 rounded-2xl transition-all cursor-pointer border-none ${
+            className={`relative flex items-center justify-between p-6 rounded-2xl transition-all cursor-pointer ${
               userType === "client"
-                ? "bg-snow-blue"
-                : "hover:border-cobalt-blue"
+                ? "bg-cobalt-blue"
+                : "bg-snow-blue border border-gray-200 hover:border-cobalt-blue"
             }`}
             onClick={() => onUserTypeChange("client")}
           >
-            <RadioGroupItem value="client" id="client" />
             <label
-              htmlFor="client"
-              className="text-lg font-bold text-exford-blue cursor-pointer flex-1"
+              className={`text-lg font-bold cursor-pointer ${
+                userType === "client" ? "text-white" : "text-exford-blue"
+              }`}
             >
               Je cherche un expert
             </label>
+            <Image
+              src="/assets/logo_check.svg"
+              alt="arrow-right"
+              width={100}
+              height={100}
+              className="absolute right-0 top-1/2 transform -translate-y-1/2"
+            />
+            <div className="flex-shrink-0">
+              {userType === "client" ? (
+                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                  <svg
+                    width="12"
+                    height="9"
+                    viewBox="0 0 12 9"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10.5 1.5L4.5 7.5L1.5 4.5"
+                      stroke="#2563EB"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
+              )}
+            </div>
           </div>
           <div
-            className={`flex items-center space-x-4 p-4 border-2 rounded-2xl transition-all cursor-pointer border-none ${
+            className={`relative flex items-center justify-between p-6 rounded-2xl transition-all cursor-pointer ${
               userType === "expert"
-                ? "bg-snow-blue"
-                : "hover:border-cobalt-blue"
+                ? "bg-cobalt-blue"
+                : "bg-snow-blue border border-gray-200 hover:border-cobalt-blue"
             }`}
             onClick={() => onUserTypeChange("expert")}
           >
-            <RadioGroupItem value="expert" id="expert" />
+            <Image
+              src="/assets/logo_check.svg"
+              alt="arrow-right"
+              width={100}
+              height={100}
+              className="absolute right-0 top-1/2 transform -translate-y-1/2"
+            />
             <label
-              htmlFor="expert"
-              className="text-lg font-bold text-exford-blue cursor-pointer flex-1"
+              className={`text-lg font-bold cursor-pointer ${
+                userType === "expert" ? "text-white" : "text-exford-blue"
+              }`}
             >
               Je suis un expert
             </label>
+            <div className="flex-shrink-0">
+              {userType === "expert" ? (
+                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                  <svg
+                    width="12"
+                    height="9"
+                    viewBox="0 0 12 9"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10.5 1.5L4.5 7.5L1.5 4.5"
+                      stroke="#2563EB"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              ) : (
+                <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
+              )}
+            </div>
           </div>
         </RadioGroup>
       </div>

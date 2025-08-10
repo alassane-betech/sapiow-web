@@ -56,8 +56,8 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
     };
 
     return (
-      <div className={cn("space-y-2", containerClassName)}>
-        <div className="relative">
+      <div className={cn("space-y-2 w-full", containerClassName)}>
+        <div className="relative w-full">
           {/* Label flottant - apparaît quand il y a du contenu */}
           {label && hasContent && (
             <label

@@ -15,9 +15,9 @@ const API_KEY = process.env.NEXT_PUBLIC_STREAM_API_KEY;
 const MOCK_DATA = {
   API_KEY: "mmhfdzb5evj2", // Clé API Stream de test publique
   TOKEN:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL0tpcl9LYW5vcyIsInVzZXJfaWQiOiJLaXJfS2Fub3MiLCJ2YWxpZGl0eV9pbl9zZWNvbmRzIjo2MDQ4MDAsImlhdCI6MTc1MjE4MzIwMCwiZXhwIjoxNzUyNzg4MDAwfQ._d1PFKVDS4PYyG8BZysnyn7KG9YONLhG7qfQXfNSmcs", // Token JWT de test
-  USER_ID: "Kir_Kanos",
-  CALL_ID: "BVq4mRkLNV5C",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL0x1eHVyaW91c19TYW5kd2ljaCIsInVzZXJfaWQiOiJMdXh1cmlvdXNfU2FuZHdpY2giLCJ2YWxpZGl0eV9pbl9zZWNvbmRzIjo2MDQ4MDAsImlhdCI6MTc1NDM0MDQ1NCwiZXhwIjoxNzU0OTQ1MjU0fQ.Rrq32NkywVL7u--Z38Km_OgBaqk6YquKPJc6o3q_Jwg", // Token JWT de test
+  USER_ID: "Luxurious_Sandwich",
+  CALL_ID: "hhKzhYQZ4BiKL58OEN39w",
   USER_NAME: "Dr. Sarah Martin",
 };
 

@@ -5,7 +5,7 @@ import Image from "next/image";
 interface ButtonProps extends React.ComponentProps<typeof ButtonUI> {
   label: string;
   className?: string;
-  icon?: string;
+  icon?: string | React.ReactNode;
   iconSize?: number;
 }
 
@@ -22,7 +22,7 @@ export const Button = ({
 
   const defaultStyles = disabled
     ? "bg-soft-ice-gray text-pale-blue-gray hover:bg-soft-ice-gray cursor-not-allowed"
-    : "bg-cobalt-blue text-white hover:bg-blue-700 cursor-pointer";
+    : "bg-cobalt-blue text-white hover:bg-cobalt-blue/80 cursor-pointer";
 
   return (
     <ButtonUI
@@ -31,7 +31,11 @@ export const Button = ({
       {...props}
     >
       {icon && (
-        <Image src={icon} alt="icon" width={iconSize} height={iconSize} />
+        typeof icon === 'string' ? (
+          <Image src={icon} alt="icon" width={iconSize} height={iconSize} />
+        ) : (
+          icon
+        )
       )}
       {label}
     </ButtonUI>
