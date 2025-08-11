@@ -1,12 +1,13 @@
 "use client";
 import { ProfileAvatar } from "@/components/common/ProfileAvatar";
 import { ShareLinkButton } from "@/components/common/ShareLinkButton";
+import { useUserStore } from "@/store/useUser";
 import React, { useState } from "react";
 import { Switch } from "../../ui/switch";
 
 export const Header: React.FC = () => {
   const [isExpertMode, setIsExpertMode] = useState(true);
-
+  const { setUser } = useUserStore();
   return (
     <header className="container bg-white px-6 py-4">
       <div className="flex items-center justify-between">
@@ -42,6 +43,7 @@ export const Header: React.FC = () => {
               checked={isExpertMode}
               onCheckedChange={setIsExpertMode}
               className="data-[state=checked]:bg-[#1E293B]"
+              onClick={() => setUser({ type: "client" })}
             />
           </div>
         </div>

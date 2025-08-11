@@ -1,5 +1,5 @@
-import { useCallback, useRef } from "react";
 import type { Call } from "@stream-io/video-react-sdk";
+import { useCallback, useRef } from "react";
 
 export const useDeviceCleanup = () => {
   const activeStreamsRef = useRef<MediaStream[]>([]);

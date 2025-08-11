@@ -51,9 +51,11 @@ export function MessageInput() {
             rows={1}
           />
           <button className="cursor-pointer flex-shrink-0" type="button">
-            <img
+            <Image
               src="/assets/icons/files.svg"
               alt="clip"
+              width={24}
+              height={24}
               className="w-6 h-6 opacity-60"
             />
           </button>

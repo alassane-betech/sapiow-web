@@ -1,20 +1,20 @@
 "use client";
+import { Header } from "@/components/layout/header/Header";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
-import { useState } from "react";
+import { useUserStore } from "@/store/useUser";
 import Client from "./home/Client";
+import Expert from "./home/Expert";
 
 export default function Home() {
-  const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
-
+  const { user } = useUserStore();
   return (
     <div className="flex">
       <AppSidebar />
       <div className="w-full">
-        <HeaderClient />
+        {user.type === "client" ? <HeaderClient /> : <Header />}
         <div className="w-full flex-1 container px-5">
-          {/* <Expert /> */}
-          <Client />
+          {user.type === "client" ? <Client /> : <Expert />}
         </div>
       </div>
     </div>

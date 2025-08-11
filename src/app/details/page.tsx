@@ -15,7 +15,7 @@ import { usePlaningStore } from "@/store/usePlaning";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import OfferSelection from "../home/OfferSelection";
 import ProfessionalCard from "../home/ProfessionalCard";
 
@@ -130,7 +130,7 @@ const professionals = [
   },
 ];
 
-export default function ProfessionalDetail() {
+function ProfessionalDetailContent() {
   const isMobile = useIsMobile();
   const isMobileOrTablet = useIsMobileOrTablet();
   const router = useRouter();
@@ -226,8 +226,9 @@ export default function ProfessionalDetail() {
                     Domaines d'expertise
                   </h3>
                   <div className="max-w-[400px] flex gap-2 flex-wrap">
-                    {expertise.map((expertise) => (
+                    {expertise.map((expertise, index) => (
                       <Badge
+                        key={index}
                         className="p-2 text-xs lg:text-[10px] xl:text-xs text-[#1F2937] font-medium bg-[#F3F4F6] hover:bg-[#F3F4F6] max-w-fit font-inter mb-2"
                         variant="secondary"
                       >
@@ -525,5 +526,13 @@ export default function ProfessionalDetail() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProfessionalDetail() {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <ProfessionalDetailContent />
+    </Suspense>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { HeaderClient } from "@/components/layout/header/HeaderClient";
+import HeaderExpert from "@/components/layout/header/HeaderExpert";
 import { HeaderVisio } from "@/components/layout/header/HeaderVisio";
 import { VisiosTabs } from "@/components/visios/VisiosTabs";
 import { useCallStore } from "@/store/useCall";
@@ -25,7 +25,7 @@ export default function Expert({ handleNotificationClick }: ExpertProps) {
           title="Session avec Moussa Diagne"
         />
       ) : (
-        <HeaderClient />
+        <HeaderExpert handleNotificationClick={handleNotificationClick} />
       )}
 
       {/* Onglets des visios */}

@@ -243,7 +243,7 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
         }
       }
     };
-  }, [callConfig.token, callConfig.callId]);
+  }, [callConfig.token, callConfig.callId, call, cleanupAllDevices, client, initializeCall]);
 
   return {
     client,

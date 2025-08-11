@@ -1,6 +1,7 @@
 "use client";
 import { AccountSidebar } from "@/components/layout/AccountSidebar";
 import { AppSidebar } from "@/components/layout/Sidebare";
+import { useUserStore } from "@/store/useUser";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -20,6 +21,8 @@ export default function AccountLayout({
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
+  const { user } = useUserStore();
 
   return (
     <div className={`flex ${className}`}>
@@ -87,7 +90,7 @@ export default function AccountLayout({
         <div className="flex">
           {/* Sidebar desktop */}
           <div className="hidden lg:block">
-            <AccountSidebar />
+            <AccountSidebar userType={user.type} />
           </div>
 
           {/* Menu mobile overlay */}
