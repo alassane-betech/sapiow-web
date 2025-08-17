@@ -1,66 +1,22 @@
 "use client";
 import { Button } from "@/components/common/Button";
 import PhoneNumber from "@/components/common/PhoneNumber";
-import { Country, detectCountryFromPhone } from "@/constants/countries";
+import { useLogin } from "@/hooks/useLogin";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function Login() {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
-  const [formattedValue, setFormattedValue] = useState("");
-  const [isPhoneValid, setIsPhoneValid] = useState(false);
-  const router = useRouter();
-
-  // Récupérer les données sauvegardées au chargement de la page
-  useEffect(() => {
-    const savedFullPhone = localStorage.getItem("phoneNumber");
-    const savedFormatted = localStorage.getItem("formattedPhone");
-
-    console.log("Données récupérées:", { savedFullPhone, savedFormatted });
-
-    if (savedFullPhone) {
-      // Détecter le pays depuis le numéro complet (ex: "+221771234567")
-      const detectedCountry = detectCountryFromPhone(savedFullPhone);
-      console.log("Pays détecté:", detectedCountry);
-
-      // Extraire le numéro sans l'indicatif
-      const phoneWithoutDialCode = savedFullPhone.replace(
-        detectedCountry.dialCode,
-        ""
-      );
-      console.log("Numéro sans indicatif:", phoneWithoutDialCode);
-
-      // Pré-remplir les états avec le numéro SANS indicatif
-      setPhoneNumber(phoneWithoutDialCode); // Passer seulement le numéro sans indicatif
-      setSelectedCountry(detectedCountry);
-      setFormattedValue(savedFormatted || "");
-    }
-  }, []);
-
-  const handlePhoneChange = (
-    value: string,
-    country: Country,
-    formatted?: string
-  ) => {
-    setPhoneNumber(value);
-    setSelectedCountry(country);
-    setFormattedValue(formatted || "");
-  };
-
-  const handleContinue = () => {
-    if (isPhoneValid && selectedCountry) {
-      // Sauvegarder les données dans localStorage
-      const fullPhoneNumber = `${selectedCountry.dialCode}${phoneNumber}`;
-      localStorage.setItem("phoneNumber", fullPhoneNumber);
-      localStorage.setItem("formattedPhone", formattedValue);
-
-      // Rediriger vers la page de vérification
-      router.push("/login/verify");
-    }
-  };
+  const {
+    phoneNumber,
+    selectedCountry,
+    formattedValue,
+    isPhoneValid,
+    isLoading,
+    error,
+    setIsPhoneValid,
+    handlePhoneChange,
+    handleContinue,
+  } = useLogin();
 
   return (
     <div className="min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
@@ -102,11 +58,18 @@ export default function Login() {
               />
             </div>
 
+            {/* Message d'erreur */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[8px]">
+                <p className="text-sm text-red-600 font-medium">{error}</p>
+              </div>
+            )}
+
             {/* Bouton */}
             <Button
-              label="Continuer"
+              label={isLoading ? "Envoi en cours..." : "Continuer"}
               className="w-full rounded-[8px] h-[56px] text-base font-medium"
-              disabled={!isPhoneValid}
+              disabled={!isPhoneValid || isLoading}
               onClick={handleContinue}
             />
 

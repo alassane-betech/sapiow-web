@@ -15,18 +15,20 @@ import { usePlaningStore } from "@/store/usePlaning";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import OfferSelection from "../home/OfferSelection";
 import ProfessionalCard from "../home/ProfessionalCard";
 
+import { useGetProExpertById } from "@/api/proExpert/useProExpert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
+import { useDetailsLogic } from "@/hooks/useDetailsLogic";
 import { Professional } from "@/types/professional";
 
 // Données des professionnels (à déplacer dans un contexte ou API plus tard)
 const professionalsSimilar = [
   {
-    id: 1,
+    id: "1",
     name: "Jean-Pierre Fauch",
     price: "199.00 €",
     image: "/assets/icons/pro1.png",
@@ -35,7 +37,7 @@ const professionalsSimilar = [
     linkedin: "https://www.linkedin.com/in/jean-pierre-fauch/",
   },
   {
-    id: 2,
+    id: "2",
     name: "Dr Amandine Bergère",
     price: "120.00 €",
     image: "/assets/icons/pro2.png",
@@ -43,7 +45,7 @@ const professionalsSimilar = [
     category: "business",
   },
   {
-    id: 3,
+    id: "3",
     name: "Jean-Pierre Fauch",
     price: "199.00 €",
     image: "/assets/icons/pro1.png",
@@ -51,7 +53,7 @@ const professionalsSimilar = [
     category: "business",
   },
   {
-    id: 4,
+    id: "4",
     name: "Dr Amandine Bergère",
     price: "120.00 €",
     image: "/assets/icons/pro2.png",
@@ -59,7 +61,7 @@ const professionalsSimilar = [
     category: "business",
   },
   {
-    id: 5,
+    id: "5",
     name: "Jean-Pierre Fauch",
     price: "199.00 €",
     image: "/assets/icons/pro1.png",
@@ -67,66 +69,12 @@ const professionalsSimilar = [
     category: "business",
   },
   {
-    id: 6,
+    id: "6",
     name: "Dr Amandine Bergère",
     price: "120.00 €",
     image: "/assets/icons/pro1.png",
     verified: true,
     category: "business",
-  },
-];
-const professionals = [
-  {
-    id: 1,
-    name: "Jean-Pierre Fauch",
-    image: "/assets/product-image.png",
-    verified: false,
-    topExpertise: true,
-    category: "business",
-    description: "Dermatologue chez L'Oréal",
-    linkedin: "https://www.linkedin.com/in/jean-pierre-fauch/",
-  },
-  {
-    id: 2,
-    name: "Dr Amandine Bergère",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    topExpertise: false,
-    category: "glow",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 3,
-    name: "Jean-Pierre Fauch",
-    price: "199.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "media",
-  },
-  {
-    id: 4,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "culture",
-  },
-  {
-    id: 5,
-    name: "Jean-Pierre Fauch",
-    price: "199.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "sport",
-  },
-  {
-    id: 6,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "maison",
   },
 ];
 
@@ -135,46 +83,76 @@ function ProfessionalDetailContent() {
   const isMobileOrTablet = useIsMobileOrTablet();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [professional, setProfessional] = useState<Professional | null>(null);
-  const [isOfferSheetOpen, setIsOfferSheetOpen] = useState(false);
-  const [likedProfs, setLikedProfs] = useState<Record<number, boolean>>({});
   const { isPaid } = usePayStore();
   const { isPlaning } = usePlaningStore();
 
+  // Récupérer l'ID depuis les paramètres de recherche
+  const expertId = searchParams.get("id");
+
+  // Utiliser le hook API pour récupérer l'expert
+  const {
+    data: expertData,
+    isLoading,
+    error,
+  } = useGetProExpertById(expertId || "");
+
+  // Utilisation du hook pour isoler la logique
+  const {
+    professional,
+    expertiseNames,
+    isOfferSheetOpen,
+    likedProfs,
+    isDescriptionExpanded,
+    toggleLike,
+    isLiked,
+    openOfferSheet,
+    closeOfferSheet,
+    setIsOfferSheetOpen,
+    toggleDescriptionExpanded,
+    setIsDescriptionExpanded
+  } = useDetailsLogic(expertData);
   useEffect(() => {
-    const id = searchParams.get("id");
-    if (id) {
-      const prof = professionals.find((p) => p.id === parseInt(id));
-      if (prof) {
-        setProfessional(prof);
-      } else {
-        // Rediriger vers la page d'accueil si le professionnel n'est pas trouvé
-        router.push("/");
-      }
-    } else {
-      // Rediriger vers la page d'accueil si aucun ID n'est fourni
+    if (!expertId) {
       router.push("/");
     }
-  }, [searchParams, router]);
+  }, [expertId, router]);
 
-  const toggleLike = (profId: number) => {
-    setLikedProfs((prev) => ({
-      ...prev,
-      [profId]: !prev[profId],
-    }));
-  };
 
-  if (!professional) {
-    return <div>Chargement...</div>;
+  // États de chargement et d'erreur
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-exford-blue"></div>
+      </div>
+    );
   }
 
-  const expertise = [
-    "Transition de carrière",
-    "Création de CV",
-    "Leadership",
-    "Négociation salariale",
-  ];
-  const isLiked = likedProfs[professional.id] || false;
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-lg text-red-600">
+            Erreur lors du chargement de l'expert
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            {error.message || "Expert introuvable"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!professional) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Expert introuvable</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isExpertLiked = professional ? isLiked(String(professional.id)) : false;
 
   // Dimensions responsive pour l'image
   const imageWidth = isMobile ? 358 : 303;
@@ -188,15 +166,16 @@ function ProfessionalDetailContent() {
         {/* <Expert /> */}
         <div className="w-full grid grid-cols-1 lg:grid-cols-[2fr_1fr] xl:grid-cols-[1fr_386px] gap-6 pl-5 container pb-20 lg:pb-0">
           <div className="">
-            <div className="flex justify-center items-center flex-col md:flex-row gap-6 mt-3">
+            <div className="flex justify-center flex-col md:flex-row gap-6 mt-3">
               <div className="relative">
                 <ProfessionalCard
                   professional={professional}
-                  isLiked={isLiked}
-                  onToggleLike={() => toggleLike(professional.id)}
+                  isLiked={isExpertLiked}
+                  onToggleLike={() => toggleLike(String(professional.id))}
                   imageWidth={imageWidth}
                   imageHeight={imageHeight}
                   maxWidth={maxWidth}
+                  lineClamp={1}
                 />
               </div>
 
@@ -205,19 +184,20 @@ function ProfessionalDetailContent() {
                   <h2 className="xl:text-base text-sm font-bold mb-1 font-figtree mt-3">
                     À propos
                   </h2>
-                  <p className="text-gray-700 leading-relaxed font-figtree xl:text-base text-sm">
-                    Dermatologue chez L'Oréal, passionné par l'innovation en
-                    soins de la peau. Avec une expertise de plus de 10 ans, je
-                    me consacre à la recherche et au développement de produits
-                    qui améliorent la santé cutanée. Mon parcours inclut des
-                    collaborations avec des équipes scientifiques pour créer des
-                    solutions adaptées aux besoins des consommateurs.
+                  <p
+                    className={`text-gray-700 leading-relaxed font-figtree xl:text-base text-sm ${
+                      isDescriptionExpanded ? "" : "line-clamp-[7]"
+                    }`}
+                  >
+                    {expertData?.description}
                   </p>
                   <ButtonUI
+                    onClick={toggleDescriptionExpanded}
                     variant="link"
                     className="text-sm font-bold p-0 h-auto text-cobalt-blue underline font-inter cursor-pointer"
                   >
-                    Voir plus <ChevronDown className="h-4 w-4 ml-1" />
+                    {isDescriptionExpanded ? "Voir moins" : "Voir plus"}{" "}
+                    <ChevronDown className="h-4 w-4 ml-1" />
                   </ButtonUI>
                 </div>
 
@@ -226,15 +206,17 @@ function ProfessionalDetailContent() {
                     Domaines d'expertise
                   </h3>
                   <div className="max-w-[400px] flex gap-2 flex-wrap">
-                    {expertise.map((expertise, index) => (
-                      <Badge
-                        key={index}
-                        className="p-2 text-xs lg:text-[10px] xl:text-xs text-[#1F2937] font-medium bg-[#F3F4F6] hover:bg-[#F3F4F6] max-w-fit font-inter mb-2"
-                        variant="secondary"
-                      >
-                        {expertise}
-                      </Badge>
-                    ))}
+                    {expertiseNames?.map(
+                      (expertiseName: string, index: number) => (
+                        <Badge
+                          key={index}
+                          className="p-2 text-xs lg:text-[10px] xl:text-xs text-[#1F2937] font-medium bg-[#F3F4F6] hover:bg-[#F3F4F6] max-w-fit font-inter mb-2"
+                          variant="secondary"
+                        >
+                          {expertiseName}
+                        </Badge>
+                      )
+                    )}
                   </div>
                 </div>
 
@@ -366,8 +348,8 @@ function ProfessionalDetailContent() {
                     <ProfessionalCard
                       key={professional.id}
                       professional={professional}
-                      isLiked={likedProfs[professional.id] || false}
-                      onToggleLike={() => toggleLike(professional.id)}
+                      isLiked={isLiked(String(professional.id))}
+                      onToggleLike={() => toggleLike(String(professional.id))}
                     />
                   ))}
                 </div>
@@ -453,8 +435,15 @@ function ProfessionalDetailContent() {
               </aside>
             ) : (
               <>
-                {!isPlaning && <OfferSelection />}
-                {isPlaning && <VisioPlanningCalendar />}
+                {!isPlaning && (
+                  <OfferSelection price={professional?.price || ""} />
+                )}
+                {isPlaning && (
+                  <VisioPlanningCalendar
+                    expertData={expertData}
+                    professionalName={professional?.name || "Expert"}
+                  />
+                )}
               </>
             )}
           </div>
@@ -518,8 +507,15 @@ function ProfessionalDetailContent() {
               className="h-[90vh] overflow-y-auto bg-white"
             >
               <div className="mt-4">
-                {!isPlaning && <OfferSelection />}
-                {isPlaning && <VisioPlanningCalendar />}
+                {!isPlaning && (
+                  <OfferSelection price={professional?.price || ""} />
+                )}
+                {isPlaning && (
+                  <VisioPlanningCalendar
+                    expertData={expertData}
+                    professionalName={professional?.name || "Expert"}
+                  />
+                )}
               </div>
             </SheetContent>
           </Sheet>

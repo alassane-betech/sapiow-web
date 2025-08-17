@@ -1,4 +1,5 @@
 "use client";
+import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { ProfileAvatar } from "@/components/common/ProfileAvatar";
 import { ShareLinkButton } from "@/components/common/ShareLinkButton";
 import { useUserStore } from "@/store/useUser";
@@ -8,6 +9,8 @@ import { Switch } from "../../ui/switch";
 export const Header: React.FC = () => {
   const [isExpertMode, setIsExpertMode] = useState(true);
   const { setUser } = useUserStore();
+  const { data: user } = useGetProExpert();
+
   return (
     <header className="container bg-white px-6 py-4">
       <div className="flex items-center justify-between">
@@ -15,7 +18,7 @@ export const Header: React.FC = () => {
         <div className="flex flex-col items-start gap-4">
           {/* Photo de profil */}
           <ProfileAvatar
-            src="/assets/memoji.jpg"
+            src={user?.avatar || "/assets/memoji.jpg"}
             alt="Photo de profil"
             size="lg"
           />
@@ -23,7 +26,8 @@ export const Header: React.FC = () => {
           {/* Message de bienvenue */}
           <div>
             <h1 className="text-xl font-semibold text-exford-blue font-figtree">
-              Bonjour Dr. Pierre
+              Bonjour{" "}
+              {user ? `${user.first_name} ${user.last_name}` : "Utilisateur"}
             </h1>
             <p className="text-sm font-medium text-exford-blue font-figtree">
               Vous avez 3 visios à venir aujourd'hui

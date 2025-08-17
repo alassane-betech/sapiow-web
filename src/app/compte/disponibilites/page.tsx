@@ -18,6 +18,8 @@ import { formatFullDate } from "@/utils/dateFormat";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
+import { useGetProExpert } from "@/api/proExpert/useProExpert";
+import { useProExpertStore } from "@/store/useProExpert";
 
 export default function Disponibilites() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("semaine");
@@ -27,6 +29,18 @@ export default function Disponibilites() {
   const [showTimeSlotsManager, setShowTimeSlotsManager] = useState(false);
   const [showAvailabilitySheet, setShowAvailabilitySheet] = useState(false);
   const [showSessionDetailsSheet, setShowSessionDetailsSheet] = useState(false);
+
+  // API et Store pour synchroniser les données proExpert
+  const { data: proExpertData, isLoading: isLoadingApi } = useGetProExpert();
+  const { setProExpertData, setLoading } = useProExpertStore();
+
+  // Synchroniser les données API avec le store
+  useEffect(() => {
+    setLoading(isLoadingApi);
+    if (proExpertData) {
+      setProExpertData(proExpertData);
+    }
+  }, [proExpertData, isLoadingApi, setProExpertData, setLoading]);
 
   const handleConnectGoogle = () => {
     // Logique de connexion Google Agenda

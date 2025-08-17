@@ -42,6 +42,11 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     "3": "border-3",
   };
 
+  const isValidAvatarUrl = (url?: string): boolean => {
+    if (!url) return false;
+    return url.startsWith("http://") || url.startsWith("https://");
+  };
+
   return (
     <div
       className={cn(
@@ -53,7 +58,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       )}
     >
       <Image
-        src={src}
+        src={isValidAvatarUrl(src) ? src : "/assets/memoji.jpg"}
         alt={alt}
         width={sizeValues[size].width}
         height={sizeValues[size].height}

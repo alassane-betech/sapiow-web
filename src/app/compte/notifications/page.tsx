@@ -1,97 +1,42 @@
 "use client";
 
 import { Switch } from "@/components/ui/switch";
+import { useNotificationSettings } from "@/hooks/useNotificationSettings";
 import Image from "next/image";
-import { useState } from "react";
 import AccountLayout from "../AccountLayout";
 
-// Interface pour les notifications
-interface Notification {
-  id: string;
-  icon: string;
-  label: string;
-  checked: boolean;
-}
-
-const initialSmsNotifications: Notification[] = [
-  {
-    id: "sms-calendar",
-    icon: "/assets/icons/calendar.svg",
-    label: "Notifications de Rendez-vous",
-    checked: true,
-  },
-  {
-    id: "sms-chat",
-    icon: "/assets/icons/chatunread.svg",
-    label: "Notifications de Messagerie",
-    checked: true,
-  },
-  {
-    id: "sms-sale",
-    icon: "/assets/icons/sale.svg",
-    label: "Promotions & Offres spéciales",
-    checked: false,
-  },
-  {
-    id: "sms-app",
-    icon: "/assets/icons/smartphone.svg",
-    label: "Mises à jour de l'application",
-    checked: false,
-  },
-];
-
-const initialEmailNotifications: Notification[] = [
-  {
-    id: "email-calendar",
-    icon: "/assets/icons/calendar.svg",
-    label: "Notifications de Rendez-vous",
-    checked: true,
-  },
-  {
-    id: "email-chat",
-    icon: "/assets/icons/chatunread.svg",
-    label: "Notifications de Messagerie",
-    checked: false,
-  },
-  {
-    id: "email-sale",
-    icon: "/assets/icons/sale.svg",
-    label: "Promotions & Offres spéciales",
-    checked: true,
-  },
-  {
-    id: "email-app",
-    icon: "/assets/icons/smartphone.svg",
-    label: "Mises à jour de l'application",
-    checked: true,
-  },
-];
-
 export default function Notifications() {
-  const [smsNotifications, setSmsNotifications] = useState<Notification[]>(
-    initialSmsNotifications
-  );
-  const [emailNotifications, setEmailNotifications] = useState<Notification[]>(
-    initialEmailNotifications
-  );
+  const {
+    smsNotifications,
+    emailNotifications,
+    handleSmsNotificationChange,
+    handleEmailNotificationChange,
+    isLoading,
+    isUpdating,
+    error,
+  } = useNotificationSettings();
 
-  // Fonction pour mettre à jour l'état d'une notification SMS
-  const handleSmsNotificationChange = (id: string, checked: boolean) => {
-    setSmsNotifications((prev) =>
-      prev.map((notif) => (notif.id === id ? { ...notif, checked } : notif))
+  if (isLoading) {
+    return (
+      <AccountLayout>
+        <div className="container w-full py-0 px-5">
+          <div className="flex justify-center items-center py-8">
+            <div className="text-gray-600">Chargement des paramètres...</div>
+          </div>
+        </div>
+      </AccountLayout>
     );
-  };
-
-  // Fonction pour mettre à jour l'état d'une notification Email
-  const handleEmailNotificationChange = (id: string, checked: boolean) => {
-    setEmailNotifications((prev) =>
-      prev.map((notif) => (notif.id === id ? { ...notif, checked } : notif))
-    );
-  };
+  }
 
   return (
     <AccountLayout>
       <div className="container w-full py-0 px-5">
+        {error && (
+          <div className="mt-4 p-4 bg-red-100 border border-red-300 rounded-md">
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        )}
+
         <div className="mt-8">
           <h2 className="text-xs font-bold text-gray-700 uppercase mb-2 font-figtree">
             Notifications par SMS
@@ -121,6 +66,7 @@ export default function Notifications() {
                   onCheckedChange={(checked) =>
                     handleSmsNotificationChange(notif.id, checked)
                   }
+                  disabled={isUpdating}
                   className="data-[state=checked]:bg-[#1E293B]"
                 />
               </div>
@@ -140,7 +86,7 @@ export default function Notifications() {
                   idx === emailNotifications.length - 1
                     ? "border-b-0"
                     : "border-b border-light-blue-gray"
-                }`}
+                } ${isUpdating ? "opacity-60" : ""}`}
               >
                 <Image
                   src={notif.icon}
@@ -157,6 +103,7 @@ export default function Notifications() {
                   onCheckedChange={(checked) =>
                     handleEmailNotificationChange(notif.id, checked)
                   }
+                  disabled={isUpdating}
                   className="data-[state=checked]:bg-[#1E293B]"
                 />
               </div>

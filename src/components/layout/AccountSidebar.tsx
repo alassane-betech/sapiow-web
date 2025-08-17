@@ -1,7 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
+import { supabase } from "@/lib/supabase/client";
 
 const navItems = [
   {
@@ -65,9 +68,37 @@ export function AccountSidebar({
   isMobile = false,
   userType = "expert",
 }: AccountSidebarProps) {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const sidebarClasses = isMobile
     ? "w-full h-full flex flex-col px-4 py-4"
     : " w-[302px] h-[calc(100vh-72px)] sticky top-[72px] z-30 flex flex-col px-4 py-4 border-r border-r-light-blue-gray";
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      
+      // Déconnexion via Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error("Erreur lors de la déconnexion:", error);
+        return;
+      }
+
+      // Nettoyer le localStorage si nécessaire
+      localStorage.removeItem("phoneNumber");
+      localStorage.removeItem("selectedCountry");
+      
+      // Rediriger vers la page de connexion
+      router.push("/login");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   // Filtrer les éléments de navigation selon le type d'utilisateur
   const getFilteredNavItems = () => {
@@ -159,8 +190,12 @@ export function AccountSidebar({
           isMobile ? "mt-auto" : "sticky bottom-0 left-0"
         } pt-4 pb-2 -mx-4 px-4 z-10`}
       >
-        <button className="w-full text-center text-[#1E293B] font-bold text-[15px] py-2 rounded-xl hover:bg-[#F7F9FB] transition">
-          Se déconnecter
+        <button 
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="w-full text-center text-[#1E293B] font-bold text-[15px] py-2 rounded-xl hover:bg-[#F7F9FB] transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
         </button>
       </div>
     </aside>

@@ -1,14 +1,7 @@
 "use client";
 
 import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
-
-interface SessionDuration {
-  id: string;
-  duration: string;
-  price: number;
-  enabled: boolean;
-}
+import { useProSessionsConfig } from "@/hooks/useProSessionsConfig";
 
 interface VisioSessionsConfigProps {
   className?: string;
@@ -17,28 +10,16 @@ interface VisioSessionsConfigProps {
 export default function VisioSessionsConfig({
   className,
 }: VisioSessionsConfigProps) {
-  const [sessions, setSessions] = useState<SessionDuration[]>([
-    { id: "15min", duration: "15 minutes", price: 85, enabled: true },
-    { id: "30min", duration: "30 minutes", price: 85, enabled: true },
-    { id: "45min", duration: "45 minutes", price: 0, enabled: false },
-    { id: "60min", duration: "60 minutes", price: 0, enabled: false },
-  ]);
-
-  const handlePriceChange = (id: string, newPrice: number) => {
-    setSessions((prev) =>
-      prev.map((session) =>
-        session.id === id ? { ...session, price: newPrice } : session
-      )
-    );
-  };
-
-  const handleToggle = (id: string, enabled: boolean) => {
-    setSessions((prev) =>
-      prev.map((session) =>
-        session.id === id ? { ...session, enabled } : session
-      )
-    );
-  };
+  const {
+    sessions,
+    isInitialLoading,
+    error,
+    isSessionUpdating,
+    handlePriceChange,
+    handleToggle,
+    handlePriceBlur,
+    handleToggleUpdate
+  } = useProSessionsConfig();
 
   const expectations = [
     "Posez trois questions ou plus",
@@ -53,46 +34,77 @@ export default function VisioSessionsConfig({
     "Comment aborder votre le croissance de ma startup ?",
   ];
 
+  // Loading initial seulement si on n'a pas encore de données
+  if (isInitialLoading) {
+    return (
+      <div className={`space-y-6 ${className}`}>
+        <div className="text-center py-8">
+          <p className="text-gray-600">Chargement des sessions...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`space-y-6 ${className}`}>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-red-600 text-sm">Erreur lors du chargement des sessions</p>
+        </div>
+      )}
+
       {/* Configuration des sessions */}
       <div className="space-y-4">
-        {sessions.map((session) => (
-          <div
-            key={session.id}
-            className="flex items-center justify-between p-4 bg-white rounded-[12px] border border-light-blue-gray"
-          >
-            <div className="flex items-center gap-6">
-              <span className="text-lg font-bold text-slate-900 min-w-[100px]">
-                {session.duration}
-              </span>
+        {sessions.map((session) => {
+          const sessionUpdating = isSessionUpdating(session.id);
+          
+          return (
+            <div
+              key={session.id}
+              className={`flex items-center justify-between p-4 bg-white rounded-[12px] border border-light-blue-gray ${
+                sessionUpdating ? 'opacity-70' : ''
+              } transition-opacity duration-200`}
+            >
+              <div className="flex items-center gap-6">
+                <span className="text-lg font-bold text-slate-900 min-w-[100px]">
+                  {session.duration}
+                </span>
 
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Prix</span>
-                <input
-                  type="number"
-                  value={session.price}
-                  onChange={(e) =>
-                    handlePriceChange(session.id, parseInt(e.target.value) || 0)
-                  }
-                  disabled={!session.enabled}
-                  className={`w-16 px-2 py-1 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    session.enabled
-                      ? "border-gray-300 bg-white text-gray-900"
-                      : "border-gray-200 bg-gray-50 text-gray-400"
-                  }`}
-                />
-                <span className="text-gray-500">€</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Prix</span>
+                  <input
+                    type="number"
+                    value={session.price}
+                    onChange={(e) =>
+                      handlePriceChange(session.id, parseInt(e.target.value) || 0)
+                    }
+                    onBlur={() => handlePriceBlur(session.id)}
+                    disabled={!session.enabled || sessionUpdating}
+                    className={`w-16 px-2 py-1 text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      session.enabled && !sessionUpdating
+                        ? "border-gray-300 bg-white text-gray-900"
+                        : "border-gray-200 bg-gray-50 text-gray-400"
+                    }`}
+                  />
+                  <span className="text-gray-500">€</span>
+                </div>
               </div>
-            </div>
 
-            <Switch
-              checked={session.enabled}
-              onCheckedChange={(checked) => handleToggle(session.id, checked)}
-              className="data-[state=checked]:bg-gray-900"
-            />
-          </div>
-        ))}
+              <Switch
+                checked={session.enabled}
+                onCheckedChange={(checked) => {
+                  handleToggle(session.id, checked);
+                  // Pour les sessions existantes, appeler l'API immédiatement
+                  if (session.api_id) {
+                    handleToggleUpdate(session.id, checked);
+                  }
+                }}
+                disabled={sessionUpdating}
+                className="data-[state=checked]:bg-gray-900"
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Section Attentes */}

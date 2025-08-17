@@ -13,6 +13,7 @@ interface ProfessionalCardProps {
   imageWidth?: number;
   imageHeight?: number;
   maxWidth?: string;
+  lineClamp?: number;
 }
 
 export default function ProfessionalCard({
@@ -23,6 +24,7 @@ export default function ProfessionalCard({
   imageWidth = 175,
   imageHeight = 196,
   maxWidth = "max-w-[175px]",
+  lineClamp = 3,
 }: ProfessionalCardProps) {
   return (
     <Card
@@ -36,8 +38,14 @@ export default function ProfessionalCard({
           </Badge>
         )}
         <Image
-          src={professional.image || "/placeholder.svg"}
-          alt={professional.name}
+          src={professional.image || professional.avatar || "/placeholder.svg"}
+          alt={
+            professional.name ||
+            `${professional.first_name || ""} ${
+              professional.last_name || ""
+            }`.trim() ||
+            "Professional"
+          }
           width={imageWidth}
           height={imageHeight}
           quality={100}
@@ -54,7 +62,11 @@ export default function ProfessionalCard({
           className="absolute top-3 right-3 bg-white/20 hover:bg-white rounded-full w-8 h-8 backdrop-blur-[1.4px]"
           onClick={(e) => {
             e.stopPropagation();
-            onToggleLike(professional.id);
+            onToggleLike(
+              typeof professional.id === "string"
+                ? parseInt(professional.id, 10) || 0
+                : professional.id
+            );
           }}
         >
           <Image
@@ -74,7 +86,11 @@ export default function ProfessionalCard({
         <div>
           <div className="flex items-center mb-1">
             <h3 className="font-bold text-black text-sm truncate">
-              {professional.name}
+              {professional.name ||
+                `${professional.first_name || ""} ${
+                  professional.last_name || ""
+                }`.trim() ||
+                "Nom non disponible"}
             </h3>
             {professional.verified && (
               <Image
@@ -107,7 +123,9 @@ export default function ProfessionalCard({
               ""
             )}
           </p>
-          <p className="text-xs text-gray-500 leading-relaxed font-figtree">
+          <p
+            className={`text-xs text-gray-500 leading-relaxed font-figtree line-clamp-${lineClamp} overflow-hidden`}
+          >
             {professional.description}
           </p>
         </div>

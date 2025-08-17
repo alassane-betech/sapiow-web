@@ -46,9 +46,16 @@ export default function CategorySection({
           <ProfessionalCard
             key={professional.id}
             professional={professional}
-            isLiked={likedProfs[professional.id] || false}
+            isLiked={
+              likedProfs[
+                typeof professional.id === "string"
+                  ? parseInt(professional.id, 10) || 0
+                  : professional.id
+              ] || false
+            }
             onToggleLike={onToggleLike}
             onProfessionalClick={onProfessionalClick}
+            lineClamp={3}
           />
         ))}
       </div>

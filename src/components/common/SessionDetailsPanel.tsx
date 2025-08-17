@@ -3,7 +3,13 @@ import { SessionPreviewCard } from "@/components/common/SessionPreviewCard";
 import TimeSlotsManager from "@/components/common/TimeSlotsManager";
 import { mockAvailabilityEvents } from "@/data/mockAvailability";
 import { SessionDetailsData } from "@/types/availability";
-import { formatDateForSession, formatFullDate, formatTimeForSession } from "@/utils/dateFormat";
+import {
+  formatDateForSession,
+  formatFullDate,
+  formatTimeForSession,
+} from "@/utils/dateFormat";
+import { useProExpertStore } from "@/store/useProExpert";
+import { getDayOfWeekFromDate, ApiSchedule } from "@/types/schedule";
 
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
@@ -11,17 +17,30 @@ interface SessionDetailsPanelProps {
   onAddAvailability: () => void;
 }
 
-export const SessionDetailsPanel = ({ 
-  selectedDate, 
-  showTimeSlotsManager, 
-  onAddAvailability 
+export const SessionDetailsPanel = ({
+  selectedDate,
+  showTimeSlotsManager,
+  onAddAvailability,
 }: SessionDetailsPanelProps) => {
+  // Store pour vérifier les créneaux existants
+  const { proExpertData } = useProExpertStore();
+
+  // Vérifier s'il y a des créneaux pour la date sélectionnée
+  const hasTimeSlotsForDate = (date: Date | null): boolean => {
+    if (!date || !proExpertData?.schedules) return false;
+    
+    const dayOfWeek = getDayOfWeekFromDate(date);
+    const schedules = proExpertData.schedules as ApiSchedule[];
+    return schedules.some(schedule => schedule.day_of_week === dayOfWeek);
+  };
+
   // Fonction pour récupérer les détails des sessions pour une date sélectionnée
   const getSessionDetails = (): SessionDetailsData | null => {
     if (!selectedDate) return null;
 
     const dayOfMonth = selectedDate.getDate();
-    const event = mockAvailabilityEvents[dayOfMonth as keyof typeof mockAvailabilityEvents];
+    const event =
+      mockAvailabilityEvents[dayOfMonth as keyof typeof mockAvailabilityEvents];
 
     if (!event || event.users.length === 0) return null;
 
@@ -69,9 +88,9 @@ export const SessionDetailsPanel = ({
             </div>
           )}
 
-          {showTimeSlotsManager ? (
+          {showTimeSlotsManager || hasTimeSlotsForDate(selectedDate) ? (
             <div className="w-full">
-              <TimeSlotsManager />
+              <TimeSlotsManager selectedDate={selectedDate} />
             </div>
           ) : (
             <EmptySessionCard

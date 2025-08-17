@@ -1,86 +1,21 @@
 "use client";
 import { Button } from "@/components/common/Button";
 import OTPInput from "@/components/common/OTPInput";
+import { useVerifyOtp } from "@/hooks/useVerifyOtp";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function VerifyCode() {
-  const [code, setCode] = useState("");
-  const [isCodeComplete, setIsCodeComplete] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [formattedPhone, setFormattedPhone] = useState("");
-  console.log(formattedPhone);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-
-  // Récupérer le numéro de téléphone depuis localStorage
-  useEffect(() => {
-    const savedPhone = localStorage.getItem("phoneNumber");
-    const savedFormatted = localStorage.getItem("formattedPhone");
-
-    if (savedPhone) {
-      setPhoneNumber(savedPhone);
-      setFormattedPhone(savedFormatted || savedPhone);
-    } else {
-      // Rediriger vers la page de login si pas de numéro sauvegardé
-      router.push("/login");
-    }
-  }, [router]);
-
-  // Vérifier si le code est complet
-  useEffect(() => {
-    setIsCodeComplete(code.length === 6);
-  }, [code]);
-
-  const handleCodeChange = (value: string) => {
-    setCode(value);
-  };
-
-  const handleResendCode = async () => {
-    setIsLoading(true);
-    try {
-      // Simuler l'appel API pour renvoyer le code
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Code renvoyé au numéro:", phoneNumber);
-      // Ici vous pourrez ajouter la logique d'appel API
-    } catch (error) {
-      console.error("Erreur lors du renvoi du code:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChangeNumber = () => {
-    // Rediriger vers la page de login sans supprimer les données
-    // pour permettre de pré-remplir le champ téléphone
-    router.push("/login");
-  };
-
-  const handleContinue = async () => {
-    if (isCodeComplete) {
-      setIsLoading(true);
-
-      try {
-        // Simuler la vérification du code
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        console.log("Code de vérification:", code);
-        console.log("Numéro vérifié:", phoneNumber);
-
-        // Nettoyer les données temporaires après vérification réussie
-        localStorage.removeItem("phoneNumber");
-        localStorage.removeItem("formattedPhone");
-
-        // Rediriger vers la page d'onboarding
-        router.push("/onboarding");
-      } catch (error) {
-        console.error("Erreur lors de la vérification:", error);
-        // Gérer l'erreur (code incorrect, etc.)
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
+  const {
+    code,
+    isCodeComplete,
+    formattedPhone,
+    isLoading,
+    error,
+    handleCodeChange,
+    handleResendCode,
+    handleChangeNumber,
+    handleContinue,
+  } = useVerifyOtp();
 
   return (
     <div className="min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
@@ -119,6 +54,15 @@ export default function VerifyCode() {
                 maxLength={6}
               />
             </div>
+
+            {/* Message d'erreur */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[8px]">
+                <p className="text-sm text-red-600 font-medium text-center">
+                  {error}
+                </p>
+              </div>
+            )}
 
             {/* Liens d'action */}
             <div className="text-center space-y-3 font-figtree">

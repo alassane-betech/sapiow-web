@@ -6,7 +6,11 @@ import { usePlaningStore } from "@/store/usePlaning";
 import Image from "next/image";
 import { useState } from "react";
 
-export default function OfferSelection() {
+interface OfferSelectionProps {
+  price: string;
+}
+
+export default function OfferSelection({ price }: OfferSelectionProps) {
   const [selectedOption, setSelectedOption] = useState<
     "session" | "subscription"
   >("session");
@@ -45,7 +49,7 @@ export default function OfferSelection() {
                     Parfait pour des questions spécifiques
                   </p>
                   <p className="text-sm text-gray-700 mb-6 font-figtree">
-                    À partir de <span className="font-semibold">89 €</span>
+                    À partir de <span className="font-semibold">{price}</span>
                   </p>
                 </div>
                 <div className="ml-4">

@@ -1,4 +1,5 @@
 "use client";
+import { useListExperts } from "@/api/listExpert/useListExpert";
 import { SessionCard } from "@/components/common/SessionCard";
 import { StatsCard } from "@/components/common/StatsCard";
 import { ArrowRight } from "lucide-react";
@@ -7,6 +8,8 @@ import Link from "next/link";
 import { useState } from "react";
 
 export default function Expert() {
+  const { data: expertList } = useListExperts();
+
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
   const handleStartVideoCall = () => {
     setIsVideoCallOpen(true);

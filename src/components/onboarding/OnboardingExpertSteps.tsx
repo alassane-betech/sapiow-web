@@ -3,6 +3,7 @@ import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Textarea } from "@/components/ui/textarea";
 import { useOnboardingExpert } from "@/hooks/useOnboardingExpert";
+import { DOMAIN_ID_MAPPING } from "@/constants/onboarding";
 import React from "react";
 import { DomainSelector } from "./DomainSelector";
 import { Pagination } from "./Pagination";
@@ -22,11 +23,16 @@ export const OnboardingExpertSteps: React.FC = () => {
     aboutMe,
     linkedinUrl,
     websiteUrl,
+    avatar,
     visioOptions,
     isFormValid,
     isDomainValid,
     isSpecialtyValid,
     isVisioValid,
+    domains,
+    isLoadingDomains,
+    expertises,
+    isLoadingExpertises,
     setFirstName,
     setLastName,
     setProfession,
@@ -37,8 +43,10 @@ export const OnboardingExpertSteps: React.FC = () => {
     setWebsiteUrl,
     nextStep,
     handleSpecialtyToggle,
+    handleAvatarChange,
     updateVisioOption,
     completeOnboarding,
+    completeOnboardingWithoutSessions,
   } = useOnboardingExpert();
 
   // Étape 1 : Formulaire expert
@@ -112,8 +120,18 @@ export const OnboardingExpertSteps: React.FC = () => {
         <DomainSelector
           title="Dans quelle domaine exercez vous ?"
           subtitle="Nous avons besoin de quelques informations pour personnaliser créer votre compte Expert."
-          selectedDomain={selectedDomain}
-          onDomainSelect={setSelectedDomain}
+          domains={domains}
+          isLoading={isLoadingDomains}
+          selectedDomain={selectedDomain ? DOMAIN_ID_MAPPING[selectedDomain] : null}
+          onDomainSelect={(domainId: number) => {
+            // Convert numeric ID back to string ID
+            const stringId = Object.keys(DOMAIN_ID_MAPPING).find(
+              key => DOMAIN_ID_MAPPING[key] === domainId
+            );
+            if (stringId) {
+              setSelectedDomain(stringId);
+            }
+          }}
           multiSelect={false}
         />
         <Pagination currentStep={2} totalSteps={5} />
@@ -134,6 +152,8 @@ export const OnboardingExpertSteps: React.FC = () => {
         <SpecialtySelector
           selectedDomain={selectedDomain}
           selectedSpecialties={selectedSpecialties}
+          expertises={expertises}
+          isLoadingExpertises={isLoadingExpertises}
           onSpecialtyToggle={handleSpecialtyToggle}
         />
         <Pagination currentStep={3} totalSteps={5} />
@@ -167,7 +187,9 @@ export const OnboardingExpertSteps: React.FC = () => {
           créer <br /> votre compte Expert.
         </p>
 
-        <ProfilePhotoUpload />
+        <ProfilePhotoUpload 
+          onPhotoSelect={handleAvatarChange}
+        />
 
         <div className="space-y-6 mb-8">
           <Textarea
@@ -231,7 +253,7 @@ export const OnboardingExpertSteps: React.FC = () => {
             label="Plus tard"
             className="w-1/2 rounded-[8px] h-[56px] text-base font-medium bg-white border border-gray-300 text-exford-blue hover:bg-gray-50"
             variant="outline"
-            onClick={completeOnboarding}
+            onClick={completeOnboardingWithoutSessions}
           />
           <Button
             label="Terminer"
