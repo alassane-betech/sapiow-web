@@ -15,7 +15,7 @@ import { usePlaningStore } from "@/store/usePlaning";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 import OfferSelection from "../home/OfferSelection";
 import ProfessionalCard from "../home/ProfessionalCard";
 
@@ -23,7 +23,6 @@ import { useGetProExpertById } from "@/api/proExpert/useProExpert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
 import { useDetailsLogic } from "@/hooks/useDetailsLogic";
-import { Professional } from "@/types/professional";
 
 // Données des professionnels (à déplacer dans un contexte ou API plus tard)
 const professionalsSimilar = [
@@ -109,14 +108,13 @@ function ProfessionalDetailContent() {
     closeOfferSheet,
     setIsOfferSheetOpen,
     toggleDescriptionExpanded,
-    setIsDescriptionExpanded
+    setIsDescriptionExpanded,
   } = useDetailsLogic(expertData);
   useEffect(() => {
     if (!expertId) {
       router.push("/");
     }
   }, [expertId, router]);
-
 
   // États de chargement et d'erreur
   if (isLoading) {
@@ -436,7 +434,7 @@ function ProfessionalDetailContent() {
             ) : (
               <>
                 {!isPlaning && (
-                  <OfferSelection price={professional?.price || ""} />
+                  <OfferSelection price={professional?.price || ""} expertData={expertData} />
                 )}
                 {isPlaning && (
                   <VisioPlanningCalendar
@@ -508,7 +506,7 @@ function ProfessionalDetailContent() {
             >
               <div className="mt-4">
                 {!isPlaning && (
-                  <OfferSelection price={professional?.price || ""} />
+                  <OfferSelection price={professional?.price || ""} expertData={expertData} />
                 )}
                 {isPlaning && (
                   <VisioPlanningCalendar

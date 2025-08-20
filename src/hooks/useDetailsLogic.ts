@@ -1,15 +1,24 @@
 import { useState, useMemo } from 'react';
 import { useGetExpertises } from "@/api/domaine/useDomaine";
 import { Professional } from "@/types/professional";
+import { useFavoritesLogic } from "./useFavoritesLogic";
 
 /**
  * Hook pour isoler la logique métier de la page details
+ * 
+ * RESPONSABILITÉS :
+ * - Transformation des données expert → Professional
+ * - Mapping des expertises
+ * - Gestion UI (modals, description étendue)
+ * - Délégation des favoris au hook useFavoritesLogic
  */
 export const useDetailsLogic = (expertData: any) => {
-  // États UI
+  // États UI locaux
   const [isOfferSheetOpen, setIsOfferSheetOpen] = useState(false);
-  const [likedProfs, setLikedProfs] = useState<Record<string, boolean>>({});
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  
+  // Hook logique favoris (partagé avec la page d'accueil)
+  const { likedProfs, handleToggleLike, isLoadingFavorites } = useFavoritesLogic();
 
   // Récupérer les expertises pour le mapping
   const { data: expertises } = useGetExpertises(
@@ -58,15 +67,10 @@ export const useDetailsLogic = (expertData: any) => {
     };
   }, [expertData]);
 
-  // Fonction pour gérer les likes
-  const toggleLike = (profId: string) => {
-    setLikedProfs((prev) => ({
-      ...prev,
-      [profId]: !prev[profId],
-    }));
-  };
-
-  // Fonction pour vérifier si un professionnel est liké
+  /**
+   * Fonction pour vérifier si un expert est en favori
+   * Utilise les données réelles de l'API favorites
+   */
   const isLiked = (profId: string) => {
     return likedProfs[profId] || false;
   };
@@ -90,8 +94,11 @@ export const useDetailsLogic = (expertData: any) => {
     likedProfs,
     isDescriptionExpanded,
     
+    // États API
+    isLoadingFavorites,
+    
     // Actions
-    toggleLike,
+    toggleLike: handleToggleLike, // Délégation au hook favoris
     isLiked,
     openOfferSheet,
     closeOfferSheet,

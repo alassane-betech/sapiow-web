@@ -14,6 +14,14 @@ import Image from "next/image";
 import React from "react";
 import { Button } from "./Button";
 
+interface AppointmentQuestion {
+  id: number | string;
+  question: string;
+  created_at: string;
+  updated_at: string;
+  appointment_id: number | string;
+}
+
 interface SessionModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,6 +30,7 @@ interface SessionModalProps {
   name: string;
   isUpcoming?: boolean;
   onAccept?: () => void;
+  questions?: AppointmentQuestion[];
 }
 
 export const SessionModal: React.FC<SessionModalProps> = ({
@@ -32,6 +41,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   name,
   isUpcoming = false,
   onAccept,
+  questions = [],
 }) => {
   // Détermine le titre du modal selon le contexte
   const modalTitle = isUpcoming ? "Détail de la visio" : "Demande en attente";
@@ -75,9 +85,9 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                 <p className="font-bold text-gunmetal-gray text-sm font-outfit">
                   {name}
                 </p>
-                <p className="text-xs font-medium text-bluish-gray font-figtree mt-1">
+                {/* <p className="text-xs font-medium text-bluish-gray font-figtree mt-1">
                   Student, ESOC
-                </p>
+                </p> */}
               </div>
             </div>
           </div>
@@ -93,17 +103,22 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           </div>
 
           {/* Questions section */}
-          <div>
-            <p className="text-xs font-outfit font-medium text-slate-gray mb-2">
-              Questions ou commentaires
-            </p>
-            <div className="bg-snow-blue rounded-[8px] p-4">
-              <p className="text-sm text-gray-700 font-figtree font-normal leading-relaxed">
-                Je veux savoir comment transformer mon idée de SaaS B2B en 100M
-                $ ARR
+          {questions.length > 0 && (
+            <div>
+              <p className="text-xs font-outfit font-medium text-slate-gray mb-2">
+                Questions ou commentaires
               </p>
+              <div className="space-y-3">
+                {questions.map((question) => (
+                  <div key={question.id} className="bg-snow-blue rounded-[8px] p-4">
+                    <p className="text-sm text-gray-700 font-figtree font-normal leading-relaxed">
+                      {question.question}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Action buttons - Fixed at bottom */}

@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/common/Button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
@@ -11,30 +10,40 @@ import {
 } from "@/components/ui/sheet";
 import { X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 import { FormField } from "./FormField";
+import { SessionCreate } from "@/api/sessions/useSessions";
+import { useAddSessionModal } from "@/hooks/useAddSessionModal";
 
 interface AddAccompanimentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: (data: AccompanimentData) => void;
+  onSuccess?: (data: SessionData) => void;
 }
 
-interface AccompanimentData {
-  title: string;
-  pricePerMonth: string;
-  features: string[];
+interface SessionData extends SessionCreate {
+  // SessionData hérite de SessionCreate du hook API
 }
+
+const sessionTypeOptions = [
+  { label: '15 minutes', value: '15m' as const },
+  { label: '30 minutes', value: '30m' as const },
+  { label: '45 minutes', value: '45m' as const },
+  { label: '60 minutes', value: '60m' as const },
+];
+
+const sessionNatureOptions = [
+  { label: 'Ponctuelle', value: 'one_time' as const },
+  { label: 'Abonnement', value: 'subscription' as const },
+];
 
 const availableFeatures = [
-  "Chat 1:1 (illimité)",
-  "Appels vidéo 1:1 (90 min/mois)",
-  "Sessions de stratégie hebdomadaires (2 heures/mois)",
-  "Accès à des ressources exclusives en ligne",
-  "Support client prioritaire 24/7",
-  "Séances de mentorat individuelles (1 heure/mois)",
-  "Webinaires mensuels sur des sujets d'actualité",
-  "Accès à un groupe communautaire exclusif",
+  { key: 'one_on_one', label: 'Session individuelle 1:1' },
+  { key: 'video_call', label: 'Appel vidéo' },
+  { key: 'strategic_session', label: 'Session stratégique' },
+  { key: 'exclusive_ressources', label: 'Ressources exclusives' },
+  { key: 'support', label: 'Support client' },
+  { key: 'mentorship', label: 'Mentorat' },
+  { key: 'webinar', label: 'Webinaire' },
 ];
 
 export default function AddAccompanimentModal({
@@ -42,58 +51,17 @@ export default function AddAccompanimentModal({
   onClose,
   onSuccess,
 }: AddAccompanimentModalProps) {
-  const [formData, setFormData] = useState({
-    title: "",
-    pricePerMonth: "",
-  });
-
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const handleFeatureToggle = (feature: string, checked: boolean) => {
-    setSelectedFeatures((prev) => {
-      if (checked) {
-        return [...prev, feature];
-      } else {
-        return prev.filter((f) => f !== feature);
-      }
-    });
-  };
-
-  const handleSubmit = () => {
-    const accompanimentData: AccompanimentData = {
-      title: formData.title,
-      pricePerMonth: formData.pricePerMonth,
-      features: selectedFeatures,
-    };
-
-    console.log("Données de l'accompagnement:", accompanimentData);
-
-    if (onSuccess) {
-      onSuccess(accompanimentData);
-    }
-
-    handleCancel();
-  };
-
-  const handleCancel = () => {
-    // Réinitialiser le formulaire
-    setFormData({
-      title: "",
-      pricePerMonth: "",
-    });
-    setSelectedFeatures([]);
-    onClose();
-  };
-
-  const isFormValid =
-    formData.title.trim() !== "" && formData.pricePerMonth.trim() !== "";
+  const {
+    formData,
+    selectedFeatures,
+    errors,
+    isFormValid,
+    isPending,
+    handleInputChange,
+    handleFeatureToggle,
+    handleSubmit,
+    handleCancel,
+  } = useAddSessionModal({ onSuccess, onClose });
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -106,7 +74,7 @@ export default function AddAccompanimentModal({
           <SheetHeader className="p-6 pb-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl font-semibold text-gray-900">
-                Ajouter un accompagnement
+                Ajouter une session
               </SheetTitle>
               <button
                 onClick={onClose}
@@ -119,29 +87,71 @@ export default function AddAccompanimentModal({
 
           {/* Content */}
           <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-            {/* Titre */}
+            {/* Nom */}
             <div className="space-y-2">
               <FormField
-                label="Titre"
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="Titre"
+                label="Nom de la session"
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+                placeholder="Ex: Consultation stratégique"
                 className="w-full h-[56px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
               />
             </div>
 
-            {/* Prix/Mois */}
+            {/* Durée - seulement pour les sessions ponctuelles */}
+            {formData.session_nature === "one_time" && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">Durée</Label>
+                <div className="flex gap-2">
+                  {sessionTypeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => handleInputChange("session_type", option.value)}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        formData.session_type === option.value
+                          ? "bg-cobalt-blue text-white border-cobalt-blue"
+                          : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Type de session */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-700">Type</Label>
+              <div className="flex gap-2">
+                {sessionNatureOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleInputChange("session_nature", option.value)}
+                    className={`px-4 py-2 rounded-lg border transition-colors ${
+                      formData.session_nature === option.value
+                        ? "bg-cobalt-blue text-white border-cobalt-blue"
+                        : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Prix */}
             <div className="space-y-2">
               <FormField
-                label="Prix/Mois"
+                label="Prix (€)"
                 type="number"
                 id="price"
-                value={formData.pricePerMonth}
-                onChange={(e) =>
-                  handleInputChange("pricePerMonth", e.target.value)
-                }
-                placeholder="Prix/Mois"
+                value={formData.price}
+                onChange={(e) => handleInputChange("price", e.target.value)}
+                placeholder="Ex: 120"
                 rightIcon={
                   <Image
                     src="/assets/icons/mdi_euro.svg"
@@ -154,6 +164,19 @@ export default function AddAccompanimentModal({
               />
             </div>
 
+            {/* Affichage des erreurs */}
+            {errors.length > 0 && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="text-sm text-red-700">
+                  {errors.map((error, index) => (
+                    <div key={index} className="mb-1">
+                      • {error}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Fonctionnalités */}
             <div className="space-y-4 border border-light-blue-gray rounded-[12px] p-4">
               <Label className="text-sm font-medium text-gray-700">
@@ -161,18 +184,19 @@ export default function AddAccompanimentModal({
               </Label>
               <div className="space-y-4">
                 {availableFeatures.map((feature) => (
-                  <div key={feature} className="flex items-center space-x-3">
+                  <div key={feature.key} className="flex items-center space-x-3">
                     <Label
-                      htmlFor={feature}
+                      htmlFor={feature.key}
                       className="text-sm text-gray-700 flex-1 cursor-pointer"
                     >
-                      {feature}
+                      {feature.label}
                     </Label>
-                    <Checkbox
-                      id={feature}
-                      checked={selectedFeatures.includes(feature)}
+                    <input
+                      type="checkbox"
+                      id={feature.key}
+                      checked={selectedFeatures[feature.key] || false}
                       onChange={(e) =>
-                        handleFeatureToggle(feature, e.target.checked)
+                        handleFeatureToggle(feature.key, e.target.checked)
                       }
                       className="w-6 h-6 bg-white border-3 border-[#94A3B8] rounded-[8px] focus:ring-2"
                     />
@@ -192,10 +216,12 @@ export default function AddAccompanimentModal({
               />
 
               <Button
-                label="Ajouter"
+                label={isPending ? "Création..." : "Ajouter"}
                 onClick={handleSubmit}
                 disabled={!isFormValid}
-                className="flex-1 py-3 text-base font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed h-[56px] border-none shadow-none"
+                className={`flex-1 py-3 text-base font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed h-[56px] border-none shadow-none ${
+                  isPending ? 'cursor-not-allowed' : ''
+                }`}
               />
             </div>
           </div>

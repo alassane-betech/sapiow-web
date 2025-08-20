@@ -9,7 +9,7 @@ export type SessionNature = "one_time" | "subscription";
 // Interface pour les données de création de session
 export interface SessionCreate {
   price: number; // float
-  session_type: SessionType;
+  session_type?: SessionType; // Optionnel pour les accompagnements mensuels
   session_nature: SessionNature;
   one_on_one?: boolean; // default: false
   video_call?: boolean; // default: false
@@ -109,8 +109,14 @@ export const useCreateProSession = () => {
         );
       }
 
-      if (!sessionData.session_type) {
-        throw new Error("Le type de session est requis");
+      // session_type requis seulement pour les sessions ponctuelles
+      if (
+        sessionData.session_nature === "one_time" &&
+        !sessionData.session_type
+      ) {
+        throw new Error(
+          "Le type de session est requis pour les sessions ponctuelles"
+        );
       }
 
       if (!sessionData.session_nature) {
@@ -118,8 +124,6 @@ export const useCreateProSession = () => {
       }
 
       try {
-        console.log("Creating pro session with data:", sessionData);
-
         // Préparation des données avec valeurs par défaut
         const sessionPayload: SessionCreate = {
           price: sessionData.price,
@@ -142,8 +146,6 @@ export const useCreateProSession = () => {
           sessionPayload
         );
 
-        console.log("Pro session created successfully:", response);
-
         // L'API retourne directement l'objet session
         // On wrape dans la structure attendue
         return {
@@ -164,9 +166,7 @@ export const useCreateProSession = () => {
         );
       }
     },
-    onSuccess: (data) => {
-      console.log("Session créée avec succès:", data);
-    },
+    onSuccess: (data) => {},
     onError: (error) => {
       console.error("Erreur création session:", error);
     },
@@ -183,11 +183,14 @@ export const validateSessionData = (data: SessionCreate): string[] => {
     errors.push("Le prix doit être un nombre positif");
   }
 
-  if (
-    !data.session_type ||
-    !["15m", "30m", "45m", "60m"].includes(data.session_type)
-  ) {
-    errors.push("Type de session invalide (15m, 30m, 45m, 60m)");
+  // session_type requis seulement pour les sessions ponctuelles
+  if (data.session_nature === "one_time") {
+    if (
+      !data.session_type ||
+      !["15m", "30m", "45m", "60m"].includes(data.session_type)
+    ) {
+      errors.push("Type de session invalide (15m, 30m, 45m, 60m)");
+    }
   }
 
   if (
@@ -230,18 +233,15 @@ export const createDefaultSessionData = (
  * Hook pour mettre à jour une session pro existante via PUT /pro-session/{id}
  */
 export const useUpdateProSession = () => {
-  return useMutation<SessionUpdateResponse, SessionUpdateError, { id: string; data: SessionUpdate }>({
+  return useMutation<
+    SessionUpdateResponse,
+    SessionUpdateError,
+    { id: string; data: SessionUpdate }
+  >({
     mutationFn: async ({ id, data }: { id: string; data: SessionUpdate }) => {
       try {
-        console.log("Updating pro session", id, data);
-
         // Appel API via apiClient
-        const response = await apiClient.put<any>(
-          `pro-session/${id}`,
-          data
-        );
-
-        console.log("Pro session updated successfully:", response);
+        const response = await apiClient.put<any>(`pro-session/${id}`, data);
 
         // L'API retourne directement l'objet session
         // On wrape dans la structure attendue

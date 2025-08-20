@@ -57,8 +57,8 @@ export const useOnboardingExpert = () => {
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
     profession.trim().length > 0;
-    // && email.trim().length > 0 &&
-    // /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  // && email.trim().length > 0 &&
+  // /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const isDomainValid = !!selectedDomain;
   const isSpecialtyValid = selectedSpecialties.length > 0;
@@ -127,11 +127,9 @@ export const useOnboardingExpert = () => {
       };
 
       // Soumettre l'expert à l'API
-      const expertResult = await onboardingMutation.mutateAsync(onboardingData);
-      console.log("Expert créé avec succès:", expertResult);
+      await onboardingMutation.mutateAsync(onboardingData);
 
       // Rediriger vers la page d'accueil après succès
-      console.log("Onboarding expert terminé sans sessions");
       setUser({ type: "expert" });
       router.push("/");
     } catch (error) {
@@ -166,22 +164,8 @@ export const useOnboardingExpert = () => {
         ...(avatar && { avatar }),
       };
 
-      // Debug: Afficher le payload complet avant envoi
-      console.log("📦 PAYLOAD COMPLET à envoyer:", {
-        ...onboardingData,
-        avatar: avatar
-          ? {
-              name: avatar.name,
-              size: avatar.size,
-              type: avatar.type,
-              file: avatar,
-            }
-          : null,
-      });
-
       // Soumettre l'expert à l'API
       const expertResult = await onboardingMutation.mutateAsync(onboardingData);
-      console.log("Expert créé avec succès:", expertResult);
 
       // ÉTAPE 2: Créer les sessions si des options sont configurées
       if (

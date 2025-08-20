@@ -14,6 +14,8 @@ interface UpcomingVideoCallProps {
   onViewDetails?: () => void;
   className?: string;
   variant?: "dark" | "light";
+  showButton?: boolean;
+  sessionTime?: string; // Format: "14h30 - 15h30"
 }
 
 export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
@@ -25,12 +27,21 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
   onViewDetails,
   className = "",
   variant = "dark",
+  showButton = true,
+  sessionTime,
 }) => {
   const isDark = variant === "dark";
 
   const cardClasses = isDark
-    ? "bg-slate-800 text-white"
+    ? "text-white"
     : "bg-snow-blue text-slate-800 border border-soft-ice-gray shadow-none";
+
+  const cardStyle = isDark
+    ? {
+        background: "linear-gradient(98deg, #020617 15.14%, #040E37 95.16%)",
+        boxShadow: "0 4px 4px 0 #F1F5F9",
+      }
+    : {};
 
   const iconFilter = isDark ? "brightness-0 invert" : "opacity-60";
 
@@ -46,6 +57,7 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
   return (
     <Card
       className={`w-full ${cardClasses}  rounded-[16px] overflow-hidden p-3 ${className}`}
+      style={cardStyle}
     >
       {/* En-tête avec date et durée */}
       <CardHeader className="p-0">
@@ -84,13 +96,27 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
       <CardContent className="p-0 mb-1 -mt-4.5">
         {/* Profil utilisateur */}
         <div className="flex items-center gap-3">
-          <ProfileAvatar
-            src={profileImage}
-            alt={name}
-            size="lg"
-            borderColor="border-none"
-            borderWidth="1"
-          />
+          {showButton ? (
+            <ProfileAvatar
+              src={profileImage}
+              alt={name}
+              size="lg"
+              borderColor="border-none"
+              borderWidth="1"
+            />
+          ) : (
+            <div 
+              className="relative overflow-hidden rounded-[8px]"
+              style={{ width: '75px', height: '86px' }}
+            >
+              <Image
+                src={profileImage}
+                alt={name}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
           <div className="flex-1">
             <h3 className={`text-base font-bold ${textClasses.primary}`}>
               {name}
@@ -101,12 +127,22 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
           </div>
         </div>
 
-        {/* Bouton d'action */}
-        <Button
-          label="Voir détail"
-          onClick={onViewDetails}
-          className={`w-full ${buttonClasses} font-bold rounded-[8px] transition-all duration-200 mt-2.5 mb-1`}
-        />
+        {/* Bouton d'action ou informations de session */}
+        {showButton ? (
+          <Button
+            label="Voir détail"
+            onClick={onViewDetails}
+            className={`w-full ${buttonClasses} font-bold rounded-[8px] transition-all duration-200 mt-2.5 mb-1`}
+          />
+        ) : (
+          sessionTime && (
+            <div className="mt-3 mb-1">
+              <p className={`text-lg font-bold ${textClasses.primary} text-center`}>
+                {sessionTime}
+              </p>
+            </div>
+          )
+        )}
       </CardContent>
     </Card>
   );

@@ -11,6 +11,14 @@ import { Button } from "./Button";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { SessionModal } from "./SessionModal";
 
+interface AppointmentQuestion {
+  id: number | string;
+  question: string;
+  created_at: string;
+  updated_at: string;
+  appointment_id: number | string;
+}
+
 interface SessionCardProps {
   date: string;
   time: string;
@@ -31,6 +39,7 @@ interface SessionCardProps {
   };
   isUpcoming?: boolean; // Pour distinguer l'onglet "A venir"
   isFlex1?: boolean;
+  questions?: AppointmentQuestion[];
 }
 
 export const SessionCard: React.FC<SessionCardProps> = ({
@@ -50,6 +59,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   buttonStates = { acceptDisabled: false, viewDisabled: false },
   isUpcoming = false,
   isFlex1 = false,
+  questions = [],
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -144,6 +154,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             name={name}
             isUpcoming={isUpcoming}
             onAccept={onAccept}
+            questions={questions}
             trigger={
               <Button
                 onClick={handleViewRequest}

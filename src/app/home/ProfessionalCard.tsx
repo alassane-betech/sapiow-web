@@ -8,12 +8,13 @@ import Image from "next/image";
 interface ProfessionalCardProps {
   professional: Professional;
   isLiked: boolean;
-  onToggleLike: (id: number) => void;
+  onToggleLike: (id: string) => void;
   onProfessionalClick?: (professional: Professional) => void;
   imageWidth?: number;
   imageHeight?: number;
   maxWidth?: string;
   lineClamp?: number;
+  isLoadingFavorite?: boolean;
 }
 
 export default function ProfessionalCard({
@@ -25,6 +26,7 @@ export default function ProfessionalCard({
   imageHeight = 196,
   maxWidth = "max-w-[175px]",
   lineClamp = 3,
+  isLoadingFavorite = false,
 }: ProfessionalCardProps) {
   return (
     <Card
@@ -59,27 +61,32 @@ export default function ProfessionalCard({
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-3 right-3 bg-white/20 hover:bg-white rounded-full w-8 h-8 backdrop-blur-[1.4px]"
+          className={`absolute top-3 right-3 bg-white/20 hover:bg-white rounded-full w-8 h-8 backdrop-blur-[1.4px] transition-all duration-200 ${
+            isLoadingFavorite ? "opacity-70 cursor-not-allowed" : ""
+          }`}
           onClick={(e) => {
             e.stopPropagation();
-            onToggleLike(
-              typeof professional.id === "string"
-                ? parseInt(professional.id, 10) || 0
-                : professional.id
-            );
-          }}
-        >
-          <Image
-            src={
-              isLiked
-                ? "/assets/icons/heartactif.svg"
-                : "/assets/icons/heart.svg"
+            if (!isLoadingFavorite) {
+              onToggleLike(professional.id.toString());
             }
-            alt="Heart"
-            width={16}
-            height={16}
-            className="transition-all duration-200"
-          />
+          }}
+          disabled={isLoadingFavorite}
+        >
+          {isLoadingFavorite ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
+          ) : (
+            <Image
+              src={
+                isLiked
+                  ? "/assets/icons/heartactif.svg"
+                  : "/assets/icons/heart.svg"
+              }
+              alt="Heart"
+              width={16}
+              height={16}
+              className="transition-all duration-200"
+            />
+          )}
         </Button>
       </div>
       <CardContent className="flex items-center justify-between p-0 m-0">
@@ -124,7 +131,7 @@ export default function ProfessionalCard({
             )}
           </p>
           <p
-            className={`text-xs text-gray-500 leading-relaxed font-figtree line-clamp-${lineClamp} overflow-hidden`}
+            className={`text-xs text-gray-500 leading-relaxed font-figtree line-clamp-3 overflow-hidden`}
           >
             {professional.description}
           </p>

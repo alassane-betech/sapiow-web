@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/common/Button";
 import { usePlaningStore } from "@/store/usePlaning";
+import { useCreatePatientAppointment } from "@/api/appointments/useAppointments";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -9,6 +10,7 @@ interface VisioPlanningCalendarProps {
   className?: string;
   expertData?: any; // Données de l'expert depuis l'API
   professionalName?: string; // Nom de l'expert
+  onAppointmentCreated?: (appointmentData: any) => void; // Callback après création
 }
 
 const daysOfWeek = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
@@ -116,13 +118,17 @@ export default function VisioPlanningCalendar({
   className = "",
   expertData,
   professionalName = "Expert",
+  onAppointmentCreated,
 }: VisioPlanningCalendarProps) {
   const { setIsPlaning } = usePlaningStore();
   const [currentDate, setCurrentDate] = useState(new Date(2025, 3, 1)); // Avril 2025
   const [selectedDate, setSelectedDate] = useState(4); // 4 avril sélectionné par défaut
+  
+  // Hook pour créer un appointment
+  const createAppointmentMutation = useCreatePatientAppointment();
 
   // Créer les durées dynamiques basées sur les sessions de l'expert
-  const availableDurations = expertData?.sessions?.map((session: any) => ({
+  const availableDurations = expertData?.sessions?.filter((session: any) => session.session_type).map((session: any) => ({
     label:
       session.session_type === "15m"
         ? "15 min"
@@ -201,14 +207,47 @@ export default function VisioPlanningCalendar({
     setSelectedTime("");
   };
 
-  const handleReserve = () => {
-    if (onDateTimeSelect && selectedDate) {
-      const selectedDateTime = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth(),
-        selectedDate
-      );
-      onDateTimeSelect(selectedDateTime, selectedTime, selectedDuration);
+  const handleReserve = async () => {
+    if (!selectedDate || !selectedTime || !selectedSession?.sessionId) {
+      console.error("Données manquantes pour créer l'appointment");
+      return;
+    }
+
+    // Créer la date et heure complète pour l'appointment
+    const selectedDateTime = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      selectedDate
+    );
+    
+    // Parser l'heure sélectionnée et l'ajouter à la date
+    const [hours, minutes] = selectedTime.split(':').map(Number);
+    selectedDateTime.setHours(hours, minutes, 0, 0);
+
+    try {
+      const appointmentData = {
+        pro_id: expertData?.id, // ID de l'expert
+        session_id: selectedSession.sessionId, // ID de la session
+        appointment_at: selectedDateTime.toISOString(), // Date/heure ISO
+      };
+
+      const result = await createAppointmentMutation.mutateAsync(appointmentData);
+      
+      // Callback de succès
+      if (onAppointmentCreated) {
+        onAppointmentCreated(result);
+      }
+      
+      // Callback legacy si défini
+      if (onDateTimeSelect) {
+        onDateTimeSelect(selectedDateTime, selectedTime, selectedDuration);
+      }
+      
+      // Fermer le planning
+      setIsPlaning(false);
+      
+    } catch (error) {
+      console.error("Erreur lors de la création de l'appointment:", error);
     }
   };
 
@@ -395,15 +434,21 @@ export default function VisioPlanningCalendar({
           </div>
 
           <Button
-            label="Réserver"
+            label={createAppointmentMutation.isPending ? "Réservation..." : "Réserver"}
             onClick={handleReserve}
-            disabled={timeSlots.length === 0 || !selectedTime}
+            disabled={timeSlots.length === 0 || !selectedTime || !selectedSession?.sessionId || createAppointmentMutation.isPending}
             className={`w-full h-12 font-medium rounded-lg ${
-              timeSlots.length === 0 || !selectedTime
+              timeSlots.length === 0 || !selectedTime || !selectedSession?.sessionId || createAppointmentMutation.isPending
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-cobalt-blue hover:bg-cobalt-blue/90 text-white"
             }`}
           />
+          
+          {createAppointmentMutation.isError && (
+            <div className="mt-2 text-sm text-red-600 text-center">
+              Erreur lors de la réservation. Veuillez réessayer.
+            </div>
+          )}
         </div>
       </div>
     </div>

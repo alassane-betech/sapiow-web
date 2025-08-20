@@ -118,6 +118,7 @@ export const useExpertProfileUpdate = ({
         last_name: formData.lastName,
         description: formData.description,
         job: formData.job,
+        email: formData.email,
         linkedin: formData.linkedin,
         website: formData.website,
         domain_id: formData.domainName
@@ -127,10 +128,10 @@ export const useExpertProfileUpdate = ({
         ...(avatar && { avatar }),
       };
 
-      // Filtrer les champs vides pour ne pas les envoyer
+      // Filtrer les champs vides pour ne pas les envoyer (sauf email qui doit toujours être envoyé)
       Object.keys(updateData).forEach((key) => {
         const value = updateData[key as keyof UpdateProExpertData];
-        if (value === "" || value === undefined) {
+        if ((value === "" || value === undefined) && key !== "email") {
           delete updateData[key as keyof UpdateProExpertData];
         }
       });
@@ -167,8 +168,8 @@ export const useExpertProfileUpdate = ({
         email: user.email || "",
         description: user.description || "",
         job: user.job || "",
-        linkedin: "",
-        website: "",
+        linkedin: user.linkedin || "",
+        website: user.website || "",
         domainName: getDomainNameById(user.domain_id) || "",
         expertises: user.pro_expertises || [],
       });

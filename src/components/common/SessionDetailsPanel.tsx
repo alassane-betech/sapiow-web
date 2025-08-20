@@ -2,14 +2,14 @@ import { EmptySessionCard } from "@/components/common/EmptySessionCard";
 import { SessionPreviewCard } from "@/components/common/SessionPreviewCard";
 import TimeSlotsManager from "@/components/common/TimeSlotsManager";
 import { mockAvailabilityEvents } from "@/data/mockAvailability";
+import { useProExpertStore } from "@/store/useProExpert";
 import { SessionDetailsData } from "@/types/availability";
+import { ApiSchedule, getDayOfWeekFromDate } from "@/types/schedule";
 import {
   formatDateForSession,
   formatFullDate,
   formatTimeForSession,
 } from "@/utils/dateFormat";
-import { useProExpertStore } from "@/store/useProExpert";
-import { getDayOfWeekFromDate, ApiSchedule } from "@/types/schedule";
 
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
@@ -28,10 +28,10 @@ export const SessionDetailsPanel = ({
   // Vérifier s'il y a des créneaux pour la date sélectionnée
   const hasTimeSlotsForDate = (date: Date | null): boolean => {
     if (!date || !proExpertData?.schedules) return false;
-    
+
     const dayOfWeek = getDayOfWeekFromDate(date);
     const schedules = proExpertData.schedules as ApiSchedule[];
-    return schedules.some(schedule => schedule.day_of_week === dayOfWeek);
+    return schedules.some((schedule) => schedule.day_of_week === dayOfWeek);
   };
 
   // Fonction pour récupérer les détails des sessions pour une date sélectionnée

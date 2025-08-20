@@ -101,8 +101,6 @@ export const useGetCustomer = () => {
     queryKey: ["customer"],
     queryFn: async () => {
       try {
-        console.log("Fetching customer");
-
         const response = await apiClient.get<Customer>(`patient`);
 
         // L'API retourne directement l'objet client
@@ -138,43 +136,22 @@ const transformUpdateCustomerToFormData = (
     formData.append("domain_id", JSON.stringify(data.domain_id));
   }
 
-  // Ajouter les champs de notification
-  if (data.appointment_notification_sms !== undefined) {
-    formData.append(
-      "appointment_notification_sms",
-      data.appointment_notification_sms.toString()
-    );
-  }
-  if (data.appointment_notification_email !== undefined) {
-    formData.append(
-      "appointment_notification_email",
-      data.appointment_notification_email.toString()
-    );
-  }
-  if (data.message_notification_sms !== undefined) {
-    formData.append(
-      "message_notification_sms",
-      data.message_notification_sms.toString()
-    );
-  }
-  if (data.message_notification_email !== undefined) {
-    formData.append(
-      "message_notification_email",
-      data.message_notification_email.toString()
-    );
-  }
-  if (data.promotions_notification_sms !== undefined) {
-    formData.append(
-      "promotions_notification_sms",
-      data.promotions_notification_sms.toString()
-    );
-  }
-  if (data.promotions_notification_email !== undefined) {
-    formData.append(
-      "promotions_notification_email",
-      data.promotions_notification_email.toString()
-    );
-  }
+  // Ajouter les champs de notification (comme JSON pour garder le type boolean)
+  const notificationFields = {
+    appointment_notification_sms: data.appointment_notification_sms,
+    appointment_notification_email: data.appointment_notification_email,
+    message_notification_sms: data.message_notification_sms,
+    message_notification_email: data.message_notification_email,
+    promotions_notification_sms: data.promotions_notification_sms,
+    promotions_notification_email: data.promotions_notification_email,
+  };
+
+  // Nettoyer les valeurs undefined et ajouter seulement les champs définis
+  Object.entries(notificationFields).forEach(([key, value]) => {
+    if (value !== undefined) {
+      formData.append(key, value ? "true" : "false");
+    }
+  });
 
   // Ajouter l'avatar s'il existe
   if (data.avatar) {

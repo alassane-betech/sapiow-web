@@ -183,30 +183,6 @@ export default function TimeSlotsManager({
     );
   }
 
-  // Si aucun créneau pour ce jour, afficher un message d'invitation
-  if (timeSlots.length === 0) {
-    return (
-      <div className="w-full mx-auto p-4 sm:p-6">
-        <Card className="p-4 sm:p-6 bg-gray-50 border-gray-200">
-          <div className="space-y-4">
-            <div className="text-center">
-              <p className="text-gray-600 mb-4">
-                Aucun créneau pour ce jour.
-              </p>
-              <Button
-                onClick={addTimeSlot}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Ajouter votre premier créneau
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full mx-auto p-4 sm:p-6">
       <Card className="p-4 sm:p-6 bg-gray-50 border-gray-200">
@@ -224,6 +200,15 @@ export default function TimeSlotsManager({
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
+
+          {/* Message si aucun créneau */}
+          {timeSlots.length === 0 && (
+            <div className="text-center text-gray-600 py-4">
+              Aucun créneau pour ce jour.
+            </div>
+          )}
+
+          {/* Afficher les créneaux existants */}
           {timeSlots.map((slot) => (
             <div key={slot.id} className="flex items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -285,6 +270,8 @@ export default function TimeSlotsManager({
               </div>
             </div>
           ))}
+          
+          {/* Bouton pour ajouter une disponibilité - toujours visible */}
           <Button
             variant="ghost"
             onClick={addTimeSlot}

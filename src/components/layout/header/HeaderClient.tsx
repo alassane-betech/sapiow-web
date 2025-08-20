@@ -98,7 +98,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
           <div className="flex items-center gap-2">
             {" "}
             <ButtonUI
-              onClick={() => setUser({ type: "expert" })}
+              onClick={() => handleFavoriToggle()}
               className={`w-12 h-12 p-[3px] rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 bg-snow-blue hover:bg-snow-blue/80 shadow-none`}
             >
               <Image

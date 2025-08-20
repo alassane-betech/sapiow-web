@@ -1,5 +1,8 @@
 "use client";
+import { useGetProAppointments } from "@/api/appointments/useAppointments";
 import { useListExperts } from "@/api/listExpert/useListExpert";
+import { useGetProExpert } from "@/api/proExpert/useProExpert";
+import { useGetStatistics } from "@/api/statistics/useStatistics";
 import { SessionCard } from "@/components/common/SessionCard";
 import { StatsCard } from "@/components/common/StatsCard";
 import { ArrowRight } from "lucide-react";
@@ -14,14 +17,23 @@ export default function Expert() {
   const handleStartVideoCall = () => {
     setIsVideoCallOpen(true);
   };
+  const { data: proExpert } = useGetProExpert();
+  const { data: statistics } = useGetStatistics();
+  const { data: appointments } = useGetProAppointments(proExpert?.id);
+  console.log(appointments);
+
   return (
     <div>
       {" "}
       <div className="w-full flex gap-x-6 mt-5">
-        <StatsCard title="Visios completées" value="78" className="w-full" />
+        <StatsCard
+          title="Visios completées"
+          value={statistics?.count ?? 0}
+          className="w-full"
+        />
         <StatsCard
           title="Résumer de gain"
-          value="4 280"
+          value={statistics?.totalPrice ?? 0}
           currency="€"
           className="w-full"
         />
@@ -62,70 +74,107 @@ export default function Expert() {
         </Link>
       </div>
       <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-5">
-        <SessionCard
-          date="Aujourd'hui"
-          time="10h30"
-          profileImage="/assets/prof.jpg"
-          name="Sarah Fills"
-          sessionDescription="Session rapide de 30 minutes"
-          onAccept={() => {}}
-          onViewRequest={() => {}}
-          isFlex1={true}
-        />
-        <SessionCard
-          date="Aujourd'hui"
-          time="10h30"
-          profileImage="/assets/prof1.jpg"
-          name="Sarah Fills"
-          sessionDescription="Session rapide de 30 minutes"
-          onAccept={() => {}}
-          onViewRequest={() => {}}
-          isFlex1={true}
-        />
-        <SessionCard
-          date="Aujourd'hui"
-          time="10h30"
-          profileImage="/assets/prof2.jpg"
-          name="Sarah Fills"
-          sessionDescription="Session rapide de 30 minutes"
-          onAccept={() => {}}
-          onViewRequest={() => {}}
-          isFlex1={true}
-        />
+        {Array.isArray(appointments) && appointments.length > 0 ? (
+          appointments
+            .filter((appointment: any) => appointment.status === "pending")
+            .map((appointment: any) => {
+              const appointmentDate = new Date(appointment.appointment_at);
+              const today = new Date();
+              const isToday =
+                appointmentDate.toDateString() === today.toDateString();
+              const dateDisplay = isToday
+                ? "Aujourd'hui"
+                : appointmentDate.toLocaleDateString("fr-FR");
+              const timeDisplay = appointmentDate.toLocaleTimeString("fr-FR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+              return (
+                <SessionCard
+                  key={appointment.id}
+                  date={dateDisplay}
+                  time={timeDisplay}
+                  profileImage={
+                    appointment.patient?.avatar || "/assets/prof.jpg"
+                  }
+                  name={
+                    `${appointment.patient?.first_name || ""} ${
+                      appointment.patient?.last_name || ""
+                    }`.trim() || "Patient"
+                  }
+                  sessionDescription={appointment.session?.name || "Session"}
+                  onAccept={() => {}}
+                  onViewRequest={() => {}}
+                  isFlex1={true}
+                  questions={appointment.appointment_questions || []}
+                />
+              );
+            })
+        ) : (
+          <div className="col-span-full text-center py-8 text-gray-500">
+            Aucune demande en attente
+          </div>
+        )}
       </div>
       <div className="w-full gap-2 mt-5">
         <h1 className="text-lg font-bold font-figtree text-cobalt-blue-500 mb-[11px] mt-[19px]">
           Prochaine visio
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-          <SessionCard
-            date="Aujourd'hui"
-            time="10h30"
-            profileImage="/assets/prof.jpg"
-            name="Sarah Fills"
-            sessionDescription="Session rapide de 30 minutes"
-            onAccept={handleStartVideoCall}
-            onViewRequest={() => {}}
-            isComming={true}
-            duration="45mn"
-            classFooter="!flex-col"
-            textButton="Commencer la visio"
-            icon="/assets/icons/videocamera.svg"
-          />
-          <SessionCard
-            date="Aujourd'hui"
-            time="10h30"
-            profileImage="/assets/prof.jpg"
-            name="Sarah Fills"
-            sessionDescription="Session rapide de 30 minutes"
-            onAccept={handleStartVideoCall}
-            onViewRequest={() => {}}
-            isComming={true}
-            duration="45mn"
-            classFooter="!flex-col"
-            textButton="Commencer la visio"
-            icon="/assets/icons/videocamera.svg"
-          />
+          {Array.isArray(appointments) && appointments.length > 0 ? (
+            appointments
+              .filter((appointment: any) => appointment.status === "confirmed")
+              .map((appointment: any) => {
+                const appointmentDate = new Date(appointment.appointment_at);
+                const today = new Date();
+                const isToday =
+                  appointmentDate.toDateString() === today.toDateString();
+                const dateDisplay = isToday
+                  ? "Aujourd'hui"
+                  : appointmentDate.toLocaleDateString("fr-FR");
+                const timeDisplay = appointmentDate.toLocaleTimeString(
+                  "fr-FR",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                );
+                const sessionDuration =
+                  appointment.session?.session_type || "30mn";
+
+                return (
+                  <SessionCard
+                    key={appointment.id}
+                    date={dateDisplay}
+                    time={timeDisplay}
+                    profileImage={
+                      appointment.patient?.avatar !== "undefined"
+                        ? appointment.patient?.avatar
+                        : "/assets/prof.jpg"
+                    }
+                    name={
+                      `${appointment.patient?.first_name || ""} ${
+                        appointment.patient?.last_name || ""
+                      }`.trim() || "Patient"
+                    }
+                    sessionDescription={appointment.session?.name || "Session"}
+                    onAccept={handleStartVideoCall}
+                    onViewRequest={() => {}}
+                    isComming={true}
+                    duration={sessionDuration}
+                    classFooter="!flex-col"
+                    textButton="Commencer la visio"
+                    icon="/assets/icons/videocamera.svg"
+                    questions={appointment.appointment_questions || []}
+                  />
+                );
+              })
+          ) : (
+            <div className="col-span-full text-center py-8 text-gray-500">
+              Aucune visio programmée
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useGetStatistics } from "@/api/statistics/useStatistics";
 import AddBankAccountModal from "@/components/common/AddBankAccountModal";
 import BankAccountSection from "@/components/revenue/BankAccountSection";
 import PaymentHistory from "@/components/revenue/PaymentHistory";
@@ -7,7 +8,8 @@ import RevenueDisplay from "@/components/revenue/RevenueDisplay";
 import RevenueFilters from "@/components/revenue/RevenueFilters";
 import UpcomingTransactions from "@/components/revenue/UpcomingTransactions";
 import { paymentHistory, upcomingTransactions } from "@/data/mockRevenue";
-import { useState } from "react";
+import { getDateRangeByFilter } from "@/utils/dateFilters";
+import { useMemo, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
 export default function Revenus() {
@@ -36,6 +38,16 @@ export default function Revenus() {
     setActiveFilter(filter);
   };
 
+  // Calcul de la plage de dates selon le filtre actif
+  const dateRange = useMemo(() => {
+    return getDateRangeByFilter(activeFilter);
+  }, [activeFilter]);
+
+  const { data: statistics } = useGetStatistics(dateRange ? {
+    start: dateRange.start,
+    end: dateRange.end
+  } : undefined);
+
   return (
     <AccountLayout>
       <div className="space-y-8 mt-2.5 px-4 lg:px-2 xl:px-4">
@@ -51,7 +63,9 @@ export default function Revenus() {
                 activeFilter={activeFilter}
                 onFilterChange={handleFilterChange}
               />
-              <RevenueDisplay amount="4 280 €" />
+              <RevenueDisplay
+                amount={statistics?.totalPrice?.toString() || "0"}
+              />
             </div>
 
             {/* Compte bancaire section */}

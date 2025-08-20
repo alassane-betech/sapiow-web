@@ -77,9 +77,16 @@ export interface UpdateProExpertData {
   domain_id?: number;
   description?: string;
   job?: string;
+  email?: string;
   linkedin?: string;
   website?: string;
   language?: string;
+  appointment_notification_sms?: boolean;
+  appointment_notification_email?: boolean;
+  message_notification_sms?: boolean;
+  message_notification_email?: boolean;
+  promotions_notification_sms?: boolean;
+  promotions_notification_email?: boolean;
   availability_start_date?: string; // Format date YYYY-MM-DD
   availability_end_date?: string; // Format date YYYY-MM-DD
   expertises?: any[]; // Sera converti en JSON string
@@ -129,6 +136,7 @@ export const transformUpdateDataToFormData = (
     formData.append("first_name", data.first_name);
   if (data.last_name !== undefined)
     formData.append("last_name", data.last_name);
+  if (data.email !== undefined) formData.append("email", data.email);
   if (data.domain_id !== undefined)
     formData.append("domain_id", data.domain_id.toString());
   if (data.description !== undefined)
@@ -146,6 +154,22 @@ export const transformUpdateDataToFormData = (
   if (data.avatar && data.avatar instanceof File) {
     formData.append("avatar", data.avatar);
   }
+
+  // Champs de notification
+  const notificationFields = [
+    "appointment_notification_sms",
+    "appointment_notification_email",
+    "message_notification_sms",
+    "message_notification_email",
+    "promotions_notification_sms",
+    "promotions_notification_email",
+  ] as const;
+
+  notificationFields.forEach((field) => {
+    if ((data as any)[field] !== undefined) {
+      formData.append(field, (data as any)[field] ? "true" : "false");
+    }
+  });
 
   // JSON strings
   if (data.expertises && data.expertises.length > 0) {
@@ -217,9 +241,7 @@ export const useGetProExpert = () => {
     queryKey: ["proExpert"],
     queryFn: async () => {
       try {
-        console.log("Fetching pro expert");
-
-        const response = await apiClient.get<ProExpert>(`/pro`);
+        const response = await apiClient.get<ProExpert>(`pro`);
 
         // L'API retourne directement l'objet expert
         return response;
@@ -257,8 +279,6 @@ export const useUpdateProExpert = () => {
   >({
     mutationFn: async (updateData: UpdateProExpertData) => {
       try {
-        console.log("Updating pro expert", updateData);
-
         // Validation des données
         const validation = validateUpdateProExpertData(updateData);
         if (!validation.isValid) {
@@ -277,11 +297,8 @@ export const useUpdateProExpert = () => {
           }
         );
 
-        console.log("Pro expert updated successfully", response);
         return response;
       } catch (error: any) {
-        console.error("Error updating pro expert:", error);
-
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
         }
@@ -300,8 +317,6 @@ export const useUpdateProExpert = () => {
       if (data.data) {
         queryClient.setQueryData(["proExpert"], data.data);
       }
-
-      console.log("Pro expert cache updated");
     },
     onError: (error) => {
       console.error("Failed to update pro expert:", error);

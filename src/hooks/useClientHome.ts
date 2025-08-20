@@ -1,8 +1,8 @@
 import { Expert, useListExperts } from "@/api/listExpert/useListExpert";
-import { useFavorites } from "@/contexts/FavoritesContext";
 import { Professional } from "@/types/professional";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useFavoritesLogic } from "./useFavoritesLogic";
 
 // Mapping function to convert Expert to Professional format
 const mapExpertToProfessional = (expert: Expert): Professional => {
@@ -51,34 +51,46 @@ const mapExpertToProfessional = (expert: Expert): Professional => {
   };
 };
 
+/**
+ * Hook principal pour la page d'accueil client
+ *
+ * RESPONSABILITÉS :
+ * - Gestion des catégories et filtres
+ * - Conversion des données API experts → format Professional
+ * - Navigation entre pages
+ * - Délégation de la logique favoris au hook useFavoritesLogic
+ */
 export const useClientHome = () => {
   const router = useRouter();
-  const { likedProfs, toggleLike } = useFavorites();
 
-  // États
+  // États UI pour les filtres et catégories
   const [selectedCategory, setSelectedCategory] = useState("top");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [sortOption, setSortOption] = useState("recommended");
 
-  // Données API
-  const { data: expertList, isLoading, error } = useListExperts();
+  // Hook API pour récupérer la liste des experts
+  const {
+    data: expertList,
+    isLoading: isLoadingExperts,
+    error,
+  } = useListExperts();
 
-  // Convert API data to Professional format - handle both cases
+  // Hook logique favoris (séparé pour réutilisabilité)
+  const {
+    likedProfs,
+    isLoadingFavorites,
+    handleToggleLike,
+    isMutatingFavorite,
+  } = useFavoritesLogic();
+
+  // Conversion des données API en format Professional pour l'UI
   const expertsArray = Array.isArray(expertList)
     ? expertList
     : expertList?.data || [];
   const allProfessionals = expertsArray.map(mapExpertToProfessional);
 
-  // Handlers
-  const handleToggleLike = (profId: number) => {
-    const professional = allProfessionals.find(
-      (p: Professional) =>
-        (typeof p.id === "string" ? parseInt(p.id, 10) || 0 : p.id) === profId
-    );
-    if (professional) {
-      toggleLike(profId, professional);
-    }
-  };
+  // États de chargement combinés
+  const isLoading = isLoadingExperts || isLoadingFavorites;
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -87,7 +99,12 @@ export const useClientHome = () => {
   };
 
   const handleSubCategoryChange = (subCategoryId: string) => {
-    setSelectedSubCategory(subCategoryId);
+    // Toggle behavior: si on clique sur la même sous-catégorie, la désélectionner
+    if (selectedSubCategory === subCategoryId) {
+      setSelectedSubCategory("");
+    } else {
+      setSelectedSubCategory(subCategoryId);
+    }
   };
 
   const handleSortChange = (sortId: string) => {
@@ -99,7 +116,10 @@ export const useClientHome = () => {
     router.push(`/details?id=${professional.id}`);
   };
 
-  // Grouper les professionnels par catégorie pour l'affichage "Top"
+  /**
+   * Grouper les professionnels par catégorie pour l'affichage "Top"
+   * Chaque catégorie devient une section horizontale
+   */
   const groupedProfessionals = allProfessionals.reduce(
     (acc: Record<string, Professional[]>, prof: Professional) => {
       const category = prof.category || "business";
@@ -112,28 +132,68 @@ export const useClientHome = () => {
     {} as Record<string, Professional[]>
   );
 
-  // Filtrer les professionnels selon la catégorie sélectionnée
-  const filteredProfessionals =
-    selectedCategory === "top"
-      ? allProfessionals
-      : allProfessionals.filter((prof: Professional) => {
-          // Filtrer par domain_id (selectedCategory est le domain_id en string)
+  /**
+   * Filtrer les professionnels selon la catégorie et sous-catégorie sélectionnées
+   * Pour "top" : tous les professionnels ou filtre par sous-catégorie statique
+   * Pour domaines : filtre par domain_id et potentiellement par expertise_id
+   */
+  const filteredProfessionals = useMemo(() => {
+    if (selectedCategory === "top") {
+      // Logique existante pour "top" avec sous-catégories statiques
+      if (!selectedSubCategory || selectedSubCategory === "tout") {
+        return allProfessionals;
+      }
+      // Filtrage par sous-catégorie statique (à implémenter selon besoins)
+      return allProfessionals;
+    }
+
+    // Vérifier si selectedCategory est un domaine ID
+    const isDomainId = !isNaN(Number(selectedCategory));
+
+    if (isDomainId) {
+      // Filtrer d'abord par domaine
+      const professionalsInDomain = allProfessionals.filter(
+        (prof: Professional) => {
           const expertWithDomain = expertsArray.find(
             (expert: any) => expert.id === prof.id
           );
-          const matches =
-            expertWithDomain?.domain_id.toString() === selectedCategory;
+          return expertWithDomain?.domain_id.toString() === selectedCategory;
+        }
+      );
 
-          return matches;
+      // Si une expertise est sélectionnée, filtrer davantage
+      if (selectedSubCategory && selectedSubCategory !== "") {
+        const expertiseId = Number(selectedSubCategory);
+        return professionalsInDomain.filter((prof: Professional) => {
+          const expert = expertsArray.find(
+            (expert: any) => expert.id === prof.id
+          );
+
+          // Vérifier si l'expert a cette expertise dans ses pro_expertises
+          const hasExpertise = expert?.pro_expertises?.some((proExp: any) => {
+            return proExp.expertise_id === expertiseId;
+          });
+
+          return hasExpertise;
         });
+      }
+
+      return professionalsInDomain;
+    }
+
+    // Fallback pour catégories string (logique existante)
+    return allProfessionals.filter((prof: Professional) => {
+      return prof.category === selectedCategory;
+    });
+  }, [allProfessionals, expertsArray, selectedCategory, selectedSubCategory]);
 
   return {
-    // États
+    // États UI
     selectedCategory,
     selectedSubCategory,
     sortOption,
 
-    // Données
+    // Données transformées
     allProfessionals,
     groupedProfessionals,
     filteredProfessionals,
@@ -143,11 +203,16 @@ export const useClientHome = () => {
     isLoading,
     error,
 
-    // Handlers
+    // Handlers UI
     handleCategoryChange,
     handleSubCategoryChange,
     handleSortChange,
-    handleToggleLike,
     handleProfessionalClick,
+
+    // Handler favoris (délégué au hook spécialisé)
+    handleToggleLike,
+
+    // États UX favoris
+    isMutatingFavorite,
   };
 };

@@ -52,19 +52,14 @@ export const useMediaCleanup = () => {
 
     // 3. Vider la liste locale
     activeTracksRef.current = [];
-
-    console.log("✅ Tous les tracks ont été arrêtés");
   }, []);
 
   // Fonction pour nettoyer complètement les périphériques
   const cleanupAllDevices = useCallback(
     async (call?: Call | null) => {
-      console.log("🧹 Début du nettoyage complet des périphériques...");
-
       try {
         // 1. Désactiver via l'API Stream
         if (call) {
-          console.log("📹 Désactivation via Stream API...");
           try {
             await call.camera.disable();
             await call.microphone.disable();
