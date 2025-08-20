@@ -25,7 +25,7 @@ export default function LanguePage() {
 
   return (
     <AccountLayout>
-      <div className="container space-y-6">
+      <div className="container space-y-6 px-6">
         <h1 className="text-2xl font-bold text-gray-900 mt-5">Langue</h1>
 
         <div className="space-y-4">
