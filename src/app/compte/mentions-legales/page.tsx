@@ -54,7 +54,7 @@ export default function MentionsLegales() {
 
   return (
     <AccountLayout>
-      <div className="container px-6 grid grid-cols-2 gap-x-6">
+      <div className="container px-6 grid grid-cols-2 gap-x-6 test">
         <nav className="flex-1 overflow-y-auto mt-5">
           <ul className="space-y-1">
             {navItems.map((item, index) => (
