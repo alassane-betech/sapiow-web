@@ -1,9 +1,13 @@
 "use client";
+import { useCreatePatientAppointment } from "@/api/appointments/useAppointments";
 import { Button } from "@/components/common/Button";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface OfferSelectionProps {
@@ -11,18 +15,74 @@ interface OfferSelectionProps {
   expertData?: any; // Données de l'expert avec ses sessions
 }
 
-export default function OfferSelection({ price, expertData }: OfferSelectionProps) {
+export default function OfferSelection({
+  price,
+  expertData,
+}: OfferSelectionProps) {
   const [selectedOption, setSelectedOption] = useState<
     "session" | "subscription"
   >("session");
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
 
   const { setIsPaid } = usePayStore();
   const { setIsPlaning } = usePlaningStore();
+  const { setAppointmentData } = useAppointmentStore();
+  const router = useRouter();
+  const createAppointmentMutation = useCreatePatientAppointment();
 
   // Récupérer la session d'abonnement (session_type null et session_nature "subscription")
-  const subscriptionSession = expertData?.sessions?.find((session: any) => 
-    session.session_type === null && session.session_nature === "subscription"
+  const subscriptionSession = expertData?.sessions?.find(
+    (session: any) =>
+      session.session_type === null && session.session_nature === "subscription"
   );
+
+  // Fonction pour gérer le paiement de l'abonnement
+  const handleSubscriptionPayment = async () => {
+    if (!subscriptionSession || !expertData?.id) {
+      console.error("Données manquantes pour créer l'appointment");
+      return;
+    }
+
+    setIsPaymentLoading(true);
+
+    try {
+      // Créer la date d'aujourd'hui pour l'abonnement
+      const today = new Date();
+
+      const appointmentData = {
+        pro_id: expertData.id, // ID de l'expert
+        session_id: subscriptionSession.id, // ID de la session d'abonnement
+        appointment_at: today.toISOString(), // Date d'aujourd'hui ISO
+      };
+
+      console.log("Création de l'appointment pour l'abonnement:", appointmentData);
+
+      const result = await createAppointmentMutation.mutateAsync(
+        appointmentData,
+        {
+          onSuccess: (data: any) => {
+            console.log("Appointment créé avec succès:", data);
+            if (data?.appointment && data?.payment) {
+              setAppointmentData(data.appointment, data.payment);
+              // Construire l'URL de retour avec l'ID de l'expert
+              const returnUrl = `/details?id=${data.appointment.pro_id}`;
+              router.push(`/payment?returnUrl=${encodeURIComponent(returnUrl)}`);
+            }
+          },
+          onError: (error) => {
+            console.error(
+              "Erreur lors de la création de l'appointment:",
+              error
+            );
+            setIsPaymentLoading(false);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Erreur lors de la création de l'appointment:", error);
+      setIsPaymentLoading(false);
+    }
+  };
 
   return (
     <div className="w-full">
@@ -222,9 +282,19 @@ export default function OfferSelection({ price, expertData }: OfferSelectionProp
                 </div>
                 {selectedOption === "subscription" && (
                   <Button
-                    label="Choisir et payer"
-                    className="w-full h-[56px] rounded-[8px] bg-cobalt-blue hover:bg-cobalt-blue/80 text-white"
-                    onClick={() => setIsPaid(true)}
+                    label={
+                      isPaymentLoading ? (
+                        <div className="flex items-center gap-2">
+                          <LoadingSpinner size="sm" />
+                          Création de l'appointment...
+                        </div>
+                      ) : (
+                        "Choisir et payer"
+                      )
+                    }
+                    className="w-full h-[56px] rounded-[8px] bg-cobalt-blue hover:bg-cobalt-blue/80 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleSubscriptionPayment}
+                    disabled={isPaymentLoading}
                   />
                 )}
               </CardContent>

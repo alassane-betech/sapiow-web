@@ -13,6 +13,7 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { Button } from "./Button";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 interface AppointmentQuestion {
   id: number | string;
@@ -30,7 +31,9 @@ interface SessionModalProps {
   name: string;
   isUpcoming?: boolean;
   onAccept?: () => void;
+  onCancel?: () => void;
   questions?: AppointmentQuestion[];
+  loadingState?: 'confirming' | 'cancelling' | null;
 }
 
 export const SessionModal: React.FC<SessionModalProps> = ({
@@ -41,7 +44,9 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   name,
   isUpcoming = false,
   onAccept,
+  onCancel,
   questions = [],
+  loadingState = null,
 }) => {
   // Détermine le titre du modal selon le contexte
   const modalTitle = isUpcoming ? "Détail de la visio" : "Demande en attente";
@@ -110,7 +115,10 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               </p>
               <div className="space-y-3">
                 {questions.map((question) => (
-                  <div key={question.id} className="bg-snow-blue rounded-[8px] p-4">
+                  <div
+                    key={question.id}
+                    className="bg-snow-blue rounded-[8px] p-4"
+                  >
                     <p className="text-sm text-gray-700 font-figtree font-normal leading-relaxed">
                       {question.question}
                     </p>
@@ -155,18 +163,33 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               <div className="flex space-x-3">
                 <Button
                   variant="outline"
-                  className="flex-1 text-charcoal-blue font-figtree font-bold text-xs md:text-base border-none shadow-none hover:bg-gray-50 bg-transparent h-14"
-                  onClick={() => onOpenChange(false)}
-                  label="Refuser"
+                  className="flex-1 text-charcoal-blue font-figtree font-bold text-xs md:text-base border-none shadow-none hover:bg-gray-50 bg-transparent h-14 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => {
+                    onCancel?.();
+                    onOpenChange(false);
+                  }}
+                  disabled={loadingState === 'cancelling'}
+                  label={loadingState === 'cancelling' ? (
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
+                      Annulation...
+                    </div>
+                  ) : "Refuser"}
                 />
 
                 <Button
-                  className="flex-1 bg-cobalt-blue hover:bg-cobalt-blue/80 rounded-[8px] shadow-none text-white font-figtree font-bold text-xs md:text-base h-14"
+                  className="flex-1 bg-cobalt-blue hover:bg-cobalt-blue/80 rounded-[8px] shadow-none text-white font-figtree font-bold text-xs md:text-base h-14 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => {
                     onAccept?.();
                     onOpenChange(false);
                   }}
-                  label="Accepter"
+                  disabled={loadingState === 'confirming'}
+                  label={loadingState === 'confirming' ? (
+                    <div className="flex items-center gap-2">
+                      <LoadingSpinner size="sm" />
+                      Confirmation...
+                    </div>
+                  ) : "Accepter"}
                 />
               </div>
             )}

@@ -4,13 +4,13 @@ import { useGetCustomer } from "@/api/customer/useCustomer";
 import { UpcomingVideoCall } from "@/components/common/DarkSessionCard";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { SessionDetailSheet } from "@/components/visios/SessionDetailSheet";
-import { useState, useMemo } from "react";
-import { 
-  transformAppointmentToSessionData, 
+import {
   filterAndSortAppointments,
+  transformAppointmentToSessionData,
   type ApiAppointment,
-  type SessionData 
+  type SessionData,
 } from "@/utils/appointmentUtils";
+import { useMemo, useState } from "react";
 
 export default function Client() {
   const [selectedSession, setSelectedSession] = useState<SessionData | null>(
@@ -36,13 +36,14 @@ export default function Client() {
     return filterAndSortAppointments(appointments as ApiAppointment[]);
   }, [appointments]);
 
-  const upcomingSessionsData = useMemo(() => 
-    upcomingConfirmed.map(apt => transformAppointmentToSessionData(apt)),
+  const upcomingSessionsData = useMemo(
+    () =>
+      upcomingConfirmed.map((apt) => transformAppointmentToSessionData(apt)),
     [upcomingConfirmed]
   );
 
-  const otherSessionsData = useMemo(() => 
-    otherUpcoming.map(apt => transformAppointmentToSessionData(apt)),
+  const otherSessionsData = useMemo(
+    () => otherUpcoming.map((apt) => transformAppointmentToSessionData(apt)),
     [otherUpcoming]
   );
 
@@ -52,7 +53,9 @@ export default function Client() {
         <HeaderClient text="Mes visioconférences" />
         <div className="w-full my-4 px-5 pb-10">
           <div className="flex items-center justify-center h-40">
-            <p className="text-gray-500">Chargement de vos visioconférences...</p>
+            <p className="text-gray-500">
+              Chargement de vos visioconférences...
+            </p>
           </div>
         </div>
       </div>
@@ -71,7 +74,7 @@ export default function Client() {
               <UpcomingVideoCall
                 key={session.id}
                 date={session.date}
-                duration={session.duration.replace(' minutes', '')}
+                duration={session.duration.replace(" minutes", "")}
                 profileImage={session.profileImage}
                 name={session.professionalName}
                 title={session.professionalTitle}
@@ -83,7 +86,9 @@ export default function Client() {
           </div>
         ) : (
           <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
-            <p className="text-gray-500">Aucune visioconférence confirmée à venir</p>
+            <p className="text-gray-500">
+              Aucune visioconférence confirmée à venir
+            </p>
           </div>
         )}
 
@@ -95,7 +100,7 @@ export default function Client() {
               <UpcomingVideoCall
                 key={session.id}
                 date={session.date}
-                duration={session.duration.replace(' minutes', '')}
+                duration={session.duration.replace(" minutes", "")}
                 profileImage={session.profileImage}
                 name={session.professionalName}
                 title={session.professionalTitle}
@@ -107,7 +112,9 @@ export default function Client() {
           </div>
         ) : (
           <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-10">
-            <p className="text-gray-500">Aucune autre visioconférence programmée</p>
+            <p className="text-gray-500">
+              Aucune autre visioconférence programmée
+            </p>
           </div>
         )}
       </div>

@@ -79,7 +79,7 @@ export default function Client() {
     <div className="min-h-screen">
       {/* Section visios confirmées à venir */}
       {upcomingSessionsData.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-6 mt-4">
           <h2 className="mb-3 text-lg font-bold text-exford-blue font-figtree">
             Votre prochaine visio
           </h2>
@@ -131,7 +131,7 @@ export default function Client() {
             ([category, categoryProfessionals]) => (
               <CategorySection
                 key={category}
-                categoryName={category}
+                category={category}
                 professionals={categoryProfessionals}
                 likedProfs={likedProfs}
                 onToggleLike={handleToggleLike}

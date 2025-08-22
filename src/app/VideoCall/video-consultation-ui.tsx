@@ -1,4 +1,6 @@
 "use client";
+import { useGetStreamCall } from "@/api/call/useCall";
+import { useCallStore } from "@/store/useCall";
 import {
   CallingState,
   ParticipantView,
@@ -11,7 +13,7 @@ import { MicOff, Users, VideoOff } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CallEndedScreen, ErrorScreen, LoadingScreen } from "./components";
-import { useTestData, useVideoCallSimple } from "./hooks";
+import { useVideoCallSimple } from "./hooks";
 
 interface VideoConsultationUIProps {
   onClose?: () => void;
@@ -20,9 +22,21 @@ interface VideoConsultationUIProps {
 export default function VideoConsultationUI({
   onClose,
 }: VideoConsultationUIProps) {
-  // Initialiser les données de test (mode développement)
-  const { isTestMode, hasData } = useTestData(true);
+  const { appointmentId } = useCallStore();
+  
+  console.log("🎬 VideoConsultationUI - appointmentId from store:", appointmentId);
+  console.log("🎬 VideoConsultationUI - appointmentId type:", typeof appointmentId);
+  
+  // Récupérer les données Stream depuis l'API
+  const {
+    data: streamData,
+    isLoading: isLoadingStreamData,
+    error: streamError,
+  } = useGetStreamCall(appointmentId || undefined);
 
+  console.log("🎬 VideoConsultationUI - streamData:", streamData);
+  console.log("🎬 VideoConsultationUI - isLoadingStreamData:", isLoadingStreamData);
+  console.log("🎬 VideoConsultationUI - streamError:", streamError);
   const {
     client,
     call,
@@ -33,12 +47,24 @@ export default function VideoConsultationUI({
     handleRetry,
   } = useVideoCallSimple();
 
-  // Afficher le mode de test dans la console
+  console.log("🎬 useVideoCallSimple states:");
+  console.log("- client:", client);
+  console.log("- call:", call);
+  console.log("- error:", error);
+  console.log("- isConnecting:", isConnecting);
+  console.log("- isEndingCall:", isEndingCall);
+
+  // Gérer les données de l'API et les stocker
   useEffect(() => {
-    if (isTestMode && hasData) {
-      console.log("🧪 Mode test activé - Données Stream chargées");
+    console.log("📡 Données API récupérées - Mise à jour du store");
+    if (streamData && ((streamData as any)?.proStreamUser || (streamData as any)?.patientStreamUser)) {
+      console.log("📡 Données API récupérées - Mise à jour du store avec:", streamData);
+      const { useCallStore } = require("@/store/useCall");
+      const { setCallData } = useCallStore.getState();
+      setCallData(streamData as any);
+      console.log("✅ Store mis à jour avec:", streamData);
     }
-  }, [isTestMode, hasData]);
+  }, [streamData]);
 
   if (error) {
     return (
@@ -50,11 +76,25 @@ export default function VideoConsultationUI({
     );
   }
 
+  // Gestion des erreurs API
+  if (streamError) {
+    console.error("❌ Erreur API Stream:", streamError);
+  }
+
+  if (isLoadingStreamData && appointmentId) {
+    return (
+      <LoadingScreen
+        message="Récupération des données d'appel..."
+        subtitle="Connexion à l'API"
+      />
+    );
+  }
+
   if (!client || !call || isConnecting) {
     return (
       <LoadingScreen
         message={!isConnecting ? "Connexion en cours..." : "Initialisation..."}
-        subtitle={isTestMode ? "Mode test activé" : "Veuillez patienter"}
+        subtitle="Veuillez patienter"
       />
     );
   }

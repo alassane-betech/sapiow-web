@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
+import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -84,6 +85,7 @@ function ProfessionalDetailContent() {
   const searchParams = useSearchParams();
   const { isPaid } = usePayStore();
   const { isPlaning } = usePlaningStore();
+  const { appointment } = useAppointmentStore(); // Added line
 
   // Récupérer l'ID depuis les paramètres de recherche
   const expertId = searchParams.get("id");
@@ -414,15 +416,15 @@ function ProfessionalDetailContent() {
                     Votre session a été réservée <br /> avec succès !
                   </p>
                 </div>
-                <div className="w-full max-w-[358px] mx-auto">
+                <div className="p-6">
                   <BookedSessionCard
-                    date="Lundi, 26 juillet 2025"
-                    time="9h - 15h"
+                    date={appointment?.appointment_at ? new Date(appointment.appointment_at).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Date non disponible"}
+                    time={appointment?.appointment_at ? new Date(appointment.appointment_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : "Heure non disponible"}
                     duration="60 minutes"
                     sessionType="Session rapide visio"
-                    professionalName="Dr. Mohamed Musad"
-                    professionalTitle="Expert en nutrition"
-                    profileImage="/assets/icons/pro2.png"
+                    professionalName={professional?.name || "Expert"}
+                    professionalTitle="Expert"
+                    profileImage={professional?.image || "/assets/icons/pro2.png"}
                   />
                 </div>
                 <Button
@@ -434,7 +436,10 @@ function ProfessionalDetailContent() {
             ) : (
               <>
                 {!isPlaning && (
-                  <OfferSelection price={professional?.price || ""} expertData={expertData} />
+                  <OfferSelection
+                    price={professional?.price || ""}
+                    expertData={expertData}
+                  />
                 )}
                 {isPlaning && (
                   <VisioPlanningCalendar
@@ -471,13 +476,13 @@ function ProfessionalDetailContent() {
               </div>
               <div className="w-full max-w-[358px] mb-6">
                 <BookedSessionCard
-                  date="Lundi, 26 juillet 2025"
-                  time="9h - 15h"
+                  date={appointment?.appointment_at ? new Date(appointment.appointment_at).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Date non disponible"}
+                  time={appointment?.appointment_at ? new Date(appointment.appointment_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : "Heure non disponible"}
                   duration="60 minutes"
                   sessionType="Session rapide visio"
-                  professionalName="Dr. Mohamed Musad"
-                  professionalTitle="Expert en nutrition"
-                  profileImage="/assets/icons/pro2.png"
+                  professionalName={professional?.name || "Expert"}
+                  professionalTitle="Expert"
+                  profileImage={professional?.image || "/assets/icons/pro2.png"}
                 />
               </div>
               <Button
@@ -506,7 +511,10 @@ function ProfessionalDetailContent() {
             >
               <div className="mt-4">
                 {!isPlaning && (
-                  <OfferSelection price={professional?.price || ""} expertData={expertData} />
+                  <OfferSelection
+                    price={professional?.price || ""}
+                    expertData={expertData}
+                  />
                 )}
                 {isPlaning && (
                   <VisioPlanningCalendar

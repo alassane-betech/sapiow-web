@@ -1,6 +1,11 @@
 "use client";
+import {
+  useGetProAppointments,
+  useUpdateProAppointment,
+} from "@/api/appointments/useAppointments";
+import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import React from "react";
+import React, { useState } from "react";
 import CustomCalendar from "../common/CustomCalendar";
 import { SessionCard } from "../common/SessionCard";
 
@@ -9,6 +14,59 @@ interface VisiosTabsProps {
 }
 
 export const VisiosTabs: React.FC<VisiosTabsProps> = ({ onStartVideoCall }) => {
+  const { data: proExpert } = useGetProExpert();
+  const { data: appointments } = useGetProAppointments(proExpert?.id);
+  const { mutateAsync: updateProAppointment } = useUpdateProAppointment();
+  const [loadingStates, setLoadingStates] = useState<
+    Record<string, "confirming" | "cancelling" | null>
+  >({});
+
+  const handleConfirmAppointment = async (appointmentId: string) => {
+    try {
+      setLoadingStates((prev) => ({ ...prev, [appointmentId]: "confirming" }));
+      await updateProAppointment({
+        appointmentId,
+        updateData: {
+          status: "confirmed",
+        },
+      });
+    } catch (error) {
+      console.error("Erreur lors de la confirmation:", error);
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [appointmentId]: null }));
+    }
+  };
+
+  const handleCancelAppointment = async (appointmentId: string) => {
+    try {
+      setLoadingStates((prev) => ({ ...prev, [appointmentId]: "cancelling" }));
+      await updateProAppointment({
+        appointmentId,
+        updateData: {
+          status: "cancelled",
+        },
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'annulation:", error);
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [appointmentId]: null }));
+    }
+  };
+
+  // Organiser les appointments par statut
+  const confirmedAppointments = Array.isArray(appointments)
+    ? appointments.filter((apt: any) => apt.status === "confirmed")
+    : [];
+
+  const pendingAppointments = Array.isArray(appointments)
+    ? appointments.filter((apt: any) => apt.status === "pending")
+    : [];
+
+  const historicAppointments = Array.isArray(appointments)
+    ? appointments.filter(
+        (apt: any) => apt.status === "cancelled" || apt.status === "completed"
+      )
+    : [];
   return (
     <div className="w-full grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-4 mt-3 px-4 pb-20">
       <Tabs defaultValue="a-venir" className="w-full">
@@ -36,95 +94,152 @@ export const VisiosTabs: React.FC<VisiosTabsProps> = ({ onStartVideoCall }) => {
 
         <TabsContent value="a-venir" className="mt-6">
           <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
-            <SessionCard
-              date="Aujourd'hui"
-              time="10h30"
-              profileImage="/assets/prof.jpg"
-              name="Sarah Ellis"
-              sessionDescription="Mentoring mensuel"
-              onAccept={onStartVideoCall}
-              onViewRequest={() => {}}
-              isComming={true}
-              duration="45mn"
-              classFooter="!flex-col"
-              textButton="Commencer la visio"
-              icon="/assets/icons/videocamera.svg"
-              isUpcoming={true}
-            />
-            <SessionCard
-              date="Aujourd'hui"
-              time="10h30"
-              profileImage="/assets/prof1.jpg"
-              name="Sarah Ellis"
-              sessionDescription="Mentoring mensuel"
-              onAccept={() => {}}
-              onViewRequest={() => {}}
-              isComming={true}
-              duration="45mn"
-              classFooter="!flex-col"
-              textButton="Commencer dans 1H10mn"
-              icon="/assets/icons/clockCircle.svg"
-              buttonStates={{ acceptDisabled: true, viewDisabled: true }}
-              isUpcoming={true}
-            />
-            <SessionCard
-              date="Aujourd'hui"
-              time="10h30"
-              profileImage="/assets/prof1.jpg"
-              name="Sarah Ellis"
-              sessionDescription="Mentoring mensuel"
-              onAccept={() => {}}
-              onViewRequest={() => {}}
-              isComming={true}
-              duration="45mn"
-              classFooter="!flex-col"
-              textButton="Commencer dans 3H40mn"
-              icon="/assets/icons/clockCircle.svg"
-              buttonStates={{ acceptDisabled: true, viewDisabled: true }}
-              isUpcoming={true}
-            />
+            {confirmedAppointments.length > 0 ? (
+              confirmedAppointments.map((appointment: any) => {
+                const appointmentDate = new Date(appointment.appointment_at);
+                const today = new Date();
+                const isToday =
+                  appointmentDate.toDateString() === today.toDateString();
+                const dateDisplay = isToday
+                  ? "Aujourd'hui"
+                  : appointmentDate.toLocaleDateString("fr-FR");
+                const timeDisplay = appointmentDate.toLocaleTimeString(
+                  "fr-FR",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                );
+
+                return (
+                  <SessionCard
+                    key={appointment.id}
+                    date={dateDisplay}
+                    time={timeDisplay}
+                    profileImage={
+                      appointment.patient?.avatar || "/assets/prof.jpg"
+                    }
+                    name={
+                      `${appointment.patient?.first_name || ""} ${
+                        appointment.patient?.last_name || ""
+                      }`.trim() || "Patient"
+                    }
+                    sessionDescription={appointment.session?.name || "Session"}
+                    onAccept={onStartVideoCall}
+                    onViewRequest={() => {}}
+                    isComming={true}
+                    duration="45mn"
+                    classFooter="!flex-col"
+                    textButton="Commencer la visio"
+                    icon="/assets/icons/videocamera.svg"
+                    isUpcoming={true}
+                    questions={appointment.appointment_questions || []}
+                  />
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                Aucune visio confirmée à venir
+              </div>
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="en-attente" className="mt-6">
           <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
-            <SessionCard
-              date="Aujourd'hui"
-              time="10h30"
-              profileImage="/assets/prof.jpg"
-              name="Sarah Ellis"
-              sessionDescription="Réunion rapide de 30 minutes"
-              onAccept={() => {}}
-              onViewRequest={() => {}}
-              textButton="Accepter"
-            />
-            <SessionCard
-              date="Demain"
-              time="14h00"
-              profileImage="/assets/prof1.jpg"
-              name="John Smith"
-              sessionDescription="Atelier de créativité de 1 heure"
-              onAccept={() => {}}
-              onViewRequest={() => {}}
-              textButton="Accepter"
-            />
-            <SessionCard
-              date="Vendredi"
-              time="9h00"
-              profileImage="/assets/prof2.jpg"
-              name="Emily Tran"
-              sessionDescription="Réunion stratégique de 45 minutes"
-              onAccept={() => {}}
-              onViewRequest={() => {}}
-              textButton="Accepter"
-            />
+            {pendingAppointments.length > 0 ? (
+              pendingAppointments.map((appointment: any) => {
+                const appointmentDate = new Date(appointment.appointment_at);
+                const today = new Date();
+                const isToday =
+                  appointmentDate.toDateString() === today.toDateString();
+                const dateDisplay = isToday
+                  ? "Aujourd'hui"
+                  : appointmentDate.toLocaleDateString("fr-FR");
+                const timeDisplay = appointmentDate.toLocaleTimeString(
+                  "fr-FR",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                );
+
+                const loadingState = loadingStates[appointment.id];
+
+                return (
+                  <SessionCard
+                    key={appointment.id}
+                    date={dateDisplay}
+                    time={timeDisplay}
+                    profileImage={
+                      appointment.patient?.avatar || "/assets/prof.jpg"
+                    }
+                    name={
+                      `${appointment.patient?.first_name || ""} ${
+                        appointment.patient?.last_name || ""
+                      }`.trim() || "Patient"
+                    }
+                    sessionDescription={appointment.session?.name || "Session"}
+                    onAccept={() => handleConfirmAppointment(appointment.id)}
+                    onCancel={() => handleCancelAppointment(appointment.id)}
+                    onViewRequest={() => {}}
+                    textButton="Accepter"
+                    questions={appointment.appointment_questions || []}
+                    loadingState={loadingState}
+                  />
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                Aucune demande en attente
+              </div>
+            )}
           </div>
         </TabsContent>
 
-        <TabsContent value="historique" className="mt-6 px-6">
-          <div className="space-y-4">
-            <p className="text-gray-600">Historique des visios...</p>
-            {/* Ici vous pouvez ajouter les SessionCard pour l'historique */}
+        <TabsContent value="historique" className="mt-6">
+          <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
+            {historicAppointments.length > 0 ? (
+              historicAppointments.map((appointment: any) => {
+                const appointmentDate = new Date(appointment.appointment_at);
+                const dateDisplay = appointmentDate.toLocaleDateString("fr-FR");
+                const timeDisplay = appointmentDate.toLocaleTimeString(
+                  "fr-FR",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                );
+
+                return (
+                  <SessionCard
+                    key={appointment.id}
+                    date={dateDisplay}
+                    time={timeDisplay}
+                    profileImage={
+                      appointment.patient?.avatar || "/assets/prof.jpg"
+                    }
+                    name={
+                      `${appointment.patient?.first_name || ""} ${
+                        appointment.patient?.last_name || ""
+                      }`.trim() || "Patient"
+                    }
+                    sessionDescription={appointment.session?.name || "Session"}
+                    onViewRequest={() => {}}
+                    textButton={
+                      appointment.status === "cancelled" ? "Annulé" : "Terminé"
+                    }
+                    buttonStates={{ acceptDisabled: true, viewDisabled: false }}
+                    isUpcoming={true}
+                    questions={appointment.appointment_questions || []}
+                  />
+                );
+              })
+            ) : (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                Aucun historique disponible
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>

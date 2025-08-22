@@ -11,16 +11,6 @@ import { useMediaCleanup } from "./useMediaCleanup";
 
 const API_KEY = process.env.NEXT_PUBLIC_STREAM_API_KEY;
 
-// Données de test pour développement sans backend
-const MOCK_DATA = {
-  API_KEY: "mmhfdzb5evj2", // Clé API Stream de test publique
-  TOKEN:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL0x1eHVyaW91c19TYW5kd2ljaCIsInVzZXJfaWQiOiJMdXh1cmlvdXNfU2FuZHdpY2giLCJ2YWxpZGl0eV9pbl9zZWNvbmRzIjo2MDQ4MDAsImlhdCI6MTc1NDM0MDQ1NCwiZXhwIjoxNzU0OTQ1MjU0fQ.Rrq32NkywVL7u--Z38Km_OgBaqk6YquKPJc6o3q_Jwg", // Token JWT de test
-  USER_ID: "Luxurious_Sandwich",
-  CALL_ID: "hhKzhYQZ4BiKL58OEN39w",
-  USER_NAME: "Dr. Sarah Martin",
-};
-
 interface UseVideoCallReturn {
   client: StreamVideoClient | null;
   call: Call | null;
@@ -49,23 +39,11 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
     // Utiliser proStreamUser ou patientStreamUser selon ce qui est disponible
     const streamUser = callData?.proStreamUser || callData?.patientStreamUser;
 
-    // Utiliser les données du store si disponibles, sinon les variables d'environnement, sinon les données de test
-    const token =
-      streamUser?.token ||
-      process.env.NEXT_PUBLIC_STREAM_TOKEN ||
-      MOCK_DATA.TOKEN;
-    const userId =
-      streamUser?.user?.id ||
-      process.env.NEXT_PUBLIC_STREAM_USER_ID ||
-      MOCK_DATA.USER_ID;
-    const callId =
-      streamUser?.appointmentId ||
-      process.env.NEXT_PUBLIC_STREAM_CALL_ID ||
-      MOCK_DATA.CALL_ID;
-    const userName =
-      streamUser?.user?.name ||
-      process.env.NEXT_PUBLIC_STREAM_USER_NAME ||
-      MOCK_DATA.USER_NAME;
+    // Utiliser uniquement les données du store (API) ou les variables d'environnement
+    const token = streamUser?.token || process.env.NEXT_PUBLIC_STREAM_TOKEN;
+    const userId = streamUser?.user?.id || process.env.NEXT_PUBLIC_STREAM_USER_ID;
+    const callId = streamUser?.appointmentId || process.env.NEXT_PUBLIC_STREAM_CALL_ID;
+    const userName = streamUser?.user?.name || process.env.NEXT_PUBLIC_STREAM_USER_NAME;
 
     return {
       token,
@@ -73,7 +51,7 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
       callId,
       user: {
         id: userId || "!anon",
-        name: userName,
+        name: userName || "User",
       } as User,
     };
   }, [callData]);
@@ -95,24 +73,21 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
         throw new Error("Token ou ID d'appel manquant");
       }
 
-      // Validation du token JWT uniquement s'il ne s'agit pas du token de test
-      if (token !== MOCK_DATA.TOKEN) {
-        try {
-          const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-          const currentTime = Math.floor(Date.now() / 1000);
+      // Validation du token JWT
+      try {
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
 
-          if (tokenPayload.exp < currentTime) {
-            throw new Error(
-              "Le token JWT a expiré. Veuillez générer un nouveau token."
-            );
-          }
-        } catch (tokenErr) {
-          console.warn("⚠️ Erreur de validation du token:", tokenErr);
-          // Continuer avec le token de test si la validation échoue
+        if (tokenPayload.exp < currentTime) {
+          throw new Error(
+            "Le token JWT a expiré. Veuillez générer un nouveau token."
+          );
         }
+      } catch (tokenErr) {
+        console.warn("⚠️ Erreur de validation du token:", tokenErr);
       }
 
-      const apiKey = API_KEY || MOCK_DATA.API_KEY;
+      const apiKey = API_KEY;
 
       if (!apiKey) {
         throw new Error("Clé API Stream manquante");
@@ -243,7 +218,14 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
         }
       }
     };
-  }, [callConfig.token, callConfig.callId, call, cleanupAllDevices, client, initializeCall]);
+  }, [
+    callConfig.token,
+    callConfig.callId,
+    call,
+    cleanupAllDevices,
+    client,
+    initializeCall,
+  ]);
 
   return {
     client,

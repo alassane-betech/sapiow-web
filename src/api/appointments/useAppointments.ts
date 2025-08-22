@@ -51,6 +51,10 @@ export interface AppointmentCreateResponse {
   updated_at: string;
 }
 
+export interface UpdateAppointmentData {
+  status: "confirmed" | "cancelled";
+}
+
 export const useSubmitAppointmentQuestion = () => {
   const queryClient = useQueryClient();
 
@@ -99,15 +103,39 @@ export const useCreatePatientAppointment = () => {
       queryClient.invalidateQueries({
         queryKey: ["appointments", variables.pro_id],
       });
-      
+
       // Ajouter le nouvel appointment au cache si besoin
-      queryClient.setQueryData(
-        ["appointment", data.id],
-        data
-      );
+      queryClient.setQueryData(["appointment", data.id], data);
     },
     onError: (error) => {
       console.error("Failed to create appointment:", error);
+    },
+  });
+};
+
+export const useUpdateProAppointment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      appointmentId,
+      updateData,
+    }: {
+      appointmentId: string;
+      updateData: UpdateAppointmentData;
+    }) => {
+      return apiClient.put(`pro-appointment/${appointmentId}`, updateData);
+    },
+    onSuccess: (_, variables) => {
+      // Invalider le cache pour recharger les données
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", variables.appointmentId],
+      });
+
+      // Invalider aussi la liste des rendez-vous
+      queryClient.invalidateQueries({
+        queryKey: ["appointments"],
+      });
     },
   });
 };

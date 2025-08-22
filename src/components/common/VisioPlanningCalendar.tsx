@@ -1,8 +1,10 @@
 "use client";
 import { useCreatePatientAppointment } from "@/api/appointments/useAppointments";
 import { Button } from "@/components/common/Button";
+import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePlaningStore } from "@/store/usePlaning";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 interface VisioPlanningCalendarProps {
@@ -121,9 +123,13 @@ export default function VisioPlanningCalendar({
   onAppointmentCreated,
 }: VisioPlanningCalendarProps) {
   const { setIsPlaning } = usePlaningStore();
-  const [currentDate, setCurrentDate] = useState(new Date(2025, 3, 1)); // Avril 2025
-  const [selectedDate, setSelectedDate] = useState(4); // 4 avril sélectionné par défaut
-
+  const today = new Date();
+  const [currentDate, setCurrentDate] = useState(
+    new Date(today.getFullYear(), today.getMonth(), 1)
+  );
+  const [selectedDate, setSelectedDate] = useState(today.getDate()); // Jour actuel sélectionné par défaut
+  const { setAppointmentData } = useAppointmentStore();
+  const router = useRouter();
   // Hook pour créer un appointment
   const createAppointmentMutation = useCreatePatientAppointment();
 
@@ -201,6 +207,9 @@ export default function VisioPlanningCalendar({
       }
       return newDate;
     });
+
+    // Réinitialiser la date sélectionnée lors du changement de mois
+    setSelectedDate(1);
   };
 
   const handleDateClick = (day: number) => {
@@ -234,7 +243,26 @@ export default function VisioPlanningCalendar({
       };
 
       const result = await createAppointmentMutation.mutateAsync(
-        appointmentData
+        appointmentData,
+        {
+          onSuccess: (data: any) => {
+            console.log("Appointment créé avec succès:", data);
+            if (data?.appointment && data?.payment) {
+              setAppointmentData(data.appointment, data.payment);
+              // Construire l'URL de retour avec l'ID de l'expert
+              const returnUrl = `/details?id=${data.appointment.pro_id}`;
+              router.push(
+                `/payment?returnUrl=${encodeURIComponent(returnUrl)}`
+              );
+            }
+          },
+          onError: (error) => {
+            console.error(
+              "Erreur lors de la création de l'appointment:",
+              error
+            );
+          },
+        }
       );
 
       // Callback de succès
@@ -267,7 +295,12 @@ export default function VisioPlanningCalendar({
     // Jours du mois
     for (let day = 1; day <= daysInMonth; day++) {
       const isSelected = day === selectedDate;
-      const isClickable = day >= 1 && day <= 16; // Jours disponibles
+      const dayDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        day
+      );
+      const isClickable = dayDate >= today; // Seuls les jours futurs ou aujourd'hui sont cliquables
 
       days.push(
         <div

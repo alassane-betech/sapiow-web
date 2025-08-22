@@ -1,7 +1,6 @@
 "use client";
 import {
   useSubmitAppointmentQuestion,
-  useUpdateAppointmentQuestion,
   type AppointmentQuestion,
 } from "@/api/appointments/useAppointments";
 import BookedSessionCard from "@/components/common/BookedSessionCard";
@@ -13,7 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Send, X } from "lucide-react";
+import { Send, X, Video } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../common/Button";
 
@@ -35,16 +34,20 @@ interface SessionDetailSheetProps {
   session: SessionData | null;
   isOpen: boolean;
   onClose: () => void;
+  onStartVideoCall?: (appointmentId: string) => void;
 }
 
 export function SessionDetailSheet({
   session,
   isOpen,
   onClose,
+  onStartVideoCall,
 }: SessionDetailSheetProps) {
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [question, setQuestion] = useState("");
-  const [localQuestions, setLocalQuestions] = useState<AppointmentQuestion[]>([]);
+  const [localQuestions, setLocalQuestions] = useState<AppointmentQuestion[]>(
+    []
+  );
 
   const submitQuestionMutation = useSubmitAppointmentQuestion();
 
@@ -69,8 +72,8 @@ export function SessionDetailSheet({
         updated_at: new Date().toISOString(),
         appointment_id: session.id,
       };
-      
-      setLocalQuestions(prev => [...prev, newQuestion]);
+
+      setLocalQuestions((prev) => [...prev, newQuestion]);
       setQuestion("");
       setShowQuestionForm(false);
     } catch (error) {
@@ -154,7 +157,8 @@ export function SessionDetailSheet({
                           <button
                             onClick={handleSubmitQuestion}
                             disabled={
-                              !question.trim() || submitQuestionMutation.isPending
+                              !question.trim() ||
+                              submitQuestionMutation.isPending
                             }
                             className="absolute bottom-3 right-3 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           >
@@ -196,7 +200,8 @@ export function SessionDetailSheet({
                           <button
                             onClick={handleSubmitQuestion}
                             disabled={
-                              !question.trim() || submitQuestionMutation.isPending
+                              !question.trim() ||
+                              submitQuestionMutation.isPending
                             }
                             className="absolute bottom-3 right-3 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           >
@@ -243,6 +248,15 @@ export function SessionDetailSheet({
             {/* Action buttons - Fixed at bottom */}
             <div className="absolute bottom-0 left-0 right-0 p-6 bg-white border-none">
               <div className="flex flex-col space-y-3">
+                {/* Video consultation button - only for confirmed appointments */}
+                {session?.status === "confirmed" && onStartVideoCall && (
+                  <Button
+                    label="Commencer la visio"
+                    className="h-[40px] w-full rounded-[8px] text-base font-bold font-figtree"
+                    onClick={() => onStartVideoCall(session.id)}
+                    icon={<Video className="w-4 h-4" />}
+                  />
+                )}
                 <ButtonUI
                   variant="outline"
                   className="w-full text-gray-700 border-gray-300 hover:bg-gray-50 bg-transparent"

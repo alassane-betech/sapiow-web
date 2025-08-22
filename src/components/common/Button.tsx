@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 interface ButtonProps extends React.ComponentProps<typeof ButtonUI> {
-  label: string;
+  label: string | React.ReactNode;
   className?: string;
   icon?: string | React.ReactNode;
   iconSize?: number;
