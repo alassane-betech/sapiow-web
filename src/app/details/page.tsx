@@ -1,5 +1,6 @@
 "use client";
 import Accordion from "@/components/common/Accordion";
+import { AuthGuard } from "@/components/common/AuthGuard";
 import BookedSessionCard from "@/components/common/BookedSessionCard";
 import { Button } from "@/components/common/Button";
 import HowItWorksCard from "@/components/common/HowItWorksCard";
@@ -533,8 +534,10 @@ function ProfessionalDetailContent() {
 
 export default function ProfessionalDetail() {
   return (
-    <Suspense fallback={<div>Chargement...</div>}>
-      <ProfessionalDetailContent />
-    </Suspense>
+    <AuthGuard>
+      <Suspense fallback={<div>Chargement...</div>}>
+        <ProfessionalDetailContent />
+      </Suspense>
+    </AuthGuard>
   );
 }

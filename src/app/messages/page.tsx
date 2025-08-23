@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthGuard } from "@/components/common/AuthGuard";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,7 +26,8 @@ export default function Messages() {
 
   // Responsive : afficher la liste ou le chat sur mobile
   return (
-    <div className="flex h-screen bg-white">
+    <AuthGuard>
+      <div className="flex h-screen bg-white">
       <AppSidebar hideMobileNav={!!selectedConversation} />
 
       {/* Desktop (lg+) : sidebar + chat */}
@@ -156,6 +158,7 @@ export default function Messages() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

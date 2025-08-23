@@ -1,5 +1,3 @@
-import { supabase } from "./supabase/client";
-
 const API_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
 if (!API_URL) {
@@ -101,17 +99,17 @@ export const fetchApi = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  console.log(session);
+  // Récupérer le token depuis localStorage au lieu de la session Supabase
+  const access_token = localStorage.getItem("access_token");
+  console.log("Token depuis localStorage:", access_token);
+
   const headers = {
     ...(options.body instanceof FormData
       ? {}
       : { "Content-Type": "application/json" }),
     apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-    ...(session?.access_token && {
-      Authorization: `Bearer ${session.access_token}`,
+    ...(access_token && {
+      Authorization: `Bearer ${access_token}`,
     }),
     ...options.headers,
   };

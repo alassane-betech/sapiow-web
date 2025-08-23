@@ -4,6 +4,7 @@ import {
   useRemoveFavorite,
 } from "@/api/favorites/useFavorites";
 import ProfessionalCard from "@/app/home/ProfessionalCard";
+import { AuthGuard } from "@/components/common/AuthGuard";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { Professional } from "@/types/professional";
@@ -80,72 +81,81 @@ export default function Favori() {
 
   if (isLoading) {
     return (
-      <div className="flex">
-        <AppSidebar />
-        <div className="w-full flex-1">
-          <HeaderClient text="Mes Favoris" isBack={true} />
-          <div className="container">
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-exford-blue mx-auto"></div>
-              <p className="mt-4 text-gray-500">Chargement de vos favoris...</p>
+      <AuthGuard>
+        <div className="flex">
+          <AppSidebar />
+          <div className="w-full flex-1">
+            <HeaderClient text="Mes Favoris" isBack={true} />
+            <div className="container">
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-exford-blue mx-auto"></div>
+                <p className="mt-4 text-gray-500">
+                  Chargement de vos favoris...
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </AuthGuard>
     );
   }
 
   if (error) {
     return (
+      <AuthGuard>
+        <div className="flex">
+          <AppSidebar />
+          <div className="w-full flex-1">
+            <HeaderClient text="Mes Favoris" isBack={true} />
+            <div className="container">
+              <div className="text-center py-12">
+                <div className="text-red-500 text-lg mb-4">
+                  Erreur lors du chargement des favoris
+                </div>
+                <p className="text-gray-400">
+                  {error.message || "Erreur inconnue"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </AuthGuard>
+    );
+  }
+
+  return (
+    <AuthGuard>
       <div className="flex">
         <AppSidebar />
         <div className="w-full flex-1">
           <HeaderClient text="Mes Favoris" isBack={true} />
           <div className="container">
-            <div className="text-center py-12">
-              <div className="text-red-500 text-lg mb-4">
-                Erreur lors du chargement des favoris
+            {favoriteProfessionals.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-500 text-lg mb-4">
+                  Aucun professionnel en favori pour le moment
+                </div>
+                <p className="text-gray-400">
+                  Ajoutez des professionnels à vos favoris en cliquant sur le
+                  cœur
+                </p>
               </div>
-              <p className="text-gray-400">
-                {error.message || "Erreur inconnue"}
-              </p>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 py-6">
+                {favoriteProfessionals.map((professional) => (
+                  <ProfessionalCard
+                    key={professional.id}
+                    professional={professional}
+                    isLiked={true} // Tous sont favoris dans cette page
+                    onToggleLike={(id) => handleToggleLike(id)}
+                    onProfessionalClick={handleProfessionalClick}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="flex">
-      <AppSidebar />
-      <div className="w-full flex-1">
-        <HeaderClient text="Mes Favoris" isBack={true} />
-        <div className="container">
-          {favoriteProfessionals.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-500 text-lg mb-4">
-                Aucun professionnel en favori pour le moment
-              </div>
-              <p className="text-gray-400">
-                Ajoutez des professionnels à vos favoris en cliquant sur le cœur
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:px-4">
-              {favoriteProfessionals.map((professional) => (
-                <ProfessionalCard
-                  key={professional.id}
-                  professional={professional}
-                  isLiked={true} // Tous sont favoris dans cette page
-                  onToggleLike={(id) => handleToggleLike(id)}
-                  onProfessionalClick={handleProfessionalClick}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    </AuthGuard>
   );
 }

@@ -1,4 +1,5 @@
 "use client";
+import { AuthGuard } from "@/components/common/AuthGuard";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import {
   Elements,
@@ -63,20 +64,26 @@ export default function PaymentPage() {
   const { payment } = useAppointmentStore();
 
   if (!payment) {
-    return <p>Chargement...</p>;
+    return (
+      <AuthGuard>
+        <p>Chargement...</p>
+      </AuthGuard>
+    );
   }
 
   const stripePromise = loadStripe(payment.publishableKey);
 
   return (
-    <Elements
-      stripe={stripePromise}
-      options={{
-        clientSecret: payment.paymentIntent, // <-- très important
-        appearance: { theme: "stripe" },
-      }}
-    >
-      <CheckoutForm />
-    </Elements>
+    <AuthGuard>
+      <Elements
+        stripe={stripePromise}
+        options={{
+          clientSecret: payment.paymentIntent, // <-- très important
+          appearance: { theme: "stripe" },
+        }}
+      >
+        <CheckoutForm />
+      </Elements>
+    </AuthGuard>
   );
 }

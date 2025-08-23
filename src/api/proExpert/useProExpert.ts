@@ -138,7 +138,7 @@ export const transformUpdateDataToFormData = (
     formData.append("last_name", data.last_name);
   if (data.email !== undefined) formData.append("email", data.email);
   if (data.domain_id !== undefined)
-    formData.append("domain_id", data.domain_id.toString());
+    formData.append("domain_id", String(data.domain_id));
   if (data.description !== undefined)
     formData.append("description", data.description);
   if (data.job !== undefined) formData.append("job", data.job);
@@ -285,16 +285,49 @@ export const useUpdateProExpert = () => {
           throw new Error(`Données invalides: ${validation.errors.join(", ")}`);
         }
 
-        // Transformation vers FormData
-        const formData = transformUpdateDataToFormData(updateData);
+        // Si pas d'avatar File, utiliser JSON pour préserver les types
+        if (!updateData.avatar || typeof updateData.avatar === 'string') {
+          const jsonData: any = {
+            ...(updateData.first_name !== undefined && { first_name: updateData.first_name }),
+            ...(updateData.last_name !== undefined && { last_name: updateData.last_name }),
+            ...(updateData.email !== undefined && { email: updateData.email }),
+            ...(updateData.domain_id !== undefined && { domain_id: updateData.domain_id }), // Garder comme number
+            ...(updateData.description !== undefined && { description: updateData.description }),
+            ...(updateData.job !== undefined && { job: updateData.job }),
+            ...(updateData.linkedin !== undefined && { linkedin: updateData.linkedin }),
+            ...(updateData.website !== undefined && { website: updateData.website }),
+            ...(updateData.language !== undefined && { language: updateData.language }),
+            ...(updateData.availability_start_date !== undefined && { availability_start_date: updateData.availability_start_date }),
+            ...(updateData.availability_end_date !== undefined && { availability_end_date: updateData.availability_end_date }),
+            ...(typeof updateData.avatar === 'string' && { avatar: updateData.avatar }),
+          };
 
-        // Appel API avec FormData
+          return await apiClient.put<UpdateProExpertResponse>("pro", jsonData);
+        }
+
+        // Si avatar est un File, utiliser FormData mais sans domain_id
+        const formData = new FormData();
+        if (updateData.first_name !== undefined) formData.append("first_name", updateData.first_name);
+        if (updateData.last_name !== undefined) formData.append("last_name", updateData.last_name);
+        if (updateData.email !== undefined) formData.append("email", updateData.email);
+        if (updateData.description !== undefined) formData.append("description", updateData.description);
+        if (updateData.job !== undefined) formData.append("job", updateData.job);
+        if (updateData.linkedin !== undefined) formData.append("linkedin", updateData.linkedin);
+        if (updateData.website !== undefined) formData.append("website", updateData.website);
+        if (updateData.language !== undefined) formData.append("language", updateData.language);
+        if (updateData.availability_start_date !== undefined) formData.append("availability_start_date", updateData.availability_start_date);
+        if (updateData.availability_end_date !== undefined) formData.append("availability_end_date", updateData.availability_end_date);
+        if (updateData.avatar instanceof File) formData.append("avatar", updateData.avatar);
+
+        // Envoyer domain_id séparément en JSON si présent
+        if (updateData.domain_id !== undefined) {
+          await apiClient.put("pro/domain", { domain_id: updateData.domain_id });
+        }
+
         const response = await apiClient.fetchFormData<UpdateProExpertResponse>(
           "pro",
           formData,
-          {
-            method: "PUT",
-          }
+          { method: "PUT" }
         );
 
         return response;

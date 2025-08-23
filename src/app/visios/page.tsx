@@ -1,4 +1,5 @@
 "use client";
+import { AuthGuard } from "@/components/common/AuthGuard";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { useCallStore } from "@/store/useCall";
 import { useUserStore } from "@/store/useUser";
@@ -12,18 +13,20 @@ export default function Visios() {
   const { isVideoCallOpen } = useCallStore();
   const { user } = useUserStore();
   return (
-    <div className="flex">
-      <AppSidebar hideMobileNav={isVideoCallOpen} />
-      <div className="w-full flex-1 container pb-10">
-        {/* <Client /> */}
-        {user.type === "client" ? (
-          <Client />
-        ) : (
-          <Expert handleNotificationClick={handleNotificationClick} />
-        )}
-      </div>
+    <AuthGuard>
+      <div className="flex">
+        <AppSidebar hideMobileNav={isVideoCallOpen} />
+        <div className="w-full flex-1 container pb-10">
+          {/* <Client /> */}
+          {user.type === "client" ? (
+            <Client />
+          ) : (
+            <Expert handleNotificationClick={handleNotificationClick} />
+          )}
+        </div>
 
-      {/* Modal de consultation vidéo */}
-    </div>
+        {/* Modal de consultation vidéo */}
+      </div>
+    </AuthGuard>
   );
 }

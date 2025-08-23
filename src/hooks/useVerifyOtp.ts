@@ -2,6 +2,7 @@ import { useGetCustomer } from "@/api/customer/useCustomer";
 import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { supabase } from "@/lib/supabase/client";
 import { useUserStore } from "@/store/useUser";
+import { authUtils } from "@/utils/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -107,6 +108,13 @@ export function useVerifyOtp(): UseVerifyOtpReturn {
 
       if (data.user && data.session) {
         console.log("Utilisateur authentifié:", data.user);
+
+        // Stocker le token dans localStorage
+        authUtils.setTokens(
+          data.session.access_token,
+          data.session.refresh_token,
+          data.user.id
+        );
 
         // Nettoyer les données temporaires après vérification réussie
         localStorage.removeItem("phoneNumber");

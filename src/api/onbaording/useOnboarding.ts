@@ -76,16 +76,37 @@ export const useOnboardingExpertPro = () => {
         );
       }
 
-      // Transformation en FormData pour multipart/form-data
-      const formData = transformOnboardingExpertToFormData(data);
-
       try {
-        // Utilisation du client API centralisé avec FormData
-        const response =
-          await apiClient.fetchFormData<OnboardingExpertResponse>(
-            "pro",
-            formData
-          );
+        // Toujours utiliser JSON pour préserver les types numériques
+        const jsonData: any = {
+          first_name: data.first_name.trim(),
+          last_name: data.last_name.trim(),
+          domain_id: data.domain_id, // Garder comme number
+          ...(data.description && { description: data.description.trim() }),
+          ...(data.job && { job: data.job.trim() }),
+          ...(data.linkedin && { linkedin: data.linkedin.trim() }),
+          ...(data.website && { website: data.website.trim() }),
+        };
+
+        // Si avatar est une string (URL), l'inclure dans les données JSON
+        if (typeof data.avatar === 'string') {
+          jsonData.avatar = data.avatar;
+        }
+
+        const response = await apiClient.post<OnboardingExpertResponse>(
+          "pro",
+          jsonData
+        );
+
+        // Si avatar est un File, l'uploader séparément après la création du profil
+        if (data.avatar instanceof File) {
+          const avatarFormData = new FormData();
+          avatarFormData.append("avatar", data.avatar);
+          
+          // Assuming we need to update the profile with avatar after creation
+          // You might need to adjust this endpoint based on your API
+          await apiClient.fetchFormData("pro/avatar", avatarFormData);
+        }
 
         return response;
       } catch (error: any) {

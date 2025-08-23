@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthGuard } from "@/components/common/AuthGuard";
 import { useUserStore } from "@/store/useUser";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -19,10 +20,12 @@ export default function Profile() {
 
   // Affichage de chargement pendant la redirection
   return (
-    <AccountLayout>
-      <div className="flex justify-center items-center py-8">
-        <div className="text-gray-600">Chargement du profil...</div>
-      </div>
-    </AccountLayout>
+    <AuthGuard>
+      <AccountLayout>
+        <div className="flex justify-center items-center py-8">
+          <div className="text-gray-600">Chargement du profil...</div>
+        </div>
+      </AccountLayout>
+    </AuthGuard>
   );
 }
