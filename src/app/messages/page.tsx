@@ -1,5 +1,6 @@
 "use client";
 
+import { withAuth } from "@/components/common/withAuth";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,7 +14,7 @@ import { conversations, messages } from "@/data/mockMessages";
 
 
 
-export default function Messages() {
+function Messages() {
   const [selectedConversation, setSelectedConversation] = useState<
     number | null
   >(null);
@@ -159,3 +160,5 @@ export default function Messages() {
     </div>
   );
 }
+
+export default withAuth(Messages);

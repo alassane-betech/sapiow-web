@@ -7,6 +7,7 @@ import ProfessionalCard from "@/app/home/ProfessionalCard";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { Professional } from "@/types/professional";
+import { withAuth } from "@/components/common/withAuth";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
@@ -55,7 +56,7 @@ const mapFavoriteToProfessional = (favorite: any): Professional => {
   };
 };
 
-export default function Favori() {
+function Favori() {
   const { data: favoritesData, isLoading, error } = useGetFavorites();
   const removeFavoriteMutation = useRemoveFavorite();
   const router = useRouter();
@@ -149,3 +150,5 @@ export default function Favori() {
     </div>
   );
 }
+
+export default withAuth(Favori);

@@ -1,4 +1,7 @@
-import { UpdateCustomerData, useUpdateCustomer } from "@/api/customer/useCustomer";
+import {
+  UpdateCustomerData,
+  useUpdateCustomer,
+} from "@/api/customer/useCustomer";
 import { useCallback, useEffect, useState } from "react";
 
 export interface ClientFormData {
@@ -12,7 +15,9 @@ export interface UseClientProfileUpdateProps {
   customer: any; // Type Customer de l'API
 }
 
-export const useClientProfileUpdate = ({ customer }: UseClientProfileUpdateProps) => {
+export const useClientProfileUpdate = ({
+  customer,
+}: UseClientProfileUpdateProps) => {
   // États pour les champs du formulaire
   const [formData, setFormData] = useState<ClientFormData>({
     firstName: "",
@@ -45,13 +50,16 @@ export const useClientProfileUpdate = ({ customer }: UseClientProfileUpdateProps
   }, [customer]);
 
   // Gestion des changements de champs
-  const handleFieldChange = useCallback((field: keyof ClientFormData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    setIsEditing(true);
-  }, []);
+  const handleFieldChange = useCallback(
+    (field: keyof ClientFormData, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+      setIsEditing(true);
+    },
+    []
+  );
 
   // Gestion de la sélection des domaines
   const handleDomainToggle = useCallback((domainId: number) => {
@@ -133,7 +141,7 @@ export const useClientProfileUpdate = ({ customer }: UseClientProfileUpdateProps
     avatar,
     isUpdating,
     updateError,
-    
+
     // Actions
     handleFieldChange,
     handleDomainToggle,

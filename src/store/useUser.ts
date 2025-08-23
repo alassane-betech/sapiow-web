@@ -1,10 +1,10 @@
-import { UserType } from "@/types/user";
+import { User } from "@/types/user";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface UserStore {
-  user: UserType;
-  setUser: (user: UserType) => void;
+  user: User;
+  setUser: (user: User) => void;
 }
 
 export const useUserStore = create<UserStore>()(

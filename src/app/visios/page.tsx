@@ -2,10 +2,11 @@
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { useCallStore } from "@/store/useCall";
 import { useUserStore } from "@/store/useUser";
+import { withAuth } from "@/components/common/withAuth";
 import Client from "./Client";
 import Expert from "./Expert";
 
-export default function Visios() {
+function Visios() {
   const handleNotificationClick = () => {
     console.log("Notifications cliquées");
   };
@@ -27,3 +28,5 @@ export default function Visios() {
     </div>
   );
 }
+
+export default withAuth(Visios);

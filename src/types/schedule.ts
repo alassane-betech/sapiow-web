@@ -86,8 +86,8 @@ export const convertApiSchedulesToTimeSlots = (
 ): UITimeSlot[] => {
   return apiSchedules
     .filter((schedule) => schedule.day_of_week === dayOfWeek)
-    .map((schedule) => ({
-      id: `${dayOfWeek}-${schedule.id}`,
+    .map((schedule, index) => ({
+      id: `${dayOfWeek}-${schedule.id || `temp-${index}`}`,
       startTime: convertApiTimeToUITime(schedule.start_time),
       endTime: convertApiTimeToUITime(schedule.end_time),
     }));

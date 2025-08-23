@@ -37,7 +37,7 @@ export const EmptySessionCard: React.FC<EmptySessionCardProps> = ({
           className="flex items-center gap-2 border border-[#E3E8EF] rounded-xl px-5 py-2 mb-10 bg-white hover:bg-gray-50 transition"
         >
           <span className="text-xl font-bold text-gunmetal-gray">+</span>
-          <span className="font-bold text-base text-gunmetal-gray">
+          <span className="font-bold text-base text-gunmetal-gray cursor-pointer">
             {buttonLabel}
           </span>
         </button>

@@ -9,7 +9,7 @@ export interface OnboardingSeekerData {
   last_name: string;
   email: string;
   avatar?: File | string; // File pour upload, string pour URL existante
-  domain_id: number[]; // IDs des domaines sélectionnés
+  domain_id: number; // IDs des domaines sélectionnés
 }
 
 /**
@@ -80,7 +80,7 @@ export const transformOnboardingSeekerToFormData = (
   }
 
   // Convertir les domain_ids en JSON string pour FormData
-  formData.append("domain_id", JSON.stringify(data.domain_id));
+  formData.append("domain_id", "1");
 
   return formData;
 };
@@ -94,7 +94,7 @@ export const validateOnboardingSeekerData = (
   const isFirstNameValid = data.first_name.trim().length > 0;
   const isLastNameValid = data.last_name.trim().length > 0;
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
-  const isDomainsValid = data.domain_id.length > 0;
+  const isDomainsValid = data.domain_id > 0;
 
   return {
     isFirstNameValid,
@@ -275,7 +275,8 @@ export const validateOnboardingExpertData = (
 ): OnboardingExpertValidation => {
   const isFirstNameValid = data.first_name.trim().length > 0;
   const isLastNameValid = data.last_name.trim().length > 0;
-  const isEmailValid = !data.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
+  const isEmailValid =
+    !data.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email);
   const isDomainValid = data.domain_id > 0;
 
   // Description et job sont optionnels mais si fournis, doivent être non-vides

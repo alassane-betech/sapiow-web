@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/common/Button";
+import { withAuth } from "@/components/common/withAuth";
 import Image from "next/image";
 
-export default function CompteConnecte() {
+function CompteConnecte() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -111,3 +112,5 @@ export default function CompteConnecte() {
     </div>
   );
 }
+
+export default withAuth(CompteConnecte);

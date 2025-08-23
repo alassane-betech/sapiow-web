@@ -3,6 +3,8 @@ import { SessionPreviewCard } from "@/components/common/SessionPreviewCard";
 import TimeSlotsManager from "@/components/common/TimeSlotsManager";
 import { mockAvailabilityEvents } from "@/data/mockAvailability";
 import { useProExpertStore } from "@/store/useProExpert";
+import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
+import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { SessionDetailsData } from "@/types/availability";
 import { ApiSchedule, getDayOfWeekFromDate } from "@/types/schedule";
 import {
@@ -14,16 +16,16 @@ import {
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
   showTimeSlotsManager: boolean;
-  onAddAvailability: () => void;
 }
 
 export const SessionDetailsPanel = ({
   selectedDate,
   showTimeSlotsManager,
-  onAddAvailability,
 }: SessionDetailsPanelProps) => {
-  // Store pour vérifier les créneaux existants
-  const { proExpertData } = useProExpertStore();
+  // Stores et API
+  const { proExpertData, setProExpertData } = useProExpertStore();
+  const { addTimeSlotLocal } = useTimeSlotsStore();
+  const updateProExpertMutation = useUpdateProExpert();
 
   // Vérifier s'il y a des créneaux pour la date sélectionnée
   const hasTimeSlotsForDate = (date: Date | null): boolean => {
@@ -60,6 +62,19 @@ export const SessionDetailsPanel = ({
   };
 
   const sessionDetails = getSessionDetails();
+
+  // Fonction pour ajouter une disponibilité localement (sans appel réseau)
+  const handleAddAvailability = () => {
+    if (!selectedDate || !proExpertData?.schedules) return;
+    
+    const result = addTimeSlotLocal(proExpertData.schedules, selectedDate);
+    
+    // Mettre à jour le store principal avec les nouvelles données locales
+    setProExpertData({
+      ...proExpertData,
+      schedules: result.schedules,
+    });
+  };
 
   return (
     <div className="w-full max-w-[349px]">
@@ -100,7 +115,7 @@ export const SessionDetailsPanel = ({
                 </>
               }
               buttonLabel="Ajouter une disponibilité"
-              onAdd={onAddAvailability}
+              onAdd={handleAddAvailability}
             />
           )}
         </div>

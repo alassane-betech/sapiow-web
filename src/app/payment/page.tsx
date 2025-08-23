@@ -7,6 +7,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { withAuth } from "@/components/common/withAuth";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
@@ -59,7 +60,7 @@ function CheckoutForm() {
 }
 
 // Page principale
-export default function PaymentPage() {
+function PaymentPage() {
   const { payment } = useAppointmentStore();
 
   if (!payment) {
@@ -80,3 +81,5 @@ export default function PaymentPage() {
     </Elements>
   );
 }
+
+export default withAuth(PaymentPage);

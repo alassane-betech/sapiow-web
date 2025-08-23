@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
+import { withAuth } from "@/components/common/withAuth";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -531,10 +532,12 @@ function ProfessionalDetailContent() {
   );
 }
 
-export default function ProfessionalDetail() {
+function ProfessionalDetail() {
   return (
     <Suspense fallback={<div>Chargement...</div>}>
       <ProfessionalDetailContent />
     </Suspense>
   );
 }
+
+export default withAuth(ProfessionalDetail);

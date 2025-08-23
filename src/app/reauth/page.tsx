@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/common/Button";
+import { withAuth } from "@/components/common/withAuth";
 
-export default function Reauth() {
+function Reauth() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -111,3 +112,5 @@ export default function Reauth() {
     </div>
   );
 }
+
+export default withAuth(Reauth);

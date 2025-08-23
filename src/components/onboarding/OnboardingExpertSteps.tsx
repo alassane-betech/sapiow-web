@@ -2,8 +2,8 @@
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Textarea } from "@/components/ui/textarea";
-import { useOnboardingExpert } from "@/hooks/useOnboardingExpert";
 import { DOMAIN_ID_MAPPING } from "@/constants/onboarding";
+import { useOnboardingExpert } from "@/hooks/useOnboardingExpert";
 import React from "react";
 import { DomainSelector } from "./DomainSelector";
 import { Pagination } from "./Pagination";
@@ -47,6 +47,7 @@ export const OnboardingExpertSteps: React.FC = () => {
     updateVisioOption,
     completeOnboarding,
     completeOnboardingWithoutSessions,
+    isSubmitting,
   } = useOnboardingExpert();
 
   // Étape 1 : Formulaire expert
@@ -122,11 +123,13 @@ export const OnboardingExpertSteps: React.FC = () => {
           subtitle="Nous avons besoin de quelques informations pour personnaliser créer votre compte Expert."
           domains={domains}
           isLoading={isLoadingDomains}
-          selectedDomain={selectedDomain ? DOMAIN_ID_MAPPING[selectedDomain] : null}
+          selectedDomain={
+            selectedDomain ? DOMAIN_ID_MAPPING[selectedDomain] : null
+          }
           onDomainSelect={(domainId: number) => {
             // Convert numeric ID back to string ID
             const stringId = Object.keys(DOMAIN_ID_MAPPING).find(
-              key => DOMAIN_ID_MAPPING[key] === domainId
+              (key) => DOMAIN_ID_MAPPING[key] === domainId
             );
             if (stringId) {
               setSelectedDomain(stringId);
@@ -187,9 +190,7 @@ export const OnboardingExpertSteps: React.FC = () => {
           créer <br /> votre compte Expert.
         </p>
 
-        <ProfilePhotoUpload 
-          onPhotoSelect={handleAvatarChange}
-        />
+        <ProfilePhotoUpload onPhotoSelect={handleAvatarChange} />
 
         <div className="space-y-6 mb-8">
           <Textarea
@@ -256,9 +257,9 @@ export const OnboardingExpertSteps: React.FC = () => {
             onClick={completeOnboardingWithoutSessions}
           />
           <Button
-            label="Terminer"
+            label={isSubmitting ? "En cours..." : "Terminer"}
             className="w-1/2 rounded-[8px] h-[56px] text-base font-medium"
-            disabled={!isVisioValid}
+            disabled={!isVisioValid || isSubmitting}
             onClick={completeOnboarding}
           />
         </div>

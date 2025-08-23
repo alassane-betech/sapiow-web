@@ -1,6 +1,7 @@
 "use client";
 import { AccountSidebar } from "@/components/layout/AccountSidebar";
 import { AppSidebar } from "@/components/layout/Sidebare";
+import { AuthGuard } from "@/components/common/AuthGuard";
 import { useUserStore } from "@/store/useUser";
 import Image from "next/image";
 import { useState } from "react";
@@ -25,8 +26,9 @@ export default function AccountLayout({
   const { user } = useUserStore();
 
   return (
-    <div className={`flex ${className}`}>
-      <AppSidebar />
+    <AuthGuard>
+      <div className={`flex ${className}`}>
+        <AppSidebar />
 
       {/* Layout principal */}
       <div className="w-full flex-1">
@@ -139,6 +141,7 @@ export default function AccountLayout({
           <div className="container mx-auto lg:px-0 pb-20">{children}</div>
         </div>
       </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

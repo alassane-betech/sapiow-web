@@ -1,9 +1,10 @@
 "use client";
 import { usePayStore } from "@/store/usePay";
 import { useRouter, useSearchParams } from "next/navigation";
+import { withAuth } from "@/components/common/withAuth";
 import { useEffect } from "react";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setIsPaid } = usePayStore();
@@ -31,3 +32,5 @@ export default function PaymentSuccessPage() {
     </div>
   );
 }
+
+export default withAuth(PaymentSuccessPage);

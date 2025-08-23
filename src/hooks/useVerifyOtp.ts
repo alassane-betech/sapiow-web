@@ -1,7 +1,4 @@
-import { useGetCustomer } from "@/api/customer/useCustomer";
-import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { supabase } from "@/lib/supabase/client";
-import { useUserStore } from "@/store/useUser";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -26,11 +23,7 @@ export function useVerifyOtp(): UseVerifyOtpReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: proExpert } = useGetProExpert();
-  const { data: customer } = useGetCustomer();
-
   const router = useRouter();
-  const { setUser } = useUserStore();
 
   // Récupérer le numéro de téléphone depuis localStorage
   useEffect(() => {
@@ -108,31 +101,17 @@ export function useVerifyOtp(): UseVerifyOtpReturn {
       if (data.user && data.session) {
         console.log("Utilisateur authentifié:", data.user);
 
+        // Stocker les tokens d'authentification dans localStorage
+        localStorage.setItem("access_token", data.session.access_token);
+        localStorage.setItem("refresh_token", data.session.refresh_token);
+        localStorage.setItem("user_id", data.user.id);
+
         // Nettoyer les données temporaires après vérification réussie
         localStorage.removeItem("phoneNumber");
         localStorage.removeItem("formattedPhone");
 
-        // Vérifier les données et rediriger
-        const isProEmpty = checkIfEmpty(proExpert);
-        const isCustomerEmpty = checkIfEmpty(customer);
-
-        if (isProEmpty && isCustomerEmpty) {
-          router.push("/onboarding");
-          console.log({
-            isProEmpty,
-            isCustomerEmpty,
-          });
-          // router.push("/onboarding");
-        } else if (isCustomerEmpty && !isProEmpty) {
-          setUser({ type: "expert" });
-          router.push("/");
-        } else if (isProEmpty && !isCustomerEmpty) {
-          setUser({ type: "client" });
-          router.push("/");
-        } else {
-          setUser({ type: "expert" });
-          router.push("/");
-        }
+        // Rediriger vers onboarding - la logique de vérification des profils se fera là-bas
+        router.push("/onboarding");
       }
     } catch (err) {
       console.error("Erreur inattendue lors de la vérification:", err);
@@ -140,33 +119,6 @@ export function useVerifyOtp(): UseVerifyOtpReturn {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Fonction pour vérifier si les données sont vides ou contiennent l'erreur spécifique
-  const checkIfEmpty = (data: any): boolean => {
-    if (!data) return true;
-
-    // Vérifier si c'est l'erreur spécifique
-    if (data.error === "Cannot coerce the result to a single JSON object") {
-      return true;
-    }
-
-    // Vérifier si c'est un tableau vide
-    if (Array.isArray(data) && data.length === 0) {
-      return true;
-    }
-
-    // Vérifier si la réponse a un data vide ou tableau vide
-    if (data.data && Array.isArray(data.data) && data.data.length === 0) {
-      return true;
-    }
-
-    // Vérifier si success est false
-    if (data.success === false) {
-      return true;
-    }
-
-    return false;
   };
 
   return {

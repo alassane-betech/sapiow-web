@@ -1,4 +1,4 @@
-import { supabase } from "./supabase/client";
+import { authUtils } from "../utils/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
@@ -101,18 +101,15 @@ export const fetchApi = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  console.log(session);
+  // Récupération des headers d'authentification via authUtils (localStorage)
+  const authHeaders = authUtils.getAuthHeaders();
+  
   const headers = {
     ...(options.body instanceof FormData
       ? {}
       : { "Content-Type": "application/json" }),
     apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-    ...(session?.access_token && {
-      Authorization: `Bearer ${session.access_token}`,
-    }),
+    ...authHeaders, // Inclut Authorization: Bearer token si disponible
     ...options.headers,
   };
 

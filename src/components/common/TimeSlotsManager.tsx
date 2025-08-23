@@ -1,7 +1,6 @@
 "use client";
 
 import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
-import { useProExpertStore } from "@/store/useProExpert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -11,15 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ApiSchedule,
-  convertApiSchedulesToTimeSlots,
-  convertTimeSlotsToApiSchedules,
-  getDayOfWeekFromDate,
-  UITimeSlot,
-} from "@/types/schedule";
+import { useProExpertStore } from "@/store/useProExpert";
+import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
 import { Link, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface TimeSlotsManagerProps {
   selectedDate: Date | null;
@@ -28,13 +22,27 @@ interface TimeSlotsManagerProps {
 export default function TimeSlotsManager({
   selectedDate,
 }: TimeSlotsManagerProps) {
-  const [timeSlots, setTimeSlots] = useState<UITimeSlot[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [timeSlots, setTimeSlots] = useState<any[]>([]);
 
   // Store et API
-  const { proExpertData, isLoading: isLoadingData, setProExpertData } = useProExpertStore();
+  const {
+    proExpertData,
+    isLoading: isLoadingData,
+    setProExpertData,
+  } = useProExpertStore();
+
+  const {
+    isLoading,
+    error,
+    getTimeSlotsForDate,
+    addTimeSlotLocal,
+    updateTimeSlotLocal,
+    saveSchedulesToServer,
+    removeTimeSlot,
+  } = useTimeSlotsStore();
+
   const updateProExpertMutation = useUpdateProExpert();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Générer les options d'heures (de 8h00 à 20h00 par tranches de 30 minutes)
   const generateTimeOptions = () => {
@@ -50,122 +58,111 @@ export default function TimeSlotsManager({
 
   const timeOptions = generateTimeOptions();
 
-  // Charger les créneaux depuis l'API quand les données ou la date changent
+  // Charger les créneaux depuis le store quand les données ou la date changent
   useEffect(() => {
-    if (selectedDate) {
-      const dayOfWeek = getDayOfWeekFromDate(selectedDate);
-      
-      if (proExpertData?.schedules) {
-        const apiSchedules = proExpertData.schedules as ApiSchedule[];
-        const dayTimeSlots = convertApiSchedulesToTimeSlots(
-          apiSchedules,
-          dayOfWeek
-        );
-        
-        // Toujours définir les créneaux trouvés, même si c'est un tableau vide
-        setTimeSlots(dayTimeSlots);
-      } else {
-        // Pas de données encore chargées, réinitialiser
-        setTimeSlots([]);
-      }
+    if (selectedDate && proExpertData?.schedules) {
+      const slots = getTimeSlotsForDate(proExpertData.schedules, selectedDate);
+      setTimeSlots(slots);
     } else {
-      // Pas de date sélectionnée, réinitialiser
       setTimeSlots([]);
     }
-  }, [proExpertData?.schedules, selectedDate]);
+  }, [selectedDate, proExpertData?.schedules, getTimeSlotsForDate]);
 
-  const addTimeSlot = async () => {
-    if (!selectedDate) return;
-
-    const dayOfWeek = getDayOfWeekFromDate(selectedDate);
-    const newSlot: UITimeSlot = {
-      id: `${dayOfWeek}-${Date.now()}`,
-      startTime: "9h00",
-      endTime: "9h30",
-    };
-    
-    // Si c'est le premier créneau du jour, on l'ajoute sans sauvegarder
-    // Sinon on ajoute à la liste existante et on sauvegarde
-    const updatedTimeSlots = timeSlots.length === 0 
-      ? [newSlot] 
-      : [...timeSlots, newSlot];
-      
-    setTimeSlots(updatedTimeSlots);
-
-    // Sauvegarder automatiquement
-    await saveSchedulesToAPI(updatedTimeSlots);
-  };
-
-  const removeTimeSlot = async (id: string) => {
-    const updatedTimeSlots = timeSlots.filter((slot) => slot.id !== id);
-    setTimeSlots(updatedTimeSlots);
-
-    // Sauvegarder automatiquement
-    await saveSchedulesToAPI(updatedTimeSlots);
-  };
-
-  // Sauvegarder les schedules vers l'API
-  const saveSchedulesToAPI = async (updatedTimeSlots: UITimeSlot[]) => {
-    if (!selectedDate || !proExpertData) return;
+  const handleRemoveTimeSlot = async (slotId: string) => {
+    if (!selectedDate || !proExpertData?.schedules) return;
 
     try {
-      setIsLoading(true);
-      setError(null);
-
-      const dayOfWeek = getDayOfWeekFromDate(selectedDate);
-
-      // Convertir les créneaux actuels vers le format API
-      const dayApiSchedules = convertTimeSlotsToApiSchedules(
-        updatedTimeSlots,
-        dayOfWeek
+      const updatedSchedules = await removeTimeSlot(
+        proExpertData.schedules,
+        selectedDate,
+        slotId,
+        async (updateData: any) => {
+          const result = await updateProExpertMutation.mutateAsync(updateData);
+          return result.data;
+        }
       );
 
-      // Récupérer les schedules existants et filtrer les autres jours
-      const existingSchedules =
-        (proExpertData.schedules as ApiSchedule[]) || [];
-      const otherDaysSchedules = existingSchedules.filter(
-        (s) => s.day_of_week !== dayOfWeek
-      );
-
-      // Combiner avec les nouveaux schedules du jour courant
-      const allSchedules = [...otherDaysSchedules, ...dayApiSchedules];
-
-      // Sauvegarder via l'API
-      const updatedData = await updateProExpertMutation.mutateAsync({
-        schedules: allSchedules,
+      // Mettre à jour le store principal
+      setProExpertData({
+        ...proExpertData,
+        schedules: updatedSchedules,
       });
-      
-      // Mettre à jour le store avec les nouvelles données
-      if (updatedData && proExpertData) {
-        setProExpertData({
-          ...proExpertData,
-          schedules: allSchedules
-        });
-      }
-    } catch (err) {
-      setError("Erreur lors de la sauvegarde des créneaux");
-      console.error("Error saving schedules:", err);
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error("Error removing time slot:", error);
     }
   };
 
-  const updateTimeSlot = async (
-    id: string,
+  // Mettre à jour localement sans sauvegarde
+  const handleUpdateTimeSlot = (
+    slotId: string,
     field: "startTime" | "endTime",
     value: string
   ) => {
-    const updatedTimeSlots = timeSlots.map((slot) =>
-      slot.id === id ? { ...slot, [field]: value } : slot
+    if (!selectedDate || !proExpertData?.schedules) return;
+
+    const updatedSchedules = updateTimeSlotLocal(
+      proExpertData.schedules,
+      selectedDate,
+      slotId,
+      field,
+      value
     );
 
-    setTimeSlots(updatedTimeSlots);
-
-    // Sauvegarder automatiquement
-    await saveSchedulesToAPI(updatedTimeSlots);
+    // Mettre à jour le store principal localement
+    setProExpertData({
+      ...proExpertData,
+      schedules: updatedSchedules,
+    });
   };
 
-  const copyTimeSlot = (slot: UITimeSlot) => {
+  // Ajouter un nouveau créneau localement
+  const handleAddTimeSlot = () => {
+    if (!selectedDate || !proExpertData?.schedules) return;
+
+    const result = addTimeSlotLocal(proExpertData.schedules, selectedDate);
+
+    // Mettre à jour le store principal
+    setProExpertData({
+      ...proExpertData,
+      schedules: result.schedules,
+    });
+  };
+
+  // Sauvegarder sur le serveur avec debouncing pour éviter les doublons
+  const handleSaveToServer = async () => {
+    if (!proExpertData?.schedules) return;
+    
+    // Annuler le timeout précédent s'il existe
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    // Programmer la sauvegarde avec un délai
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        await saveSchedulesToServer(
+          proExpertData.schedules || [],
+          async (updateData: any) => {
+            const result = await updateProExpertMutation.mutateAsync(updateData);
+            return result.data;
+          }
+        );
+      } catch (error) {
+        console.error("Error saving to server:", error);
+      }
+    }, 500); // Attendre 500ms avant de sauvegarder
+  };
+
+  // Nettoyer le timeout au démontage du composant
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const copyTimeSlot = (slot: any) => {
     const text = `${slot.startTime} à ${slot.endTime}`;
     navigator.clipboard.writeText(text);
   };
@@ -201,13 +198,6 @@ export default function TimeSlotsManager({
             </div>
           )}
 
-          {/* Message si aucun créneau */}
-          {timeSlots.length === 0 && (
-            <div className="text-center text-gray-600 py-4">
-              Aucun créneau pour ce jour.
-            </div>
-          )}
-
           {/* Afficher les créneaux existants */}
           {timeSlots.map((slot) => (
             <div key={slot.id} className="flex items-center gap-2 sm:gap-4">
@@ -215,8 +205,14 @@ export default function TimeSlotsManager({
                 <Select
                   value={slot.startTime}
                   onValueChange={(value) =>
-                    updateTimeSlot(slot.id, "startTime", value)
+                    handleUpdateTimeSlot(slot.id, "startTime", value)
                   }
+                  onOpenChange={(open) => {
+                    if (!open && slot.endTime) {
+                      // Sauvegarder seulement si endTime est rempli
+                      handleSaveToServer();
+                    }
+                  }}
                 >
                   <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
                     <SelectValue />
@@ -235,8 +231,16 @@ export default function TimeSlotsManager({
                 <Select
                   value={slot.endTime}
                   onValueChange={(value) =>
-                    updateTimeSlot(slot.id, "endTime", value)
+                    handleUpdateTimeSlot(slot.id, "endTime", value)
                   }
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      // Attendre un peu pour que la valeur soit mise à jour, puis sauvegarder
+                      setTimeout(() => {
+                        handleSaveToServer();
+                      }, 100);
+                    }
+                  }}
                 >
                   <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
                     <SelectValue />
@@ -263,19 +267,19 @@ export default function TimeSlotsManager({
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex-shrink-0"
-                  onClick={() => removeTimeSlot(slot.id)}
+                  onClick={() => handleRemoveTimeSlot(slot.id)}
                 >
                   <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
                 </Button>
               </div>
             </div>
           ))}
-          
-          {/* Bouton pour ajouter une disponibilité - toujours visible */}
+
+          {/* Bouton pour ajouter une nouvelle disponibilité */}
           <Button
             variant="ghost"
-            onClick={addTimeSlot}
-            className="w-full mt-6 py-4 sm:py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-400 hover:bg-gray-50 text-gray-700 text-sm sm:text-base"
+            onClick={handleAddTimeSlot}
+            className="w-full mt-6 py-4 sm:py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-400 hover:bg-gray-50 text-gray-700 text-sm sm:text-base cursor-pointer"
           >
             <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Ajouter une disponibilité

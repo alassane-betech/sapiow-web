@@ -1,40 +1,14 @@
 "use client";
-import { useGetProAppointments } from "@/api/appointments/useAppointments";
-import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { ProfileAvatar } from "@/components/common/ProfileAvatar";
 import { ShareLinkButton } from "@/components/common/ShareLinkButton";
-import { useUserStore } from "@/store/useUser";
-import React, { useMemo, useState } from "react";
+import { useModeSwitch } from "@/hooks/useModeSwitch";
+import { useTodayVisios } from "@/hooks/useTodayVisios";
+import React from "react";
 import { Switch } from "../../ui/switch";
 
 export const Header: React.FC = () => {
-  const [isExpertMode, setIsExpertMode] = useState(true);
-  const { setUser } = useUserStore();
-  const { data: user } = useGetProExpert();
-  const { data: appointments } = useGetProAppointments(user?.id?.toString());
-
-  // Calculer le nombre de visios pour aujourd'hui
-  const todayVisiosCount = useMemo(() => {
-    if (!appointments) return 0;
-    
-    const today = new Date();
-    const todayStr = today.toDateString();
-    
-    // Gérer différentes structures possibles de la réponse API
-    let appointmentsList: any[] = [];
-    
-    if (Array.isArray(appointments)) {
-      appointmentsList = appointments;
-    } else if (appointments && typeof appointments === 'object') {
-      appointmentsList = (appointments as any).appointments || (appointments as any).data || [];
-    }
-    
-    return appointmentsList.filter((appointment: any) => {
-      if (!appointment?.appointment_at) return false;
-      const appointmentDate = new Date(appointment.appointment_at);
-      return appointmentDate.toDateString() === todayStr;
-    }).length;
-  }, [appointments]);
+  const { isExpertMode, handleModeSwitch } = useModeSwitch();
+  const { todayVisiosCount, user } = useTodayVisios();
 
   return (
     <header className="container bg-white px-6 py-4">
@@ -70,9 +44,8 @@ export const Header: React.FC = () => {
             <span className="text-white font-bold">Mode expert</span>
             <Switch
               checked={isExpertMode}
-              onCheckedChange={setIsExpertMode}
+              onCheckedChange={handleModeSwitch}
               className="data-[state=checked]:bg-[#1E293B]"
-              onClick={() => setUser({ type: "client" })}
             />
           </div>
         </div>

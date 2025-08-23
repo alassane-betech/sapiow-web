@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import { useUserStore } from "@/store/useUser";
 import { useQuery } from "@tanstack/react-query";
 
 // Types
@@ -14,6 +15,7 @@ export interface StatisticsFilters {
 
 // Hook GET pour récupérer les statistiques avec filtres optionnels
 export const useGetStatistics = (filters?: StatisticsFilters) => {
+  const { user } = useUserStore();
   const queryParams = new URLSearchParams();
 
   if (filters?.start) {
@@ -32,5 +34,6 @@ export const useGetStatistics = (filters?: StatisticsFilters) => {
   return useQuery<StatisticsData>({
     queryKey: ["statistics", filters?.start, filters?.end],
     queryFn: () => apiClient.get<StatisticsData>(endpoint),
+    enabled: user.type === "expert",
   });
 };
