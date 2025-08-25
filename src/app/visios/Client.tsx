@@ -4,6 +4,7 @@ import { useGetCustomer } from "@/api/customer/useCustomer";
 import { UpcomingVideoCall } from "@/components/common/DarkSessionCard";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { SessionDetailSheet } from "@/components/visios/SessionDetailSheet";
+import { useCallStore } from "@/store/useCall";
 import {
   filterAndSortAppointments,
   transformAppointmentToSessionData,
@@ -11,11 +12,14 @@ import {
   type SessionData,
 } from "@/utils/appointmentUtils";
 import { useMemo, useState } from "react";
+import VideoConsultation from "../VideoCall/video-consultation";
 
 export default function Client() {
+  const { setAppointmentId } = useCallStore();
   const [selectedSession, setSelectedSession] = useState<SessionData | null>(
     null
   );
+  const { isVideoCallOpen, setIsVideoCallOpen } = useCallStore();
 
   const handleViewDetails = (sessionData: SessionData) => {
     setSelectedSession(sessionData);
@@ -23,6 +27,13 @@ export default function Client() {
 
   const handleCloseDetails = () => {
     setSelectedSession(null);
+  };
+
+  const handleStartVideoCall = (appointmentId: string) => {
+    console.log({ appointmentId });
+    setAppointmentId(appointmentId);
+    setIsVideoCallOpen(true);
+    setSelectedSession(null); // Fermer le sheet modal
   };
 
   const { data: customer } = useGetCustomer();
@@ -64,72 +75,89 @@ export default function Client() {
 
   return (
     <div>
-      <HeaderClient text="Mes visioconférences" />
-      <div className="w-full my-4 px-5 pb-10">
-        {/* Section Visio à venir */}
-        <h2 className="mb-3">Visio à venir</h2>
-        {upcomingConfirmed.length > 0 ? (
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-            {upcomingConfirmed.map((appointment: ApiAppointment) => {
-              const sessionData = transformAppointmentToSessionData(appointment);
-              return (
-                <UpcomingVideoCall
-                  key={appointment.id}
-                  date={sessionData.date}
-                  appointmentAt={appointment.appointment_at}
-                  profileImage={sessionData.profileImage}
-                  name={sessionData.professionalName}
-                  title={sessionData.professionalTitle}
-                  onViewDetails={() => handleViewDetails(sessionData)}
-                  variant="dark"
-                  className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
-            <p className="text-gray-500">
-              Aucune visioconférence confirmée à venir
-            </p>
-          </div>
-        )}
+      {/* Header */}
+      {isVideoCallOpen ? (
+        <HeaderClient text="Session en cours" />
+      ) : (
+        <HeaderClient text="Mes visioconférences" />
+      )}
 
-        {/* Section Prochaines visios */}
-        <h2 className="mb-3 mt-6">Prochaines visios</h2>
-        {otherSessionsData.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-            {otherUpcoming.map((appointment: ApiAppointment) => {
-              const sessionData = transformAppointmentToSessionData(appointment);
-              return (
-                <UpcomingVideoCall
-                  key={appointment.id}
-                  date={sessionData.date}
-                  appointmentAt={appointment.appointment_at}
-                  profileImage={sessionData.profileImage}
-                  name={sessionData.professionalName}
-                  title={sessionData.professionalTitle}
-                  onViewDetails={() => handleViewDetails(sessionData)}
-                  variant="light"
-                  className="w-full h-[184px]"
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-10">
-            <p className="text-gray-500">
-              Aucune autre visioconférence programmée
-            </p>
-          </div>
-        )}
-      </div>
+      {/* Contenu principal */}
+      {isVideoCallOpen ? (
+        <VideoConsultation
+          isOpen={isVideoCallOpen}
+          onClose={() => setIsVideoCallOpen(false)}
+        />
+      ) : (
+        <div className="w-full my-4 px-5 pb-10">
+          {/* Section Visio à venir */}
+          <h2 className="mb-3">Visio à venir</h2>
+          {upcomingConfirmed.length > 0 ? (
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+              {upcomingConfirmed.map((appointment: ApiAppointment) => {
+                const sessionData =
+                  transformAppointmentToSessionData(appointment);
+                return (
+                  <UpcomingVideoCall
+                    key={appointment.id}
+                    date={sessionData.date}
+                    appointmentAt={appointment.appointment_at}
+                    profileImage={sessionData.profileImage}
+                    name={sessionData.professionalName}
+                    title={sessionData.professionalTitle}
+                    onViewDetails={() => handleViewDetails(sessionData)}
+                    variant="dark"
+                    className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
+              <p className="text-gray-500">
+                Aucune visioconférence confirmée à venir
+              </p>
+            </div>
+          )}
+
+          {/* Section Prochaines visios */}
+          <h2 className="mb-3 mt-6">Prochaines visios</h2>
+          {otherSessionsData.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+              {otherUpcoming.map((appointment: ApiAppointment) => {
+                const sessionData =
+                  transformAppointmentToSessionData(appointment);
+                return (
+                  <UpcomingVideoCall
+                    key={appointment.id}
+                    date={sessionData.date}
+                    appointmentAt={appointment.appointment_at}
+                    profileImage={sessionData.profileImage}
+                    name={sessionData.professionalName}
+                    title={sessionData.professionalTitle}
+                    onViewDetails={() => handleViewDetails(sessionData)}
+                    variant="light"
+                    className="w-full h-[184px]"
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-10">
+              <p className="text-gray-500">
+                Aucune autre visioconférence programmée
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Sheet modal de détails de session */}
       <SessionDetailSheet
         session={selectedSession}
         isOpen={!!selectedSession}
         onClose={handleCloseDetails}
+        onStartVideoCall={handleStartVideoCall}
       />
     </div>
   );

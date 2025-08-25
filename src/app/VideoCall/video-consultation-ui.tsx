@@ -23,20 +23,24 @@ export default function VideoConsultationUI({
   onClose,
 }: VideoConsultationUIProps) {
   const { appointmentId } = useCallStore();
-  
-  console.log("🎬 VideoConsultationUI - appointmentId from store:", appointmentId);
-  console.log("🎬 VideoConsultationUI - appointmentId type:", typeof appointmentId);
-  
+
+  console.log(
+    "🎬 VideoConsultationUI - appointmentId from store:",
+    appointmentId
+  );
+  console.log(
+    "🎬 VideoConsultationUI - appointmentId type:",
+    typeof appointmentId
+  );
+
   // Récupérer les données Stream depuis l'API
   const {
     data: streamData,
     isLoading: isLoadingStreamData,
     error: streamError,
   } = useGetStreamCall(appointmentId || undefined);
+  console.log({ appointmentId });
 
-  console.log("🎬 VideoConsultationUI - streamData:", streamData);
-  console.log("🎬 VideoConsultationUI - isLoadingStreamData:", isLoadingStreamData);
-  console.log("🎬 VideoConsultationUI - streamError:", streamError);
   const {
     client,
     call,
@@ -57,8 +61,15 @@ export default function VideoConsultationUI({
   // Gérer les données de l'API et les stocker
   useEffect(() => {
     console.log("📡 Données API récupérées - Mise à jour du store");
-    if (streamData && ((streamData as any)?.proStreamUser || (streamData as any)?.patientStreamUser)) {
-      console.log("📡 Données API récupérées - Mise à jour du store avec:", streamData);
+    if (
+      streamData &&
+      ((streamData as any)?.proStreamUser ||
+        (streamData as any)?.patientStreamUser)
+    ) {
+      console.log(
+        "📡 Données API récupérées - Mise à jour du store avec:",
+        streamData
+      );
       const { useCallStore } = require("@/store/useCall");
       const { setCallData } = useCallStore.getState();
       setCallData(streamData as any);

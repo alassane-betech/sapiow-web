@@ -39,7 +39,7 @@ interface SessionCardProps {
     acceptDisabled?: boolean;
     viewDisabled?: boolean;
   };
-  isUpcoming?: boolean; // Pour distinguer l'onglet "A venir"
+  isUpcoming?: boolean;
   isFlex1?: boolean;
   questions?: AppointmentQuestion[];
   loadingState?: "confirming" | "cancelling" | null;
