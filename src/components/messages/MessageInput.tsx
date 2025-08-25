@@ -1,6 +1,9 @@
+import { usePatientSendMessage } from "@/api/patientMessages/usePatientMessage";
+import { useProSendMessage } from "@/api/porMessages/useProMessage";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useSendMessage } from "@/api/porMessages/useProMessage";
+import { useCurrentUserData } from "@/store/useCurrentUser";
+import { useUserStore } from "@/store/useUser";
 import { Paperclip, Send } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -10,9 +13,16 @@ interface MessageInputProps {
 }
 
 export function MessageInput({ receiverId }: MessageInputProps) {
+  const { currentUser } = useCurrentUserData();
+  const currentProId = currentUser?.id;
+  const currentPatientId = currentUser?.id;
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const sendMessageMutation = useSendMessage();
+  const { user } = useUserStore();
+  const sendMessageMutation =
+    user?.type === "expert"
+      ? useProSendMessage(currentProId || "")
+      : usePatientSendMessage(currentPatientId || "");
 
   // Logique pour ajuster automatiquement la hauteur
   const adjustHeight = () => {
@@ -50,7 +60,7 @@ export function MessageInput({ receiverId }: MessageInputProps) {
       try {
         await sendMessageMutation.mutateAsync({
           receiverId,
-          content: message.trim()
+          content: message.trim(),
         });
         setMessage("");
         adjustHeight();
@@ -94,7 +104,9 @@ export function MessageInput({ receiverId }: MessageInputProps) {
             size="icon"
             className="text-gray-500"
             onClick={handleSendMessage}
-            disabled={!message.trim() || !receiverId || sendMessageMutation.isPending}
+            disabled={
+              !message.trim() || !receiverId || sendMessageMutation.isPending
+            }
           >
             <Send
               className={`h-5 w-5 ${

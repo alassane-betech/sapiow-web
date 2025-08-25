@@ -48,7 +48,7 @@ export interface SendMessageData {
 }
 
 // Hook pour envoyer un message
-export const useProSendMessage = (senderId: string) => {
+export const usePatientSendMessage = (senderId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation<Message, Error, SendMessageData>({
@@ -84,16 +84,16 @@ export const useProSendMessage = (senderId: string) => {
 };
 
 // Hook pour récupérer les messages avec real-time
-export const useProGetMessages = () => {
-  const { currentUser } = useCurrentUserData();
-  const currentProId = currentUser?.id;
+export const usePatientGetMessages = () => {
   const queryClient = useQueryClient();
+  const { currentUser } = useCurrentUserData();
+  const currentPatientId = currentUser?.id;
 
   const query = useQuery<Message[], Error>({
     queryKey: ["messages"],
     queryFn: async () => {
       try {
-        const response = await apiClient.get<Message[]>(`pro-messages`);
+        const response = await apiClient.get<Message[]>(`patient-messages`);
 
         // L'API retourne directement l'objet expert
         return response;
@@ -110,22 +110,20 @@ export const useProGetMessages = () => {
     },
   });
 
-  // Real-time pour tous les messages du pro
+  // Real-time pour tous les messages du patient
   useEffect(() => {
-    if (!currentProId) return;
-
     const channel = supabase
-      .channel(`pro-messages-${currentProId}`)
+      .channel("messages")
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "messages",
-          filter: `or(sender_id.eq.${currentProId},receiver_id.eq.${currentProId})`,
+          filter: `or(sender_id.eq.${currentPatientId},receiver_id.eq.${currentPatientId})`,
         },
         (payload) => {
-          console.log("Real-time pro messages update:", payload);
+          console.log("Real-time patient messages update:", payload);
           // Invalider la liste des messages pour mettre à jour
           queryClient.invalidateQueries({
             queryKey: ["messages"],
@@ -137,25 +135,25 @@ export const useProGetMessages = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient, currentProId]);
+  }, [queryClient, currentPatientId]);
 
   return query;
 };
 
-export const useProGetConversation = (
-  patientId: string,
-  currentProId: string
+export const usePatientGetConversation = (
+  proId: string,
+  currentPatientId: string
 ) => {
   const queryClient = useQueryClient();
 
   const query = useQuery<Message[], Error>({
-    queryKey: ["conversation", patientId],
+    queryKey: ["conversation", proId],
     queryFn: async () => {
-      if (!patientId) return [];
+      if (!proId) return [];
 
       try {
         const response = await apiClient.get<Message[]>(
-          `pro-messages/${patientId}`
+          `patient-messages/${proId}`
         );
 
         return response;
@@ -170,28 +168,28 @@ export const useProGetConversation = (
         );
       }
     },
-    enabled: !!patientId, // Ne pas exécuter si patientId est vide
+    enabled: !!proId, // Ne pas exécuter si patientId est vide
   });
 
   // Real-time pour les messages de cette conversation
   useEffect(() => {
-    if (!patientId || !currentProId) return;
+    if (!proId) return;
 
     const channel = supabase
-      .channel(`pro-conversation-${currentProId}-${patientId}`)
+      .channel(`messages`)
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "messages",
-          filter: `or(and(sender_id.eq.${currentProId},receiver_id.eq.${patientId}),and(sender_id.eq.${patientId},receiver_id.eq.${currentProId}))`,
+          filter: `or(and(sender_id.eq.${currentPatientId},receiver_id.eq.${proId}),and(sender_id.eq.${proId},receiver_id.eq.${currentPatientId}))`,
         },
         (payload) => {
-          console.log("Real-time conversation update:", payload);
+          console.log("Real-time message update:", payload);
           // Invalider et refetch les messages de cette conversation
           queryClient.invalidateQueries({
-            queryKey: ["conversation", patientId],
+            queryKey: ["conversation", proId],
           });
           // Aussi invalider la liste des conversations pour mettre à jour le dernier message
           queryClient.invalidateQueries({
@@ -204,7 +202,7 @@ export const useProGetConversation = (
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [patientId, queryClient, currentProId]);
+  }, [proId, queryClient, currentPatientId]);
 
   return query;
 };

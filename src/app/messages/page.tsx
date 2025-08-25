@@ -1,8 +1,12 @@
 "use client";
 
 import {
-  useGetConversations,
-  useGetMessages,
+  usePatientGetConversation,
+  usePatientGetMessages,
+} from "@/api/patientMessages/usePatientMessage";
+import {
+  useProGetConversation,
+  useProGetMessages,
 } from "@/api/porMessages/useProMessage";
 import { withAuth } from "@/components/common/withAuth";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -12,32 +16,75 @@ import { MessageInput } from "@/components/messages/MessageInput";
 import { MessageItem } from "@/components/messages/MessageItem";
 import { SearchBar } from "@/components/messages/SearchBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCurrentUserData } from "@/store/useCurrentUser";
+import { useUserStore } from "@/store/useUser";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
 function Messages() {
-  const { data: conversationsData } = useGetConversations();
-  console.log("conversationsData", conversationsData);
   const [selectedConversation, setSelectedConversation] = useState<
     string | null
   >(null);
 
   // ID du professionnel actuel (à récupérer depuis le contexte d'auth plus tard)
-  const currentProId = "311f1e9b-aefe-4e59-940e-d956002ff377";
+  const { currentUser } = useCurrentUserData();
+  const currentProId = currentUser?.id;
+  const currentPatientId = currentUser?.id;
+  const { user } = useUserStore();
+
+  // Récupérer tous les messages avec profils pour la liste des conversations
+  const {
+    data: messagesData,
+    isLoading: messagesLoading,
+    error: messagesError,
+  } = user?.type === "expert" ? useProGetMessages() : usePatientGetMessages();
+
+  // Récupérer les messages de la conversation sélectionnée
+  const {
+    data: conversationMessages,
+    isLoading: conversationLoading,
+    error: conversationError,
+  } = user?.type === "expert"
+    ? useProGetConversation(selectedConversation || "", currentProId || "")
+    : usePatientGetConversation(
+        selectedConversation || "",
+        currentPatientId || ""
+      );
+
+  // Extraire les conversations uniques des messages
+  const conversationsData = messagesData
+    ? (() => {
+        const conversationsMap = new Map();
+
+        messagesData.forEach((messageItem: any) => {
+          const profileId = messageItem.profile.id;
+
+          // Si cette conversation n'existe pas encore ou si ce message est plus récent
+          if (
+            !conversationsMap.has(profileId) ||
+            new Date(messageItem.latest_message.created_at) >
+              new Date(
+                conversationsMap.get(profileId).latest_message.created_at
+              )
+          ) {
+            conversationsMap.set(profileId, {
+              profile: messageItem.profile,
+              latest_message: messageItem.latest_message,
+            });
+          }
+        });
+
+        return Array.from(conversationsMap.values());
+      })()
+    : [];
+
+  const conversationsLoading = messagesLoading;
+  const conversationsError = messagesError;
 
   // Trouver la conversation sélectionnée
   const activeConversation = conversationsData?.find(
     (conv) => conv.profile.id === selectedConversation
   );
-
-  // Récupérer les messages de la conversation active
-  const {
-    data: messagesData,
-    isLoading: messagesLoading,
-    error: messagesError,
-  } = useGetMessages(selectedConversation || "", currentProId);
-
-  console.log("messagesData", messagesData);
 
   // Responsive : afficher la liste ou le chat sur mobile
   return (
@@ -54,16 +101,34 @@ function Messages() {
 
             {/* Conversations List */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-              {conversationsData?.map((conversation) => (
-                <ConversationItem
-                  key={conversation.profile.id}
-                  conversation={conversation}
-                  isSelected={conversation.profile.id === selectedConversation}
-                  onClick={() =>
-                    setSelectedConversation(conversation.profile.id)
-                  }
-                />
-              ))}
+              {conversationsLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-exford-blue"></div>
+                </div>
+              ) : conversationsError ? (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-red-500">
+                    Erreur: {conversationsError.message}
+                  </p>
+                </div>
+              ) : conversationsData && conversationsData.length > 0 ? (
+                conversationsData.map((conversation) => (
+                  <ConversationItem
+                    key={conversation.profile.id}
+                    conversation={conversation}
+                    isSelected={
+                      conversation.profile.id === selectedConversation
+                    }
+                    onClick={() =>
+                      setSelectedConversation(conversation.profile.id)
+                    }
+                  />
+                ))
+              ) : (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-gray-500">Aucune conversation trouvée</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -105,17 +170,18 @@ function Messages() {
             <div className="bg-gray-50 flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
               {selectedConversation ? (
                 <>
-                  {messagesLoading ? (
+                  {conversationLoading ? (
                     <div className="flex items-center justify-center h-full">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-exford-blue"></div>
                     </div>
-                  ) : messagesError ? (
+                  ) : conversationError ? (
                     <div className="flex items-center justify-center h-full">
                       <p className="text-red-500">
                         Erreur lors du chargement des messages
                       </p>
                     </div>
-                  ) : messagesData && messagesData.length > 0 ? (
+                  ) : conversationMessages &&
+                    conversationMessages.length > 0 ? (
                     <>
                       {/* Date Separator */}
                       <div className="flex justify-center">
@@ -124,33 +190,41 @@ function Messages() {
                         </span>
                       </div>
 
-                      {/* Messages */}
-                      {messagesData.map((message) => {
-                        const isOwn = message.sender_id === currentProId;
-                        const messageTime = new Date(
-                          message.created_at
-                        ).toLocaleTimeString("fr-FR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        });
+                      {/* Messages de la conversation */}
+                      {conversationMessages
+                        .sort(
+                          (a: any, b: any) =>
+                            new Date(a.created_at).getTime() -
+                            new Date(b.created_at).getTime()
+                        )
+                        .map((message: any) => {
+                          const isOwn = message.sender_id === currentProId;
+                          const messageTime = new Date(
+                            message.created_at
+                          ).toLocaleTimeString("fr-FR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          });
 
-                        return (
-                          <MessageItem
-                            key={message.id}
-                            message={{
-                              id: parseInt(message.id.slice(-8), 16),
-                              message: message.content,
-                              time: messageTime,
-                              isOwn,
-                              avatar: !isOwn
-                                ? activeConversation?.profile.avatar ||
-                                  undefined
-                                : undefined,
-                              hasImage: message.type === "image",
-                            }}
-                          />
-                        );
-                      })}
+                          return (
+                            <MessageItem
+                              key={message.id || Math.random()}
+                              message={{
+                                id: message.id
+                                  ? parseInt(message.id.slice(-8), 16)
+                                  : Math.floor(Math.random() * 1000000),
+                                message: message.content || "",
+                                time: messageTime,
+                                isOwn,
+                                avatar: !isOwn
+                                  ? activeConversation?.profile.avatar ||
+                                    undefined
+                                  : undefined,
+                                hasImage: message.type === "image",
+                              }}
+                            />
+                          );
+                        })}
                     </>
                   ) : (
                     <div className="flex items-center justify-center h-full">
@@ -185,15 +259,31 @@ function Messages() {
             </h2>
             <SearchBar className="sticky top-0 z-10 bg-white pt-2 pb-2" />
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-              {conversationsData?.map((conversation) => (
-                <ConversationItem
-                  key={conversation.profile.id}
-                  conversation={conversation}
-                  onClick={() =>
-                    setSelectedConversation(conversation.profile.id)
-                  }
-                />
-              ))}
+              {conversationsLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-exford-blue"></div>
+                </div>
+              ) : conversationsError ? (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-red-500">
+                    Erreur: {conversationsError.message}
+                  </p>
+                </div>
+              ) : conversationsData && conversationsData.length > 0 ? (
+                conversationsData.map((conversation) => (
+                  <ConversationItem
+                    key={conversation.profile.id}
+                    conversation={conversation}
+                    onClick={() =>
+                      setSelectedConversation(conversation.profile.id)
+                    }
+                  />
+                ))
+              ) : (
+                <div className="flex items-center justify-center h-32">
+                  <p className="text-gray-500">Aucune conversation trouvée</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -263,10 +353,12 @@ function Messages() {
 
                     return (
                       <MessageItem
-                        key={message.id}
+                        key={message.id || Math.random()}
                         message={{
-                          id: parseInt(message.id.slice(-8), 16),
-                          message: message.content,
+                          id: message.id
+                            ? parseInt(message.id.slice(-8), 16)
+                            : Math.floor(Math.random() * 1000000),
+                          message: message.content || "",
                           time: messageTime,
                           isOwn,
                           avatar: !isOwn
