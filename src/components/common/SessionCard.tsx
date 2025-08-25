@@ -167,6 +167,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             onOpenChange={setIsOpen}
             profileImage={profileImage}
             name={name}
+            sessionDescription={sessionDescription}
             isUpcoming={isUpcoming}
             onAccept={onAccept}
             onCancel={onCancel}

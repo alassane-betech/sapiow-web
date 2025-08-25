@@ -1,28 +1,43 @@
 "use client";
 
+import {
+  useGetConversations,
+  useGetMessages,
+} from "@/api/porMessages/useProMessage";
 import { withAuth } from "@/components/common/withAuth";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { AppSidebar } from "@/components/layout/Sidebare";
+import { ConversationItem } from "@/components/messages/ConversationItem";
+import { MessageInput } from "@/components/messages/MessageInput";
+import { MessageItem } from "@/components/messages/MessageItem";
+import { SearchBar } from "@/components/messages/SearchBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
-import { ConversationItem } from "@/components/messages/ConversationItem";
-import { MessageItem } from "@/components/messages/MessageItem";
-import { SearchBar } from "@/components/messages/SearchBar";
-import { MessageInput } from "@/components/messages/MessageInput";
-import { conversations, messages } from "@/data/mockMessages";
-
-
 
 function Messages() {
+  const { data: conversationsData } = useGetConversations();
+  console.log("conversationsData", conversationsData);
   const [selectedConversation, setSelectedConversation] = useState<
-    number | null
+    string | null
   >(null);
 
+  // ID du professionnel actuel (à récupérer depuis le contexte d'auth plus tard)
+  const currentProId = "311f1e9b-aefe-4e59-940e-d956002ff377";
+
   // Trouver la conversation sélectionnée
-  const activeConversation = conversations.find(
-    (conv) => conv.id === selectedConversation
+  const activeConversation = conversationsData?.find(
+    (conv) => conv.profile.id === selectedConversation
   );
+
+  // Récupérer les messages de la conversation active
+  const {
+    data: messagesData,
+    isLoading: messagesLoading,
+    error: messagesError,
+  } = useGetMessages(selectedConversation || "", currentProId);
+
+  console.log("messagesData", messagesData);
 
   // Responsive : afficher la liste ou le chat sur mobile
   return (
@@ -36,15 +51,17 @@ function Messages() {
           {/* Sidebar des conversations */}
           <div className="w-80 bg-white flex flex-col mr-4">
             <SearchBar />
-            
+
             {/* Conversations List */}
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-              {conversations.map((conversation) => (
+              {conversationsData?.map((conversation) => (
                 <ConversationItem
-                  key={conversation.id}
+                  key={conversation.profile.id}
                   conversation={conversation}
-                  isSelected={conversation.id === selectedConversation}
-                  onClick={() => setSelectedConversation(conversation.id)}
+                  isSelected={conversation.profile.id === selectedConversation}
+                  onClick={() =>
+                    setSelectedConversation(conversation.profile.id)
+                  }
                 />
               ))}
             </div>
@@ -55,40 +72,104 @@ function Messages() {
             {/* Chat Header */}
             <div className="border-b border-gray-200 p-4">
               <div className="flex items-center">
-                <Avatar className="h-10 w-10 mr-3">
-                  <AvatarImage
-                    src={activeConversation?.avatar || "/assets/prof1.jpg"}
-                  />
-                  <AvatarFallback>
-                    {activeConversation?.name?.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+                {activeConversation && (
+                  <Avatar
+                    key={activeConversation.profile.id}
+                    className="h-10 w-10 mr-3"
+                  >
+                    {activeConversation.profile.avatar ? (
+                      <AvatarImage src={activeConversation.profile.avatar} />
+                    ) : null}
+                    <AvatarFallback className="bg-blue-100 text-exford-blue font-semibold text-sm flex items-center justify-center">
+                      {activeConversation.profile.first_name &&
+                      activeConversation.profile.last_name
+                        ? `${activeConversation.profile.first_name[0]}${activeConversation.profile.last_name[0]}`.toUpperCase()
+                        : "UN"}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
                 <div>
                   <h2 className="font-semibold text-gray-900 font-outfit text-base">
-                    {activeConversation?.name ||
-                      "Sélectionnez une conversation"}
+                    {activeConversation
+                      ? `${activeConversation.profile.first_name} ${activeConversation.profile.last_name}`
+                      : "Sélectionnez une conversation"}
                   </h2>
-                  <p className="text-sm text-green-600">Actif maintenant</p>
+                  {activeConversation && (
+                    <p className="text-sm text-green-600">Actif maintenant</p>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Messages Area */}
             <div className="bg-gray-50 flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
-              {/* Date Separator */}
-              <div className="flex justify-center">
-                <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
-                  Aujourd'hui
-                </span>
-              </div>
+              {selectedConversation ? (
+                <>
+                  {messagesLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-exford-blue"></div>
+                    </div>
+                  ) : messagesError ? (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-red-500">
+                        Erreur lors du chargement des messages
+                      </p>
+                    </div>
+                  ) : messagesData && messagesData.length > 0 ? (
+                    <>
+                      {/* Date Separator */}
+                      <div className="flex justify-center">
+                        <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+                          Aujourd'hui
+                        </span>
+                      </div>
 
-              {/* Messages */}
-              {messages.map((message) => (
-                <MessageItem key={message.id} message={message} />
-              ))}
+                      {/* Messages */}
+                      {messagesData.map((message) => {
+                        const isOwn = message.sender_id === currentProId;
+                        const messageTime = new Date(
+                          message.created_at
+                        ).toLocaleTimeString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
+
+                        return (
+                          <MessageItem
+                            key={message.id}
+                            message={{
+                              id: parseInt(message.id.slice(-8), 16),
+                              message: message.content,
+                              time: messageTime,
+                              isOwn,
+                              avatar: !isOwn
+                                ? activeConversation?.profile.avatar ||
+                                  undefined
+                                : undefined,
+                              hasImage: message.type === "image",
+                            }}
+                          />
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-gray-500">
+                        Aucun message dans cette conversation
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">
+                    Sélectionnez une conversation pour voir les messages
+                  </p>
+                </div>
+              )}
             </div>
 
-            <MessageInput />
+            <MessageInput receiverId={selectedConversation || undefined} />
           </div>
         </div>
       </div>
@@ -104,11 +185,13 @@ function Messages() {
             </h2>
             <SearchBar className="sticky top-0 z-10 bg-white pt-2 pb-2" />
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-              {conversations.map((conversation) => (
+              {conversationsData?.map((conversation) => (
                 <ConversationItem
-                  key={conversation.id}
+                  key={conversation.profile.id}
                   conversation={conversation}
-                  onClick={() => setSelectedConversation(conversation.id)}
+                  onClick={() =>
+                    setSelectedConversation(conversation.profile.id)
+                  }
                 />
               ))}
             </div>
@@ -125,35 +208,85 @@ function Messages() {
               >
                 <ArrowLeft className="h-6 w-6 text-gray-900" />
               </button>
-              <Avatar className="h-10 w-10 mr-3">
-                <AvatarImage
-                  src={activeConversation?.avatar || "/assets/prof1.jpg"}
-                />
-                <AvatarFallback>
-                  {activeConversation?.name?.charAt(0) || "U"}
+              <Avatar
+                key={activeConversation?.profile.id}
+                className="h-10 w-10 mr-3"
+              >
+                {activeConversation?.profile.avatar ? (
+                  <AvatarImage src={activeConversation.profile.avatar} />
+                ) : null}
+                <AvatarFallback className="bg-blue-100 text-exford-blue font-semibold text-sm flex items-center justify-center">
+                  {activeConversation?.profile.first_name &&
+                  activeConversation?.profile.last_name
+                    ? `${activeConversation.profile.first_name[0]}${activeConversation.profile.last_name[0]}`.toUpperCase()
+                    : "UN"}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h2 className="font-semibold text-gray-900">
-                  {activeConversation?.name || "Sélectionnez une conversation"}
+                  {activeConversation
+                    ? `${activeConversation.profile.first_name} ${activeConversation.profile.last_name}`
+                    : "Sélectionnez une conversation"}
                 </h2>
                 <p className="text-sm text-green-600">Actif maintenant</p>
               </div>
             </div>
             {/* Messages Area */}
             <div className="bg-gray-50 flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
-              {/* Date Separator */}
-              <div className="flex justify-center">
-                <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
-                  Aujourd'hui
-                </span>
-              </div>
-              {/* Messages */}
-              {messages.map((message) => (
-                <MessageItem key={message.id} message={message} />
-              ))}
+              {messagesLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-exford-blue"></div>
+                </div>
+              ) : messagesError ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-red-500">
+                    Erreur lors du chargement des messages
+                  </p>
+                </div>
+              ) : messagesData && messagesData.length > 0 ? (
+                <>
+                  {/* Date Separator */}
+                  <div className="flex justify-center">
+                    <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+                      Aujourd'hui
+                    </span>
+                  </div>
+                  {/* Messages */}
+                  {messagesData.map((message) => {
+                    const isOwn = message.sender_id === currentProId;
+                    const messageTime = new Date(
+                      message.created_at
+                    ).toLocaleTimeString("fr-FR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+
+                    return (
+                      <MessageItem
+                        key={message.id}
+                        message={{
+                          id: parseInt(message.id.slice(-8), 16),
+                          message: message.content,
+                          time: messageTime,
+                          isOwn,
+                          avatar: !isOwn
+                            ? activeConversation?.profile.avatar || undefined
+                            : undefined,
+                          hasImage: message.type === "image",
+                        }}
+                      />
+                    );
+                  })}
+                </>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">
+                    Aucun message dans cette conversation
+                  </p>
+                </div>
+              )}
             </div>
-            <MessageInput />
+            <MessageInput receiverId={selectedConversation || undefined} />
           </div>
         )}
       </div>

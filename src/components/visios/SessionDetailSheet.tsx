@@ -12,7 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Send, X, Video } from "lucide-react";
+import { Send, Video, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../common/Button";
 
@@ -182,7 +182,7 @@ export function SessionDetailSheet({
                   <div className="mb-4">
                     {!showQuestionForm ? (
                       <Button
-                        label="Ajouter une question"
+                        label="Ajoute une autre question"
                         className="h-[40px] w-full rounded-[8px] text-base font-bold font-figtree"
                         onClick={handleToggleQuestionForm}
                       />

@@ -419,7 +419,7 @@ export default function VisioPlanningCalendar({
                     onClick={() => setSelectedTime(slot.time)}
                     disabled={!slot.available}
                     className={`
-                  relative p-3 rounded-lg text-sm font-medium transition-all w-[110px]
+                  relative p-3 rounded-lg text-sm font-medium transition-all w-[110px] cursor-pointer
                   ${
                     selectedTime === slot.time
                       ? "bg-exford-blue text-white"

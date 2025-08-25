@@ -1,4 +1,5 @@
 "use client";
+import { withAuth } from "@/components/common/withAuth";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import {
   Elements,
@@ -7,12 +8,12 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { withAuth } from "@/components/common/withAuth";
 import { useSearchParams } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 
 // Bouton de paiement
 function CheckoutForm() {
+  const [loading, setLoading] = useState(false);
   const stripe = useStripe();
   const elements = useElements();
   const searchParams = useSearchParams();
@@ -22,7 +23,7 @@ function CheckoutForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setLoading(true);
     if (!stripe || !elements) return;
 
     // Confirmation du paiement
@@ -37,6 +38,7 @@ function CheckoutForm() {
 
     if (error) {
       console.error(error.message);
+      setLoading(false);
       alert(error.message);
     }
     // Note: Si le paiement réussit, Stripe redirige automatiquement vers return_url
@@ -50,10 +52,10 @@ function CheckoutForm() {
       <PaymentElement />
       <button
         type="submit"
-        disabled={!stripe}
+        disabled={!stripe || loading}
         className="bg-blue-600 text-white p-2 rounded cursor-pointer"
       >
-        {stripe ? "Payer" : "Chargement..."}
+        {stripe && !loading ? "Payer" : "Chargement..."}
       </button>
     </form>
   );

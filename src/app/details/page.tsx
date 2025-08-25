@@ -4,16 +4,16 @@ import BookedSessionCard from "@/components/common/BookedSessionCard";
 import { Button } from "@/components/common/Button";
 import HowItWorksCard from "@/components/common/HowItWorksCard";
 import VisioPlanningCalendar from "@/components/common/VisioPlanningCalendar";
+import { withAuth } from "@/components/common/withAuth";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { Badge } from "@/components/ui/badge";
 import { Button as ButtonUI } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
-import { useAppointmentStore } from "@/store/useAppointmentStore";
-import { withAuth } from "@/components/common/withAuth";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,10 +21,67 @@ import { Suspense, useEffect } from "react";
 import OfferSelection from "../home/OfferSelection";
 import ProfessionalCard from "../home/ProfessionalCard";
 
+import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointments";
+import { useGetCustomer } from "@/api/customer/useCustomer";
 import { useGetProExpertById } from "@/api/proExpert/useProExpert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
 import { useDetailsLogic } from "@/hooks/useDetailsLogic";
+
+// Type definitions based on actual API response
+interface Patient {
+  id: string;
+  avatar: string | null;
+  domains: any;
+  user_id: string;
+  language: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+interface Pro {
+  id: string;
+  job: string;
+  avatar: string;
+  domains: any;
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+interface Session {
+  created_at: string;
+  exclusive_ressources: boolean;
+  id: string;
+  is_active: boolean;
+  mentorship: boolean;
+  name: string;
+  one_on_one: boolean;
+  price: number;
+  pro_id: string;
+  session_nature: string;
+  session_type: string;
+  strategic_session: boolean;
+  support: boolean;
+  updated_at: string;
+  video_call: boolean;
+  webinar: boolean;
+}
+
+interface Appointment {
+  appointment_at: string;
+  appointment_questions: any[];
+  created_at: string;
+  id: string;
+  patient: Patient;
+  patient_id: string;
+  pro: Pro;
+  pro_id: string;
+  session: Session;
+  session_id: string;
+  status: string;
+  updated_at: string;
+}
 
 // Données des professionnels (à déplacer dans un contexte ou API plus tard)
 const professionalsSimilar = [
@@ -80,6 +137,11 @@ const professionalsSimilar = [
 ];
 
 function ProfessionalDetailContent() {
+  const { data: customer } = useGetCustomer();
+  const { data: appointments } = useGetPatientAppointmentsById(
+    customer?.id || ""
+  ) as { data: Appointment[] };
+  console.log({ appointments });
   const isMobile = useIsMobile();
   const isMobileOrTablet = useIsMobileOrTablet();
   const router = useRouter();
@@ -419,13 +481,39 @@ function ProfessionalDetailContent() {
                 </div>
                 <div className="p-6">
                   <BookedSessionCard
-                    date={appointment?.appointment_at ? new Date(appointment.appointment_at).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Date non disponible"}
-                    time={appointment?.appointment_at ? new Date(appointment.appointment_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : "Heure non disponible"}
-                    duration="60 minutes"
-                    sessionType="Session rapide visio"
-                    professionalName={professional?.name || "Expert"}
+                    date={
+                      appointments?.[0]?.appointment_at
+                        ? new Date(
+                            appointments[0].appointment_at
+                          ).toLocaleDateString("fr-FR", {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : "Date non disponible"
+                    }
+                    time={
+                      appointments?.[0]?.appointment_at
+                        ? new Date(
+                            appointments[0].appointment_at
+                          ).toLocaleTimeString("fr-FR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Heure non disponible"
+                    }
+                    duration={appointments?.[0]?.session?.name}
+                    sessionType="Session"
+                    professionalName={
+                      appointments?.[0]?.pro?.first_name +
+                        " " +
+                        appointments?.[0]?.pro?.last_name || "Expert"
+                    }
                     professionalTitle="Expert"
-                    profileImage={professional?.image || "/assets/icons/pro2.png"}
+                    profileImage={
+                      appointments?.[0]?.pro?.avatar || "/assets/icons/pro2.png"
+                    }
                   />
                 </div>
                 <Button
@@ -477,11 +565,35 @@ function ProfessionalDetailContent() {
               </div>
               <div className="w-full max-w-[358px] mb-6">
                 <BookedSessionCard
-                  date={appointment?.appointment_at ? new Date(appointment.appointment_at).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : "Date non disponible"}
-                  time={appointment?.appointment_at ? new Date(appointment.appointment_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : "Heure non disponible"}
+                  date={
+                    appointments?.[0]?.appointment_at
+                      ? new Date(
+                          appointments[0].appointment_at
+                        ).toLocaleDateString("fr-FR", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "Date non disponible"
+                  }
+                  time={
+                    appointments?.[0]?.appointment_at
+                      ? new Date(
+                          appointments[0].appointment_at
+                        ).toLocaleTimeString("fr-FR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "Heure non disponible"
+                  }
                   duration="60 minutes"
                   sessionType="Session rapide visio"
-                  professionalName={professional?.name || "Expert"}
+                  professionalName={
+                    appointments?.[0]?.pro?.first_name +
+                      " " +
+                      appointments?.[0]?.pro?.last_name || "Expert"
+                  }
                   professionalTitle="Expert"
                   profileImage={professional?.image || "/assets/icons/pro2.png"}
                 />

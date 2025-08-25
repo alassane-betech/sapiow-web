@@ -3,8 +3,9 @@ import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { Button as ButtonUI } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useFavorites } from "@/hooks/useFavorites";
 import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
+import { useFavorites } from "@/hooks/useFavorites";
+import { usePayStore } from "@/store/usePay";
 import { ChevronLeft, Search } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -18,7 +19,18 @@ interface HeaderClientProps {
 export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
   const router = useRouter();
   const { isFavoriActive, handleFavoriToggle } = useFavorites();
-  const { handleExpertModeSwitch, handleModeSwitch, hasExpertProfile, isExpertMode } = useExpertModeSwitch();
+  const { setIsPaid } = usePayStore();
+
+  const handleHome = () => {
+    router.push("/");
+    setIsPaid(false);
+  };
+  const {
+    handleExpertModeSwitch,
+    handleModeSwitch,
+    hasExpertProfile,
+    isExpertMode,
+  } = useExpertModeSwitch();
 
   return (
     <header className="container lg:border-b-2 lg:border-snow-blue py-4 sticky top-0 z-20 bg-white">
@@ -29,7 +41,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
             <div className="flex items-center gap-2">
               {isBack && (
                 <ButtonUI
-                  onClick={() => router.back()}
+                  onClick={handleHome}
                   className="w-12 h-12 p-[3px] rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 shadow-none bg-snow-blue"
                 >
                   <ChevronLeft />

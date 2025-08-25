@@ -29,11 +29,12 @@ interface SessionModalProps {
   trigger: React.ReactNode;
   profileImage: string;
   name: string;
+  sessionDescription: string;
   isUpcoming?: boolean;
   onAccept?: () => void;
   onCancel?: () => void;
   questions?: AppointmentQuestion[];
-  loadingState?: 'confirming' | 'cancelling' | null;
+  loadingState?: "confirming" | "cancelling" | null;
 }
 
 export const SessionModal: React.FC<SessionModalProps> = ({
@@ -42,6 +43,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   trigger,
   profileImage,
   name,
+  sessionDescription,
   isUpcoming = false,
   onAccept,
   onCancel,
@@ -103,7 +105,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               Session name :
             </p>
             <p className="text-sm text-gunmetal-gray font-bold font-figtree">
-              Session rapide visio - 60 minutes
+              {sessionDescription}
             </p>
           </div>
 
@@ -168,13 +170,17 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                     onCancel?.();
                     onOpenChange(false);
                   }}
-                  disabled={loadingState === 'cancelling'}
-                  label={loadingState === 'cancelling' ? (
-                    <div className="flex items-center gap-2">
-                      <LoadingSpinner size="sm" />
-                      Annulation...
-                    </div>
-                  ) : "Refuser"}
+                  disabled={loadingState === "cancelling"}
+                  label={
+                    loadingState === "cancelling" ? (
+                      <div className="flex items-center gap-2">
+                        <LoadingSpinner size="sm" />
+                        Annulation...
+                      </div>
+                    ) : (
+                      "Refuser"
+                    )
+                  }
                 />
 
                 <Button
@@ -183,13 +189,17 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                     onAccept?.();
                     onOpenChange(false);
                   }}
-                  disabled={loadingState === 'confirming'}
-                  label={loadingState === 'confirming' ? (
-                    <div className="flex items-center gap-2">
-                      <LoadingSpinner size="sm" />
-                      Confirmation...
-                    </div>
-                  ) : "Accepter"}
+                  disabled={loadingState === "confirming"}
+                  label={
+                    loadingState === "confirming" ? (
+                      <div className="flex items-center gap-2">
+                        <LoadingSpinner size="sm" />
+                        Confirmation...
+                      </div>
+                    ) : (
+                      "Accepter"
+                    )
+                  }
                 />
               </div>
             )}

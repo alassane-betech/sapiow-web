@@ -68,21 +68,24 @@ export default function Client() {
       <div className="w-full my-4 px-5 pb-10">
         {/* Section Visio à venir */}
         <h2 className="mb-3">Visio à venir</h2>
-        {upcomingSessionsData.length > 0 ? (
+        {upcomingConfirmed.length > 0 ? (
           <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-            {upcomingSessionsData.map((session) => (
-              <UpcomingVideoCall
-                key={session.id}
-                date={session.date}
-                duration={session.duration.replace(" minutes", "")}
-                profileImage={session.profileImage}
-                name={session.professionalName}
-                title={session.professionalTitle}
-                onViewDetails={() => handleViewDetails(session)}
-                variant="dark"
-                className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
-              />
-            ))}
+            {upcomingConfirmed.map((appointment: ApiAppointment) => {
+              const sessionData = transformAppointmentToSessionData(appointment);
+              return (
+                <UpcomingVideoCall
+                  key={appointment.id}
+                  date={sessionData.date}
+                  appointmentAt={appointment.appointment_at}
+                  profileImage={sessionData.profileImage}
+                  name={sessionData.professionalName}
+                  title={sessionData.professionalTitle}
+                  onViewDetails={() => handleViewDetails(sessionData)}
+                  variant="dark"
+                  className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
@@ -96,19 +99,22 @@ export default function Client() {
         <h2 className="mb-3 mt-6">Prochaines visios</h2>
         {otherSessionsData.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-            {otherSessionsData.map((session) => (
-              <UpcomingVideoCall
-                key={session.id}
-                date={session.date}
-                duration={session.duration.replace(" minutes", "")}
-                profileImage={session.profileImage}
-                name={session.professionalName}
-                title={session.professionalTitle}
-                onViewDetails={() => handleViewDetails(session)}
-                variant="light"
-                className="w-full h-[184px]"
-              />
-            ))}
+            {otherUpcoming.map((appointment: ApiAppointment) => {
+              const sessionData = transformAppointmentToSessionData(appointment);
+              return (
+                <UpcomingVideoCall
+                  key={appointment.id}
+                  date={sessionData.date}
+                  appointmentAt={appointment.appointment_at}
+                  profileImage={sessionData.profileImage}
+                  name={sessionData.professionalName}
+                  title={sessionData.professionalTitle}
+                  onViewDetails={() => handleViewDetails(sessionData)}
+                  variant="light"
+                  className="w-full h-[184px]"
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-10">

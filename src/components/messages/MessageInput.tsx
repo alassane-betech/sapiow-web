@@ -1,12 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip } from "lucide-react";
+import { useSendMessage } from "@/api/porMessages/useProMessage";
+import { Paperclip, Send } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-export function MessageInput() {
+interface MessageInputProps {
+  receiverId?: string;
+}
+
+export function MessageInput({ receiverId }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sendMessageMutation = useSendMessage();
 
   // Logique pour ajuster automatiquement la hauteur
   const adjustHeight = () => {
@@ -14,7 +20,7 @@ export function MessageInput() {
     if (textarea) {
       textarea.style.height = "auto";
       const scrollHeight = textarea.scrollHeight;
-      const maxHeight = 96; // ~4 lignes (24px par ligne)
+      const maxHeight = 96;
 
       if (scrollHeight <= maxHeight) {
         textarea.style.height = `${scrollHeight}px`;
@@ -29,6 +35,29 @@ export function MessageInput() {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
     adjustHeight();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+    // Shift+Enter permet le saut de ligne naturel
+  };
+
+  const handleSendMessage = async () => {
+    if (message.trim() && receiverId) {
+      try {
+        await sendMessageMutation.mutateAsync({
+          receiverId,
+          content: message.trim()
+        });
+        setMessage("");
+        adjustHeight();
+      } catch (error) {
+        console.error("Erreur lors de l'envoi du message:", error);
+      }
+    }
   };
 
   useEffect(() => {
@@ -46,19 +75,33 @@ export function MessageInput() {
             ref={textareaRef}
             value={message}
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             placeholder="Votre message"
             className="border-none bg-transparent shadow-none resize-none min-h-[24px] leading-6 py-2 scrollbar-hide"
             rows={1}
           />
-          <button className="cursor-pointer flex-shrink-0" type="button">
-            <Image
+          {/* <button className="cursor-pointer flex-shrink-0" type="button"> */}
+          {/* <Image
               src="/assets/icons/files.svg"
               alt="clip"
               width={24}
               height={24}
               className="w-6 h-6 opacity-60"
+            /> */}
+          {/* </button> */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-500"
+            onClick={handleSendMessage}
+            disabled={!message.trim() || !receiverId || sendMessageMutation.isPending}
+          >
+            <Send
+              className={`h-5 w-5 ${
+                message.trim() ? "text-exford-blue" : "text-gray-400"
+              }`}
             />
-          </button>
+          </Button>
         </div>
         <Button variant="ghost" size="icon" className="text-gray-500">
           <Image

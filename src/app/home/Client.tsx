@@ -36,15 +36,13 @@ export default function Client() {
     customer?.id || ""
   );
 
-  // Filtrage et transformation des visios confirmées
-  const upcomingSessionsData = useMemo(() => {
+  // Filtrage des visios confirmées (on garde les données originales)
+  const upcomingAppointments = useMemo(() => {
     if (!appointments) return [];
     const { upcomingConfirmed } = filterAndSortAppointments(
       appointments as ApiAppointment[]
     );
-    return upcomingConfirmed.map((apt) =>
-      transformAppointmentToSessionData(apt)
-    );
+    return upcomingConfirmed;
   }, [appointments]);
 
   if (isLoading) {
@@ -78,32 +76,32 @@ export default function Client() {
   return (
     <div className="min-h-screen">
       {/* Section visios confirmées à venir */}
-      {upcomingSessionsData.length > 0 && (
+      {upcomingAppointments.length > 0 && (
         <div className="mb-6 mt-4">
           <h2 className="mb-3 text-lg font-bold text-exford-blue font-figtree">
             Votre prochaine visio
           </h2>
           <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-            {upcomingSessionsData.slice(0, 2).map((session) => (
-              <UpcomingVideoCall
-                key={session.id}
-                date={session.date}
-                duration={session.duration.replace(" minutes", "")}
-                profileImage={session.profileImage}
-                name={session.professionalName}
-                title={session.professionalTitle}
-                variant="dark"
-                showButton={false}
-                sessionTime={`${session.time} - ${new Date(
-                  new Date(`1970-01-01T${session.time}:00`).getTime() +
-                    parseInt(session.duration) * 60000
-                ).toLocaleTimeString("fr-FR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}`}
-                className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
-              />
-            ))}
+            {upcomingAppointments
+              .slice(0, 2)
+              .map((appointment: ApiAppointment) => {
+                const sessionData =
+                  transformAppointmentToSessionData(appointment);
+                return (
+                  <UpcomingVideoCall
+                    key={appointment.id}
+                    date={sessionData.date}
+                    appointmentAt={appointment.appointment_at}
+                    profileImage={sessionData.profileImage}
+                    name={sessionData.professionalName}
+                    title={sessionData.professionalTitle}
+                    variant="dark"
+                    showButton={false}
+                    sessionTime={sessionData.time}
+                    className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
+                  />
+                );
+              })}
           </div>
         </div>
       )}

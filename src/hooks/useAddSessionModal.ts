@@ -1,20 +1,28 @@
+import {
+  SessionCreate,
+  useCreateProSession,
+  validateSessionData,
+} from "@/api/sessions/useSessions";
 import { useState } from "react";
-import { useCreateProSession, SessionCreate, validateSessionData } from "@/api/sessions/useSessions";
 
 interface UseAddSessionModalProps {
   onSuccess?: (data: SessionCreate) => void;
   onClose: () => void;
 }
 
-export const useAddSessionModal = ({ onSuccess, onClose }: UseAddSessionModalProps) => {
+export const useAddSessionModal = ({
+  onSuccess,
+  onClose,
+}: UseAddSessionModalProps) => {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
-    session_type: "15m" as const,
-    session_nature: "one_time" as const,
+    session_nature: "subscription" as const,
   });
 
-  const [selectedFeatures, setSelectedFeatures] = useState<Record<string, boolean>>({
+  const [selectedFeatures, setSelectedFeatures] = useState<
+    Record<string, boolean>
+  >({
     one_on_one: false,
     video_call: false,
     strategic_session: false,
@@ -25,7 +33,7 @@ export const useAddSessionModal = ({ onSuccess, onClose }: UseAddSessionModalPro
   });
 
   const [errors, setErrors] = useState<string[]>([]);
-  
+
   // Hook pour créer une session
   const createSessionMutation = useCreateProSession();
 
@@ -46,7 +54,7 @@ export const useAddSessionModal = ({ onSuccess, onClose }: UseAddSessionModalPro
   const handleSubmit = async () => {
     // Réinitialiser les erreurs
     setErrors([]);
-    
+
     const sessionData: SessionCreate = {
       name: formData.name.trim(),
       price: parseFloat(formData.price),
@@ -54,11 +62,6 @@ export const useAddSessionModal = ({ onSuccess, onClose }: UseAddSessionModalPro
       ...selectedFeatures,
       is_active: true,
     };
-
-    // Inclure session_type seulement pour les sessions ponctuelles
-    if (formData.session_nature === "one_time") {
-      sessionData.session_type = formData.session_type;
-    }
 
     // Validation des données
     const validationErrors = validateSessionData(sessionData);
@@ -69,13 +72,13 @@ export const useAddSessionModal = ({ onSuccess, onClose }: UseAddSessionModalPro
 
     try {
       const result = await createSessionMutation.mutateAsync(sessionData);
-      
+
       console.log("Session créée avec succès:", result);
-      
+
       if (onSuccess) {
         onSuccess(sessionData);
       }
-      
+
       handleCancel();
     } catch (error: any) {
       console.error("Erreur lors de la création:", error);
@@ -88,8 +91,7 @@ export const useAddSessionModal = ({ onSuccess, onClose }: UseAddSessionModalPro
     setFormData({
       name: "",
       price: "",
-      session_type: "15m" as const,
-      session_nature: "one_time" as const,
+      session_nature: "subscription" as const,
     });
     setSelectedFeatures({
       one_on_one: false,
@@ -105,9 +107,9 @@ export const useAddSessionModal = ({ onSuccess, onClose }: UseAddSessionModalPro
   };
 
   const isFormValid =
-    formData.name.trim() !== "" && 
-    formData.price.trim() !== "" && 
-    !isNaN(parseFloat(formData.price)) && 
+    formData.name.trim() !== "" &&
+    formData.price.trim() !== "" &&
+    !isNaN(parseFloat(formData.price)) &&
     parseFloat(formData.price) > 0 &&
     !createSessionMutation.isPending;
 
@@ -117,10 +119,10 @@ export const useAddSessionModal = ({ onSuccess, onClose }: UseAddSessionModalPro
     selectedFeatures,
     errors,
     isFormValid,
-    
+
     // États de mutation
     isPending: createSessionMutation.isPending,
-    
+
     // Handlers
     handleInputChange,
     handleFeatureToggle,

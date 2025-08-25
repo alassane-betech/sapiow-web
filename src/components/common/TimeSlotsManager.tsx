@@ -56,6 +56,23 @@ export default function TimeSlotsManager({
     return times;
   };
 
+  // Convertir une heure en nombre pour comparaison (ex: "9h30" -> 9.5)
+  const timeToNumber = (time: string): number => {
+    const [hour, minutes] = time.replace('h', ':').split(':');
+    return parseInt(hour) + (parseInt(minutes || '0') / 60);
+  };
+
+  // Générer les options de endTime filtrées selon startTime
+  const getEndTimeOptions = (startTime: string): string[] => {
+    if (!startTime) return generateTimeOptions();
+    
+    const startTimeNum = timeToNumber(startTime);
+    return generateTimeOptions().filter(time => {
+      const timeNum = timeToNumber(time);
+      return timeNum > startTimeNum;
+    });
+  };
+
   const timeOptions = generateTimeOptions();
 
   // Charger les créneaux depuis le store quand les données ou la date changent
@@ -208,10 +225,8 @@ export default function TimeSlotsManager({
                     handleUpdateTimeSlot(slot.id, "startTime", value)
                   }
                   onOpenChange={(open) => {
-                    if (!open && slot.endTime) {
-                      // Sauvegarder seulement si endTime est rempli
-                      handleSaveToServer();
-                    }
+                    // Ne pas sauvegarder automatiquement le startTime
+                    // L'utilisateur doit d'abord remplir endTime
                   }}
                 >
                   <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
@@ -234,8 +249,8 @@ export default function TimeSlotsManager({
                     handleUpdateTimeSlot(slot.id, "endTime", value)
                   }
                   onOpenChange={(open) => {
-                    if (!open) {
-                      // Attendre un peu pour que la valeur soit mise à jour, puis sauvegarder
+                    if (!open && slot.startTime && slot.endTime) {
+                      // Sauvegarder seulement si les deux heures sont remplies
                       setTimeout(() => {
                         handleSaveToServer();
                       }, 100);
@@ -246,7 +261,7 @@ export default function TimeSlotsManager({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    {timeOptions.map((time) => (
+                    {getEndTimeOptions(slot.startTime).map((time) => (
                       <SelectItem key={time} value={time}>
                         {time}
                       </SelectItem>

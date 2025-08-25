@@ -1,12 +1,12 @@
+import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 import { supabase } from "@/lib/supabase/client";
+import { useUserStore } from "@/store/useUser";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
-import { useUserStore } from "@/store/useUser";
-import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 
 const navItems = [
   {
@@ -65,9 +65,7 @@ interface AccountSidebarProps {
   isMobile?: boolean;
 }
 
-export function AccountSidebar({
-  isMobile = false,
-}: AccountSidebarProps) {
+export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user } = useUserStore();
@@ -104,7 +102,6 @@ export function AccountSidebar({
       setIsLoggingOut(false);
     }
   };
-
 
   // Filtrer les éléments de navigation selon le type d'utilisateur
   const getFilteredNavItems = () => {

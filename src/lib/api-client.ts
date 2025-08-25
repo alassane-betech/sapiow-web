@@ -101,6 +101,17 @@ export const fetchApi = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
+  // Vérifier et rafraîchir le token si nécessaire avant la requête
+  const isTokenValid = await authUtils.ensureValidToken();
+  
+  if (!isTokenValid) {
+    // Si impossible d'obtenir un token valide, rediriger vers la connexion
+    const error = new Error("Session expirée. Veuillez vous reconnecter.") as ApiError;
+    error.status = 401;
+    error.statusText = "Unauthorized";
+    throw error;
+  }
+
   // Récupération des headers d'authentification via authUtils (localStorage)
   const authHeaders = authUtils.getAuthHeaders();
   
@@ -119,6 +130,17 @@ export const fetchApi = async <T>(
   });
 
   if (!response.ok) {
+    // Gestion spéciale des erreurs d'authentification
+    if (response.status === 401 || response.status === 403) {
+      console.log('Erreur d\'authentification détectée, nettoyage des tokens');
+      authUtils.clearTokens();
+      
+      const error = new Error("Session expirée. Veuillez vous reconnecter.") as ApiError;
+      error.status = response.status;
+      error.statusText = response.statusText;
+      throw error;
+    }
+
     let errorMessage = `API error: ${response.statusText}`;
 
     try {

@@ -1,13 +1,13 @@
 "use client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./Button";
 import { ProfileAvatar } from "./ProfileAvatar";
 
 interface UpcomingVideoCallProps {
   date: string;
-  duration: string;
+  appointmentAt: string; // ISO date string from API
   profileImage: string;
   name: string;
   title: string;
@@ -18,9 +18,35 @@ interface UpcomingVideoCallProps {
   sessionTime?: string; // Format: "14h30 - 15h30"
 }
 
+// Fonction pour calculer le temps restant
+const calculateTimeRemaining = (appointmentAt: string): string => {
+  const now = new Date();
+  const appointmentDate = new Date(appointmentAt);
+  const diffMs = appointmentDate.getTime() - now.getTime();
+
+  if (diffMs <= 0) {
+    return "Maintenant";
+  }
+
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) {
+    return `Dans ${diffDays} jour${diffDays > 1 ? "s" : ""}`;
+  } else if (diffHours > 0) {
+    const remainingMinutes = diffMinutes % 60;
+    return remainingMinutes > 0
+      ? `Dans ${diffHours}h${remainingMinutes.toString().padStart(2, "0")}`
+      : `Dans ${diffHours}h`;
+  } else {
+    return `Dans ${diffMinutes} min`;
+  }
+};
+
 export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
   date,
-  duration,
+  appointmentAt,
   profileImage,
   name,
   title,
@@ -31,6 +57,18 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
   sessionTime,
 }) => {
   const isDark = variant === "dark";
+  const [timeRemaining, setTimeRemaining] = useState<string>(
+    calculateTimeRemaining(appointmentAt)
+  );
+
+  // Mettre à jour le temps restant chaque minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeRemaining(calculateTimeRemaining(appointmentAt));
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [appointmentAt]);
 
   const cardClasses = isDark
     ? "text-white"
@@ -85,8 +123,7 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
             <div
               className={`flex items-center gap-2 text-xs font-medium ${textClasses.dateTime}`}
             >
-              <span>Dans</span>
-              <span className="">{duration} minutes</span>
+              <span>{timeRemaining}</span>
             </div>
           </div>
         </div>
@@ -105,9 +142,9 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
               borderWidth="1"
             />
           ) : (
-            <div 
+            <div
               className="relative overflow-hidden rounded-[8px]"
-              style={{ width: '75px', height: '86px' }}
+              style={{ width: "75px", height: "86px" }}
             >
               <Image
                 src={profileImage}
@@ -124,24 +161,19 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
             <p className={`text-sm font-semibold ${textClasses.secondary}`}>
               {title}
             </p>
+            <p className={`text-lg font-bold ${textClasses.primary} `}>
+              {sessionTime}
+            </p>
           </div>
         </div>
 
         {/* Bouton d'action ou informations de session */}
-        {showButton ? (
+        {showButton && (
           <Button
             label="Voir détail"
             onClick={onViewDetails}
             className={`w-full ${buttonClasses} font-bold rounded-[8px] transition-all duration-200 mt-2.5 mb-1`}
           />
-        ) : (
-          sessionTime && (
-            <div className="mt-3 mb-1">
-              <p className={`text-lg font-bold ${textClasses.primary} text-center`}>
-                {sessionTime}
-              </p>
-            </div>
-          )
         )}
       </CardContent>
     </Card>
