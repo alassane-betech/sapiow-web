@@ -1,13 +1,47 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Message } from "@/types/messages";
 import Image from "next/image";
-import { FileText, Download } from "lucide-react";
+import { FileText, Download, Play, Pause, Volume2 } from "lucide-react";
+import { useState, useRef } from "react";
 
 interface MessageItemProps {
   message: Message;
 }
 
 export function MessageItem({ message }: MessageItemProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const togglePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
   return (
     <div className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}>
       <div
@@ -70,6 +104,52 @@ export function MessageItem({ message }: MessageItemProps) {
                 </div>
                 <Download className="h-4 w-4 text-gray-400" />
               </button>
+            </div>
+          )}
+
+          {message.type === 'audio' && (
+            <div className="bg-gray-100 rounded-2xl p-3 max-w-xs">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={togglePlay}
+                  className="flex-shrink-0 w-10 h-10 bg-exford-blue hover:bg-blue-700 rounded-full flex items-center justify-center transition-colors"
+                >
+                  {isPlaying ? (
+                    <Pause className="h-5 w-5 text-white" />
+                  ) : (
+                    <Play className="h-5 w-5 text-white ml-0.5" />
+                  )}
+                </button>
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Volume2 className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm font-medium text-gray-900">Message audio</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>{formatTime(currentTime)}</span>
+                    <div className="flex-1 h-1 bg-gray-300 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-exford-blue transition-all duration-200"
+                        style={{ width: `${duration > 0 && !isNaN(duration) && isFinite(duration) ? (currentTime / duration) * 100 : 0}%` }}
+                      />
+                    </div>
+                    {duration > 0 && !isNaN(duration) && isFinite(duration) && (
+                      <span>{formatTime(duration)}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <audio
+                ref={audioRef}
+                src={message.message}
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onEnded={() => setIsPlaying(false)}
+                className="hidden"
+              />
             </div>
           )}
 
