@@ -1,9 +1,9 @@
 "use client";
 
+import { useLanguageSettings } from "@/hooks/useLanguageSettings";
 import { Check, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { useLanguageSettings } from "@/hooks/useLanguageSettings";
 import AccountLayout from "../AccountLayout";
 
 interface Language {
@@ -13,23 +13,27 @@ interface Language {
 }
 
 const availableLanguages: Language[] = [
-  { id: "French", name: "Français", flagUrl: "https://flagcdn.com/24x18/fr.png" },
-  { id: "English", name: "Anglais", flagUrl: "https://flagcdn.com/24x18/us.png" },
+  {
+    id: "French",
+    name: "Français",
+    flagUrl: "https://flagcdn.com/24x18/fr.png",
+  },
+  {
+    id: "English",
+    name: "Anglais",
+    flagUrl: "https://flagcdn.com/24x18/us.png",
+  },
 ];
 
 export default function LanguePage() {
-  const {
-    currentLanguage,
-    isLoading,
-    error,
-    handleLanguageChange,
-  } = useLanguageSettings();
+  const { currentLanguage, isLoading, error, handleLanguageChange } =
+    useLanguageSettings();
 
   const [updatingLanguage, setUpdatingLanguage] = useState<string | null>(null);
 
   const handleLanguageSelect = async (languageId: string) => {
     if (currentLanguage === languageId) return;
-    
+
     setUpdatingLanguage(languageId);
     try {
       await handleLanguageChange(languageId);
@@ -69,13 +73,15 @@ export default function LanguePage() {
           {availableLanguages.map((language, index) => {
             const isUpdating = updatingLanguage === language.id;
             const isSelected = currentLanguage === language.id;
-            
+
             return (
               <div
                 key={language.id}
                 className={`flex items-center justify-between py-4 cursor-pointer border-b border-[#D9D9D9] ${
                   index === availableLanguages.length - 1 ? "border-b-0" : ""
-                } ${isUpdating ? "opacity-70" : ""} transition-opacity duration-200`}
+                } ${
+                  isUpdating ? "opacity-70" : ""
+                } transition-opacity duration-200`}
                 onClick={() => !isUpdating && handleLanguageSelect(language.id)}
               >
                 <div className="flex items-center gap-3">
