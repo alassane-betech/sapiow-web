@@ -12,12 +12,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Send, Video, X } from "lucide-react";
+import { useConversationStore } from "@/store/useConversationStore";
+import { Send, X } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../common/Button";
 
 interface SessionData {
   id: string;
+  proId: string;
   professionalName: string;
   professionalTitle: string;
   profileImage: string;
@@ -44,6 +48,10 @@ export function SessionDetailSheet({
   onStartVideoCall,
 }: SessionDetailSheetProps) {
   const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const { setSelectedConversation, setSelectedProfessional } =
+    useConversationStore();
+
+  const router = useRouter();
   const [question, setQuestion] = useState("");
   const [localQuestions, setLocalQuestions] = useState<AppointmentQuestion[]>(
     []
@@ -85,6 +93,25 @@ export function SessionDetailSheet({
     setShowQuestionForm(!showQuestionForm);
     if (showQuestionForm) {
       setQuestion("");
+    }
+  };
+
+  const handleOpenChat = () => {
+    if (session?.id) {
+      // Récupérer l'ID du professionnel depuis les données de session
+      const professionalId = session.proId;
+
+      // Stocker les informations du professionnel pour l'affichage
+      setSelectedProfessional({
+        id: professionalId,
+        name: session.professionalName,
+        title: session.professionalTitle,
+        avatar: session.profileImage,
+      });
+
+      setSelectedConversation(professionalId);
+      // onClose();
+      router.push("/messages");
     }
   };
 
@@ -254,16 +281,43 @@ export function SessionDetailSheet({
                     label="Commencer la visio"
                     className="h-[40px] w-full rounded-[8px] text-base font-bold font-figtree"
                     onClick={() => onStartVideoCall(session.id)}
-                    icon={<Video className="w-4 h-4" />}
+                    icon={
+                      <Image
+                        src="/assets/icons/videocamera.svg"
+                        width={20}
+                        height={20}
+                        alt="icon"
+                      />
+                    }
                   />
                 )}
-                <ButtonUI
-                  variant="outline"
-                  className="w-full text-gray-700 border-gray-300 hover:bg-gray-50 bg-transparent"
-                  onClick={onClose}
-                >
-                  Ajouter au calendrier
-                </ButtonUI>
+                <div className="w-full max-w-[90%] mx-auto flex items-center justify-center">
+                  <ButtonUI
+                    variant="outline"
+                    className="w-full max-w-[360px] text-exford-blue font-bold border-gray-300 hover:bg-gray-50 bg-transparent font-figtree mr-2 cursor-pointer"
+                    onClick={onClose}
+                  >
+                    <Image
+                      src="/assets/icons/calendar.svg"
+                      width={20}
+                      height={20}
+                      alt="icon"
+                    />
+                    Ajouter au calendrier
+                  </ButtonUI>
+                  <ButtonUI
+                    variant="outline"
+                    className="w-full max-w-[56px] text-exford-blue font-bold border-gray-300 hover:bg-gray-50 bg-transparent font-figtree cursor-pointer"
+                    onClick={handleOpenChat}
+                  >
+                    <Image
+                      src="/assets/icons/chatDots.svg"
+                      width={20}
+                      height={20}
+                      alt="icon"
+                    />
+                  </ButtonUI>
+                </div>
               </div>
             </div>
           </>

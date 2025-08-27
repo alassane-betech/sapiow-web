@@ -45,6 +45,7 @@ export interface Conversation {
 export interface SendMessageData {
   receiverId: string;
   content: string | File;
+  type: MessageType;
 }
 
 // Hook pour envoyer un message
@@ -53,17 +54,18 @@ export const usePatientSendMessage = (senderId: string) => {
 
   return useMutation<Message, Error, SendMessageData>({
     mutationFn: async (data: SendMessageData) => {
-      // Envoi direct via Supabase
-      const { data: messageData, error } = await supabase
-        .from("messages")
-        .insert({
-          receiver_id: data.receiverId,
-          content: data.content,
-          type: "text",
-          sender_id: senderId,
-        })
-        .select()
-        .single();
+      // Le backend attend des FormData
+      const formData = new FormData();
+      formData.append("content", data.content);
+
+      // Utiliser l'endpoint Supabase Function comme le backend l'attend
+      const { data: messageData, error } = await supabase.functions.invoke(
+        `patient-messages/${data.receiverId}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (error) {
         throw new Error(error.message);
@@ -222,4 +224,34 @@ export const validateFile = (file: File): boolean => {
   ];
 
   return allAllowedTypes.includes(file.type);
+};
+
+// Fonction helper pour déterminer le type de message basé sur le fichier
+export const getMessageTypeFromFile = (file: File): MessageType => {
+  if (ALLOWED_FILE_TYPES.image.includes(file.type)) {
+    return "image";
+  }
+  if (ALLOWED_FILE_TYPES.audio.includes(file.type)) {
+    return "audio";
+  }
+  if (ALLOWED_FILE_TYPES.document.includes(file.type)) {
+    return "document";
+  }
+  // Par défaut, considérer comme text (ne devrait pas arriver si validateFile est utilisé)
+  return "text";
+};
+
+// Fonction helper pour créer les données de message
+export const createSendMessageData = (
+  receiverId: string,
+  content: string | File
+): SendMessageData => {
+  const type: MessageType =
+    typeof content === "string" ? "text" : getMessageTypeFromFile(content);
+
+  return {
+    receiverId,
+    content,
+    type,
+  };
 };

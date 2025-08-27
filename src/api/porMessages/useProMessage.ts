@@ -45,6 +45,7 @@ export interface Conversation {
 export interface SendMessageData {
   receiverId: string;
   content: string | File;
+  type: MessageType;
 }
 
 // Hook pour envoyer un message
@@ -53,17 +54,18 @@ export const useProSendMessage = (senderId: string) => {
 
   return useMutation<Message, Error, SendMessageData>({
     mutationFn: async (data: SendMessageData) => {
-      // Envoi direct via Supabase
-      const { data: messageData, error } = await supabase
-        .from("messages")
-        .insert({
-          receiver_id: data.receiverId,
-          content: data.content,
-          type: "text",
-          sender_id: senderId,
-        })
-        .select()
-        .single();
+      // Le backend attend des FormData
+      const formData = new FormData();
+      formData.append("content", data.content);
+
+      // Utiliser l'endpoint Supabase Function comme le backend l'attend
+      const { data: messageData, error } = await supabase.functions.invoke(
+        `pro-messages/${data.receiverId}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (error) {
         throw new Error(error.message);

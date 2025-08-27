@@ -131,7 +131,7 @@ export default function ProfessionalCard({
             )}
           </p>
           <p
-            className={`text-xs text-gray-500 leading-relaxed font-figtree line-clamp-3 overflow-hidden`}
+            className={`text-xs text-gray-500 leading-relaxed font-figtree font-medium line-clamp-3 overflow-hidden`}
           >
             {professional.description}
           </p>

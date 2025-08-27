@@ -11,7 +11,7 @@ export const Header: React.FC = () => {
   const { todayVisiosCount, user } = useTodayVisios();
 
   return (
-    <header className="container bg-white px-6 py-4">
+    <header className="container bg-white px-6 py-4 sticky top-0 z-20">
       <div className="flex items-center justify-between">
         {/* Section gauche - Photo de profil et message */}
         <div className="flex flex-col items-start gap-4">
@@ -29,7 +29,8 @@ export const Header: React.FC = () => {
               {user ? `${user.first_name} ${user.last_name}` : "Utilisateur"}
             </h1>
             <p className="text-sm font-medium text-exford-blue font-figtree">
-              Vous avez {todayVisiosCount} visio{todayVisiosCount > 1 ? 's' : ''} à venir aujourd'hui
+              Vous avez {todayVisiosCount} visio
+              {todayVisiosCount > 1 ? "s" : ""} à venir aujourd'hui
             </p>
           </div>
         </div>

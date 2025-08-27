@@ -16,15 +16,17 @@ import { MessageInput } from "@/components/messages/MessageInput";
 import { MessageItem } from "@/components/messages/MessageItem";
 import { SearchBar } from "@/components/messages/SearchBar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useConversationStore } from "@/store/useConversationStore";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useUserStore } from "@/store/useUser";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
 
 function Messages() {
-  const [selectedConversation, setSelectedConversation] = useState<
-    string | null
-  >(null);
+  const {
+    selectedConversation,
+    setSelectedConversation,
+    selectedProfessional,
+  } = useConversationStore();
 
   // ID du professionnel actuel (à récupérer depuis le contexte d'auth plus tard)
   const { currentUser } = useCurrentUserData();
@@ -50,7 +52,7 @@ function Messages() {
         selectedConversation || "",
         currentPatientId || ""
       );
-
+  console.log(conversationMessages);
   // Extraire les conversations uniques des messages
   const conversationsData = messagesData
     ? (() => {
@@ -81,10 +83,22 @@ function Messages() {
   const conversationsLoading = messagesLoading;
   const conversationsError = messagesError;
 
-  // Trouver la conversation sélectionnée
-  const activeConversation = conversationsData?.find(
-    (conv) => conv.profile.id === selectedConversation
-  );
+  // Trouver la conversation sélectionnée ou utiliser les infos du professionnel sélectionné
+  const activeConversation =
+    conversationsData?.find(
+      (conv) => conv.profile.id === selectedConversation
+    ) ||
+    (selectedProfessional
+      ? {
+          profile: {
+            id: selectedProfessional.id,
+            first_name: selectedProfessional.name.split(" ")[0],
+            last_name: selectedProfessional.name.split(" ").slice(1).join(" "),
+            avatar: selectedProfessional.avatar,
+          },
+          latest_message: null,
+        }
+      : null);
 
   // Responsive : afficher la liste ou le chat sur mobile
   return (
@@ -220,7 +234,8 @@ function Messages() {
                                   ? activeConversation?.profile.avatar ||
                                     undefined
                                   : undefined,
-                                hasImage: message.type === "image",
+                                hasImage: message.type === "image" || message.type === "document",
+                                type: message.type,
                               }}
                             />
                           );
@@ -364,7 +379,8 @@ function Messages() {
                           avatar: !isOwn
                             ? activeConversation?.profile.avatar || undefined
                             : undefined,
-                          hasImage: message.type === "image",
+                          hasImage: message.type === "image" || message.type === "document",
+                          type: message.type,
                         }}
                       />
                     );

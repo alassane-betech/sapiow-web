@@ -19,6 +19,7 @@ export default function Client() {
   const [selectedSession, setSelectedSession] = useState<SessionData | null>(
     null
   );
+  console.log(selectedSession);
   const { isVideoCallOpen, setIsVideoCallOpen } = useCallStore();
 
   const handleViewDetails = (sessionData: SessionData) => {

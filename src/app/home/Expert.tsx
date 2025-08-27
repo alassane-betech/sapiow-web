@@ -67,6 +67,14 @@ export default function Expert() {
   const { data: statistics } = useGetStatistics();
   const { data: appointments } = useGetProAppointments(proExpert?.id);
 
+  // Calculer le nombre de demandes en attente
+  const pendingAppointments = Array.isArray(appointments)
+    ? appointments.filter(
+        (appointment: any) => appointment.status === "pending"
+      )
+    : [];
+  const pendingCount = pendingAppointments.length;
+
   return (
     <>
       {/* Contenu principal */}
@@ -101,30 +109,34 @@ export default function Expert() {
                   height={26}
                 />
                 <span className="absolute top-1.5 right-0.5 pt-[1px] bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
-                  3
+                  {pendingCount}
                 </span>
               </button>
               <p className="text-sm font-bold font-figtree text-cobalt-blue-500">
                 Demandes en attente
               </p>
-              <Link
-                href="/home/requests"
-                className="flex items-center gap-2 text-black font-figtree"
-              >
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              {pendingCount > 3 && (
+                <Link
+                  href="/visios"
+                  className="flex items-center gap-2 text-black font-figtree"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
             </div>
           </div>
           <div className="hidden lg:flex w-full justify-between gap-2 mb-[10px] mt-[24px]">
             <h1 className="text-lg font-bold font-figtree text-cobalt-blue-500">
               Demandes en attente
             </h1>
-            <Link
-              href="/home/requests"
-              className="flex items-center gap-2 text-cobalt-blue font-figtree"
-            >
-              Tout voir <ArrowRight className="w-4 h-4" />
-            </Link>
+            {pendingCount > 3 && (
+              <Link
+                href="/visios"
+                className="flex items-center gap-2 text-cobalt-blue font-figtree"
+              >
+                Tout voir <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
           </div>
           <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mt-5">
             {Array.isArray(appointments) && appointments.length > 0 ? (

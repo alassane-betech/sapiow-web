@@ -1,5 +1,5 @@
-import { format, isToday, isTomorrow, isThisWeek, parseISO } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { format, isThisWeek, isToday, isTomorrow, parseISO } from "date-fns";
+import { fr } from "date-fns/locale";
 
 // Types pour les données API
 export interface AppointmentQuestion {
@@ -13,7 +13,7 @@ export interface AppointmentQuestion {
 export interface ApiAppointment {
   id: string;
   appointment_at: string;
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
+  status: "confirmed" | "pending" | "cancelled" | "completed";
   patient: {
     id: string;
     first_name: string;
@@ -42,6 +42,7 @@ export interface ApiAppointment {
 // Interface pour les données transformées
 export interface SessionData {
   id: string;
+  proId: string;
   professionalName: string;
   professionalTitle: string;
   profileImage: string;
@@ -57,54 +58,62 @@ export interface SessionData {
 /**
  * Transforme les données API en format pour UpcomingVideoCall
  */
-export function transformAppointmentToSessionData(appointment: ApiAppointment): SessionData {
+export function transformAppointmentToSessionData(
+  appointment: ApiAppointment
+): SessionData {
   const appointmentDate = parseISO(appointment.appointment_at);
-  
+
   // Formatage de la date
-  let formattedDate = '';
+  let formattedDate = "";
   if (isToday(appointmentDate)) {
     formattedDate = "Aujourd'hui";
   } else if (isTomorrow(appointmentDate)) {
-    formattedDate = 'Demain';
+    formattedDate = "Demain";
   } else if (isThisWeek(appointmentDate)) {
-    formattedDate = format(appointmentDate, 'EEEE', { locale: fr });
+    formattedDate = format(appointmentDate, "EEEE", { locale: fr });
   } else {
-    formattedDate = format(appointmentDate, 'EEE, dd MMM yyyy', { locale: fr });
+    formattedDate = format(appointmentDate, "EEE, dd MMM yyyy", { locale: fr });
   }
 
   // Formatage de l'heure
-  const timeRange = format(appointmentDate, 'HH:mm', { locale: fr });
-  
+  const timeRange = format(appointmentDate, "HH:mm", { locale: fr });
+
   // Conversion du type de session en durée
   const durationMap: Record<string, string> = {
-    '15m': '15',
-    '30m': '30', 
-    '45m': '45',
-    '60m': '60',
-    '90m': '90',
-    '120m': '120'
+    "15m": "15",
+    "30m": "30",
+    "45m": "45",
+    "60m": "60",
+    "90m": "90",
+    "120m": "120",
   };
 
-  const duration = durationMap[appointment.session.session_type] || '30';
-  
+  const duration = durationMap[appointment.session.session_type] || "30";
+
   // Gestion de l'avatar avec fallback
   let profileImage = appointment.pro.avatar;
-  if (profileImage && !profileImage.startsWith('http')) {
+  if (profileImage && !profileImage.startsWith("http")) {
     profileImage = `https://ncvpplapgfqsgowtkrbw.supabase.co/storage/v1/object/public/${profileImage}`;
   }
 
   return {
     id: appointment.id,
-    professionalName: `${appointment.pro.first_name} ${appointment.pro.last_name}`.trim(),
-    professionalTitle: appointment.pro.job || appointment.pro.domains?.name || 'Expert',
-    profileImage: profileImage || '/assets/icons/pro1.png',
+    proId: appointment.pro.id,
+    professionalName:
+      `${appointment.pro.first_name} ${appointment.pro.last_name}`.trim(),
+    professionalTitle:
+      appointment.pro.job || appointment.pro.domains?.name || "Expert",
+    profileImage: profileImage || "/assets/icons/pro1.png",
     sessionType: appointment.session.name,
     duration: `${duration} minutes`,
     date: formattedDate,
-    time: `${timeRange} - ${format(new Date(appointmentDate.getTime() + parseInt(duration) * 60000), 'HH:mm')}`,
+    time: `${timeRange} - ${format(
+      new Date(appointmentDate.getTime() + parseInt(duration) * 60000),
+      "HH:mm"
+    )}`,
     status: appointment.status,
     price: appointment.session.price,
-    appointment_questions: appointment.appointment_questions || []
+    appointment_questions: appointment.appointment_questions || [],
   };
 }
 
@@ -113,55 +122,50 @@ export function transformAppointmentToSessionData(appointment: ApiAppointment): 
  */
 export function filterAndSortAppointments(appointments: ApiAppointment[]) {
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-  
-  // Debug: log pour voir les données
-  console.log('Current time:', now.toISOString());
-  console.log('Start of today:', startOfToday.toISOString());
-  console.log('Appointments to filter:', appointments.length);
-  
+
   // Séparer les appointments confirmés (aujourd'hui ou à venir dans les 7 prochains jours)
   const upcomingConfirmed = appointments
-    .filter(apt => {
+    .filter((apt) => {
       const aptDate = parseISO(apt.appointment_at);
-      const isConfirmed = apt.status === 'confirmed';
+      const isConfirmed = apt.status === "confirmed";
       const isTodayOrLater = aptDate >= startOfToday; // Inclut aujourd'hui même si passé
       const isWithinWeek = aptDate <= sevenDaysFromNow;
-      
-      console.log(`Appointment ${apt.id}:`, {
-        date: aptDate.toISOString(),
-        status: apt.status,
-        isConfirmed,
-        isTodayOrLater,
-        isWithinWeek,
-        includeInUpcoming: isConfirmed && isTodayOrLater && isWithinWeek
-      });
-      
+
       return isConfirmed && isTodayOrLater && isWithinWeek;
     })
-    .sort((a, b) => new Date(a.appointment_at).getTime() - new Date(b.appointment_at).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.appointment_at).getTime() -
+        new Date(b.appointment_at).getTime()
+    );
 
   // Autres appointments (en attente, aujourd'hui ou à venir)
   const otherUpcoming = appointments
-    .filter(apt => {
+    .filter((apt) => {
       const aptDate = parseISO(apt.appointment_at);
       const isTodayOrLater = aptDate >= startOfToday;
-      const isValidStatus = ['confirmed', 'pending'].includes(apt.status);
-      const isNotInUpcomingConfirmed = !upcomingConfirmed.find(confirmed => confirmed.id === apt.id);
-      
+      const isValidStatus = ["confirmed", "pending"].includes(apt.status);
+      const isNotInUpcomingConfirmed = !upcomingConfirmed.find(
+        (confirmed) => confirmed.id === apt.id
+      );
+
       return isTodayOrLater && isValidStatus && isNotInUpcomingConfirmed;
     })
-    .sort((a, b) => new Date(a.appointment_at).getTime() - new Date(b.appointment_at).getTime());
-
-  console.log('Filtered results:', {
-    upcomingConfirmed: upcomingConfirmed.length,
-    otherUpcoming: otherUpcoming.length
-  });
+    .sort(
+      (a, b) =>
+        new Date(a.appointment_at).getTime() -
+        new Date(b.appointment_at).getTime()
+    );
 
   return {
     upcomingConfirmed,
-    otherUpcoming
+    otherUpcoming,
   };
 }
 
@@ -170,5 +174,5 @@ export function filterAndSortAppointments(appointments: ApiAppointment[]) {
  */
 export function formatDateForCard(dateString: string): string {
   const date = parseISO(dateString);
-  return format(date, 'EEE, dd MMM yyyy', { locale: fr });
+  return format(date, "EEE, dd MMM yyyy", { locale: fr });
 }
