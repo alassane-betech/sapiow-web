@@ -1,31 +1,52 @@
 "use client";
-import { DOMAINS, getDomainIcon } from "@/constants/onboarding";
+import { getDomainIcon } from "@/constants/onboarding";
+import { Domain } from "@/api/domaine/useDomaine";
 import Image from "next/image";
 import React from "react";
 
 interface DomainSelectorProps {
-  selectedDomains?: string[];
-  selectedDomain?: string | null;
-  onDomainSelect: (domainId: string) => void;
+  domains?: Domain[];
+  selectedDomains?: number[];
+  selectedDomain?: number | null;
+  onDomainSelect: (domainId: number) => void;
   multiSelect?: boolean;
   title: string;
   subtitle?: string | React.ReactNode;
+  isLoading?: boolean;
 }
 
 export const DomainSelector: React.FC<DomainSelectorProps> = ({
+  domains = [],
   selectedDomains = [],
   selectedDomain = null,
   onDomainSelect,
   multiSelect = false,
   title,
   subtitle,
+  isLoading = false,
 }) => {
-  const isSelected = (domainId: string) => {
+  const isSelected = (domainId: number) => {
     if (multiSelect) {
       return selectedDomains.includes(domainId);
     }
     return selectedDomain === domainId;
   };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-ash-gray">Chargement des domaines...</div>
+      </div>
+    );
+  }
+
+  if (!domains.length) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-ash-gray">Aucun domaine disponible</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -38,7 +59,7 @@ export const DomainSelector: React.FC<DomainSelectorProps> = ({
         </p>
       )}
       <div className="grid grid-cols-3 gap-2.5 mb-8">
-        {DOMAINS.map((domain) => (
+        {domains.map((domain: Domain) => (
           <div
             key={domain.id}
             onClick={() => onDomainSelect(domain.id)}
@@ -50,7 +71,7 @@ export const DomainSelector: React.FC<DomainSelectorProps> = ({
           >
             <div className="mb-2">
               <Image
-                src={getDomainIcon(domain.id, isSelected(domain.id))}
+                src={getDomainIcon(domain.name.toLowerCase())}
                 alt={domain.name}
                 width={32}
                 height={32}

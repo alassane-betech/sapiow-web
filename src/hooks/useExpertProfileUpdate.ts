@@ -1,0 +1,196 @@
+import {
+  UpdateProExpertData,
+  useUpdateProExpert,
+} from "@/api/proExpert/useProExpert";
+import { useCallback, useEffect, useState } from "react";
+
+export interface ExpertFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  description: string;
+  job: string;
+  linkedin: string;
+  website: string;
+  domainName: string;
+  expertises: string[];
+}
+
+export interface UseExpertProfileUpdateProps {
+  user: any; // Type ProExpert de l'API
+}
+
+export const useExpertProfileUpdate = ({
+  user,
+}: UseExpertProfileUpdateProps) => {
+  // États pour les champs du formulaire
+  const [formData, setFormData] = useState<ExpertFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    description: "",
+    job: "",
+    linkedin: "",
+    website: "",
+    domainName: "",
+    expertises: [],
+  });
+
+  // États pour la gestion de l'interface
+  const [isEditing, setIsEditing] = useState(false);
+  const [avatar, setAvatar] = useState<File | null>(null);
+
+  // Hook pour la mutation
+  const {
+    mutate: updateProExpert,
+    isPending: isUpdating,
+    error: updateError,
+  } = useUpdateProExpert();
+
+  // Fonction utilitaire pour obtenir le nom du domaine à partir de son ID
+  const getDomainNameById = useCallback((domainId: number): string => {
+    const domainEntry = Object.entries({
+      1: "Média",
+      2: "Culture",
+      3: "Business",
+      4: "Maison",
+      5: "Artisanat",
+      6: "Glow",
+      7: "Sport",
+    }).find(([id]) => parseInt(id) === domainId);
+    return domainEntry ? domainEntry[1] : "";
+  }, []);
+
+  // Fonction utilitaire pour obtenir l'ID du domaine à partir de son nom
+  const getDomainIdByName = useCallback((domainName: string): number => {
+    const domainMap: Record<string, number> = {
+      Média: 1,
+      Culture: 2,
+      Business: 3,
+      Maison: 4,
+      Artisanat: 5,
+      Glow: 6,
+      Sport: 7,
+    };
+    return domainMap[domainName] || 0;
+  }, []);
+
+  // Mise à jour des données du formulaire quand les données de l'expert sont chargées
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.first_name || "",
+        lastName: user.last_name || "",
+        email: user.email || "",
+        description: user.description || "",
+        job: user.job || "",
+        linkedin: user.linkedin || "",
+        website: user.website || "",
+        domainName: getDomainNameById(user.domain_id) || "",
+        expertises: user.pro_expertises || [],
+      });
+    }
+  }, [user, getDomainNameById]);
+  console.log(user);
+  // Gestion des changements de champs
+  const handleFieldChange = useCallback(
+    (field: keyof ExpertFormData, value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+      setIsEditing(true);
+    },
+    []
+  );
+
+  // Gestion du changement d'avatar
+  const handleAvatarChange = useCallback((file: File | null) => {
+    setAvatar(file);
+    setIsEditing(true);
+  }, []);
+
+  // Gestion de la sauvegarde
+  const handleSave = useCallback(async () => {
+    try {
+      const updateData: UpdateProExpertData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        description: formData.description,
+        job: formData.job,
+        email: formData.email,
+        linkedin: formData.linkedin,
+        website: formData.website,
+        domain_id: formData.domainName
+          ? getDomainIdByName(formData.domainName)
+          : undefined,
+        expertises: user?.pro_expertises || [], // Inclure les expertises existantes
+        ...(avatar && { avatar }),
+      };
+
+      // Filtrer les champs vides pour ne pas les envoyer (sauf email qui doit toujours être envoyé)
+      Object.keys(updateData).forEach((key) => {
+        const value = updateData[key as keyof UpdateProExpertData];
+        if ((value === "" || value === undefined) && key !== "email") {
+          delete updateData[key as keyof UpdateProExpertData];
+        }
+      });
+
+      console.log("Sauvegarde des données expert:", updateData);
+
+      updateProExpert(updateData, {
+        onSuccess: () => {
+          setIsEditing(false);
+          setAvatar(null);
+          console.log("Profil expert mis à jour avec succès");
+        },
+        onError: (error) => {
+          console.error("Erreur lors de la sauvegarde:", error);
+        },
+      });
+    } catch (error) {
+      console.error("Erreur lors de la préparation de la sauvegarde:", error);
+    }
+  }, [formData, avatar, updateProExpert, getDomainIdByName]);
+
+  // Gestion de la suppression du compte
+  const handleDeleteAccount = useCallback(() => {
+    // TODO: Implémenter la suppression du compte
+    console.log("Suppression du compte expert demandée");
+  }, []);
+
+  // Réinitialiser le formulaire
+  const resetForm = useCallback(() => {
+    if (user) {
+      setFormData({
+        firstName: user.first_name || "",
+        lastName: user.last_name || "",
+        email: user.email || "",
+        description: user.description || "",
+        job: user.job || "",
+        linkedin: user.linkedin || "",
+        website: user.website || "",
+        domainName: getDomainNameById(user.domain_id) || "",
+        expertises: user.pro_expertises || [],
+      });
+    }
+    setIsEditing(false);
+    setAvatar(null);
+  }, [user, getDomainNameById]);
+
+  return {
+    // États
+    formData,
+    isEditing,
+    avatar,
+    isUpdating,
+    updateError,
+
+    // Actions
+    handleFieldChange,
+    handleAvatarChange,
+    handleSave,
+    handleDeleteAccount,
+    resetForm,
+  };
+};

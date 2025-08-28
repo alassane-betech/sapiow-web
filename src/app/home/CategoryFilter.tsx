@@ -1,22 +1,7 @@
 "use client";
+import { useGetDomaines } from "@/api/domaine/useDomaine";
+import { getDomainIcon } from "@/constants/onboarding";
 import Image from "next/image";
-
-interface Category {
-  id: string;
-  name: string;
-  icon: string;
-}
-
-const categories: Category[] = [
-  { id: "top", name: "Top", icon: "/assets/icons/star.svg" },
-  { id: "maison", name: "Maison", icon: "/assets/icons/home.svg" },
-  { id: "business", name: "Business", icon: "/assets/icons/business.svg" },
-  { id: "media", name: "Media", icon: "/assets/icons/podcast.svg" },
-  { id: "artisanat", name: "Artisanat", icon: "/assets/icons/paintRoller.svg" },
-  { id: "culture", name: "Culture", icon: "/assets/icons/culture.svg" },
-  { id: "glow", name: "Glow", icon: "/assets/icons/meditation.svg" },
-  { id: "sport", name: "Sport", icon: "/assets/icons/balls.svg" },
-];
 
 interface CategoryFilterProps {
   selectedCategory: string;
@@ -27,6 +12,26 @@ export default function CategoryFilter({
   selectedCategory,
   onCategoryChange,
 }: CategoryFilterProps) {
+  const { data: domains = [], isLoading } = useGetDomaines();
+
+  // Créer les catégories avec "Top" en premier + domaines API
+  const categories = [
+    { id: "top", name: "Top", icon: "/assets/icons/star.svg" },
+    ...domains.map((domain) => ({
+      id: domain.id.toString(),
+      name: domain.name,
+      icon: getDomainIcon(domain.name),
+    })),
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-6 py-4">
+        <div className="text-ash-gray text-sm">Chargement...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-6 py-4 overflow-x-auto scrollbar-hide">
       {categories.map((category) => (

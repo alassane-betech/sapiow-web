@@ -76,7 +76,7 @@ export function AppSidebar({
                     />
                   </div>
                   <span
-                    className={`text-xs font-medium ${
+                    className={`text-xs font-medium font-figtree ${
                       isActive ? "text-slate-900" : "text-slate-400"
                     }`}
                   >

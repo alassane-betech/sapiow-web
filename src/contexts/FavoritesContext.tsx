@@ -1,6 +1,6 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
 import { Professional } from "@/types/professional";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 interface FavoritesContextType {
   favorites: Professional[];
@@ -11,7 +11,9 @@ interface FavoritesContextType {
   isFavorite: (professionalId: number) => boolean;
 }
 
-const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
+const FavoritesContext = createContext<FavoritesContextType | undefined>(
+  undefined
+);
 
 export const useFavorites = () => {
   const context = useContext(FavoritesContext);
@@ -25,7 +27,9 @@ interface FavoritesProviderProps {
   children: React.ReactNode;
 }
 
-export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }) => {
+export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({
+  children,
+}) => {
   const [favorites, setFavorites] = useState<Professional[]>([]);
   const [likedProfs, setLikedProfs] = useState<Record<number, boolean>>({});
 
@@ -34,11 +38,11 @@ export const FavoritesProvider: React.FC<FavoritesProviderProps> = ({ children }
     if (typeof window !== "undefined") {
       const savedFavorites = localStorage.getItem("favorites");
       const savedLikedProfs = localStorage.getItem("likedProfs");
-      
+
       if (savedFavorites) {
         setFavorites(JSON.parse(savedFavorites));
       }
-      
+
       if (savedLikedProfs) {
         setLikedProfs(JSON.parse(savedLikedProfs));
       }

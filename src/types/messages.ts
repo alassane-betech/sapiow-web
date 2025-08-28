@@ -15,4 +15,5 @@ export interface Message {
   isOwn: boolean;
   avatar?: string;
   hasImage?: boolean;
+  type?: 'text' | 'image' | 'document' | 'audio';
 }

@@ -15,6 +15,10 @@ export const OnboardingSeekerSteps: React.FC = () => {
     selectedDomains,
     isFormValid,
     isDomainValid,
+    isSubmitting,
+    error,
+    domains,
+    isLoadingDomains,
     setFirstName,
     setLastName,
     setEmail,
@@ -71,7 +75,7 @@ export const OnboardingSeekerSteps: React.FC = () => {
           <Button
             label="Suivant"
             className="w-full rounded-[8px] h-[56px] text-base font-medium"
-            disabled={!isFormValid}
+            disabled={!isFormValid || isSubmitting}
             onClick={nextStep}
           />
         </>
@@ -88,15 +92,27 @@ export const OnboardingSeekerSteps: React.FC = () => {
                 intéressent le plus.
               </>
             }
+            domains={domains}
             selectedDomains={selectedDomains}
             onDomainSelect={handleDomainSelect}
             multiSelect={true}
+            isLoading={isLoadingDomains}
           />
           <Pagination currentStep={2} totalSteps={2} />
+
+          {/* Affichage des erreurs */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[8px]">
+              <p className="text-sm text-red-600 text-center">
+                {error || "Une erreur est survenue lors de l'inscription"}
+              </p>
+            </div>
+          )}
+
           <Button
-            label="Confirmer"
+            label={isSubmitting ? "Inscription en cours..." : "Confirmer"}
             className="w-full rounded-[8px] h-[56px] text-base font-medium"
-            disabled={!isDomainValid}
+            disabled={!isDomainValid || isSubmitting}
             onClick={completeOnboarding}
           />
         </div>

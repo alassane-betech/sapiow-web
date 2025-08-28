@@ -3,11 +3,12 @@ import { Professional } from "@/types/professional";
 import ProfessionalCard from "./ProfessionalCard";
 
 interface CategorySectionProps {
-  categoryName: string;
+  category: string;
   professionals: Professional[];
-  likedProfs: Record<number, boolean>;
-  onToggleLike: (id: number) => void;
+  likedProfs: Record<string, boolean>;
+  onToggleLike: (id: string) => void;
   onProfessionalClick?: (professional: Professional) => void;
+  isMutatingFavorite?: boolean;
 }
 
 const categoryDisplayNames: Record<string, string> = {
@@ -21,11 +22,12 @@ const categoryDisplayNames: Record<string, string> = {
 };
 
 export default function CategorySection({
-  categoryName,
+  category,
   professionals,
   likedProfs,
   onToggleLike,
   onProfessionalClick,
+  isMutatingFavorite = false,
 }: CategorySectionProps) {
   if (professionals.length === 0) {
     return null;
@@ -35,22 +37,29 @@ export default function CategorySection({
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-exford-blue font-figtree">
-          {categoryDisplayNames[categoryName] || categoryName}
+          {categoryDisplayNames[category] || category}
         </h2>
         <button className="text-xs text-cobalt-blue font-medium cursor-pointer">
           Voir tout →
         </button>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-        {professionals.map((professional) => (
-          <ProfessionalCard
-            key={professional.id}
-            professional={professional}
-            isLiked={likedProfs[professional.id] || false}
-            onToggleLike={onToggleLike}
-            onProfessionalClick={onProfessionalClick}
-          />
-        ))}
+        {professionals.map((professional) => {
+          const profIdString = professional.id.toString();
+          const isLiked = likedProfs[profIdString] || false;
+
+          return (
+            <ProfessionalCard
+              key={professional.id}
+              professional={professional}
+              isLiked={isLiked}
+              onToggleLike={onToggleLike}
+              onProfessionalClick={onProfessionalClick}
+              isLoadingFavorite={isMutatingFavorite}
+              lineClamp={3}
+            />
+          );
+        })}
       </div>
     </div>
   );

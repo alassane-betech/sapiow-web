@@ -8,8 +8,17 @@ import {
 import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "./Button";
+import { LoadingSpinner } from "./LoadingSpinner";
 import { ProfileAvatar } from "./ProfileAvatar";
 import { SessionModal } from "./SessionModal";
+
+interface AppointmentQuestion {
+  id: number | string;
+  question: string;
+  created_at: string;
+  updated_at: string;
+  appointment_id: number | string;
+}
 
 interface SessionCardProps {
   date: string;
@@ -21,6 +30,7 @@ interface SessionCardProps {
   textButton?: string;
   sessionDescription: string;
   onAccept?: () => void;
+  onCancel?: () => void;
   onViewRequest?: () => void;
   className?: string;
   icon?: string;
@@ -29,8 +39,10 @@ interface SessionCardProps {
     acceptDisabled?: boolean;
     viewDisabled?: boolean;
   };
-  isUpcoming?: boolean; // Pour distinguer l'onglet "A venir"
+  isUpcoming?: boolean;
   isFlex1?: boolean;
+  questions?: AppointmentQuestion[];
+  loadingState?: "confirming" | "cancelling" | null;
 }
 
 export const SessionCard: React.FC<SessionCardProps> = ({
@@ -40,6 +52,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   name,
   sessionDescription,
   onAccept,
+  onCancel,
   onViewRequest,
   className = "",
   icon,
@@ -50,6 +63,8 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   buttonStates = { acceptDisabled: false, viewDisabled: false },
   isUpcoming = false,
   isFlex1 = false,
+  questions = [],
+  loadingState = null,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -129,12 +144,22 @@ export const SessionCard: React.FC<SessionCardProps> = ({
         >
           <Button
             onClick={onAccept}
-            label={textButton}
-            icon={icon}
+            label={
+              loadingState === "confirming" ? (
+                <div className="flex items-center gap-2">
+                  <LoadingSpinner size="sm" />
+                </div>
+              ) : (
+                textButton
+              )
+            }
+            icon={!loadingState ? icon : undefined}
             className={`h-[40px] px-6 rounded-[8px] font-bold font-figtree text-base lg:text-[13px] xl:text-base ${
               isFlex1 ? "flex-1" : ""
             }`}
-            disabled={buttonStates.acceptDisabled}
+            disabled={
+              buttonStates.acceptDisabled || loadingState === "confirming"
+            }
           />
 
           <SessionModal
@@ -142,8 +167,12 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             onOpenChange={setIsOpen}
             profileImage={profileImage}
             name={name}
+            sessionDescription={sessionDescription}
             isUpcoming={isUpcoming}
             onAccept={onAccept}
+            onCancel={onCancel}
+            questions={questions}
+            loadingState={loadingState}
             trigger={
               <Button
                 onClick={handleViewRequest}

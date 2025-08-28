@@ -1,4 +1,5 @@
 "use client";
+import { withAuth } from "@/components/common/withAuth";
 import { Header } from "@/components/layout/header/Header";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
@@ -6,10 +7,10 @@ import { useUserStore } from "@/store/useUser";
 import Client from "./home/Client";
 import Expert from "./home/Expert";
 
-export default function Home() {
+function Home() {
   const { user } = useUserStore();
   return (
-    <div className="flex">
+    <div className="flex font-figtree">
       <AppSidebar />
       <div className="w-full">
         {user.type === "client" ? <HeaderClient /> : <Header />}
@@ -20,3 +21,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default withAuth(Home);

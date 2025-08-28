@@ -1,13 +1,37 @@
 "use client";
+import { withAuth } from "@/components/common/withAuth";
 import { OnboardingExpertSteps } from "@/components/onboarding/OnboardingExpertSteps";
 import { OnboardingSeekerSteps } from "@/components/onboarding/OnboardingSeekerSteps";
 import { UserTypeSelector } from "@/components/onboarding/UserTypeSelector";
+import { useOnboardingLogic } from "@/hooks/useOnboardingLogic";
 import Image from "next/image";
-import { useState } from "react";
 
-export default function Onboarding() {
-  const [step, setStep] = useState(0); // 0 = choix radio, 1 = étapes
-  const [userType, setUserType] = useState("client");
+function Onboarding() {
+  const {
+    isCheckingProfiles,
+    shouldShowOnboarding,
+    step,
+    userType,
+    setStep,
+    setUserType,
+  } = useOnboardingLogic();
+
+  // Afficher le loading pendant la vérification
+  if (isCheckingProfiles) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Vérification de votre profil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si on ne doit pas afficher l'onboarding, retourner null (redirection en cours)
+  if (!shouldShowOnboarding) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
@@ -26,7 +50,7 @@ export default function Onboarding() {
         {/* Logo - visible seulement à l'étape 0 */}
         {step === 0 && (
           <div className="mt-14 ml-[42px]">
-            <Image src="/assets/logo.jpg" alt="Logo" width={100} height={100} />
+            <Image src="/assets/logo.png" alt="Logo" width={175} height={100} />
           </div>
         )}
         <div
@@ -51,3 +75,5 @@ export default function Onboarding() {
     </div>
   );
 }
+
+export default withAuth(Onboarding);

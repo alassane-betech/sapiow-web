@@ -1,4 +1,5 @@
 "use client";
+import { useGetExpertises } from "@/api/domaine/useDomaine";
 import {
   Popover,
   PopoverContent,
@@ -11,59 +12,6 @@ interface SubCategory {
   id: string;
   name: string;
 }
-
-const subCategories: Record<string, SubCategory[]> = {
-  top: [
-    { id: "tout", name: "Tout" },
-    { id: "influenceur", name: "Influenceur" },
-    { id: "presentateur", name: "Présentateur" },
-    { id: "journaliste", name: "Journaliste" },
-    { id: "animateur", name: "Animateur radio" },
-    { id: "youtubeur", name: "Youtubeur" },
-  ],
-  maison: [
-    { id: "decoration", name: "Décoration" },
-    { id: "jardinage", name: "Jardinage" },
-    { id: "bricolage", name: "Bricolage" },
-    { id: "cuisine", name: "Cuisine" },
-  ],
-  business: [
-    { id: "entrepreneur", name: "Entrepreneur" },
-    { id: "consultant", name: "Consultant" },
-    { id: "coach", name: "Coach" },
-    { id: "finance", name: "Finance" },
-  ],
-  media: [
-    { id: "podcast", name: "Podcast" },
-    { id: "radio", name: "Radio" },
-    { id: "television", name: "Télévision" },
-    { id: "streaming", name: "Streaming" },
-  ],
-  artisanat: [
-    { id: "menuiserie", name: "Menuiserie" },
-    { id: "poterie", name: "Poterie" },
-    { id: "couture", name: "Couture" },
-    { id: "bijouterie", name: "Bijouterie" },
-  ],
-  culture: [
-    { id: "litterature", name: "Littérature" },
-    { id: "cinema", name: "Cinéma" },
-    { id: "musique", name: "Musique" },
-    { id: "theatre", name: "Théâtre" },
-  ],
-  glow: [
-    { id: "beaute", name: "Beauté" },
-    { id: "wellness", name: "Wellness" },
-    { id: "meditation", name: "Méditation" },
-    { id: "fitness", name: "Fitness" },
-  ],
-  sport: [
-    { id: "football", name: "Football" },
-    { id: "basketball", name: "Basketball" },
-    { id: "tennis", name: "Tennis" },
-    { id: "natation", name: "Natation" },
-  ],
-};
 
 interface SubCategoryFilterProps {
   selectedCategory: string;
@@ -86,14 +34,43 @@ export default function SubCategoryFilter({
 }: SubCategoryFilterProps) {
   const [selectedSort, setSelectedSort] = useState("recommended");
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const currentSubCategories = subCategories[selectedCategory] || [];
+
+  // Vérifier si selectedCategory est un ID de domaine (numérique)
+  const isDomainId =
+    !isNaN(Number(selectedCategory)) && selectedCategory !== "top";
+  const domainId = isDomainId ? Number(selectedCategory) : null;
+
+  // Récupérer les expertises du domaine si c'est un domaine
+  const { data: expertises = [], isLoading: isLoadingExpertises } =
+    useGetExpertises(domainId || 0);
+
+  // Utiliser uniquement les expertises API pour les domaines
+  const currentSubCategories: SubCategory[] = isDomainId
+    ? expertises.map((expertise) => ({
+        id: expertise.id.toString(),
+        name: expertise.name,
+      }))
+    : []; // Plus de données statiques
+
+  // Afficher loading si on charge les expertises
+  if (isDomainId && isLoadingExpertises) {
+    return (
+      <div className="flex items-center justify-between gap-4 py-3 px-0 lg:px-6">
+        <div className="flex items-center gap-4">
+          <div className="text-ash-gray text-sm">
+            Chargement des expertises...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (currentSubCategories.length === 0) {
     return null;
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 py-3 px-0 lg:px-6">
+    <div className="flex items-center justify-between gap-4 py-3 mt-5 mb-2 px-0 lg:px-6">
       <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 min-w-0">
         {currentSubCategories.map((subCategory) => (
           <button
@@ -107,6 +84,8 @@ export default function SubCategoryFilter({
           </button>
         ))}
       </div>
+
+      <div className="w-[2px] h-10 bg-light-blue-gray"></div>
 
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>

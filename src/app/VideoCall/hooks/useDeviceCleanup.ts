@@ -40,17 +40,13 @@ export const useDeviceCleanup = () => {
           navigator.mediaDevices
             .getUserMedia(constraints)
             .then((stream) => {
-              console.log("🎯 Flux capturé pour arrêt immédiat");
               stream.getTracks().forEach((track) => {
                 track.stop();
               });
             })
-            .catch(() => {
-              console.log("ℹ️ Aucun nouveau flux à arrêter");
-            });
+            .catch(() => {});
 
           if ((window as any).stream) {
-            console.log("🔄 Nettoyage du flux global window.stream");
             (window as any).stream
               .getTracks()
               .forEach((track: MediaStreamTrack) => track.stop());

@@ -1,388 +1,111 @@
 "use client";
-import { useFavorites } from "@/contexts/FavoritesContext";
-import { Professional } from "@/types/professional";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointments";
+import { useGetCustomer } from "@/api/customer/useCustomer";
+import { UpcomingVideoCall } from "@/components/common/DarkSessionCard";
+import { useClientHome } from "@/hooks/useClientHome";
+import {
+  filterAndSortAppointments,
+  transformAppointmentToSessionData,
+  type ApiAppointment,
+} from "@/utils/appointmentUtils";
+import { useMemo } from "react";
 import CategoryFilter from "./CategoryFilter";
 import CategorySection from "./CategorySection";
 import ProfessionalCard from "./ProfessionalCard";
 import SubCategoryFilter from "./SubCategoryFilter";
 
-const professionals = [
-  {
-    id: 1,
-    name: "Jean-Pierre Fauch",
-    price: "199.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: false,
-    category: "business",
-    topExpertise: true,
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 22,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "business",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 2,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "glow",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 3,
-    name: "Jean-Pierre Fauch",
-    price: "199.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "media",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 4,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "culture",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 5,
-    name: "Jean-Pierre Fauch",
-    price: "199.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "sport",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 6,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "maison",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 7,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "maison",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 15,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 8,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    category: "top",
-    topExpertise: true,
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 9,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 10,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 11,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 12,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 13,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  {
-    id: 14,
-    name: "Dr Amandine Bergère",
-    price: "120.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Dermatologue chez L'Oréal, Autrice, Investisseuse. 40 Forbes women",
-  },
-  // Duplication du tableau avec des IDs uniques
-  {
-    id: 16,
-    name: "Marie-Claire Dubois",
-    price: "189.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "business",
-    topExpertise: true,
-    description:
-      "Consultante en stratégie digitale, Ex-Google, Formatrice en innovation",
-  },
-  {
-    id: 17,
-    name: "Dr Sophie Martin",
-    price: "135.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "business",
-    description:
-      "Psychologue du travail, Coach certifiée, Spécialiste en développement personnel",
-  },
-  {
-    id: 18,
-    name: "Dr Claire Rousseau",
-    price: "145.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "business",
-    description:
-      "Nutritionniste holistique, Autrice bestseller, Experte en bien-être",
-  },
-  {
-    id: 19,
-    name: "Thomas Leroy",
-    price: "210.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "media",
-    description:
-      "Journaliste senior, Producteur TV, Consultant en communication",
-  },
-  {
-    id: 20,
-    name: "Dr Isabelle Moreau",
-    price: "155.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: false,
-    category: "culture",
-    description:
-      "Historienne de l'art, Curatrice d'expositions, Critique culturelle",
-  },
-  {
-    id: 21,
-    name: "Antoine Girard",
-    price: "175.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "business",
-    description:
-      "Coach sportif professionnel, Ex-athlète olympique, Préparateur mental",
-  },
-  {
-    id: 23,
-    name: "Dr Nathalie Blanc",
-    price: "130.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "maison",
-    description: "Architecte d'intérieur, Designer, Experte en feng shui",
-  },
-  {
-    id: 24,
-    name: "Dr Caroline Petit",
-    price: "125.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "maison",
-    description:
-      "Décoratrice professionnelle, Styliste maison, Consultante en aménagement",
-  },
-  {
-    id: 25,
-    name: "Dr Valérie Roux",
-    price: "140.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "top",
-    description:
-      "Médecin esthétique, Formatrice internationale, Experte anti-âge",
-  },
-  {
-    id: 26,
-    name: "Dr Patricia Durand",
-    price: "160.00 €",
-    image: "/assets/icons/pro2.png",
-    category: "top",
-    topExpertise: true,
-    description:
-      "Chirurgienne plasticienne, Pionnière en médecine régénérative",
-  },
-  {
-    id: 27,
-    name: "Dr Sylvie Garnier",
-    price: "115.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "top",
-    description:
-      "Dermatologue spécialisée, Chercheuse en cosmétologie, Autrice scientifique",
-  },
-  {
-    id: 28,
-    name: "Dr Monique Fabre",
-    price: "150.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Endocrinologue, Spécialiste hormones, Experte en santé féminine",
-  },
-  {
-    id: 29,
-    name: "Dr Brigitte Simon",
-    price: "165.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: false,
-    category: "top",
-    description:
-      "Gynécologue obstétricienne, Formatrice médicale, Consultante santé",
-  },
-  {
-    id: 30,
-    name: "Dr Françoise Bonnet",
-    price: "180.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Cardiologue interventionnelle, Chercheuse clinique, Experte prévention",
-  },
-  {
-    id: 31,
-    name: "Dr Michèle Laurent",
-    price: "170.00 €",
-    image: "/assets/icons/pro1.png",
-    verified: true,
-    category: "top",
-    description:
-      "Neurologue spécialisée, Experte en neurosciences, Consultante bien-être mental",
-  },
-  {
-    id: 32,
-    name: "Dr Jacqueline Mercier",
-    price: "195.00 €",
-    image: "/assets/icons/pro2.png",
-    verified: true,
-    category: "top",
-    description:
-      "Oncologue renommée, Chercheuse en immunothérapie, Conférencière internationale",
-  },
-];
-
 export default function Client() {
-  const router = useRouter();
-  const { likedProfs, toggleLike } = useFavorites();
-  const [selectedCategory, setSelectedCategory] = useState("top");
-  const [selectedSubCategory, setSelectedSubCategory] = useState("");
-  const [sortOption, setSortOption] = useState("recommended");
+  const {
+    selectedCategory,
+    selectedSubCategory,
+    groupedProfessionals,
+    filteredProfessionals,
+    likedProfs,
+    handleCategoryChange,
+    handleSubCategoryChange,
+    handleSortChange,
+    handleToggleLike,
+    handleProfessionalClick,
+    isLoading,
+    error,
+  } = useClientHome();
 
-  const handleToggleLike = (profId: number) => {
-    const professional = professionals.find((p) => p.id === profId);
-    if (professional) {
-      toggleLike(profId, professional);
-    }
-  };
+  // Récupération des appointments du patient
+  const { data: customer } = useGetCustomer();
+  const { data: appointments } = useGetPatientAppointmentsById(
+    customer?.id || ""
+  );
 
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    // Réinitialiser la sous-catégorie quand on change de catégorie
-    setSelectedSubCategory(categoryId === "top" ? "tout" : "");
-  };
+  // Filtrage des visios confirmées (on garde les données originales)
+  const upcomingAppointments = useMemo(() => {
+    if (!appointments) return [];
+    const { upcomingConfirmed } = filterAndSortAppointments(
+      appointments as ApiAppointment[]
+    );
+    return upcomingConfirmed;
+  }, [appointments]);
 
-  const handleSubCategoryChange = (subCategoryId: string) => {
-    setSelectedSubCategory(subCategoryId);
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-exford-blue"></div>
+          <p className="mt-4 text-lg text-exford-blue">
+            Chargement des experts...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  const handleSortChange = (sortId: string) => {
-    setSortOption(sortId);
-  };
-
-  const handleProfessionalClick = (professional: Professional) => {
-    // Rediriger vers la page details avec l'ID du professionnel
-    router.push(`/details?id=${professional.id}`);
-  };
-
-  // Grouper les professionnels par catégorie pour l'affichage "Top"
-  const groupedProfessionals = professionals.reduce((acc, prof) => {
-    if (!acc[prof.category]) {
-      acc[prof.category] = [];
-    }
-    acc[prof.category].push(prof);
-    return acc;
-  }, {} as Record<string, typeof professionals>);
-
-  // Filtrer les professionnels selon la catégorie sélectionnée
-  const filteredProfessionals =
-    selectedCategory === "top"
-      ? professionals
-      : professionals.filter((prof) => prof.category === selectedCategory);
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-red-600">
+            Erreur lors du chargement des experts
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            {error.message || "Erreur inconnue"}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
+      {/* Section visios confirmées à venir */}
+      {upcomingAppointments.length > 0 && (
+        <div className="mb-6 mt-4">
+          <h2 className="mb-3 text-lg font-bold text-exford-blue font-figtree">
+            Votre prochaine visio
+          </h2>
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+            {upcomingAppointments
+              .slice(0, 2)
+              .map((appointment: ApiAppointment) => {
+                const sessionData =
+                  transformAppointmentToSessionData(appointment);
+                return (
+                  <UpcomingVideoCall
+                    key={appointment.id}
+                    date={sessionData.date}
+                    appointmentAt={appointment.appointment_at}
+                    profileImage={sessionData.profileImage}
+                    name={sessionData.professionalName}
+                    title={sessionData.professionalTitle}
+                    variant="dark"
+                    showButton={false}
+                    sessionTime={sessionData.time}
+                    className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
+                  />
+                );
+              })}
+          </div>
+        </div>
+      )}
+
       <h2 className="my-2 text-lg lg:text-2xl font-normal text-exford-blue font-figtree">
         Accélérez votre projet, Réservez une Visio.
       </h2>
@@ -403,11 +126,11 @@ export default function Client() {
         // Affichage par sections pour "Top"
         <div className="py-6 ">
           {Object.entries(groupedProfessionals).map(
-            ([category, professionals]) => (
+            ([category, categoryProfessionals]) => (
               <CategorySection
                 key={category}
-                categoryName={category}
-                professionals={professionals}
+                category={category}
+                professionals={categoryProfessionals}
                 likedProfs={likedProfs}
                 onToggleLike={handleToggleLike}
                 onProfessionalClick={handleProfessionalClick}
@@ -422,9 +145,15 @@ export default function Client() {
             <ProfessionalCard
               key={professional.id}
               professional={professional}
-              isLiked={likedProfs[professional.id] || false}
+              isLiked={(() => {
+                const profIdString = professional.id.toString();
+                const isLiked = likedProfs[profIdString] || false;
+
+                return isLiked;
+              })()}
               onToggleLike={handleToggleLike}
               onProfessionalClick={handleProfessionalClick}
+              lineClamp={3}
             />
           ))}
         </div>

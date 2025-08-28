@@ -2,26 +2,47 @@ import { EmptySessionCard } from "@/components/common/EmptySessionCard";
 import { SessionPreviewCard } from "@/components/common/SessionPreviewCard";
 import TimeSlotsManager from "@/components/common/TimeSlotsManager";
 import { mockAvailabilityEvents } from "@/data/mockAvailability";
+import { useProExpertStore } from "@/store/useProExpert";
+import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
+import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { SessionDetailsData } from "@/types/availability";
-import { formatDateForSession, formatFullDate, formatTimeForSession } from "@/utils/dateFormat";
+import { ApiSchedule, getDayOfWeekFromDate } from "@/types/schedule";
+import {
+  formatDateForSession,
+  formatFullDate,
+  formatTimeForSession,
+} from "@/utils/dateFormat";
 
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
   showTimeSlotsManager: boolean;
-  onAddAvailability: () => void;
 }
 
-export const SessionDetailsPanel = ({ 
-  selectedDate, 
-  showTimeSlotsManager, 
-  onAddAvailability 
+export const SessionDetailsPanel = ({
+  selectedDate,
+  showTimeSlotsManager,
 }: SessionDetailsPanelProps) => {
+  // Stores et API
+  const { proExpertData, setProExpertData } = useProExpertStore();
+  const { addTimeSlotLocal } = useTimeSlotsStore();
+  const updateProExpertMutation = useUpdateProExpert();
+
+  // Vérifier s'il y a des créneaux pour la date sélectionnée
+  const hasTimeSlotsForDate = (date: Date | null): boolean => {
+    if (!date || !proExpertData?.schedules) return false;
+
+    const dayOfWeek = getDayOfWeekFromDate(date);
+    const schedules = proExpertData.schedules as ApiSchedule[];
+    return schedules.some((schedule) => schedule.day_of_week === dayOfWeek);
+  };
+
   // Fonction pour récupérer les détails des sessions pour une date sélectionnée
   const getSessionDetails = (): SessionDetailsData | null => {
     if (!selectedDate) return null;
 
     const dayOfMonth = selectedDate.getDate();
-    const event = mockAvailabilityEvents[dayOfMonth as keyof typeof mockAvailabilityEvents];
+    const event =
+      mockAvailabilityEvents[dayOfMonth as keyof typeof mockAvailabilityEvents];
 
     if (!event || event.users.length === 0) return null;
 
@@ -41,6 +62,19 @@ export const SessionDetailsPanel = ({
   };
 
   const sessionDetails = getSessionDetails();
+
+  // Fonction pour ajouter une disponibilité localement (sans appel réseau)
+  const handleAddAvailability = () => {
+    if (!selectedDate || !proExpertData?.schedules) return;
+    
+    const result = addTimeSlotLocal(proExpertData.schedules, selectedDate);
+    
+    // Mettre à jour le store principal avec les nouvelles données locales
+    setProExpertData({
+      ...proExpertData,
+      schedules: result.schedules,
+    });
+  };
 
   return (
     <div className="w-full max-w-[349px]">
@@ -69,9 +103,9 @@ export const SessionDetailsPanel = ({
             </div>
           )}
 
-          {showTimeSlotsManager ? (
+          {showTimeSlotsManager || hasTimeSlotsForDate(selectedDate) ? (
             <div className="w-full">
-              <TimeSlotsManager />
+              <TimeSlotsManager selectedDate={selectedDate} />
             </div>
           ) : (
             <EmptySessionCard
@@ -81,7 +115,7 @@ export const SessionDetailsPanel = ({
                 </>
               }
               buttonLabel="Ajouter une disponibilité"
-              onAdd={onAddAvailability}
+              onAdd={handleAddAvailability}
             />
           )}
         </div>

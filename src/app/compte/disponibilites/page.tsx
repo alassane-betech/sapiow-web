@@ -15,22 +15,53 @@ import {
 } from "@/components/ui/sheet";
 import { useCalendarStore } from "@/store/useCalendar";
 import { formatFullDate } from "@/utils/dateFormat";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
+import { AvailabilityEvent } from "@/types/availability";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
+import { useGetProExpert } from "@/api/proExpert/useProExpert";
+import { useProExpertStore } from "@/store/useProExpert";
 
 export default function Disponibilites() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("semaine");
-  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const { selectedDate } = useCalendarStore();
   const [isBlocked, setIsBlocked] = useState(false);
   const [showTimeSlotsManager, setShowTimeSlotsManager] = useState(false);
   const [showAvailabilitySheet, setShowAvailabilitySheet] = useState(false);
   const [showSessionDetailsSheet, setShowSessionDetailsSheet] = useState(false);
 
-  const handleConnectGoogle = () => {
-    // Logique de connexion Google Agenda
-    setIsGoogleConnected(true);
+  // Hook Google Calendar
+  const {
+    isConnected: isGoogleConnected,
+    isLoading: isGoogleLoading,
+    error: googleError,
+    connect: connectGoogle,
+    disconnect: disconnectGoogle,
+    syncAvailabilities,
+    checkConflicts,
+  } = useGoogleCalendar();
+
+  // API et Store pour synchroniser les données proExpert
+  const { data: proExpertData, isLoading: isLoadingApi } = useGetProExpert();
+  const { setProExpertData, setLoading } = useProExpertStore();
+
+  // Synchroniser les données API avec le store
+  useEffect(() => {
+    setLoading(isLoadingApi);
+    if (proExpertData) {
+      setProExpertData(proExpertData);
+    }
+  }, [proExpertData, isLoadingApi, setProExpertData, setLoading]);
+
+  const handleConnectGoogle = async () => {
+    if (isGoogleConnected) {
+      // Si déjà connecté, déconnecter
+      await disconnectGoogle();
+    } else {
+      // Sinon, connecter
+      await connectGoogle();
+    }
   };
 
   const handleBlocked = (checked: boolean) => {
@@ -45,8 +76,21 @@ export default function Disponibilites() {
     setShowAvailabilitySheet(true);
   };
 
-  const handleSyncCalendars = () => {
-    setShowAvailabilitySheet(true);
+  const handleSyncCalendars = async () => {
+    if (isGoogleConnected) {
+      try {
+        // Récupérer les disponibilités depuis votre store/API
+        const availabilities: AvailabilityEvent[] = []; // Remplacer par vos vraies données
+        await syncAvailabilities(availabilities);
+        alert('Synchronisation réussie!');
+      } catch (error) {
+        console.error('Erreur de synchronisation:', error);
+        alert('Erreur lors de la synchronisation');
+      }
+    } else {
+      // Si pas connecté, ouvrir le sheet de gestion
+      setShowAvailabilitySheet(true);
+    }
   };
 
   // Ouvrir automatiquement le sheet sur mobile seulement quand une date est sélectionnée
@@ -145,14 +189,19 @@ export default function Disponibilites() {
                           Google Agenda
                         </p>
                         <p className="text-sm font-medium font-figtree text-slate-600">
-                          Non connecté
+                          {isGoogleConnected ? 'Connecté' : 'Non connecté'}
                         </p>
                       </div>
                     </div>
                     <Button
-                      label="Connecter"
-                      className="text-sm font-bold font-figtree text-white"
+                      label={isGoogleConnected ? 'Déconnecter' : 'Connecter'}
+                      className={`text-sm font-bold font-figtree ${
+                        isGoogleConnected 
+                          ? 'text-red-600 bg-red-50 border border-red-200' 
+                          : 'text-white'
+                      }`}
                       onClick={handleConnectGoogle}
+                      disabled={isGoogleLoading}
                     />
                   </div>
                 </CardContent>

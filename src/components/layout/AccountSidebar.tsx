@@ -1,5 +1,10 @@
+import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
+import { supabase } from "@/lib/supabase/client";
+import { useUserStore } from "@/store/useUser";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
 
@@ -58,20 +63,49 @@ const navItems = [
 
 interface AccountSidebarProps {
   isMobile?: boolean;
-  userType?: "client" | "expert";
 }
 
-export function AccountSidebar({
-  isMobile = false,
-  userType = "expert",
-}: AccountSidebarProps) {
+export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { user } = useUserStore();
+  const { handleExpertModeSwitch, hasExpertProfile } = useExpertModeSwitch();
+
   const sidebarClasses = isMobile
     ? "w-full h-full flex flex-col px-4 py-4"
     : " w-[302px] h-[calc(100vh-72px)] sticky top-[72px] z-30 flex flex-col px-4 py-4 border-r border-r-light-blue-gray";
 
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      // Déconnexion via Supabase
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("Erreur lors de la déconnexion:", error);
+        return;
+      }
+
+      // Nettoyer le localStorage si nécessaire
+      localStorage.removeItem("phoneNumber");
+      localStorage.removeItem("selectedCountry");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_id");
+
+      // Rediriger vers la page de connexion
+      router.push("/login");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   // Filtrer les éléments de navigation selon le type d'utilisateur
   const getFilteredNavItems = () => {
-    if (userType === "client") {
+    if (user.type === "client") {
       // Client : Mon profil, Historique des paiements, Notifications, Langue, Besoin d'aide ?, Mentions légales, A propos
       return navItems.filter((item) =>
         [
@@ -130,7 +164,7 @@ export function AccountSidebar({
           ))}
         </ul>
       </nav>
-      {userType === "client" && (
+      {!hasExpertProfile && (
         <div className="flex flex-col w-full max-w-[302px] h-[172px] bg-[#E8F2FF] rounded-[12px] p-4">
           <h2 className="text-base font-bold text-exford-blue font-figtree">
             Devenez expert
@@ -149,6 +183,7 @@ export function AccountSidebar({
             <Button
               label="Devenir expert"
               className="h-10 font-bold text-base font-figtree w-full max-w-[130px]"
+              onClick={handleExpertModeSwitch}
             />
           </div>
         </div>
@@ -159,8 +194,12 @@ export function AccountSidebar({
           isMobile ? "mt-auto" : "sticky bottom-0 left-0"
         } pt-4 pb-2 -mx-4 px-4 z-10`}
       >
-        <button className="w-full text-center text-[#1E293B] font-bold text-[15px] py-2 rounded-xl hover:bg-[#F7F9FB] transition">
-          Se déconnecter
+        <button
+          onClick={handleLogout}
+          disabled={isLoggingOut}
+          className="w-full text-center text-[#1E293B] font-bold text-[15px] py-2 rounded-xl hover:bg-[#F7F9FB] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
         </button>
       </div>
     </aside>

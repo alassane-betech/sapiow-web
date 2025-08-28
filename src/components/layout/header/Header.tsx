@@ -1,21 +1,23 @@
 "use client";
 import { ProfileAvatar } from "@/components/common/ProfileAvatar";
 import { ShareLinkButton } from "@/components/common/ShareLinkButton";
-import { useUserStore } from "@/store/useUser";
-import React, { useState } from "react";
+import { useModeSwitch } from "@/hooks/useModeSwitch";
+import { useTodayVisios } from "@/hooks/useTodayVisios";
+import React from "react";
 import { Switch } from "../../ui/switch";
 
 export const Header: React.FC = () => {
-  const [isExpertMode, setIsExpertMode] = useState(true);
-  const { setUser } = useUserStore();
+  const { isExpertMode, handleModeSwitch } = useModeSwitch();
+  const { todayVisiosCount, user } = useTodayVisios();
+
   return (
-    <header className="container bg-white px-6 py-4">
+    <header className="container bg-white px-6 py-4 sticky top-0 z-20">
       <div className="flex items-center justify-between">
         {/* Section gauche - Photo de profil et message */}
         <div className="flex flex-col items-start gap-4">
           {/* Photo de profil */}
           <ProfileAvatar
-            src="/assets/memoji.jpg"
+            src={user?.avatar || "/assets/memoji.jpg"}
             alt="Photo de profil"
             size="lg"
           />
@@ -23,10 +25,12 @@ export const Header: React.FC = () => {
           {/* Message de bienvenue */}
           <div>
             <h1 className="text-xl font-semibold text-exford-blue font-figtree">
-              Bonjour Dr. Pierre
+              Bonjour{" "}
+              {user ? `${user.first_name} ${user.last_name}` : "Utilisateur"}
             </h1>
             <p className="text-sm font-medium text-exford-blue font-figtree">
-              Vous avez 3 visios à venir aujourd'hui
+              Vous avez {todayVisiosCount} visio
+              {todayVisiosCount > 1 ? "s" : ""} à venir aujourd'hui
             </p>
           </div>
         </div>
@@ -41,9 +45,8 @@ export const Header: React.FC = () => {
             <span className="text-white font-bold">Mode expert</span>
             <Switch
               checked={isExpertMode}
-              onCheckedChange={setIsExpertMode}
+              onCheckedChange={handleModeSwitch}
               className="data-[state=checked]:bg-[#1E293B]"
-              onClick={() => setUser({ type: "client" })}
             />
           </div>
         </div>
