@@ -1,14 +1,14 @@
-import { 
-  usePatientSendMessage, 
+import {
   createSendMessageData,
-  validateFile 
+  usePatientSendMessage,
+  validateFile,
 } from "@/api/patientMessages/usePatientMessage";
 import { useProSendMessage } from "@/api/porMessages/useProMessage";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useUserStore } from "@/store/useUser";
-import { Paperclip, Send, Mic, Square, Play, Pause } from "lucide-react";
+import { Mic, Paperclip, Send, Square } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -71,23 +71,32 @@ export function MessageInput({ receiverId }: MessageInputProps) {
   const handleSendMessage = async () => {
     if ((message.trim() || selectedFile || recordedAudio) && receiverId) {
       try {
-        console.log("Avant envoi:", { selectedFile, recordedAudio, message: message.trim(), receiverId });
-        
+        console.log("Avant envoi:", {
+          selectedFile,
+          recordedAudio,
+          message: message.trim(),
+          receiverId,
+        });
+
         let content = selectedFile || message.trim();
-        
+
         // Si c'est un audio enregistré, créer un File à partir du Blob
         if (recordedAudio) {
-          const audioFile = new File([recordedAudio], `audio-${Date.now()}.webm`, {
-            type: recordedAudio.type
-          });
+          const audioFile = new File(
+            [recordedAudio],
+            `audio-${Date.now()}.webm`,
+            {
+              type: recordedAudio.type,
+            }
+          );
           content = audioFile;
         }
-        
+
         console.log("Content à envoyer:", content);
-        
+
         const messageData = createSendMessageData(receiverId, content);
         console.log("MessageData créé:", messageData);
-        
+
         await sendMessageMutation.mutateAsync(messageData);
         setMessage("");
         setSelectedFile(null);
@@ -112,7 +121,7 @@ export function MessageInput({ receiverId }: MessageInputProps) {
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setSelectedFile(file);
       setMessage(`🖼️ ${file.name}`);
     }
@@ -129,26 +138,31 @@ export function MessageInput({ receiverId }: MessageInputProps) {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const blob = new Blob(chunks, { type: "audio/webm" });
         setRecordedAudio(blob);
         setAudioUrl(URL.createObjectURL(blob));
-        setMessage(`🎤 Enregistrement audio (${Math.floor(recordingTime / 60)}:${(recordingTime % 60).toString().padStart(2, '0')})`);
-        stream.getTracks().forEach(track => track.stop());
+        setMessage(
+          `🎤 Enregistrement audio (${Math.floor(recordingTime / 60)}:${(
+            recordingTime % 60
+          )
+            .toString()
+            .padStart(2, "0")})`
+        );
+        stream.getTracks().forEach((track) => track.stop());
       };
 
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
-      
+
       // Démarrer le timer
       timerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime((prev) => prev + 1);
       }, 1000);
-
     } catch (error) {
-      console.error('Erreur accès microphone:', error);
-      alert('Impossible d\'accéder au microphone');
+      console.error("Erreur accès microphone:", error);
+      alert("Impossible d'accéder au microphone");
     }
   };
 
@@ -184,9 +198,9 @@ export function MessageInput({ receiverId }: MessageInputProps) {
   return (
     <div className="border-t border-gray-200 py-4 sticky bottom-0 z-10 bg-white">
       <div className="flex items-center space-x-0">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="text-gray-500"
           onClick={() => fileInputRef.current?.click()}
         >
@@ -224,19 +238,23 @@ export function MessageInput({ receiverId }: MessageInputProps) {
             className="text-gray-500"
             onClick={handleSendMessage}
             disabled={
-              (!message.trim() && !selectedFile) || !receiverId || sendMessageMutation.isPending
+              (!message.trim() && !selectedFile) ||
+              !receiverId ||
+              sendMessageMutation.isPending
             }
           >
             <Send
               className={`h-5 w-5 ${
-                (message.trim() || selectedFile) ? "text-exford-blue" : "text-gray-400"
+                message.trim() || selectedFile
+                  ? "text-exford-blue"
+                  : "text-gray-400"
               }`}
             />
           </Button>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="text-gray-500"
           onClick={() => imageInputRef.current?.click()}
         >
@@ -255,9 +273,9 @@ export function MessageInput({ receiverId }: MessageInputProps) {
           onChange={handleImageSelect}
         />
         {!isRecording ? (
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="text-gray-500 hover:text-exford-blue"
             onClick={startRecording}
           >
@@ -268,20 +286,21 @@ export function MessageInput({ receiverId }: MessageInputProps) {
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               <span className="text-sm font-medium text-red-600">
-                {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
+                {Math.floor(recordingTime / 60)}:
+                {(recordingTime % 60).toString().padStart(2, "0")}
               </span>
             </div>
             <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
                 onClick={stopRecording}
               >
                 <Square className="h-4 w-4" />
               </Button>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 className="text-gray-600 hover:text-gray-700 h-8 w-8 p-0"
                 onClick={cancelRecording}
@@ -291,7 +310,7 @@ export function MessageInput({ receiverId }: MessageInputProps) {
             </div>
           </div>
         )}
-        
+
         {/* Lecteur audio pour l'aperçu */}
         {audioUrl && !isRecording && (
           <div className="flex items-center gap-2 bg-blue-50 rounded-lg px-3 py-2">

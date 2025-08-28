@@ -38,7 +38,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({
           {numericValue}
         </div>
         {currencySymbol && (
-          <div className="text-[20px] lg:text-2xl font-bold text-cobalt-blue ml-1 mt-1">
+          <div className="text-[20px] lg:text-2xl font-bold text-cobalt-blue ml-1 mt-1 font-figtree">
             {currencySymbol}
           </div>
         )}

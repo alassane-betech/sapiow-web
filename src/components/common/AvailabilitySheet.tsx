@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -10,15 +10,14 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
-import { Check } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useState, useRef } from "react";
-import DatePicker from "./DatePicker";
-import TimeSelect from "./TimeSelect";
 import { useProExpertStore } from "@/store/useProExpert";
 import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
-import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
-import { getDayOfWeekFromDate, ApiSchedule } from "@/types/schedule";
+import { ApiSchedule } from "@/types/schedule";
+import { Check } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import DatePicker from "./DatePicker";
+import TimeSelect from "./TimeSelect";
 
 interface TimeSlot {
   id: string;
@@ -55,64 +54,110 @@ export default function AvailabilitySheet({
 
   // Convertir une heure en nombre pour comparaison (ex: "9h30" -> 9.5)
   const timeToNumber = (time: string): number => {
-    const [hour, minutes] = time.replace('h', ':').split(':');
-    return parseInt(hour) + (parseInt(minutes || '0') / 60);
+    const [hour, minutes] = time.replace("h", ":").split(":");
+    return parseInt(hour) + parseInt(minutes || "0") / 60;
   };
 
   // Générer les options de endTime filtrées selon startTime
   const getEndTimeOptions = (startTime: string): string[] => {
     const timeOptions = [
-      "08h00", "08h30", "09h00", "09h30", "10h00", "10h30",
-      "11h00", "11h30", "12h00", "12h30", "13h00", "13h30",
-      "14h00", "14h30", "15h00", "15h30", "16h00", "16h30",
-      "17h00", "17h30", "18h00", "18h30", "19h00", "19h30"
+      "08h00",
+      "08h30",
+      "09h00",
+      "09h30",
+      "10h00",
+      "10h30",
+      "11h00",
+      "11h30",
+      "12h00",
+      "12h30",
+      "13h00",
+      "13h30",
+      "14h00",
+      "14h30",
+      "15h00",
+      "15h30",
+      "16h00",
+      "16h30",
+      "17h00",
+      "17h30",
+      "18h00",
+      "18h30",
+      "19h00",
+      "19h30",
     ];
-    
+
     if (!startTime) return timeOptions;
-    
+
     const startTimeNum = timeToNumber(startTime);
-    return timeOptions.filter(time => {
+    return timeOptions.filter((time) => {
       const timeNum = timeToNumber(time);
       return timeNum > startTimeNum;
     });
   };
 
   // Détecter les conflits d'horaires dans une journée
-  const getConflictTimes = (dayIndex: number, currentSessionId: string, field: "startTime" | "endTime"): string[] => {
+  const getConflictTimes = (
+    dayIndex: number,
+    currentSessionId: string,
+    field: "startTime" | "endTime"
+  ): string[] => {
     const dayData = availability[dayIndex];
     if (!dayData) return [];
 
     const conflictTimes: string[] = [];
-    const otherSessions = dayData.sessions.filter(s => s.id !== currentSessionId && s.startTime && s.endTime);
+    const otherSessions = dayData.sessions.filter(
+      (s) => s.id !== currentSessionId && s.startTime && s.endTime
+    );
 
     // Seulement détecter les conflits s'il y a d'autres sessions complètes
     if (otherSessions.length === 0) return [];
 
     const timeOptions = [
-      "08h00", "08h30", "09h00", "09h30", "10h00", "10h30",
-      "11h00", "11h30", "12h00", "12h30", "13h00", "13h30",
-      "14h00", "14h30", "15h00", "15h30", "16h00", "16h30",
-      "17h00", "17h30", "18h00", "18h30", "19h00", "19h30"
+      "08h00",
+      "08h30",
+      "09h00",
+      "09h30",
+      "10h00",
+      "10h30",
+      "11h00",
+      "11h30",
+      "12h00",
+      "12h30",
+      "13h00",
+      "13h30",
+      "14h00",
+      "14h30",
+      "15h00",
+      "15h30",
+      "16h00",
+      "16h30",
+      "17h00",
+      "17h30",
+      "18h00",
+      "18h30",
+      "19h00",
+      "19h30",
     ];
 
-    timeOptions.forEach(time => {
+    timeOptions.forEach((time) => {
       const timeNum = timeToNumber(time);
-      
+
       for (const session of otherSessions) {
         const sessionStart = timeToNumber(session.startTime);
         const sessionEnd = timeToNumber(session.endTime);
-        
+
         // Vérifier si le temps créerait un conflit réel
         let hasConflict = false;
-        
+
         if (field === "startTime") {
           // Conflit si le startTime est strictement dans une plage existante
           hasConflict = timeNum > sessionStart && timeNum < sessionEnd;
         } else if (field === "endTime") {
-          // Conflit si le endTime est strictement dans une plage existante  
+          // Conflit si le endTime est strictement dans une plage existante
           hasConflict = timeNum > sessionStart && timeNum < sessionEnd;
         }
-        
+
         if (hasConflict) {
           conflictTimes.push(time);
           break; // Pas besoin de vérifier les autres sessions pour ce temps
@@ -125,30 +170,38 @@ export default function AvailabilitySheet({
 
   // Mapping des jours vers les données API
   const dayMapping = {
-    "Dimanche": "sunday",
-    "Lundi": "monday", 
-    "Mardi": "tuesday",
-    "Mercredi": "wednesday",
-    "Jeudi": "thursday",
-    "Vendredi": "friday",
-    "Samedi": "saturday"
+    Dimanche: "sunday",
+    Lundi: "monday",
+    Mardi: "tuesday",
+    Mercredi: "wednesday",
+    Jeudi: "thursday",
+    Vendredi: "friday",
+    Samedi: "saturday",
   } as const;
 
   // Générer les données de disponibilité depuis les schedules API
   const generateAvailabilityFromSchedules = (): DayAvailability[] => {
-    const days = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-    
-    return days.map(day => {
+    const days = [
+      "Dimanche",
+      "Lundi",
+      "Mardi",
+      "Mercredi",
+      "Jeudi",
+      "Vendredi",
+      "Samedi",
+    ];
+
+    return days.map((day) => {
       const apiDay = dayMapping[day as keyof typeof dayMapping];
-      const schedules = proExpertData?.schedules as ApiSchedule[] || [];
-      const daySchedules = schedules.filter(s => s.day_of_week === apiDay);
-      
+      const schedules = (proExpertData?.schedules as ApiSchedule[]) || [];
+      const daySchedules = schedules.filter((s) => s.day_of_week === apiDay);
+
       const sessions = daySchedules.map((schedule, index) => ({
         id: `${apiDay}-${schedule.id || index}`,
-        startTime: schedule.start_time.substring(0, 5).replace(':', 'h'),
-        endTime: schedule.end_time.substring(0, 5).replace(':', 'h'),
+        startTime: schedule.start_time.substring(0, 5).replace(":", "h"),
+        endTime: schedule.end_time.substring(0, 5).replace(":", "h"),
       }));
-      
+
       return {
         day,
         available: sessions.length > 0,
@@ -159,14 +212,16 @@ export default function AvailabilitySheet({
 
   // État des disponibilités basé sur les données API
   const [availability, setAvailability] = useState<DayAvailability[]>([]);
-  
+
   // Ref pour éviter les boucles de mise à jour
   const isUpdatingRef = useRef(false);
-  
+
   // Mettre à jour les disponibilités quand les schedules changent
   useEffect(() => {
     if (proExpertData?.schedules && !isUpdatingRef.current) {
-      console.log('AvailabilitySheet: useEffect triggered, updating availability');
+      console.log(
+        "AvailabilitySheet: useEffect triggered, updating availability"
+      );
       const newAvailability = generateAvailabilityFromSchedules();
       setAvailability(newAvailability);
     }
@@ -205,17 +260,19 @@ export default function AvailabilitySheet({
   // Sauvegarder sur le serveur avec debouncing
   const handleSaveToServer = async () => {
     if (!proExpertData?.schedules) return;
-    
+
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    
+
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         await saveSchedulesToServer(
           proExpertData.schedules || [],
           async (updateData: any) => {
-            const result = await updateProExpertMutation.mutateAsync(updateData);
+            const result = await updateProExpertMutation.mutateAsync(
+              updateData
+            );
             return result.data;
           }
         );
@@ -239,19 +296,19 @@ export default function AvailabilitySheet({
     if (!dayData || !proExpertData?.schedules) return;
 
     const apiDay = dayMapping[dayData.day as keyof typeof dayMapping];
-    
+
     if (dayData.available) {
       // Supprimer tous les créneaux de ce jour
-      const updatedSchedules = (proExpertData.schedules as ApiSchedule[]).filter(
-        s => s.day_of_week !== apiDay
-      );
-      
+      const updatedSchedules = (
+        proExpertData.schedules as ApiSchedule[]
+      ).filter((s) => s.day_of_week !== apiDay);
+
       setProExpertData({
         ...proExpertData,
         schedules: updatedSchedules,
       });
     }
-    
+
     // La mise à jour de l'état local se fera via useEffect
   };
 
@@ -260,7 +317,7 @@ export default function AvailabilitySheet({
     if (!dayData || !proExpertData?.schedules) return;
 
     const apiDay = dayMapping[dayData.day as keyof typeof dayMapping];
-    
+
     // Créer une date fictive pour ce jour
     const today = new Date();
     const daysToAdd = Object.keys(dayMapping).indexOf(dayData.day);
@@ -268,7 +325,7 @@ export default function AvailabilitySheet({
     fakeDate.setDate(today.getDate() + (daysToAdd - today.getDay()));
 
     const result = addTimeSlotLocal(proExpertData.schedules, fakeDate);
-    
+
     setProExpertData({
       ...proExpertData,
       schedules: result.schedules,
@@ -280,7 +337,7 @@ export default function AvailabilitySheet({
     if (!dayData || !proExpertData?.schedules) return;
 
     const apiDay = dayMapping[dayData.day as keyof typeof dayMapping];
-    
+
     // Créer une date fictive pour ce jour
     const today = new Date();
     const daysToAdd = Object.keys(dayMapping).indexOf(dayData.day);
@@ -297,7 +354,7 @@ export default function AvailabilitySheet({
           return result.data;
         }
       );
-      
+
       setProExpertData({
         ...proExpertData,
         schedules: updatedSchedules,
@@ -318,12 +375,17 @@ export default function AvailabilitySheet({
       sessionId,
       field,
       value,
-      currentAvailability: availability[dayIndex]?.sessions.find(s => s.id === sessionId)
+      currentAvailability: availability[dayIndex]?.sessions.find(
+        (s) => s.id === sessionId
+      ),
     });
 
     const dayData = availability[dayIndex];
     if (!dayData || !proExpertData?.schedules) {
-      console.log(`AvailabilitySheet.updateSessionTime: Pas de données`, { dayData: !!dayData, schedules: !!proExpertData?.schedules });
+      console.log(`AvailabilitySheet.updateSessionTime: Pas de données`, {
+        dayData: !!dayData,
+        schedules: !!proExpertData?.schedules,
+      });
       return;
     }
 
@@ -336,7 +398,9 @@ export default function AvailabilitySheet({
     const fakeDate = new Date(today);
     fakeDate.setDate(today.getDate() + (daysToAdd - today.getDay()));
 
-    console.log(`AvailabilitySheet.updateSessionTime: Avant updateTimeSlotLocal`);
+    console.log(
+      `AvailabilitySheet.updateSessionTime: Avant updateTimeSlotLocal`
+    );
     const updatedSchedules = updateTimeSlotLocal(
       proExpertData.schedules,
       fakeDate,
@@ -345,29 +409,33 @@ export default function AvailabilitySheet({
       value
     );
 
-    console.log(`AvailabilitySheet.updateSessionTime: Après updateTimeSlotLocal, mise à jour du state`);
+    console.log(
+      `AvailabilitySheet.updateSessionTime: Après updateTimeSlotLocal, mise à jour du state`
+    );
     setProExpertData({
       ...proExpertData,
       schedules: updatedSchedules,
     });
-    
+
     // Mettre à jour immédiatement l'état local availability pour éviter le re-render
-    setAvailability(prevAvailability => {
+    setAvailability((prevAvailability) => {
       const newAvailability = [...prevAvailability];
-      const sessionIndex = newAvailability[dayIndex].sessions.findIndex(s => s.id === sessionId);
+      const sessionIndex = newAvailability[dayIndex].sessions.findIndex(
+        (s) => s.id === sessionId
+      );
       if (sessionIndex !== -1) {
         newAvailability[dayIndex].sessions[sessionIndex] = {
           ...newAvailability[dayIndex].sessions[sessionIndex],
-          [field]: value
+          [field]: value,
         };
       }
       return newAvailability;
     });
-    
+
     // Sauvegarder seulement si les deux champs sont remplis
-    const session = dayData.sessions.find(s => s.id === sessionId);
+    const session = dayData.sessions.find((s) => s.id === sessionId);
     const updatedSession = { ...session, [field]: value };
-    
+
     if (updatedSession.startTime && updatedSession.endTime) {
       handleSaveToServer();
     }
@@ -533,7 +601,11 @@ export default function AvailabilitySheet({
                                     value
                                   )
                                 }
-                                conflictOptions={getConflictTimes(dayIndex, session.id, "startTime")}
+                                conflictOptions={getConflictTimes(
+                                  dayIndex,
+                                  session.id,
+                                  "startTime"
+                                )}
                               />
 
                               <span className="text-base text-slate-gray">
@@ -551,7 +623,11 @@ export default function AvailabilitySheet({
                                   )
                                 }
                                 options={getEndTimeOptions(session.startTime)}
-                                conflictOptions={getConflictTimes(dayIndex, session.id, "endTime")}
+                                conflictOptions={getConflictTimes(
+                                  dayIndex,
+                                  session.id,
+                                  "endTime"
+                                )}
                               />
 
                               <Button

@@ -132,7 +132,6 @@ export default function Disponibilites() {
             <SessionDetailsPanel
               selectedDate={selectedDate}
               showTimeSlotsManager={showTimeSlotsManager}
-              onAddAvailability={handleAddAvailability}
             />
             {selectedDate && (
               <BlockDaySection
@@ -217,7 +216,6 @@ export default function Disponibilites() {
             <SessionDetailsPanel
               selectedDate={selectedDate}
               showTimeSlotsManager={showTimeSlotsManager}
-              onAddAvailability={handleAddAvailability}
             />
             {selectedDate && (
               <BlockDaySection

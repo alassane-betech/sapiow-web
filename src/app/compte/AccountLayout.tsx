@@ -92,7 +92,7 @@ export default function AccountLayout({
         <div className="flex">
           {/* Sidebar desktop */}
           <div className="hidden lg:block">
-            <AccountSidebar userType={user.type} />
+            <AccountSidebar />
           </div>
 
           {/* Menu mobile overlay */}

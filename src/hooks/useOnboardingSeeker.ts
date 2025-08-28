@@ -78,7 +78,7 @@ export const useOnboardingSeeker = () => {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         email: email.trim(),
-        domain_id: selectedDomains, // Les IDs sont déjà numériques
+        domain_id: selectedDomains[0], // Prendre le premier domaine sélectionné
       };
 
       // Appel API
