@@ -234,7 +234,9 @@ function Messages() {
                                   ? activeConversation?.profile.avatar ||
                                     undefined
                                   : undefined,
-                                hasImage: message.type === "image" || message.type === "document",
+                                hasImage:
+                                  message.type === "image" ||
+                                  message.type === "document",
                                 type: message.type,
                               }}
                             />
@@ -379,7 +381,9 @@ function Messages() {
                           avatar: !isOwn
                             ? activeConversation?.profile.avatar || undefined
                             : undefined,
-                          hasImage: message.type === "image" || message.type === "document",
+                          hasImage:
+                            message.type === "image" ||
+                            message.type === "document",
                           type: message.type,
                         }}
                       />

@@ -85,7 +85,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       {/* En-tête avec date et heure */}
       <CardHeader className="m-0">
         <div className="flex items-center justify-between gap-2 pt-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-figtree">
             <div className="w-4.5 h-4.5 flex items-center justify-center">
               <Image
                 src="/assets/icons/calendar.svg"
@@ -94,7 +94,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                 height={18}
               />
             </div>
-            <span className="text-xs font-outfit  font-medium text-gray-900">
+            <span className="text-xs font-figtree font-medium text-gray-900">
               {date}, {time}
             </span>
           </div>
@@ -108,7 +108,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                   height={18}
                 />
               </div>
-              <span className="text-xs font-outfit font-medium text-gray-900">
+              <span className="text-xs font-figtree font-medium text-gray-900">
                 visio de {duration}
               </span>
             </div>

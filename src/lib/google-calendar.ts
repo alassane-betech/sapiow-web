@@ -43,8 +43,10 @@ export class GoogleCalendarService {
    * Charger les tokens depuis localStorage
    */
   private loadTokensFromStorage(): void {
-    this.accessToken = localStorage.getItem('google_access_token');
-    this.refreshToken = localStorage.getItem('google_refresh_token');
+    if (typeof window !== 'undefined') {
+      this.accessToken = localStorage.getItem('google_access_token');
+      this.refreshToken = localStorage.getItem('google_refresh_token');
+    }
   }
 
   /**
@@ -52,11 +54,13 @@ export class GoogleCalendarService {
    */
   private saveTokensToStorage(accessToken: string, refreshToken?: string): void {
     this.accessToken = accessToken;
-    localStorage.setItem('google_access_token', accessToken);
-    
-    if (refreshToken) {
-      this.refreshToken = refreshToken;
-      localStorage.setItem('google_refresh_token', refreshToken);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('google_access_token', accessToken);
+      
+      if (refreshToken) {
+        this.refreshToken = refreshToken;
+        localStorage.setItem('google_refresh_token', refreshToken);
+      }
     }
   }
 
@@ -66,15 +70,18 @@ export class GoogleCalendarService {
   private clearTokens(): void {
     this.accessToken = null;
     this.refreshToken = null;
-    localStorage.removeItem('google_access_token');
-    localStorage.removeItem('google_refresh_token');
-    localStorage.removeItem('google_calendar_connected');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('google_access_token');
+      localStorage.removeItem('google_refresh_token');
+      localStorage.removeItem('google_calendar_connected');
+    }
   }
 
   /**
    * Vérifier si l'utilisateur est connecté à Google Calendar
    */
   public isConnected(): boolean {
+    if (typeof window === 'undefined') return false;
     return !!this.accessToken && localStorage.getItem('google_calendar_connected') === 'true';
   }
 
@@ -105,7 +112,9 @@ export class GoogleCalendarService {
 
       // Sauvegarder les tokens
       this.saveTokensToStorage(response.access_token, response.refresh_token);
-      localStorage.setItem('google_calendar_connected', 'true');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('google_calendar_connected', 'true');
+      }
 
       return true;
     } catch (error) {
