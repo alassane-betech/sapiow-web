@@ -86,7 +86,9 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
   const textClasses = {
     primary: isDark ? "text-white" : "text-slate-800",
     secondary: isDark ? "text-light-blue-gray" : "text-gray-600",
-    dateTime: isDark ? "text-white font-outfit" : "text-slate-700 font-outfit",
+    dateTime: isDark
+      ? "text-white font-figtree"
+      : "text-slate-700 font-figtree",
   };
 
   const buttonClasses = isDark

@@ -10,7 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useAddSessionModal } from "@/hooks/useAddSessionModal";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import Image from "next/image";
 import { FormField } from "./FormField";
 
@@ -61,7 +61,7 @@ export default function AddAccompanimentModal({
           {/* Header */}
           <SheetHeader className="p-6 pb-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <SheetTitle className="text-xl font-semibold text-gray-900">
+              <SheetTitle className="text-xl font-semibold text-gray-900 font-figtree">
                 Ajouter une session
               </SheetTitle>
               <button
@@ -110,7 +110,7 @@ export default function AddAccompanimentModal({
 
             {/* Affichage des erreurs */}
             {errors.length > 0 && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg font-figtree">
                 <div className="text-sm text-red-700">
                   {errors.map((error, index) => (
                     <div key={index} className="mb-1">
@@ -123,30 +123,38 @@ export default function AddAccompanimentModal({
 
             {/* Fonctionnalités */}
             <div className="space-y-4 border border-light-blue-gray rounded-[12px] p-4">
-              <Label className="text-sm font-medium text-gray-700">
+              <Label className="text-sm font-medium text-gray-700 font-figtree">
                 Fonctionnalités incluses
               </Label>
               <div className="space-y-4">
                 {availableFeatures.map((feature) => (
                   <div
                     key={feature.key}
-                    className="flex items-center space-x-3"
+                    className="flex items-center space-x-3 font-figtree"
                   >
                     <Label
                       htmlFor={feature.key}
-                      className="text-sm text-gray-700 flex-1 cursor-pointer"
+                      className="text-sm text-gray-700 flex-1 cursor-pointer font-figtree"
                     >
                       {feature.label}
                     </Label>
-                    <input
-                      type="checkbox"
-                      id={feature.key}
-                      checked={selectedFeatures[feature.key] || false}
-                      onChange={(e) =>
-                        handleFeatureToggle(feature.key, e.target.checked)
+                    <div
+                      onClick={() =>
+                        handleFeatureToggle(
+                          feature.key,
+                          !selectedFeatures[feature.key]
+                        )
                       }
-                      className="w-6 h-6 bg-white border-3 border-[#94A3B8] rounded-[16px] focus:ring-2"
-                    />
+                      className={`w-6 h-6 border-3 border-[#94A3B8] rounded cursor-pointer flex items-center justify-center transition-all duration-200 ${
+                        selectedFeatures[feature.key]
+                          ? "bg-[#020617] border-[#020617]"
+                          : "bg-white"
+                      }`}
+                    >
+                      {selectedFeatures[feature.key] && (
+                        <Check className="w-4 h-4 text-white" />
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

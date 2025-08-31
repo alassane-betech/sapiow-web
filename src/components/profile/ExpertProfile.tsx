@@ -58,8 +58,8 @@ export default function ExpertProfile() {
     <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
       {displayUpdateError}
       <div className="flex justify-center">
-        <ProfilePhotoUpload 
-          isCompte 
+        <ProfilePhotoUpload
+          isCompte
           onPhotoSelect={handleAvatarChange}
           currentAvatar={user?.avatar}
         />
@@ -145,14 +145,14 @@ export default function ExpertProfile() {
 
       <div className="mt-6 mb-6 flex flex-col-reverse md:flex-row justify-between gap-y-4 gap-x-6 px-10">
         <button
-          className="text-exford-blue h-[56px] hover:text-red-500 transition-colors"
+          className="text-exford-blue h-[56px] hover:text-red-500 transition-colors font-figtree"
           onClick={handleDeleteAccount}
         >
           Supprimer mon compte
         </button>
         <Button
           label={isUpdating ? "Sauvegarde..." : "Enregistrer changement"}
-          className="h-[56px] max-w-[331px] w-full font-bold text-base"
+          className="h-[56px] max-w-[331px] w-full font-bold text-base font-figtree"
           disabled={!isEditing || isUpdating}
           onClick={handleSave}
         />

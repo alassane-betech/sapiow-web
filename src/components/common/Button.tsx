@@ -18,7 +18,7 @@ export const Button = ({
   ...props
 }: ButtonProps) => {
   const baseStyles =
-    "px-6 py-4 transition-all flex items-center justify-center gap-2";
+    "px-6 py-4 transition-all flex items-center justify-center gap-2 font-figtree";
 
   const defaultStyles = disabled
     ? "bg-soft-ice-gray text-pale-blue-gray hover:bg-soft-ice-gray cursor-not-allowed"
@@ -30,13 +30,12 @@ export const Button = ({
       // disabled={disabled}
       {...props}
     >
-      {icon && (
-        typeof icon === 'string' ? (
+      {icon &&
+        (typeof icon === "string" ? (
           <Image src={icon} alt="icon" width={iconSize} height={iconSize} />
         ) : (
           icon
-        )
-      )}
+        ))}
       {label}
     </ButtonUI>
   );

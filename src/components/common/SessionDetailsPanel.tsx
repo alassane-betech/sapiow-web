@@ -16,11 +16,13 @@ import {
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
   showTimeSlotsManager: boolean;
+  confirmedAppointments?: any[];
 }
 
 export const SessionDetailsPanel = ({
   selectedDate,
   showTimeSlotsManager,
+  confirmedAppointments = [],
 }: SessionDetailsPanelProps) => {
   // Stores et API
   const { proExpertData, setProExpertData } = useProExpertStore();
@@ -40,23 +42,34 @@ export const SessionDetailsPanel = ({
   const getSessionDetails = (): SessionDetailsData | null => {
     if (!selectedDate) return null;
 
-    const dayOfMonth = selectedDate.getDate();
-    const event =
-      mockAvailabilityEvents[dayOfMonth as keyof typeof mockAvailabilityEvents];
+    // Filtrer les rendez-vous confirmés pour la date sélectionnée
+    const appointmentsForDate = confirmedAppointments.filter((appointment) => {
+      const appointmentDate = new Date(appointment.appointment_at);
+      return (
+        appointmentDate.getDate() === selectedDate.getDate() &&
+        appointmentDate.getMonth() === selectedDate.getMonth() &&
+        appointmentDate.getFullYear() === selectedDate.getFullYear()
+      );
+    });
 
-    if (!event || event.users.length === 0) return null;
+    if (appointmentsForDate.length === 0) return null;
 
     return {
       date: selectedDate,
-      event: event,
-      sessions: event.users.map((user) => ({
-        id: user.id,
-        clientName: user.name,
-        avatar: user.avatar,
-        time: user.time,
-        duration: user.duration,
-        description: user.description,
-        type: event.type,
+      event: { type: "active", users: [] },
+      sessions: appointmentsForDate.map((appointment) => ({
+        id: appointment.id,
+        clientName: appointment.patient?.first_name && appointment.patient?.last_name 
+          ? `${appointment.patient.first_name} ${appointment.patient.last_name}`
+          : 'Client',
+        avatar: appointment.patient?.avatar || '/assets/icons/defaultAvatar.png',
+        time: new Date(appointment.appointment_at).toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        duration: appointment.session?.session_type || '30 min',
+        description: appointment.session?.name || 'Consultation',
+        type: 'active',
       })),
     };
   };
@@ -92,7 +105,7 @@ export const SessionDetailsPanel = ({
                 <SessionPreviewCard
                   key={session.id}
                   date={formatDateForSession(sessionDetails.date)}
-                  time={formatTimeForSession(session.time)}
+                  time={session.time}
                   visioDuration={session.duration}
                   participantName={session.clientName}
                   participantAvatar={session.avatar}

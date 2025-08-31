@@ -107,7 +107,7 @@ export const ProfilePhotoUpload: React.FC<ProfilePhotoUploadProps> = ({
           <>
             <button
               type="button"
-              className="text-sm mt-2 w-full max-w-[140px] text-exford-blue font-bold bg-white rounded-full px-3 py-2 border border-light-blue-gray cursor-pointer"
+              className="text-[13px] mt-2 w-full max-w-[140px] text-exford-blue font-bold bg-white rounded-full px-3 py-2 border border-light-blue-gray cursor-pointer font-figtree"
               onClick={handleButtonClick}
             >
               Changer de photo

@@ -10,8 +10,6 @@ export const formatDateForSession = (date: Date): string => {
   } else {
     return date.toLocaleDateString("fr-FR", {
       weekday: "long",
-      day: "numeric",
-      month: "long",
     });
   }
 };

@@ -15,13 +15,19 @@ import {
 } from "@/components/ui/sheet";
 import { useCalendarStore } from "@/store/useCalendar";
 import { formatFullDate } from "@/utils/dateFormat";
-import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
+import { 
+  useGoogleCalendarStatus,
+  useGoogleCalendarConnect,
+  useGoogleCalendarDisconnect,
+  useGoogleCalendarAuthUrl
+} from "@/api/google-calendar-sync/useGoogleCalendarSync";
 import { AvailabilityEvent } from "@/types/availability";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
 import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { useProExpertStore } from "@/store/useProExpert";
+import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
 
 export default function Disponibilites() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("semaine");
@@ -31,20 +37,40 @@ export default function Disponibilites() {
   const [showAvailabilitySheet, setShowAvailabilitySheet] = useState(false);
   const [showSessionDetailsSheet, setShowSessionDetailsSheet] = useState(false);
 
-  // Hook Google Calendar
-  const {
-    isConnected: isGoogleConnected,
-    isLoading: isGoogleLoading,
-    error: googleError,
-    connect: connectGoogle,
-    disconnect: disconnectGoogle,
-    syncAvailabilities,
-    checkConflicts,
-  } = useGoogleCalendar();
+  // Hooks Google Calendar
+  const { data: googleStatus, isLoading: isGoogleStatusLoading } = useGoogleCalendarStatus();
+  const connectMutation = useGoogleCalendarConnect();
+  const disconnectMutation = useGoogleCalendarDisconnect();
+  const { getAuthUrl } = useGoogleCalendarAuthUrl();
+
+  // États dérivés
+  const isGoogleConnected = googleStatus?.data?.connected || false;
+  const isGoogleLoading = connectMutation.isPending || disconnectMutation.isPending;
 
   // API et Store pour synchroniser les données proExpert
   const { data: proExpertData, isLoading: isLoadingApi } = useGetProExpert();
   const { setProExpertData, setLoading } = useProExpertStore();
+  
+  // Hook pour récupérer les rendez-vous confirmés
+  const { confirmedAppointments } = useVisiosAppointments();
+
+  // Fonction réutilisable pour éviter la duplication mobile/desktop
+  const renderSessionDetailsPanel = (isMobile: boolean = false) => (
+    <>
+      <SessionDetailsPanel
+        selectedDate={selectedDate}
+        showTimeSlotsManager={showTimeSlotsManager}
+        confirmedAppointments={confirmedAppointments}
+      />
+      {selectedDate && (
+        <BlockDaySection
+          isBlocked={isBlocked}
+          onToggle={handleBlocked}
+          isMobile={isMobile}
+        />
+      )}
+    </>
+  );
 
   // Synchroniser les données API avec le store
   useEffect(() => {
@@ -54,13 +80,27 @@ export default function Disponibilites() {
     }
   }, [proExpertData, isLoadingApi, setProExpertData, setLoading]);
 
-  const handleConnectGoogle = async () => {
+  // Gérer le retour de Google OAuth (authorization code dans l'URL)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authCode = urlParams.get('code');
+    
+    if (authCode && !isGoogleConnected) {
+      connectMutation.mutate({ authorizationCode: authCode });
+      
+      // Nettoyer l'URL après récupération du code
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [isGoogleConnected]);
+
+  const handleConnectGoogle = () => {
     if (isGoogleConnected) {
       // Si déjà connecté, déconnecter
-      await disconnectGoogle();
+      disconnectMutation.mutate();
     } else {
-      // Sinon, connecter
-      await connectGoogle();
+      // Sinon, rediriger vers Google OAuth
+      const authUrl = getAuthUrl();
+      window.location.href = authUrl;
     }
   };
 
@@ -76,17 +116,10 @@ export default function Disponibilites() {
     setShowAvailabilitySheet(true);
   };
 
-  const handleSyncCalendars = async () => {
+  const handleSyncCalendars = () => {
     if (isGoogleConnected) {
-      try {
-        // Récupérer les disponibilités depuis votre store/API
-        const availabilities: AvailabilityEvent[] = []; // Remplacer par vos vraies données
-        await syncAvailabilities(availabilities);
-        alert('Synchronisation réussie!');
-      } catch (error) {
-        console.error('Erreur de synchronisation:', error);
-        alert('Erreur lors de la synchronisation');
-      }
+      // La synchronisation est automatique via le cron job backend
+      alert('La synchronisation est automatique ! Vos rendez-vous sont synchronisés toutes les 15 minutes.');
     } else {
       // Si pas connecté, ouvrir le sheet de gestion
       setShowAvailabilitySheet(true);
@@ -129,17 +162,7 @@ export default function Disponibilites() {
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6 flex flex-col items-center justify-center">
-            <SessionDetailsPanel
-              selectedDate={selectedDate}
-              showTimeSlotsManager={showTimeSlotsManager}
-            />
-            {selectedDate && (
-              <BlockDaySection
-                isBlocked={isBlocked}
-                onToggle={handleBlocked}
-                isMobile={true}
-              />
-            )}
+            {renderSessionDetailsPanel(true)}
           </div>
         </SheetContent>
       </Sheet>
@@ -155,7 +178,9 @@ export default function Disponibilites() {
               />
             </div>
             <div className="w-full max-w-[414px] lg:max-w-[400px]">
-              <CustomCalendar />
+              <CustomCalendar 
+                confirmedAppointments={confirmedAppointments}
+              />
             </div>
             {/* Section Gestion des disponibilités */}
             <div className="space-y-4 w-full lg:-ml-2 xl:ml-4 pb-6">
@@ -188,7 +213,11 @@ export default function Disponibilites() {
                           Google Agenda
                         </p>
                         <p className="text-sm font-medium font-figtree text-slate-600">
-                          {isGoogleConnected ? 'Connecté' : 'Non connecté'}
+                          {isGoogleConnected ? (
+                            googleStatus?.data?.connectedAt ? 
+                              `Connecté depuis le ${new Date(googleStatus.data.connectedAt).toLocaleDateString('fr-FR')}` 
+                              : 'Connecté'
+                          ) : 'Non connecté'}
                         </p>
                       </div>
                     </div>
@@ -213,17 +242,7 @@ export default function Disponibilites() {
 
           {/* Panneau de détails des sessions - visible sur tablettes et plus */}
           <div className="hidden md:flex flex-col justify-between items-end mt-7 w-full max-w-[414px] ml-auto">
-            <SessionDetailsPanel
-              selectedDate={selectedDate}
-              showTimeSlotsManager={showTimeSlotsManager}
-            />
-            {selectedDate && (
-              <BlockDaySection
-                isBlocked={isBlocked}
-                onToggle={handleBlocked}
-                isMobile={false}
-              />
-            )}
+            {renderSessionDetailsPanel(false)}
           </div>
         </div>
       </div>

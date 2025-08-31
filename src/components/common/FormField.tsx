@@ -63,7 +63,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
             <label
               htmlFor={inputId}
               className={cn(
-                "absolute top-[5px] left-[16px] text-[11px] font-normal text-slate-gray bg-transparent px-1 transition-all duration-200 pointer-events-none z-10",
+                "absolute top-[5px] left-[16px] text-[11px] font-normal text-slate-gray bg-transparent px-1 transition-all duration-200 pointer-events-none z-10 font-figtree",
                 leftIcon && "left-[48px]",
                 required &&
                   "after:content-['*'] after:ml-0.5 after:text-destructive",
@@ -94,8 +94,8 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
               onBlur={handleBlur}
               className={cn(
                 error &&
-                  "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
-                "placeholder:text-slate-gray placeholder:text-base placeholder:font-normal font-sf-pro-rounded border-1 border-light-blue-gray rounded-[8px] focus:border-cobalt-blue focus:outline-none focus:ring-2 focus:ring-cobalt-blue/20 transition-all focus-visible:border-cobalt-blue focus-visible:ring-cobalt-blue/20",
+                  "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20 font-figtree",
+                "placeholder:text-slate-gray placeholder:text-base placeholder:font-normal font-sf-pro-rounded border-1 border-light-blue-gray rounded-[8px] focus:border-cobalt-blue focus:outline-none focus:ring-2 focus:ring-cobalt-blue/20 transition-all focus-visible:border-cobalt-blue focus-visible:ring-cobalt-blue/20 font-figtree",
                 hasContent ? "pt-6 pb-3" : "py-3",
                 leftIcon ? "pl-12" : "pl-5",
                 rightIcon ? "pr-12" : "pr-5",
@@ -108,7 +108,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
 
             {/* Icône à droite */}
             {rightIcon && (
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none font-figtree">
                 {typeof rightIcon === "string" ? (
                   <span className="text-gray-500 font-medium">{rightIcon}</span>
                 ) : (
@@ -122,7 +122,10 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
         {error && (
           <p
             id={errorId}
-            className={cn("text-sm text-destructive", errorClassName)}
+            className={cn(
+              "text-sm text-destructive font-figtree",
+              errorClassName
+            )}
           >
             {error}
           </p>
@@ -131,7 +134,10 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
         {helperText && !error && (
           <p
             id={helperId}
-            className={cn("text-sm text-muted-foreground", helperClassName)}
+            className={cn(
+              "text-sm text-muted-foreground font-figtree",
+              helperClassName
+            )}
           >
             {helperText}
           </p>

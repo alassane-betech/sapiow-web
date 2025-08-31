@@ -43,10 +43,14 @@ export default function Revenus() {
     return getDateRangeByFilter(activeFilter);
   }, [activeFilter]);
 
-  const { data: statistics } = useGetStatistics(dateRange ? {
-    start: dateRange.start,
-    end: dateRange.end
-  } : undefined);
+  const { data: statistics } = useGetStatistics(
+    dateRange
+      ? {
+          start: dateRange.start,
+          end: dateRange.end,
+        }
+      : undefined
+  );
 
   return (
     <AccountLayout>

@@ -45,7 +45,24 @@ export function ConversationItem({
 }: ConversationItemProps) {
   // Transformer les données API
   const displayName = `${conversation.profile.first_name} ${conversation.profile.last_name}`;
-  const displayMessage = conversation.latest_message.content;
+  console.log({ conversation });
+
+  // Gérer l'affichage du message selon son type
+  const getDisplayMessage = () => {
+    const messageType = conversation.latest_message.type;
+
+    if (messageType === "document") {
+      return "📄 Document";
+    } else if (messageType === "image") {
+      return "🖼️ Image";
+    } else if (messageType === "audio") {
+      return "🔊 Audio";
+    } else {
+      return conversation.latest_message.content;
+    }
+  };
+
+  const displayMessage = getDisplayMessage();
   const displayTime = new Date(
     conversation.latest_message.created_at
   ).toLocaleTimeString("fr-FR", {
