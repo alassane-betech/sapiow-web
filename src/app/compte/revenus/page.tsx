@@ -7,7 +7,7 @@ import PaymentHistory from "@/components/revenue/PaymentHistory";
 import RevenueDisplay from "@/components/revenue/RevenueDisplay";
 import RevenueFilters from "@/components/revenue/RevenueFilters";
 import UpcomingTransactions from "@/components/revenue/UpcomingTransactions";
-import { paymentHistory, upcomingTransactions } from "@/data/mockRevenue";
+import { upcomingTransactions } from "@/data/mockRevenue";
 import { getDateRangeByFilter } from "@/utils/dateFilters";
 import { useMemo, useState } from "react";
 import AccountLayout from "../AccountLayout";
@@ -43,10 +43,14 @@ export default function Revenus() {
     return getDateRangeByFilter(activeFilter);
   }, [activeFilter]);
 
-  const { data: statistics } = useGetStatistics(dateRange ? {
-    start: dateRange.start,
-    end: dateRange.end
-  } : undefined);
+  const { data: statistics } = useGetStatistics(
+    dateRange
+      ? {
+          start: dateRange.start,
+          end: dateRange.end,
+        }
+      : undefined
+  );
 
   return (
     <AccountLayout>
@@ -81,7 +85,7 @@ export default function Revenus() {
         <UpcomingTransactions transactions={upcomingTransactions} />
 
         {/* Section Historique des paiements */}
-        <PaymentHistory payments={paymentHistory} />
+        <PaymentHistory />
       </div>
 
       {/* Modal pour ajouter un compte bancaire */}

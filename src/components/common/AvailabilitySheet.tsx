@@ -651,7 +651,7 @@ export default function AvailabilitySheet({
                           <Button
                             variant="secondary"
                             onClick={() => addSession(dayIndex)}
-                            className="w-full h-10 justify-center items-center text-base text-exford-blue font-bold font-outfit bg-white border border-light-blue-gray mt-3 mb-[13px] cursor-pointer"
+                            className="w-full h-10 justify-center items-center text-base text-exford-blue font-bold font-figtree bg-white border border-light-blue-gray mt-3 mb-[13px] font-figtree cursor-pointer"
                           >
                             <Image
                               src="/assets/icons/add.svg"

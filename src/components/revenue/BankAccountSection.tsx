@@ -70,7 +70,7 @@ export default function BankAccountSection({
                 <Button
                   label="Ajouter"
                   onClick={handleAddBankAccount}
-                  className="border border-light-blue-gray rounded-full text-exford-blue font-bold font-outfit px-4 py-2 mb-6 bg-transparent text-sm shadow-none"
+                  className="border border-light-blue-gray rounded-full text-exford-blue font-bold font-figtree px-4 py-2 mb-6 bg-transparent text-sm shadow-none"
                 />
               </>
             ) : (

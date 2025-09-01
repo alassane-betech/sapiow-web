@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
 import React from "react";
 
@@ -38,7 +39,7 @@ export const SessionPreviewCard: React.FC<SessionPreviewCardProps> = ({
               className="text-gray-600"
             />
           </div>
-          <span className="text-sm font-medium text-charcoal-blue font-outfit">
+          <span className="text-sm font-medium text-charcoal-blue font-figtree">
             {date.charAt(0).toUpperCase() + date.slice(1)}, {time}
           </span>
         </div>
@@ -53,7 +54,7 @@ export const SessionPreviewCard: React.FC<SessionPreviewCardProps> = ({
               className="text-gray-600"
             />
           </div>
-          <span className="text-xs font-medium text-gunmetal-gray font-outfit">
+          <span className="text-xs font-medium text-gunmetal-gray font-figtree">
             Visio de {visioDuration}
           </span>
         </div>
@@ -61,20 +62,21 @@ export const SessionPreviewCard: React.FC<SessionPreviewCardProps> = ({
 
       {/* Informations du participant */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
-          <Image
-            src={participantAvatar}
+        <Avatar className="w-12 h-12 border-2 border-gray-200">
+          <AvatarImage 
+            src={participantAvatar} 
             alt={participantName}
-            width={48}
-            height={48}
             className="w-full h-full object-cover"
           />
-        </div>
+          <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold text-sm">
+            {participantName.split(' ').map(name => name[0]).join('').toUpperCase().slice(0, 2)}
+          </AvatarFallback>
+        </Avatar>
         <div>
-          <h3 className="text-sm font-bold text-gunmetal-gray mb-1">
+          <h3 className="text-sm font-bold text-gunmetal-gray mb-1 font-figtree">
             {participantName}
           </h3>
-          <p className="text-xs text-bluish-gray font-medium">
+          <p className="text-xs text-bluish-gray font-medium font-figtree">
             {sessionDescription}
           </p>
         </div>

@@ -1,6 +1,6 @@
 "use client";
-import HeaderExpert from "@/components/layout/header/HeaderExpert";
 import { HeaderVisio } from "@/components/layout/header/HeaderVisio";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { VisiosTabs } from "@/components/visios/VisiosTabs";
 import { useCallStore } from "@/store/useCall";
 import VideoConsultation from "../VideoCall/video-consultation";
@@ -25,7 +25,7 @@ export default function Expert({ handleNotificationClick }: ExpertProps) {
           title="Session avec Moussa Diagne"
         />
       ) : (
-        <HeaderExpert handleNotificationClick={handleNotificationClick} />
+        <PageHeader title="Messages" className="hidden sm:flex" />
       )}
 
       {/* Onglets des visios */}

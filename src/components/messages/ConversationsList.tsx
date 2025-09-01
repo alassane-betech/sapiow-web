@@ -1,0 +1,55 @@
+import { ConversationItem } from "./ConversationItem";
+import { SearchBar } from "./SearchBar";
+
+interface ConversationsListProps {
+  conversationsData: any[];
+  conversationsLoading: boolean;
+  conversationsError: any;
+  selectedConversation: string | null;
+  onConversationSelect: (id: string) => void;
+  showSearchBar?: boolean;
+  className?: string;
+  searchBarClassName?: string;
+}
+
+export function ConversationsList({
+  conversationsData,
+  conversationsLoading,
+  conversationsError,
+  selectedConversation,
+  onConversationSelect,
+  showSearchBar = true,
+  className = "",
+  searchBarClassName = "",
+}: ConversationsListProps) {
+  return (
+    <div className={`flex flex-col ${className}`}>
+      {showSearchBar && <SearchBar className={searchBarClassName} />}
+
+      <div className="flex-1 overflow-y-auto scrollbar-hide">
+        {conversationsLoading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-exford-blue"></div>
+          </div>
+        ) : conversationsError ? (
+          <div className="flex items-center justify-center h-32">
+            <p className="text-red-500">Erreur: {conversationsError.message}</p>
+          </div>
+        ) : conversationsData && conversationsData.length > 0 ? (
+          conversationsData.map((conversation) => (
+            <ConversationItem
+              key={conversation.profile.id}
+              conversation={conversation}
+              isSelected={conversation.profile.id === selectedConversation}
+              onClick={() => onConversationSelect(conversation.profile.id)}
+            />
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-32">
+            <p className="text-gray-500">Aucune conversation trouvée</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -10,6 +10,7 @@ import { Button } from "@/components/common/Button";
 import VisioSessionsConfig from "@/components/common/VisioSessionsConfig";
 import { Check, ChevronRight, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import AccountLayout from "../AccountLayout";
 
 // Types pour les offres
@@ -41,21 +42,21 @@ const getFeatureLabel = (featureKey: string): string => {
 const getSessionFeatures = (session: ProExpertSession): string[] => {
   const features: string[] = [];
   const featureKeys = [
-    'one_on_one',
-    'video_call', 
-    'strategic_session',
-    'exclusive_ressources',
-    'support',
-    'mentorship',
-    'webinar'
+    "one_on_one",
+    "video_call",
+    "strategic_session",
+    "exclusive_ressources",
+    "support",
+    "mentorship",
+    "webinar",
   ];
-  
-  featureKeys.forEach(key => {
+
+  featureKeys.forEach((key) => {
     if (session[key as keyof ProExpertSession]) {
       features.push(getFeatureLabel(key));
     }
   });
-  
+
   return features;
 };
 
@@ -63,8 +64,9 @@ export default function OffresPage() {
   const [selectedOffer, setSelectedOffer] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const { data: expertData, isLoading, error } = useGetProExpert();
+  const queryClient = useQueryClient();
 
-  // Offres toujours disponibles (liens de navigation)  
+  // Offres toujours disponibles (liens de navigation)
   const offers: Offer[] = useMemo(() => {
     const sessionOffers: Offer[] = [];
 
@@ -76,7 +78,7 @@ export default function OffresPage() {
 
     // Toujours afficher l'accompagnement mensuel
     sessionOffers.push({
-      id: "accompagnement-mensuel", 
+      id: "accompagnement-mensuel",
       title: "Accompagnement mensuel",
       sessionData: expertData?.sessions?.find(
         (session) =>
@@ -113,7 +115,8 @@ export default function OffresPage() {
 
   const handleAddSuccess = (data: SessionData) => {
     console.log("Nouvel accompagnement créé:", data);
-    // Ici vous pourriez ajouter la logique pour sauvegarder l'offre
+    // Invalider le cache pour forcer le rechargement des données
+    queryClient.invalidateQueries({ queryKey: ["proExpert"] });
     setIsAddModalOpen(false);
   };
 
@@ -190,35 +193,40 @@ export default function OffresPage() {
                       // Affichage quand l'accompagnement existe
                       <div className="bg-white rounded-[12px] border border-light-blue-gray p-6">
                         {/* Titre de l'offre */}
-                        <h2 className="text-base xl:text-lg font-medium text-[#1F2937] mb-6">
+                        <h2 className="text-base xl:text-lg font-medium text-[#1F2937] mb-6 font-figtree">
                           {subscriptionSession.name || "Accompagnement mensuel"}
                         </h2>
 
-                        <h6 className="text-sm xl:text-base font-normal text-[#6B7280] mb-2.5">
+                        <h6 className="text-sm xl:text-base font-normal text-[#6B7280] mb-2.5 font-figtree">
                           Ce qui est inclus
                         </h6>
 
                         {/* Liste des caractéristiques */}
-                        <div className="space-y-3 mb-8">
-                          {getSessionFeatures(subscriptionSession).map((feature: string, index: number) => (
-                            <div key={index} className="flex items-start gap-3">
-                              <div className="relative w-4 h-4 bg-[#6B7280] rounded-full mt-2 flex-shrink-0">
-                                <Check className="w-3 h-3 text-white font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                        <div className="space-y-3 mb-8 font-figtree">
+                          {getSessionFeatures(subscriptionSession).map(
+                            (feature: string, index: number) => (
+                              <div
+                                key={index}
+                                className="flex items-start gap-3"
+                              >
+                                <div className="relative w-4 h-4 bg-[#6B7280] rounded-full mt-2 flex-shrink-0">
+                                  <Check className="w-3 h-3 text-white font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                </div>
+                                <p className="text-base text-[#1E293B] leading-relaxed font-figtree">
+                                  {feature}
+                                </p>
                               </div>
-                              <p className="text-base text-[#1E293B] leading-relaxed">
-                                {feature}
-                              </p>
-                            </div>
-                          ))}
+                            )
+                          )}
                         </div>
 
                         {/* Prix */}
-                        <div className="text-xl xl:text-3xl font-bold text-gray-900 mb-6">
+                        <div className="text-xl xl:text-3xl font-bold text-gray-900 mb-6 font-figtree">
                           {subscriptionSession.price} € / Mois
                         </div>
 
                         {/* Boutons d'action */}
-                        <div className="flex gap-4 mb-6">
+                        <div className="flex gap-4 mb-6 font-figtree">
                           <Button
                             label="Supprimer"
                             onClick={handleDeleteOffer}
@@ -239,10 +247,12 @@ export default function OffresPage() {
                             Accompagnement mensuel
                           </h2>
                           <p className="text-sm text-[#6B7280]">
-                            Aucun accompagnement mensuel configuré pour le moment.
+                            Aucun accompagnement mensuel configuré pour le
+                            moment.
                           </p>
                           <p className="text-sm text-[#9CA3AF]">
-                            Créez votre première offre d'accompagnement pour vos clients.
+                            Créez votre première offre d'accompagnement pour vos
+                            clients.
                           </p>
                           <Button
                             label="Créer un accompagnement"
@@ -258,7 +268,7 @@ export default function OffresPage() {
                       <div className="flex justify-center border border-light-blue-gray rounded-[8px]">
                         <button
                           onClick={handleAddOffer}
-                          className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-outfit cursor-pointer"
+                          className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-figtree cursor-pointer"
                         >
                           <Plus className="w-4 h-4" />
                           Ajouter une offre

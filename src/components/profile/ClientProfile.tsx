@@ -49,8 +49,8 @@ export default function ClientProfile() {
   return (
     <div className="w-full max-w-[702px] h-full  mx-auto mt-10 px-5">
       <div className="flex justify-center">
-        <ProfilePhotoUpload 
-          isCompte 
+        <ProfilePhotoUpload
+          isCompte
           onPhotoSelect={handleAvatarChange}
           currentAvatar={customer?.avatar}
         />
@@ -86,12 +86,12 @@ export default function ClientProfile() {
       <div className="mt-16 mb-6 flex flex-col-reverse md:flex-row justify-between items-end gap-y-4 gap-x-6 px-10">
         <Button
           label="Supprimer mon compte"
-          className="bg-white text-exford-blue border border-[#E2E8F0] rounded-[8px] shadow-none h-[56px] max-w-[331px] w-full font-bold text-base"
+          className="bg-white text-exford-blue border border-[#E2E8F0] rounded-[8px] shadow-none h-[56px] max-w-[331px] w-full font-bold text-base font-figtree"
           onClick={handleDeleteAccount}
         />
         <Button
           label={isUpdating ? "Sauvegarde..." : "Enregistrer changement"}
-          className="h-[56px] max-w-[331px] w-full font-bold text-base"
+          className="h-[56px] max-w-[331px] w-full font-bold text-base font-figtree"
           disabled={!isEditing || isUpdating}
           onClick={handleSave}
         />

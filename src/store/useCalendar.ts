@@ -33,12 +33,12 @@ export const useCalendarStore = create<CalendarStore>((set, get) => ({
 
   navigateMonth: (direction) => {
     const { currentDate } = get();
-    const newDate = new Date(currentDate);
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
     if (direction === "prev") {
-      newDate.setMonth(currentDate.getMonth() - 1);
+      newDate.setMonth(newDate.getMonth() - 1);
     } else {
-      newDate.setMonth(currentDate.getMonth() + 1);
+      newDate.setMonth(newDate.getMonth() + 1);
     }
 
     set({ currentDate: newDate });

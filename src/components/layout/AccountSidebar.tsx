@@ -138,10 +138,10 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
             <li key={item.label}>
               <Link
                 href={item.href}
-                className="flex items-center gap-3 px-2 py-0 mt-[3px] h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue"
+                className="flex items-center gap-3 px-2 py-0 mt-[3px] h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue font-figtree"
               >
                 <Image src={item.icon} alt="" width={22} height={22} />
-                <span className="flex-1 text-[12px] lg:text-[15px] font-medium">
+                <span className="flex-1 text-[12px] lg:text-[15px] font-medium font-figtree">
                   {item.label}
                 </span>
                 <svg
@@ -197,7 +197,7 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
         <button
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="w-full text-center text-[#1E293B] font-bold text-[15px] py-2 rounded-xl hover:bg-[#F7F9FB] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full text-center text-[#1E293B] font-bold text-[15px] py-2 rounded-xl hover:bg-[#F7F9FB] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-figtree"
         >
           {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
         </button>

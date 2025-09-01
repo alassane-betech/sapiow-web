@@ -14,20 +14,9 @@ function CompteConnecte() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const accountId = searchParams.get('account_id');
-    const error = searchParams.get('error');
-
-    if (error) {
-      setStatus('error');
-      setMessage('Une erreur est survenue lors de la connexion de votre compte bancaire.');
-    } else if (accountId) {
-      setStatus('success');
-      setMessage('Votre compte bancaire a été connecté avec succès !');
-    } else {
-      setStatus('error');
-      setMessage('Paramètres manquants dans la réponse.');
-    }
-  }, [searchParams]);
+    // Redirection directe vers compte/revenus
+    router.push('/compte/revenus');
+  }, [router]);
 
   const handleReturnToAccount = () => {
     router.push('/compte/revenus');

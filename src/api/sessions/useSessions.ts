@@ -1,6 +1,6 @@
 "use client";
 import { apiClient } from "@/lib/api-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Types pour les énumérations
 export type SessionType = "15m" | "30m" | "45m" | "60m";
@@ -100,6 +100,7 @@ export interface SessionUpdateError {
  * Hook pour créer une nouvelle session pro via POST /pro-session
  */
 export const useCreateProSession = () => {
+  const queryClient = useQueryClient();
   return useMutation<SessionCreateResponse, SessionCreateError, SessionCreate>({
     mutationFn: async (sessionData: SessionCreate) => {
       // Validation des données requises
@@ -166,7 +167,11 @@ export const useCreateProSession = () => {
         );
       }
     },
-    onSuccess: (data) => {},
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pro-session"],
+      });
+    },
     onError: (error) => {
       console.error("Erreur création session:", error);
     },
@@ -233,6 +238,7 @@ export const createDefaultSessionData = (
  * Hook pour mettre à jour une session pro existante via PUT /pro-session/{id}
  */
 export const useUpdateProSession = () => {
+  const queryClient = useQueryClient();
   return useMutation<
     SessionUpdateResponse,
     SessionUpdateError,
@@ -264,6 +270,9 @@ export const useUpdateProSession = () => {
       }
     },
     onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["pro-session"],
+      });
       console.log("Session mise à jour avec succès:", data);
     },
     onError: (error) => {

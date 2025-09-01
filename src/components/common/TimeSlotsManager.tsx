@@ -1,6 +1,5 @@
 "use client";
 
-import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -10,10 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useProExpertStore } from "@/store/useProExpert";
-import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
+import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
 import { Link, Plus, Trash2 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
 
 interface TimeSlotsManagerProps {
   selectedDate: Date | null;
@@ -22,167 +19,19 @@ interface TimeSlotsManagerProps {
 export default function TimeSlotsManager({
   selectedDate,
 }: TimeSlotsManagerProps) {
-  const [timeSlots, setTimeSlots] = useState<any[]>([]);
-
-  // Store et API
   const {
-    proExpertData,
-    isLoading: isLoadingData,
-    setProExpertData,
-  } = useProExpertStore();
-
-  const {
-    isLoading,
+    timeSlots,
+    timeOptions,
+    isLoadingAny,
     error,
-    getTimeSlotsForDate,
-    addTimeSlotLocal,
-    updateTimeSlotLocal,
-    saveSchedulesToServer,
-    removeTimeSlot,
-  } = useTimeSlotsStore();
-
-  const updateProExpertMutation = useUpdateProExpert();
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Générer les options d'heures (de 8h00 à 20h00 par tranches de 30 minutes)
-  const generateTimeOptions = () => {
-    const times = [];
-    for (let hour = 8; hour <= 20; hour++) {
-      times.push(`${hour}h00`);
-      if (hour < 20) {
-        times.push(`${hour}h30`);
-      }
-    }
-    return times;
-  };
-
-  // Convertir une heure en nombre pour comparaison (ex: "9h30" -> 9.5)
-  const timeToNumber = (time: string): number => {
-    const [hour, minutes] = time.replace('h', ':').split(':');
-    return parseInt(hour) + (parseInt(minutes || '0') / 60);
-  };
-
-  // Générer les options de endTime filtrées selon startTime
-  const getEndTimeOptions = (startTime: string): string[] => {
-    if (!startTime) return generateTimeOptions();
-    
-    const startTimeNum = timeToNumber(startTime);
-    return generateTimeOptions().filter(time => {
-      const timeNum = timeToNumber(time);
-      return timeNum > startTimeNum;
-    });
-  };
-
-  const timeOptions = generateTimeOptions();
-
-  // Charger les créneaux depuis le store quand les données ou la date changent
-  useEffect(() => {
-    if (selectedDate && proExpertData?.schedules) {
-      const slots = getTimeSlotsForDate(proExpertData.schedules, selectedDate);
-      setTimeSlots(slots);
-    } else {
-      setTimeSlots([]);
-    }
-  }, [selectedDate, proExpertData?.schedules, getTimeSlotsForDate]);
-
-  const handleRemoveTimeSlot = async (slotId: string) => {
-    if (!selectedDate || !proExpertData?.schedules) return;
-
-    try {
-      const updatedSchedules = await removeTimeSlot(
-        proExpertData.schedules,
-        selectedDate,
-        slotId,
-        async (updateData: any) => {
-          const result = await updateProExpertMutation.mutateAsync(updateData);
-          return result.data;
-        }
-      );
-
-      // Mettre à jour le store principal
-      setProExpertData({
-        ...proExpertData,
-        schedules: updatedSchedules,
-      });
-    } catch (error) {
-      console.error("Error removing time slot:", error);
-    }
-  };
-
-  // Mettre à jour localement sans sauvegarde
-  const handleUpdateTimeSlot = (
-    slotId: string,
-    field: "startTime" | "endTime",
-    value: string
-  ) => {
-    if (!selectedDate || !proExpertData?.schedules) return;
-
-    const updatedSchedules = updateTimeSlotLocal(
-      proExpertData.schedules,
-      selectedDate,
-      slotId,
-      field,
-      value
-    );
-
-    // Mettre à jour le store principal localement
-    setProExpertData({
-      ...proExpertData,
-      schedules: updatedSchedules,
-    });
-  };
-
-  // Ajouter un nouveau créneau localement
-  const handleAddTimeSlot = () => {
-    if (!selectedDate || !proExpertData?.schedules) return;
-
-    const result = addTimeSlotLocal(proExpertData.schedules, selectedDate);
-
-    // Mettre à jour le store principal
-    setProExpertData({
-      ...proExpertData,
-      schedules: result.schedules,
-    });
-  };
-
-  // Sauvegarder sur le serveur avec debouncing pour éviter les doublons
-  const handleSaveToServer = async () => {
-    if (!proExpertData?.schedules) return;
-    
-    // Annuler le timeout précédent s'il existe
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-    
-    // Programmer la sauvegarde avec un délai
-    saveTimeoutRef.current = setTimeout(async () => {
-      try {
-        await saveSchedulesToServer(
-          proExpertData.schedules || [],
-          async (updateData: any) => {
-            const result = await updateProExpertMutation.mutateAsync(updateData);
-            return result.data;
-          }
-        );
-      } catch (error) {
-        console.error("Error saving to server:", error);
-      }
-    }, 500); // Attendre 500ms avant de sauvegarder
-  };
-
-  // Nettoyer le timeout au démontage du composant
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const copyTimeSlot = (slot: any) => {
-    const text = `${slot.startTime} à ${slot.endTime}`;
-    navigator.clipboard.writeText(text);
-  };
+    isTimeSlotTaken,
+    getEndTimeOptions,
+    copyTimeSlot,
+    handleAddTimeSlot,
+    handleUpdateTimeSlot,
+    handleRemoveTimeSlot,
+    handleSaveToServer,
+  } = useTimeSlotsManager({ selectedDate });
 
   // Affichage de chargement si pas de date sélectionnée
   if (!selectedDate) {
@@ -202,9 +51,7 @@ export default function TimeSlotsManager({
       <Card className="p-4 sm:p-6 bg-gray-50 border-gray-200">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            {(isLoading ||
-              isLoadingData ||
-              updateProExpertMutation.isPending) && (
+            {isLoadingAny && (
               <div className="text-sm text-blue-600">Sauvegarde...</div>
             )}
           </div>
@@ -229,15 +76,27 @@ export default function TimeSlotsManager({
                     // L'utilisateur doit d'abord remplir endTime
                   }}
                 >
-                  <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
+                  <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl ">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    {timeOptions.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
+                    {timeOptions.map((time) => {
+                      const isTaken = isTimeSlotTaken(time, slot.id);
+                      return (
+                        <SelectItem
+                          key={time}
+                          value={time}
+                          disabled={isTaken}
+                          className={`${
+                            isTaken
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "text-gray-900"
+                          } hover:bg-gray-50 border-b border-[#E2E8F0]`}
+                        >
+                          {time}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 <span className="text-gray-500 text-sm whitespace-nowrap">
@@ -260,12 +119,24 @@ export default function TimeSlotsManager({
                   <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    {getEndTimeOptions(slot.startTime).map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
+                    {getEndTimeOptions(slot.startTime).map((time) => {
+                      const isTaken = isTimeSlotTaken(time, slot.id);
+                      return (
+                        <SelectItem
+                          key={time}
+                          value={time}
+                          disabled={isTaken}
+                          className={`${
+                            isTaken
+                              ? "text-gray-400 cursor-not-allowed"
+                              : "text-gray-900"
+                          } hover:bg-gray-50 border-b border-[#E2E8F0]`}
+                        >
+                          {time}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>

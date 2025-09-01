@@ -204,7 +204,10 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
           </div>
         </TabsContent>
       </Tabs>
-      <CustomCalendar className="hidden xl:block" />
+      <CustomCalendar 
+        className="hidden xl:block" 
+        confirmedAppointments={confirmedAppointments}
+      />
     </div>
   );
 };

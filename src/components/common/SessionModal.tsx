@@ -75,7 +75,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
         <div className="p-6 space-y-6 bg-white min-h-[calc(100vh-200px)] overflow-y-auto">
           {/* Requested by section */}
           <div>
-            <p className="text-sm text-slate-gray font-medium font-outfit mb-3">
+            <p className="text-sm text-slate-gray font-medium font-figtree mb-3">
               Requested by :
             </p>
             <div className="flex items-center space-x-3">
@@ -89,7 +89,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-bold text-gunmetal-gray text-sm font-outfit">
+                <p className="font-bold text-gunmetal-gray text-sm font-figtree">
                   {name}
                 </p>
                 {/* <p className="text-xs font-medium text-bluish-gray font-figtree mt-1">
@@ -101,7 +101,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
 
           {/* Session details */}
           <div>
-            <p className="text-xs font-outfit font-medium text-slate-gray mb-2">
+            <p className="text-xs font-figtree font-medium text-slate-gray mb-2">
               Session name :
             </p>
             <p className="text-sm text-gunmetal-gray font-bold font-figtree">
@@ -112,7 +112,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           {/* Questions section */}
           {questions.length > 0 && (
             <div>
-              <p className="text-xs font-outfit font-medium text-slate-gray mb-2">
+              <p className="text-xs font-figtree font-medium text-slate-gray mb-2">
                 Questions ou commentaires
               </p>
               <div className="space-y-3">

@@ -1,8 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Message } from "@/types/messages";
+import { Download, FileText, Pause, Play, Volume2 } from "lucide-react";
 import Image from "next/image";
-import { FileText, Download, Play, Pause, Volume2 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 
 interface MessageItemProps {
   message: Message;
@@ -40,7 +40,7 @@ export function MessageItem({ message }: MessageItemProps) {
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
   return (
     <div className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}>
@@ -57,7 +57,7 @@ export function MessageItem({ message }: MessageItemProps) {
         )}
         <div className="space-y-2">
           {/* Afficher le texte seulement pour les messages text ou sans type */}
-          {(!message.type || message.type === 'text') && (
+          {(!message.type || message.type === "text") && (
             <div
               className={`px-4 py-2 rounded-2xl ${
                 message.isOwn
@@ -65,12 +65,14 @@ export function MessageItem({ message }: MessageItemProps) {
                   : "bg-gray-100 text-gray-900 rounded-tl-sm"
               }`}
             >
-              <p className="text-xs font-outfit lg:text-sm">{message.message}</p>
+              <p className="text-xs font-figtree lg:text-sm">
+                {message.message}
+              </p>
             </div>
           )}
 
           {/* Affichage selon le type */}
-          {message.type === 'image' && (
+          {message.type === "image" && (
             <div className="bg-gray-100 rounded-2xl rounded-bl-md p-2 max-w-xs">
               <Image
                 src={message.message}
@@ -82,13 +84,13 @@ export function MessageItem({ message }: MessageItemProps) {
             </div>
           )}
 
-          {message.type === 'document' && (
+          {message.type === "document" && (
             <div className="bg-gray-100 rounded-2xl p-3 max-w-xs">
               <button
                 onClick={() => {
-                  const link = document.createElement('a');
+                  const link = document.createElement("a");
                   link.href = message.message;
-                  link.download = 'document.pdf';
+                  link.download = "document.pdf";
                   document.body.appendChild(link);
                   link.click();
                   document.body.removeChild(link);
@@ -99,15 +101,19 @@ export function MessageItem({ message }: MessageItemProps) {
                   <FileText className="h-8 w-8 text-red-600" />
                 </div>
                 <div className="flex-1 text-left">
-                  <p className="text-sm font-medium text-gray-900">Document PDF</p>
-                  <p className="text-xs text-gray-500">Cliquer pour télécharger</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    Document PDF
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Cliquer pour télécharger
+                  </p>
                 </div>
                 <Download className="h-4 w-4 text-gray-400" />
               </button>
             </div>
           )}
 
-          {message.type === 'audio' && (
+          {message.type === "audio" && (
             <div className="bg-gray-100 rounded-2xl p-3 max-w-xs">
               <div className="flex items-center gap-3">
                 <button
@@ -120,19 +126,29 @@ export function MessageItem({ message }: MessageItemProps) {
                     <Play className="h-5 w-5 text-white ml-0.5" />
                   )}
                 </button>
-                
+
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Volume2 className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-900">Message audio</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      Message audio
+                    </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span>{formatTime(currentTime)}</span>
                     <div className="flex-1 h-1 bg-gray-300 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-exford-blue transition-all duration-200"
-                        style={{ width: `${duration > 0 && !isNaN(duration) && isFinite(duration) ? (currentTime / duration) * 100 : 0}%` }}
+                        style={{
+                          width: `${
+                            duration > 0 &&
+                            !isNaN(duration) &&
+                            isFinite(duration)
+                              ? (currentTime / duration) * 100
+                              : 0
+                          }%`,
+                        }}
                       />
                     </div>
                     {duration > 0 && !isNaN(duration) && isFinite(duration) && (
@@ -141,7 +157,7 @@ export function MessageItem({ message }: MessageItemProps) {
                   </div>
                 </div>
               </div>
-              
+
               <audio
                 ref={audioRef}
                 src={message.message}

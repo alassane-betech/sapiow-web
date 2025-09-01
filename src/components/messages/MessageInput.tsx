@@ -26,9 +26,13 @@ export function MessageInput({ receiverId }: MessageInputProps) {
   const [recordedAudio, setRecordedAudio] = useState<Blob | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { user } = useUserStore();
@@ -127,6 +131,68 @@ export function MessageInput({ receiverId }: MessageInputProps) {
     }
   };
 
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false,
+      });
+      setCameraStream(stream);
+      setShowCamera(true);
+
+      // Attendre un peu pour que la vidéo soit montée
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Erreur accès caméra:", error);
+      alert("Impossible d'accéder à la caméra");
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+    setShowCamera(false);
+  };
+
+  const takePicture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+
+      if (context) {
+        // Définir les dimensions du canvas
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Dessiner l'image de la vidéo sur le canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convertir en blob
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const file = new File([blob], `photo-${Date.now()}.jpg`, {
+                type: "image/jpeg",
+              });
+              setSelectedFile(file);
+              setMessage(`📷 Photo prise`);
+              stopCamera();
+            }
+          },
+          "image/jpeg",
+          0.8
+        );
+      }
+    }
+  };
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -201,7 +267,7 @@ export function MessageInput({ receiverId }: MessageInputProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-500"
+          className="text-gray-500 cursor-pointer"
           onClick={() => fileInputRef.current?.click()}
         >
           <Paperclip className="h-5 w-5" />
@@ -235,7 +301,7 @@ export function MessageInput({ receiverId }: MessageInputProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-500"
+            className="text-gray-500 cursor-pointer"
             onClick={handleSendMessage}
             disabled={
               (!message.trim() && !selectedFile) ||
@@ -244,39 +310,42 @@ export function MessageInput({ receiverId }: MessageInputProps) {
             }
           >
             <Send
-              className={`h-5 w-5 ${
+              className={`h-5 w-5  ${
                 message.trim() || selectedFile
-                  ? "text-exford-blue"
+                  ? "text-exford-blue cursor-pointer"
                   : "text-gray-400"
               }`}
             />
           </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-gray-500"
-          onClick={() => imageInputRef.current?.click()}
-        >
-          <Image
-            src="/assets/icons/photo.svg"
-            alt="camera"
-            width={24}
-            height={24}
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-500 cursor-pointer"
+            onClick={startCamera}
+          >
+            <Image
+              src="/assets/icons/photo.svg"
+              alt="camera"
+              width={24}
+              height={24}
+            />
+          </Button>
+
+          <input
+            ref={imageInputRef}
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={handleImageSelect}
           />
-        </Button>
-        <input
-          ref={imageInputRef}
-          type="file"
-          className="hidden"
-          accept="image/*"
-          onChange={handleImageSelect}
-        />
+        </div>
         {!isRecording ? (
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-500 hover:text-exford-blue"
+            className="text-gray-500 cursor-pointer hover:text-exford-blue"
             onClick={startRecording}
           >
             <Mic className="h-5 w-5" />
@@ -320,6 +389,51 @@ export function MessageInput({ receiverId }: MessageInputProps) {
           </div>
         )}
       </div>
+
+      {/* Modal Camera */}
+      {showCamera && (
+        <div className="fixed inset-0 z-50 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Prendre une photo</h3>
+                <button
+                  onClick={stopCamera}
+                  className="text-gray-500 cursor-pointer hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="relative">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full rounded-lg"
+                />
+                <canvas ref={canvasRef} className="hidden" />
+              </div>
+
+              <div className="flex justify-center gap-4 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={stopCamera}
+                  className="cursor-pointer"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={takePicture}
+                  className="bg-white text-exford-blue cursor-pointer"
+                >
+                  📷 Prendre la photo
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

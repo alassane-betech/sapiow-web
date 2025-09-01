@@ -7,64 +7,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CustomCalendarProps {
   className?: string;
+  confirmedAppointments?: any[];
 }
 
-// Données d'exemple pour les événements avec les vrais avatars
-const events = {
-  6: {
-    type: "active",
-    users: [
-      { id: 1, name: "User 1", avatar: "/assets/prof.jpg" },
-      { id: 2, name: "User 2", avatar: "/assets/prof1.jpg" },
-    ],
-  },
-  8: {
-    type: "unavailable",
-    users: [],
-  },
-  9: {
-    type: "active",
-    users: [
-      { id: 3, name: "User 3", avatar: "/assets/prof.jpg" },
-      { id: 4, name: "User 4", avatar: "/assets/prof1.jpg" },
-    ],
-  },
-  11: {
-    type: "unavailable",
-    users: [],
-  },
-  12: {
-    type: "unavailable",
-    users: [],
-  },
-  13: {
-    type: "unavailable",
-    users: [],
-  },
-  14: {
-    type: "unavailable",
-    users: [],
-  },
-  15: {
-    type: "unavailable",
-    users: [],
-  },
-  19: {
-    type: "complete",
-    users: [
-      { id: 5, name: "User 5", avatar: "/assets/prof.jpg" },
-      { id: 6, name: "User 6", avatar: "/assets/prof1.jpg" },
-    ],
-  },
-  22: {
-    type: "unavailable",
-    users: [],
-  },
-  29: {
-    type: "unavailable",
-    users: [],
-  },
-};
+// Plus de données statiques - utilisation des vraies données d'API
 
 const daysOfWeek = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 const months = [
@@ -82,7 +28,10 @@ const months = [
   "Décembre",
 ];
 
-export default function CustomCalendar({ className }: CustomCalendarProps) {
+export default function CustomCalendar({
+  className,
+  confirmedAppointments = [],
+}: CustomCalendarProps) {
   const {
     currentDate,
     selectedDate,
@@ -90,6 +39,48 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
     isDateSelected,
     navigateMonth,
   } = useCalendarStore();
+
+  // Créer les événements à partir des rendez-vous confirmés uniquement
+  const getMergedEvents = () => {
+    const mergedEvents: any = {};
+
+    confirmedAppointments.forEach((appointment) => {
+      const appointmentDate = new Date(appointment.appointment_at);
+      const day = appointmentDate.getDate();
+      const isCurrentMonth =
+        appointmentDate.getMonth() === currentDate.getMonth() &&
+        appointmentDate.getFullYear() === currentDate.getFullYear();
+
+      if (isCurrentMonth) {
+        const appointmentUser = {
+          id: appointment.id,
+          name: appointment.patient?.first_name && appointment.patient?.last_name 
+            ? `${appointment.patient.first_name} ${appointment.patient.last_name}`
+            : 'Client',
+          avatar: appointment.patient?.avatar || '/assets/icons/defaultAvatar.png',
+          time: new Date(appointment.appointment_at).toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          duration: appointment.session?.session_type || '30 min',
+          description: appointment.session?.name || 'Consultation',
+        };
+
+        if (mergedEvents[day]) {
+          mergedEvents[day].users.push(appointmentUser);
+        } else {
+          mergedEvents[day] = {
+            type: "active",
+            users: [appointmentUser],
+          };
+        }
+      }
+    });
+
+    return mergedEvents;
+  };
+
+  const allEvents = getMergedEvents();
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -125,7 +116,7 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
   };
 
   const isClickable = (day: number) => {
-    const event = events[day as keyof typeof events];
+    const event = allEvents[day as keyof typeof allEvents];
     // Les dates indisponibles ne sont pas cliquables
     return event?.type !== "unavailable";
   };
@@ -172,7 +163,7 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
 
     // Jours du mois actuel
     for (let day = 1; day <= daysInMonth; day++) {
-      const event = events[day as keyof typeof events];
+      const event = allEvents[day as keyof typeof allEvents];
       const todayIndicator = isToday(day);
       const clickedDate = new Date(
         currentDate.getFullYear(),
@@ -197,7 +188,7 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
             transition-all duration-200
             
             ${event?.type === "active" ? "bg-blue-600 text-white" : ""}
-            ${event?.type === "complete" ? "bg-gray-300 text-gray-700" : ""}
+            ${event?.type === "complete" ? " text-gray-700" : ""}
             ${event?.type === "unavailable" ? "bg-white" : ""}
             ${!event && !todayIndicator ? "text-gray-900" : ""}
             ${isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""}
@@ -257,14 +248,14 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
             <div className="flex flex-col items-start">
               {event?.users && event.users.length > 0 && (
                 <div className="flex -space-x-1">
-                  {event.users.slice(0, 2).map((user, index) => (
+                  {event.users.slice(0, 2).map((user: any, index: number) => (
                     <Avatar
                       key={user.id}
                       className="w-3.5 h-3.5 border-2 border-white"
                     >
                       <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback className="text-xs">
-                        U{user.id}
+                      <AvatarFallback className="text-xs bg-blue-100 text-blue-600 font-semibold">
+                        {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
                       </AvatarFallback>
                     </Avatar>
                   ))}
@@ -272,7 +263,7 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
               )}
 
               {event?.type === "complete" && (
-                <span className="text-[8px] font-medium mt-1">Complet</span>
+                <span className="w-[150px] text-[8px] mt-1"></span>
               )}
             </div>
           </div>
@@ -322,12 +313,12 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
           variant="ghost"
           size="icon"
           onClick={() => navigateMonth("prev")}
-          className="h-8 w-8"
+          className="h-8 w-8 cursor-pointer"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-gray-900 font-figtree">
           {months[currentDate.getMonth()]} {currentDate.getFullYear()}
         </h2>
 
@@ -335,7 +326,7 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
           variant="ghost"
           size="icon"
           onClick={() => navigateMonth("next")}
-          className="h-8 w-8"
+          className="h-8 w-8 cursor-pointer"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -346,7 +337,7 @@ export default function CustomCalendar({ className }: CustomCalendarProps) {
         {daysOfWeek.map((day) => (
           <div
             key={day}
-            className="h-12 flex items-center justify-center text-gray-500 font-medium"
+            className="h-12 flex items-center justify-center text-gray-500 font-medium font-figtree"
           >
             {day}
           </div>
