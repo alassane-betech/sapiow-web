@@ -12,7 +12,17 @@ import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { Switch } from "../../ui/switch";
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  text?: string;
+  hideProfile?: boolean;
+  isBorder?: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  text,
+  hideProfile,
+  isBorder,
+}) => {
   const { isExpertMode, handleModeSwitch } = useModeSwitch();
   const { user } = useTodayVisios();
   const { data: notifications } = useProNotifications();
@@ -74,16 +84,26 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="container bg-white px-6 py-4 sticky top-0 z-20">
+    <header
+      className={`container ${
+        isBorder ? "lg:border-b-2" : ""
+      } lg:border-snow-blue bg-white px-6 py-4 sticky top-0 z-20`}
+    >
       <div className="flex items-center justify-between">
         {/* Section gauche - Photo de profil et message */}
         <div className="flex flex-col items-start gap-4">
-          {/* Photo de profil */}
-          <ProfileAvatar
-            src={user?.avatar || "/assets/memoji.jpg"}
-            alt="Photo de profil"
-            size="lg"
-          />
+          {text && (
+            <h2 className="text-base font-bold text-cobalt-blue-500 whitespace-nowrap">
+              {text}
+            </h2>
+          )}
+          {!hideProfile && (
+            <ProfileAvatar
+              src={user?.avatar || "/assets/memoji.jpg"}
+              alt="Photo de profil"
+              size="lg"
+            />
+          )}
         </div>
 
         {/* Section droite - Bouton de partage et switch mode expert */}

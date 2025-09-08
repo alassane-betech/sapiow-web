@@ -84,9 +84,7 @@ export const useClientHome = () => {
   } = useFavoritesLogic();
 
   // Conversion des données API en format Professional pour l'UI
-  const expertsArray = Array.isArray(expertList)
-    ? expertList
-    : expertList?.data || [];
+  const expertsArray = expertList || [];
   const allProfessionals = expertsArray.map(mapExpertToProfessional);
 
   // États de chargement combinés
@@ -169,9 +167,9 @@ export const useClientHome = () => {
             (expert: any) => expert.id === prof.id
           );
 
-          // Vérifier si l'expert a cette expertise dans ses pro_expertises
-          const hasExpertise = expert?.pro_expertises?.some((proExp: any) => {
-            return proExp.expertise_id === expertiseId;
+          // Vérifier si l'expert a cette expertise dans ses expertises
+          const hasExpertise = expert?.expertises?.some((expertise: any) => {
+            return expertise.expertise_id === expertiseId;
           });
 
           return hasExpertise;
