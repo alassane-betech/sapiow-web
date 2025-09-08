@@ -22,10 +22,10 @@ export default function APropos() {
           className="p-0 m-0"
         />
         <div className="w-full flex flex-col justify-center items-center gap-4 mt-3">
-          <Link href="/" className="text-xl font-bold font-sf-pro">
+          <Link href="/" className="text-xl">
             Sapiow.com
           </Link>
-          <p className="text-base text-gray-500 mb-10 font-inter">
+          <p className="text-base text-gray-500 mb-10">
             © 2025 Sapiow. Tous droits réservés.
           </p>
 

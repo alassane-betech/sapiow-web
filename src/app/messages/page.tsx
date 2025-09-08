@@ -9,7 +9,8 @@ import {
   useProGetMessages,
 } from "@/api/porMessages/useProMessage";
 import { withAuth } from "@/components/common/withAuth";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { Header } from "@/components/layout/header/Header";
+import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { ChatHeader } from "@/components/messages/ChatHeader";
 import { ConversationsList } from "@/components/messages/ConversationsList";
@@ -77,7 +78,11 @@ function Messages() {
 
       {/* Desktop (lg+) : sidebar + chat */}
       <div className="hidden lg:flex flex-1 flex-col container">
-        <PageHeader title="Messages" className="hidden sm:flex" />
+        {user.type === "client" ? (
+          <HeaderClient text="Messages" />
+        ) : (
+          <Header hideProfile={true} text="Messages" isBorder={true} />
+        )}
         <div className="flex-1 flex h-[83vh] mt-[22px]">
           {/* Sidebar des conversations */}
           <div className="w-80 bg-white flex flex-col mr-4">

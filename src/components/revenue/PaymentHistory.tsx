@@ -40,14 +40,21 @@ export default function PaymentHistory() {
   }
 
   if (error) {
+    // Vérifier si l'erreur est liée à l'absence de compte Stripe
+    const isNoStripeAccount = error.message?.includes(
+      "Stripe account not found"
+    );
+
     return (
       <div className="space-y-4">
         <h2 className="text-sm font-medium font-figtree text-charcoal-blue">
           Historique des paiements
         </h2>
         <div className="text-center py-8">
-          <div className="text-red-500">
-            Erreur lors du chargement des paiements
+          <div className="text-slate-gray">
+            {isNoStripeAccount
+              ? "Aucun historique de paiement disponible. Configurez votre compte de paiement pour commencer à recevoir des revenus."
+              : "Erreur lors du chargement des paiements"}
           </div>
         </div>
       </div>
@@ -99,7 +106,7 @@ export default function PaymentHistory() {
                   {formatAmount(payment.amount, payment.currency)}
                 </div>
                 <div
-                  className={`text-xs font-inter bg-snow-blue font-bold rounded-[100px] px-2 py-1 h-[24px] ${
+                  className={`text-xs bg-snow-blue font-bold rounded-[100px] px-2 py-1 h-[24px] ${
                     mapStatus(payment.status) === "Payé"
                       ? "text-exford-blue"
                       : "text-[#CC5802]"

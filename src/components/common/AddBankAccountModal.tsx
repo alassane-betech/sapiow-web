@@ -97,7 +97,7 @@ export default function AddBankAccountModal({
             />
 
             {/* Message d'information */}
-            <p className="text-sm text-gray-500 leading-relaxed font-inter font-normal mt-2 mb-5">
+            <p className="text-sm text-gray-500 leading-relaxed font-normal mt-2 mb-5">
               Assurez-vous que cela correspond au nom figurant sur votre pièce
               d'identité gouvernementale.
             </p>

@@ -55,7 +55,9 @@ export function AppSidebar({
         <div className="flex-1 px-[20px]">
           <nav className="space-y-8">
             {items.map((item) => {
-              const isActive = pathname === item.url;
+              const isActive = item.title === "Compte" 
+                ? pathname.startsWith("/compte")
+                : pathname === item.url;
               return (
                 <Link
                   key={item.title}
@@ -93,7 +95,9 @@ export function AppSidebar({
       {!hideMobileNav && (
         <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-soft-ice-gray flex justify-around items-center z-20 py-2">
           {items.map((item) => {
-            const isActive = pathname === item.url;
+            const isActive = item.title === "Compte" 
+              ? pathname.startsWith("/compte")
+              : pathname === item.url;
             return (
               <Link
                 key={item.title}

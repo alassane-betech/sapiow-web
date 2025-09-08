@@ -40,10 +40,13 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
     const streamUser = callData?.proStreamUser || callData?.patientStreamUser;
 
     // Utiliser uniquement les données du store (API) ou les variables d'environnement
-    const token = streamUser?.token || process.env.NEXT_PUBLIC_STREAM_TOKEN;
-    const userId = streamUser?.user?.id || process.env.NEXT_PUBLIC_STREAM_USER_ID;
-    const callId = streamUser?.appointmentId || process.env.NEXT_PUBLIC_STREAM_CALL_ID;
-    const userName = streamUser?.user?.name || process.env.NEXT_PUBLIC_STREAM_USER_NAME;
+    const token = streamUser?.token || process.env.NEXT_SECRET_STREAM_TOKEN;
+    const userId =
+      streamUser?.user?.id || process.env.NEXT_PUBLIC_STREAM_USER_ID;
+    const callId =
+      streamUser?.appointmentId || process.env.NEXT_PUBLIC_STREAM_CALL_ID;
+    const userName =
+      streamUser?.user?.name || process.env.NEXT_PUBLIC_STREAM_USER_NAME;
 
     return {
       token,

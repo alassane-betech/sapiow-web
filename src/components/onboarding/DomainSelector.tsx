@@ -1,6 +1,6 @@
 "use client";
-import { getDomainIcon } from "@/constants/onboarding";
 import { Domain } from "@/api/domaine/useDomaine";
+import { getDomainIcon } from "@/constants/onboarding";
 import Image from "next/image";
 import React from "react";
 
@@ -54,7 +54,7 @@ export const DomainSelector: React.FC<DomainSelectorProps> = ({
         {title}
       </h1>
       {subtitle && (
-        <p className="w-[295px] mx-auto text-base sm:text-base font-normal my-4 text-center text-ash-gray mb-8 font-inter">
+        <p className="w-[295px] mx-auto text-base sm:text-base font-normal my-4 text-center text-ash-gray mb-8">
           {subtitle}
         </p>
       )}

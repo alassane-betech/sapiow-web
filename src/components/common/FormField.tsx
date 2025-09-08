@@ -95,7 +95,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
               className={cn(
                 error &&
                   "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20 font-figtree",
-                "placeholder:text-slate-gray placeholder:text-base placeholder:font-normal font-sf-pro-rounded border-1 border-light-blue-gray rounded-[8px] focus:border-cobalt-blue focus:outline-none focus:ring-2 focus:ring-cobalt-blue/20 transition-all focus-visible:border-cobalt-blue focus-visible:ring-cobalt-blue/20 font-figtree",
+                "placeholder:text-slate-gray placeholder:text-base placeholder:font-normal border-1 border-light-blue-gray rounded-[8px] focus:border-cobalt-blue focus:outline-none focus:ring-2 focus:ring-cobalt-blue/20 transition-all focus-visible:border-cobalt-blue focus-visible:ring-cobalt-blue/20 font-figtree",
                 hasContent ? "pt-6 pb-3" : "py-3",
                 leftIcon ? "pl-12" : "pl-5",
                 rightIcon ? "pr-12" : "pr-5",

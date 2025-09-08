@@ -40,9 +40,7 @@ export function MessagesList({
   if (conversationError) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
-        <p className="text-red-500">
-          Erreur lors du chargement des messages
-        </p>
+        <p className="text-red-500">Erreur lors du chargement des messages</p>
       </div>
     );
   }
@@ -50,9 +48,7 @@ export function MessagesList({
   if (!conversationMessages || conversationMessages.length === 0) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
-        <p className="text-gray-500">
-          Aucun message dans cette conversation
-        </p>
+        <p className="text-gray-500">Aucun message dans cette conversation</p>
       </div>
     );
   }
@@ -61,26 +57,26 @@ export function MessagesList({
     <div className={`space-y-4 ${className}`}>
       {/* Date Separator */}
       <div className="flex justify-center">
-        <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+        {/* <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
           Aujourd'hui
-        </span>
+        </span> */}
       </div>
 
       {/* Messages de la conversation */}
       {conversationMessages
         .sort(
           (a: any, b: any) =>
-            new Date(a.created_at).getTime() -
-            new Date(b.created_at).getTime()
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         )
         .map((message: any) => {
           const isOwn = message.sender_id === currentUserId;
-          const messageTime = new Date(
-            message.created_at
-          ).toLocaleTimeString("fr-FR", {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
+          const messageTime = new Date(message.created_at).toLocaleTimeString(
+            "fr-FR",
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          );
 
           return (
             <MessageItem
@@ -96,8 +92,7 @@ export function MessagesList({
                   ? activeConversation?.profile.avatar || undefined
                   : undefined,
                 hasImage:
-                  message.type === "image" ||
-                  message.type === "document",
+                  message.type === "image" || message.type === "document",
                 type: message.type,
               }}
             />

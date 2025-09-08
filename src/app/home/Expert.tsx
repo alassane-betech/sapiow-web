@@ -7,6 +7,7 @@ import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { useGetStatistics } from "@/api/statistics/useStatistics";
 import { SessionCard } from "@/components/common/SessionCard";
 import { StatsCard } from "@/components/common/StatsCard";
+import { useTodayVisios } from "@/hooks/useTodayVisios";
 import { useCallStore } from "@/store/useCall";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -17,6 +18,7 @@ import VideoConsultation from "../VideoCall/video-consultation";
 export default function Expert() {
   const { isVideoCallOpen, setIsVideoCallOpen, setAppointmentId } =
     useCallStore();
+  const { todayVisiosCount, user } = useTodayVisios();
 
   const [loadingStates, setLoadingStates] = useState<
     Record<string, "confirming" | "cancelling" | null>
@@ -86,6 +88,16 @@ export default function Expert() {
       ) : (
         <div>
           {" "}
+          <div>
+            <h1 className="text-xl font-semibold text-exford-blue font-figtree">
+              Bonjour{" "}
+              {user ? `${user.first_name} ${user.last_name}` : "Utilisateur"}
+            </h1>
+            <p className="text-sm font-medium text-exford-blue font-figtree">
+              Vous avez {todayVisiosCount} visio
+              {todayVisiosCount > 1 ? "s" : ""} à venir aujourd'hui
+            </p>
+          </div>
           <div className="w-full flex gap-x-6 mt-5">
             <StatsCard
               title="Visios completées"

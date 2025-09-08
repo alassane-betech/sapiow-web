@@ -57,7 +57,7 @@ export const OnboardingExpertSteps: React.FC = () => {
         <h1 className="text-2xl sm:text-lg lg:text-xl font-bold text-center mb-2">
           Faisons connaissance
         </h1>
-        <p className="text-base sm:text-base font-normal my-4 text-center text-ash-gray mb-8 font-inter">
+        <p className="text-base sm:text-base font-normal my-4 text-center text-ash-gray mb-8">
           Nous avons besoin de quelques informations pour personnaliser créer
           votre compte Expert.
         </p>
@@ -182,7 +182,7 @@ export const OnboardingExpertSteps: React.FC = () => {
   if (step === 4) {
     return (
       <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px]">
-        <h1 className="text-base sm:text-lg lg:text-xl font-bold text-center mb-2 font-inter">
+        <h1 className="text-base sm:text-lg lg:text-xl font-bold text-center mb-2">
           Terminez votre profil !
         </h1>
         <p className="text-sm sm:text-base font-normal my-4 text-center text-gray-600 mb-8">

@@ -35,7 +35,7 @@ export const OnboardingSeekerSteps: React.FC = () => {
           <h1 className="text-2xl sm:text-lg lg:text-xl font-bold text-center mb-2">
             Faisons connaissance
           </h1>
-          <p className="text-base sm:text-base font-normal my-4 text-center text-ash-gray mb-8 font-inter">
+          <p className="text-base sm:text-base font-normal my-4 text-center text-ash-gray mb-8">
             Nous avons besoin de quelques <br /> informations pour personnaliser
             votre <br /> expérience.
           </p>

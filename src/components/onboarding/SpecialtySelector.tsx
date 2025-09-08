@@ -30,7 +30,7 @@ export const SpecialtySelector: React.FC<SpecialtySelectorProps> = ({
           height={30}
           className="mb-2"
         />
-        <span className="text-xs font-medium text-cobalt-blue text-center font-inter">
+        <span className="text-xs font-medium text-cobalt-blue text-center">
           {selectedDomain.charAt(0).toUpperCase() + selectedDomain.slice(1)}
         </span>
       </div>

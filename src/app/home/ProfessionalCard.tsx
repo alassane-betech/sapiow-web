@@ -35,7 +35,7 @@ export default function ProfessionalCard({
     >
       <div className="relative">
         {professional.topExpertise && (
-          <Badge className="absolute bottom-3 left-3 bg-white text-black font-bold font-inter text-xs hover:bg-white">
+          <Badge className="absolute bottom-3 left-3 bg-white text-black font-bold text-xs hover:bg-white">
             Top Expert
           </Badge>
         )}
@@ -133,7 +133,9 @@ export default function ProfessionalCard({
           <p
             className={`text-xs text-gray-500 leading-relaxed font-figtree font-medium line-clamp-3 overflow-hidden`}
           >
-            {professional.description}
+            {professional.description
+              ? professional.description
+              : professional.job}
           </p>
         </div>
         {professional.linkedin && (

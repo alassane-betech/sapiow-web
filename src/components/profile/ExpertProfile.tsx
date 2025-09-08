@@ -145,7 +145,7 @@ export default function ExpertProfile() {
 
       <div className="mt-6 mb-6 flex flex-col-reverse md:flex-row justify-between gap-y-4 gap-x-6 px-10">
         <button
-          className="text-exford-blue h-[56px] hover:text-red-500 transition-colors font-figtree"
+          className="bg-white text-red-500 rounded-[8px] shadow-none h-[56px] max-w-[331px] w-full font-bold text-base hover:bg-white cursor-pointer"
           onClick={handleDeleteAccount}
         >
           Supprimer mon compte

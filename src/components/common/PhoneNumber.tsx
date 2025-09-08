@@ -170,7 +170,7 @@ const PhoneInput: FC<PhoneInputProps> = ({
             placeholder={placeholder}
             disabled={disabled}
             required={required}
-            className={`flex-1 px-4 h-[56px] border rounded-[8px] focus:outline-none text-exford-blue font-medium placeholder-gray-500 text-base disabled:bg-gray-50 disabled:text-gray-500 transition-all font-sf-pro-rounded font-figtree ${
+            className={`flex-1 px-4 h-[56px] border rounded-[8px] focus:outline-none text-exford-blue font-medium placeholder-gray-500 text-base disabled:bg-gray-50 disabled:text-gray-500 transition-all ${
               phoneInput.formattedValue ? "pt-6 pb-3" : "py-3"
             } ${
               phoneInput.isFocused

@@ -54,16 +54,21 @@ export default function CustomCalendar({
       if (isCurrentMonth) {
         const appointmentUser = {
           id: appointment.id,
-          name: appointment.patient?.first_name && appointment.patient?.last_name 
-            ? `${appointment.patient.first_name} ${appointment.patient.last_name}`
-            : 'Client',
-          avatar: appointment.patient?.avatar || '/assets/icons/defaultAvatar.png',
-          time: new Date(appointment.appointment_at).toLocaleTimeString('fr-FR', {
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          duration: appointment.session?.session_type || '30 min',
-          description: appointment.session?.name || 'Consultation',
+          name:
+            appointment.patient?.first_name && appointment.patient?.last_name
+              ? `${appointment.patient.first_name} ${appointment.patient.last_name}`
+              : "Client",
+          avatar:
+            appointment.patient?.avatar || "/assets/icons/defaultAvatar.png",
+          time: new Date(appointment.appointment_at).toLocaleTimeString(
+            "fr-FR",
+            {
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          ),
+          duration: appointment.session?.session_type || "30 min",
+          description: appointment.session?.name || "Consultation",
         };
 
         if (mergedEvents[day]) {
@@ -210,7 +215,7 @@ export default function CustomCalendar({
             <span
               className={`text-xs font-bold leading-4 tracking-wide ${
                 todayIndicator
-                  ? "bg-[#0F172A] w-[17px] h-[16px] px-[2px] text-xs font-bold text-white rounded-full"
+                  ? "bg-[#0F172A] w-[17px] h-[16px] px-[5px] text-xs font-bold text-white rounded-full"
                   : ""
               }`}
               style={{
@@ -255,7 +260,14 @@ export default function CustomCalendar({
                     >
                       <AvatarImage src={user.avatar} alt={user.name} />
                       <AvatarFallback className="text-xs bg-blue-100 text-blue-600 font-semibold">
-                        {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+                        {user.name
+                          ? user.name
+                              .split(" ")
+                              .map((n: string) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)
+                          : "U"}
                       </AvatarFallback>
                     </Avatar>
                   ))}

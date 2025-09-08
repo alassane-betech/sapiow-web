@@ -1,4 +1,11 @@
 "use client";
+import {
+  useGoogleCalendarAuthUrl,
+  useGoogleCalendarConnect,
+  useGoogleCalendarDisconnect,
+  useGoogleCalendarStatus,
+} from "@/api/google-calendar-sync/useGoogleCalendarSync";
+import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { AvailabilityButtons } from "@/components/common/AvailabilityButtons";
 import AvailabilitySheet from "@/components/common/AvailabilitySheet";
 import { BlockDaySection } from "@/components/common/BlockDaySection";
@@ -13,21 +20,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
 import { useCalendarStore } from "@/store/useCalendar";
+import { useProExpertStore } from "@/store/useProExpert";
 import { formatFullDate } from "@/utils/dateFormat";
-import { 
-  useGoogleCalendarStatus,
-  useGoogleCalendarConnect,
-  useGoogleCalendarDisconnect,
-  useGoogleCalendarAuthUrl
-} from "@/api/google-calendar-sync/useGoogleCalendarSync";
-import { AvailabilityEvent } from "@/types/availability";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
-import { useGetProExpert } from "@/api/proExpert/useProExpert";
-import { useProExpertStore } from "@/store/useProExpert";
-import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
 
 export default function Disponibilites() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("semaine");
@@ -38,19 +37,21 @@ export default function Disponibilites() {
   const [showSessionDetailsSheet, setShowSessionDetailsSheet] = useState(false);
 
   // Hooks Google Calendar
-  const { data: googleStatus, isLoading: isGoogleStatusLoading } = useGoogleCalendarStatus();
+  const { data: googleStatus, isLoading: isGoogleStatusLoading } =
+    useGoogleCalendarStatus();
   const connectMutation = useGoogleCalendarConnect();
   const disconnectMutation = useGoogleCalendarDisconnect();
   const { getAuthUrl } = useGoogleCalendarAuthUrl();
 
   // États dérivés
   const isGoogleConnected = googleStatus?.data?.connected || false;
-  const isGoogleLoading = connectMutation.isPending || disconnectMutation.isPending;
+  const isGoogleLoading =
+    connectMutation.isPending || disconnectMutation.isPending;
 
   // API et Store pour synchroniser les données proExpert
   const { data: proExpertData, isLoading: isLoadingApi } = useGetProExpert();
   const { setProExpertData, setLoading } = useProExpertStore();
-  
+
   // Hook pour récupérer les rendez-vous confirmés
   const { confirmedAppointments } = useVisiosAppointments();
 
@@ -83,11 +84,11 @@ export default function Disponibilites() {
   // Gérer le retour de Google OAuth (authorization code dans l'URL)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const authCode = urlParams.get('code');
-    
+    const authCode = urlParams.get("code");
+
     if (authCode && !isGoogleConnected) {
       connectMutation.mutate({ authorizationCode: authCode });
-      
+
       // Nettoyer l'URL après récupération du code
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -119,7 +120,9 @@ export default function Disponibilites() {
   const handleSyncCalendars = () => {
     if (isGoogleConnected) {
       // La synchronisation est automatique via le cron job backend
-      alert('La synchronisation est automatique ! Vos rendez-vous sont synchronisés toutes les 15 minutes.');
+      alert(
+        "La synchronisation est automatique ! Vos rendez-vous sont synchronisés toutes les 15 minutes."
+      );
     } else {
       // Si pas connecté, ouvrir le sheet de gestion
       setShowAvailabilitySheet(true);
@@ -178,9 +181,7 @@ export default function Disponibilites() {
               />
             </div>
             <div className="w-full max-w-[414px] lg:max-w-[400px]">
-              <CustomCalendar 
-                confirmedAppointments={confirmedAppointments}
-              />
+              <CustomCalendar confirmedAppointments={confirmedAppointments} />
             </div>
             {/* Section Gestion des disponibilités */}
             <div className="space-y-4 w-full lg:-ml-2 xl:ml-4 pb-6">
@@ -213,20 +214,22 @@ export default function Disponibilites() {
                           Google Agenda
                         </p>
                         <p className="text-sm font-medium font-figtree text-slate-600">
-                          {isGoogleConnected ? (
-                            googleStatus?.data?.connectedAt ? 
-                              `Connecté depuis le ${new Date(googleStatus.data.connectedAt).toLocaleDateString('fr-FR')}` 
-                              : 'Connecté'
-                          ) : 'Non connecté'}
+                          {isGoogleConnected
+                            ? googleStatus?.data?.connectedAt
+                              ? `Connecté depuis le ${new Date(
+                                  googleStatus.data.connectedAt
+                                ).toLocaleDateString("fr-FR")}`
+                              : "Connecté"
+                            : "Non connecté"}
                         </p>
                       </div>
                     </div>
                     <Button
-                      label={isGoogleConnected ? 'Déconnecter' : 'Connecter'}
+                      label={isGoogleConnected ? "Déconnecter" : "Connecter"}
                       className={`text-sm font-bold font-figtree ${
-                        isGoogleConnected 
-                          ? 'text-red-600 bg-red-50 border border-red-200' 
-                          : 'text-white'
+                        isGoogleConnected
+                          ? "text-red-600 bg-red-50 border border-red-200"
+                          : "text-white"
                       }`}
                       onClick={handleConnectGoogle}
                       disabled={isGoogleLoading}

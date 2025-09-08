@@ -3,6 +3,7 @@ import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointment
 import { useGetCustomer } from "@/api/customer/useCustomer";
 import { UpcomingVideoCall } from "@/components/common/DarkSessionCard";
 import { useClientHome } from "@/hooks/useClientHome";
+import { Professional } from "@/types/professional";
 import {
   filterAndSortAppointments,
   transformAppointmentToSessionData,
@@ -130,7 +131,7 @@ export default function Client() {
               <CategorySection
                 key={category}
                 category={category}
-                professionals={categoryProfessionals}
+                professionals={categoryProfessionals as Professional[]}
                 likedProfs={likedProfs}
                 onToggleLike={handleToggleLike}
                 onProfessionalClick={handleProfessionalClick}
@@ -141,7 +142,7 @@ export default function Client() {
       ) : (
         // Affichage normal pour les autres catégories
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:px-4">
-          {filteredProfessionals.map((professional) => (
+          {filteredProfessionals.map((professional: Professional) => (
             <ProfessionalCard
               key={professional.id}
               professional={professional}

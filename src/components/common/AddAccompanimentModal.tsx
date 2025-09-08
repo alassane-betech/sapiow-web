@@ -1,5 +1,6 @@
 "use client";
 
+import { ProExpertSession } from "@/api/proExpert/useProExpert";
 import { SessionCreate } from "@/api/sessions/useSessions";
 import { Button } from "@/components/common/Button";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,8 @@ interface AddAccompanimentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (data: SessionData) => void;
+  editData?: ProExpertSession; // Données existantes pour la modification
+  isEditMode?: boolean; // Mode édition
 }
 
 interface SessionData extends SessionCreate {
@@ -38,6 +41,8 @@ export default function AddAccompanimentModal({
   isOpen,
   onClose,
   onSuccess,
+  editData,
+  isEditMode = false,
 }: AddAccompanimentModalProps) {
   const {
     formData,
@@ -49,7 +54,7 @@ export default function AddAccompanimentModal({
     handleFeatureToggle,
     handleSubmit,
     handleCancel,
-  } = useAddSessionModal({ onSuccess, onClose });
+  } = useAddSessionModal({ onSuccess, onClose, editData, isEditMode });
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -62,7 +67,7 @@ export default function AddAccompanimentModal({
           <SheetHeader className="p-6 pb-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl font-semibold text-gray-900 font-figtree">
-                Ajouter une session
+                {isEditMode ? "Modifier la session" : "Ajouter une session"}
               </SheetTitle>
               <button
                 onClick={onClose}
@@ -171,7 +176,15 @@ export default function AddAccompanimentModal({
               />
 
               <Button
-                label={isPending ? "Création..." : "Ajouter"}
+                label={
+                  isPending
+                    ? isEditMode
+                      ? "Modification..."
+                      : "Création..."
+                    : isEditMode
+                    ? "Modifier"
+                    : "Ajouter"
+                }
                 onClick={handleSubmit}
                 disabled={!isFormValid}
                 className={`flex-1 py-3 text-base font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed h-[56px] border-none shadow-none ${
