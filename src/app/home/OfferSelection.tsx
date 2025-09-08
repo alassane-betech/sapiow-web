@@ -19,9 +19,9 @@ export default function OfferSelection({
   price,
   expertData,
 }: OfferSelectionProps) {
-  const [selectedOption, setSelectedOption] = useState<
-    "session" | "subscription"
-  >("session");
+  const [selectedOption, setSelectedOption] = useState<"session" | string>(
+    "session"
+  );
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
 
   const { setIsPaid } = usePayStore();
@@ -30,32 +30,47 @@ export default function OfferSelection({
   const router = useRouter();
   const createAppointmentMutation = useCreatePatientAppointment();
 
-  // Récupérer la session d'abonnement (session_type null et session_nature "subscription")
-  const subscriptionSession = expertData?.sessions?.find(
-    (session: any) =>
-      session.session_type === null && session.session_nature === "subscription"
-  );
+  // Récupérer toutes les sessions d'abonnement actives (session_type null et session_nature "subscription")
+  const subscriptionSessions =
+    expertData?.sessions?.filter(
+      (session: any) =>
+        session.session_type === null &&
+        session.session_nature === "subscription" &&
+        session.is_active === true
+    ) || [];
 
   // Fonction pour gérer le paiement de l'abonnement
-  const handleSubscriptionPayment = async () => {
-    if (!subscriptionSession || !expertData?.id) {
+  const handleSubscriptionPayment = async (sessionId: string) => {
+    const selectedSession = subscriptionSessions.find(
+      (s: any) => s.id === sessionId
+    );
+    if (!selectedSession || !expertData?.id) {
       console.error("Données manquantes pour créer l'appointment");
       return;
     }
 
     setIsPaymentLoading(true);
+    //   const appointmentDate = new Date();
+    //   appointmentDate.setDate(appointmentDate.getDate() + 30);
 
+    //   const appointmentData = {
+    //     pro_id: expertData.id, // ID de l'expert
+    //     session_id: selectedSession.id, // ID de la session d'abonnement
+    // appointment_at: appointmentDate.toISOString(),
     try {
       // Créer la date d'aujourd'hui pour l'abonnement
       const today = new Date();
 
       const appointmentData = {
         pro_id: expertData.id, // ID de l'expert
-        session_id: subscriptionSession.id, // ID de la session d'abonnement
+        session_id: selectedSession.id, // ID de la session d'abonnement
         appointment_at: today.toISOString(), // Date d'aujourd'hui ISO
       };
 
-      console.log("Création de l'appointment pour l'abonnement:", appointmentData);
+      console.log(
+        "Création de l'appointment pour l'abonnement:",
+        appointmentData
+      );
 
       const result = await createAppointmentMutation.mutateAsync(
         appointmentData,
@@ -66,7 +81,9 @@ export default function OfferSelection({
               setAppointmentData(data.appointment, data.payment);
               // Construire l'URL de retour avec l'ID de l'expert
               const returnUrl = `/details?id=${data.appointment.pro_id}`;
-              router.push(`/payment?returnUrl=${encodeURIComponent(returnUrl)}`);
+              router.push(
+                `/payment?returnUrl=${encodeURIComponent(returnUrl)}`
+              );
             }
           },
           onError: (error) => {
@@ -141,164 +158,169 @@ export default function OfferSelection({
           </Card>
         </div>
 
-        {/* Abonnement mensuel - Affiché seulement si une session d'abonnement existe */}
-        {subscriptionSession && (
+        {/* Abonnements mensuels - Affichés seulement si des sessions d'abonnement existent */}
+        {subscriptionSessions.length > 0 && (
           <div>
             <h2 className="text-sm font-bold text-gray-900 mb-1.5 font-figtree">
-              Abonnement mensuel
+              Abonnements mensuels
             </h2>
 
-            <Card
-              className={`relative transition-all cursor-pointer p-0 ${
-                selectedOption === "subscription"
-                  ? "ring-2 ring-pale-blue-gray border border-pale-blue-gray bg-snow-blue"
-                  : "ring-2 ring-frost-gray border border-frost-gray"
-              }`}
-              onClick={() => setSelectedOption("subscription")}
-            >
-              <CardContent className="p-3.5 m-0">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 font-figtree">
-                      {subscriptionSession.name}
-                    </h3>
+            <div className="space-y-4">
+              {subscriptionSessions.map((session: any) => (
+                <Card
+                  key={session.id}
+                  className={`relative transition-all cursor-pointer p-0 ${
+                    selectedOption === session.id
+                      ? "ring-2 ring-pale-blue-gray border border-pale-blue-gray bg-snow-blue"
+                      : "ring-2 ring-frost-gray border border-frost-gray"
+                  }`}
+                  onClick={() => setSelectedOption(session.id)}
+                >
+                  <CardContent className="p-3.5 m-0">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4 font-figtree">
+                          {session.name}
+                        </h3>
 
-                    <div className="mb-6">
-                      <h4 className="text-sm font-medium text-[#6B7280] mb-2 font-figtree">
-                        Ce qui est inclus
-                      </h4>
-                      <div className="space-y-2">
-                        {subscriptionSession.one_on_one && (
-                          <div className="flex items-start gap-2">
-                            <Image
-                              src="/assets/icons/check-circle.svg"
-                              alt="check-circle"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-sm text-slate-800 font-figtree">
-                              Chat 1:1
-                            </span>
+                        <div className="mb-6">
+                          <h4 className="text-sm font-medium text-[#6B7280] mb-2 font-figtree">
+                            Ce qui est inclus
+                          </h4>
+                          <div className="space-y-2">
+                            {session.one_on_one && (
+                              <div className="flex items-start gap-2">
+                                <Image
+                                  src="/assets/icons/check-circle.svg"
+                                  alt="check-circle"
+                                  width={16}
+                                  height={16}
+                                />
+                                <span className="text-sm text-slate-800 font-figtree">
+                                  Chat 1:1
+                                </span>
+                              </div>
+                            )}
+                            {session.video_call && (
+                              <div className="flex items-start gap-2">
+                                <Image
+                                  src="/assets/icons/check-circle.svg"
+                                  alt="check-circle"
+                                  width={16}
+                                  height={16}
+                                />
+                                <span className="text-sm text-slate-800 font-figtree">
+                                  Appels vidéo 1:1
+                                </span>
+                              </div>
+                            )}
+                            {session.mentorship && (
+                              <div className="flex items-start gap-2">
+                                <Image
+                                  src="/assets/icons/check-circle.svg"
+                                  alt="check-circle"
+                                  width={16}
+                                  height={16}
+                                />
+                                <span className="text-sm text-slate-800 font-figtree">
+                                  Accompagnement personnalisé
+                                </span>
+                              </div>
+                            )}
+                            {session.strategic_session && (
+                              <div className="flex items-start gap-2">
+                                <Image
+                                  src="/assets/icons/check-circle.svg"
+                                  alt="check-circle"
+                                  width={16}
+                                  height={16}
+                                />
+                                <span className="text-sm text-slate-800 font-figtree">
+                                  Sessions de stratégie
+                                </span>
+                              </div>
+                            )}
+                            {session.exclusive_ressources && (
+                              <div className="flex items-start gap-2">
+                                <Image
+                                  src="/assets/icons/check-circle.svg"
+                                  alt="check-circle"
+                                  width={16}
+                                  height={16}
+                                />
+                                <span className="text-sm text-slate-800 font-figtree">
+                                  Ressources exclusives
+                                </span>
+                              </div>
+                            )}
+                            {session.support && (
+                              <div className="flex items-start gap-2">
+                                <Image
+                                  src="/assets/icons/check-circle.svg"
+                                  alt="check-circle"
+                                  width={16}
+                                  height={16}
+                                />
+                                <span className="text-sm text-slate-800 font-figtree">
+                                  Support
+                                </span>
+                              </div>
+                            )}
+                            {session.webinar && (
+                              <div className="flex items-start gap-2">
+                                <Image
+                                  src="/assets/icons/check-circle.svg"
+                                  alt="check-circle"
+                                  width={16}
+                                  height={16}
+                                />
+                                <span className="text-sm text-slate-800 font-figtree">
+                                  Webinaires
+                                </span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {subscriptionSession.video_call && (
-                          <div className="flex items-start gap-2">
-                            <Image
-                              src="/assets/icons/check-circle.svg"
-                              alt="check-circle"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-sm text-slate-800 font-figtree">
-                              Appels vidéo 1:1
-                            </span>
-                          </div>
-                        )}
-                        {subscriptionSession.mentorship && (
-                          <div className="flex items-start gap-2">
-                            <Image
-                              src="/assets/icons/check-circle.svg"
-                              alt="check-circle"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-sm text-slate-800 font-figtree">
-                              Accompagnement personnalisé
-                            </span>
-                          </div>
-                        )}
-                        {subscriptionSession.strategic_session && (
-                          <div className="flex items-start gap-2">
-                            <Image
-                              src="/assets/icons/check-circle.svg"
-                              alt="check-circle"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-sm text-slate-800 font-figtree">
-                              Sessions de stratégie
-                            </span>
-                          </div>
-                        )}
-                        {subscriptionSession.exclusive_ressources && (
-                          <div className="flex items-start gap-2">
-                            <Image
-                              src="/assets/icons/check-circle.svg"
-                              alt="check-circle"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-sm text-slate-800 font-figtree">
-                              Ressources exclusives
-                            </span>
-                          </div>
-                        )}
-                        {subscriptionSession.support && (
-                          <div className="flex items-start gap-2">
-                            <Image
-                              src="/assets/icons/check-circle.svg"
-                              alt="check-circle"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-sm text-slate-800 font-figtree">
-                              Support
-                            </span>
-                          </div>
-                        )}
-                        {subscriptionSession.webinar && (
-                          <div className="flex items-start gap-2">
-                            <Image
-                              src="/assets/icons/check-circle.svg"
-                              alt="check-circle"
-                              width={16}
-                              height={16}
-                            />
-                            <span className="text-sm text-slate-800 font-figtree">
-                              Webinaires
-                            </span>
-                          </div>
-                        )}
+                        </div>
+
+                        <p className="text-xl font-bold text-exford-blue font-figtree">
+                          {session.price} €{" "}
+                          <span className="text-sm font-normal text-slate-800 font-figtree">
+                            / Mois
+                          </span>
+                        </p>
+                      </div>
+                      <div className="ml-4">
+                        <button
+                          onClick={() => setSelectedOption(session.id)}
+                          className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors"
+                        >
+                          {selectedOption === session.id && (
+                            <div className="w-3 h-3 rounded-full bg-gray-900"></div>
+                          )}
+                        </button>
                       </div>
                     </div>
-
-                    <p className="text-xl font-bold text-exford-blue font-figtree">
-                      {subscriptionSession.price} €{" "}
-                      <span className="text-sm font-normal text-slate-800 font-figtree">
-                        / Mois
-                      </span>
-                    </p>
-                  </div>
-                  <div className="ml-4">
-                    <button
-                      onClick={() => setSelectedOption("subscription")}
-                      className="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors"
-                    >
-                      {selectedOption === "subscription" && (
-                        <div className="w-3 h-3 rounded-full bg-gray-900"></div>
-                      )}
-                    </button>
-                  </div>
-                </div>
-                {selectedOption === "subscription" && (
-                  <Button
-                    label={
-                      isPaymentLoading ? (
-                        <div className="flex items-center gap-2">
-                          <LoadingSpinner size="sm" />
-                          Création de l'appointment...
-                        </div>
-                      ) : (
-                        "Choisir et payer"
-                      )
-                    }
-                    className="w-full h-[56px] rounded-[8px] bg-cobalt-blue hover:bg-cobalt-blue/80 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleSubscriptionPayment}
-                    disabled={isPaymentLoading}
-                  />
-                )}
-              </CardContent>
-            </Card>
+                    {selectedOption === session.id && (
+                      <Button
+                        label={
+                          isPaymentLoading ? (
+                            <div className="flex items-center gap-2">
+                              <LoadingSpinner size="sm" />
+                              Création de l'appointment...
+                            </div>
+                          ) : (
+                            "Choisir et payer"
+                          )
+                        }
+                        className="w-full h-[56px] rounded-[8px] bg-cobalt-blue hover:bg-cobalt-blue/80 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleSubscriptionPayment(session.id)}
+                        disabled={isPaymentLoading}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
       </div>

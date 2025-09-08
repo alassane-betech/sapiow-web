@@ -113,7 +113,7 @@ export default function MentionsLegales() {
                 />
               </Link>
             </div>
-            <div className="text-ash-gray text-base leading-relaxed font-inter">
+            <div className="text-ash-gray text-base leading-relaxed">
               {activeTab.content}
             </div>
           </div>

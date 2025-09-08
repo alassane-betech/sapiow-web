@@ -4,12 +4,13 @@ import {
   useRemoveFavorite,
 } from "@/api/favorites/useFavorites";
 import ProfessionalCard from "@/app/home/ProfessionalCard";
+import { withAuth } from "@/components/common/withAuth";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
+import { useUserStore } from "@/store/useUser";
 import { Professional } from "@/types/professional";
-import { withAuth } from "@/components/common/withAuth";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 // Fonction pour convertir les données API en format Professional
 const mapFavoriteToProfessional = (favorite: any): Professional => {
@@ -57,6 +58,7 @@ const mapFavoriteToProfessional = (favorite: any): Professional => {
 };
 
 function Favori() {
+  const { user: userClient } = useUserStore();
   const { data: favoritesData, isLoading, error } = useGetFavorites();
   const removeFavoriteMutation = useRemoveFavorite();
   const router = useRouter();
@@ -78,6 +80,12 @@ function Favori() {
   const handleProfessionalClick = (professional: Professional) => {
     router.push(`/details?id=${professional.id}`);
   };
+
+  useEffect(() => {
+    if (userClient.type === "expert") {
+      router.push("/");
+    }
+  }, [userClient, router]);
 
   if (isLoading) {
     return (

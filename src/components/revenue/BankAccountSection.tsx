@@ -5,6 +5,7 @@ import {
 import { Button } from "@/components/common/Button";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
+import { useState } from "react";
 
 interface BankAccountSectionProps {
   hasBankAccount: boolean;
@@ -26,8 +27,9 @@ export default function BankAccountSection({
   const externalAccount = stripeAccount?.external_accounts?.data?.[0];
   const last4 = externalAccount?.last4;
   const country = externalAccount?.country || stripeAccount?.country;
-
+  const [initiateBankAccount, setInitiateBankAccount] = useState(false);
   const handleAddBankAccount = () => {
+    setInitiateBankAccount(true);
     initializeStripeAccount(undefined, {
       onSuccess(data) {
         if (data.onboarding_url) {
@@ -35,6 +37,7 @@ export default function BankAccountSection({
         }
       },
       onError(error) {
+        setInitiateBankAccount(false);
         console.log(error);
       },
     });
@@ -68,7 +71,7 @@ export default function BankAccountSection({
                   </div>
                 </div>
                 <Button
-                  label="Ajouter"
+                  label={initiateBankAccount ? "En cours..." : "Ajouter"}
                   onClick={handleAddBankAccount}
                   className="border border-light-blue-gray rounded-full text-exford-blue font-bold font-figtree px-4 py-2 mb-6 bg-transparent text-sm shadow-none"
                 />

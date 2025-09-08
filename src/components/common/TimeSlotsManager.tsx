@@ -47,8 +47,8 @@ export default function TimeSlotsManager({
   }
 
   return (
-    <div className="w-full mx-auto p-4 sm:p-6">
-      <Card className="p-4 sm:p-6 bg-gray-50 border-gray-200">
+    <div className="w-full mx-auto ">
+      <Card className="p-4 sm:p-6 border-gray-200">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             {isLoadingAny && (
@@ -147,15 +147,15 @@ export default function TimeSlotsManager({
                   className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex-shrink-0"
                   onClick={() => copyTimeSlot(slot)}
                 >
-                  <Link className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+                  <Link className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 cursor-pointer" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex-shrink-0"
+                  className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex-shrink-0 cursor-pointer"
                   onClick={() => handleRemoveTimeSlot(slot.id)}
                 >
-                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
+                  <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 cursor-pointer" />
                 </Button>
               </div>
             </div>

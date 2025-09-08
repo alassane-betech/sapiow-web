@@ -1,10 +1,13 @@
 "use client";
-import { useCreatePatientAppointment } from "@/api/appointments/useAppointments";
+import {
+  useCreatePatientAppointment,
+  useGetProAppointments,
+} from "@/api/appointments/useAppointments";
 import { Button } from "@/components/common/Button";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePlaningStore } from "@/store/usePlaning";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
 interface VisioPlanningCalendarProps {
@@ -46,7 +49,8 @@ const dayOfWeekMapping = {
 const generateTimeSlots = (
   schedules: any[],
   selectedDate: Date,
-  duration: number
+  duration: number,
+  existingAppointments: any[] = []
 ) => {
   if (!schedules || schedules.length === 0) return [];
 
@@ -99,10 +103,26 @@ const generateTimeSlots = (
           hour12: false,
         });
 
+        // Vérifier si ce créneau est déjà pris par un rendez-vous existant
+        const isSlotTaken = existingAppointments.some((appointment) => {
+          const appointmentDate = new Date(appointment.appointment_at);
+          const appointmentTime = appointmentDate.toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+          
+          // Vérifier si c'est le même jour et la même heure
+          return (
+            appointmentDate.toDateString() === selectedDate.toDateString() &&
+            appointmentTime === timeString
+          );
+        });
+
         timeSlots.push({
           time: timeString,
-          available: true,
-          status: null,
+          available: !isSlotTaken,
+          status: isSlotTaken ? "Complet" : null,
         });
       }
 
@@ -119,9 +139,12 @@ export default function VisioPlanningCalendar({
   onDateTimeSelect,
   className = "",
   expertData,
-  professionalName = "Expert",
   onAppointmentCreated,
 }: VisioPlanningCalendarProps) {
+  const searchParams = useSearchParams();
+  const expertId = searchParams.get("id");
+  const { data: appointments } = useGetProAppointments(expertId?.toString());
+  console.log({ appointments });
   const { setIsPlaning } = usePlaningStore();
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(
@@ -134,8 +157,9 @@ export default function VisioPlanningCalendar({
   const createAppointmentMutation = useCreatePatientAppointment();
 
   // Créer les durées dynamiques basées sur les sessions de l'expert
+
   const availableDurations = expertData?.sessions
-    ?.filter((session: any) => session.session_type)
+    ?.filter((session: any) => session.session_type && session.is_active)
     .map((session: any) => ({
       label:
         session.session_type === "15m"
@@ -178,16 +202,20 @@ export default function VisioPlanningCalendar({
     const slots = generateTimeSlots(
       expertData?.schedules || [],
       selectedDateTime,
-      selectedDuration
+      selectedDuration,
+      Array.isArray(appointments) ? appointments : []
     );
 
-    // Définir le premier créneau comme sélectionné par défaut si pas encore sélectionné
+    // Définir le premier créneau disponible comme sélectionné par défaut si pas encore sélectionné
     if (!selectedTime && slots.length > 0) {
-      setSelectedTime(slots[0].time);
+      const firstAvailableSlot = slots.find(slot => slot.available);
+      if (firstAvailableSlot) {
+        setSelectedTime(firstAvailableSlot.time);
+      }
     }
 
     return slots;
-  }, [expertData?.schedules, currentDate, selectedDate, selectedDuration]);
+  }, [expertData?.schedules, currentDate, selectedDate, selectedDuration, appointments]);
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -324,6 +352,8 @@ export default function VisioPlanningCalendar({
 
     return days;
   };
+
+  console.log(availableDurations);
 
   return (
     <div className={`bg-white rounded-lg max-w-md mx-auto ${className}`}>

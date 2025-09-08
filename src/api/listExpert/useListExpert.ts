@@ -84,9 +84,9 @@ export const useSearchExperts = (params: SearchExpertsParams = {}) => {
   const queryString = queryParams.toString();
   const endpoint = queryString ? `search?${queryString}` : "search";
 
-  return useQuery<SearchExpertsResponse>({
+  return useQuery<Expert[]>({
     queryKey: ["experts", params],
-    queryFn: () => apiClient.get<SearchExpertsResponse>(endpoint),
+    queryFn: () => apiClient.get<Expert[]>(endpoint),
   });
 };
 

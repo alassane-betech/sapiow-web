@@ -204,9 +204,9 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
             </ButtonUI>
             {/* Bouton notifications avec dropdown */}
             <div className="relative" ref={notificationRef}>
-              <button
+              <ButtonUI
                 onClick={handleNotificationClick}
-                className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="w-12 h-12 p-[3px] rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 bg-snow-blue hover:bg-snow-blue/80 shadow-none"
               >
                 <Image
                   src="/assets/icons/notif.svg"
@@ -216,11 +216,11 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
                 />
                 {/* Badge compteur */}
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-0.5 pt-[1px] bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
+                  <span className="absolute top-1.5 right-2.5 pt-[1px] bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
-              </button>
+              </ButtonUI>
 
               {/* Dropdown des notifications */}
               {showNotifications && (

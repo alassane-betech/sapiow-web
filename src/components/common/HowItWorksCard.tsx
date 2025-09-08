@@ -20,7 +20,7 @@ export default function HowItWorksCard({
         <div className="w-12 h-12 rounded-full flex items-center justify-center bg-soft-ice-gray mb-4">
           <Image src={iconSrc} alt={iconAlt} width={20} height={20} />
         </div>
-        <h3 className="text-xs md:text-sm text-left font-semibold mb-2 font-inter lg:text-xs xl:text-sm">
+        <h3 className="text-xs md:text-sm text-left font-semibold mb-2 lg:text-xs xl:text-sm">
           {title}
         </h3>
         <p className="text-xs md:text-sm text-left text-gray-700 font-figtree lg:text-xs xl:text-sm">

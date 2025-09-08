@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase/client";
 import { useUserStore } from "@/store/useUser";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
@@ -67,13 +67,14 @@ interface AccountSidebarProps {
 
 export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user } = useUserStore();
   const { handleExpertModeSwitch, hasExpertProfile } = useExpertModeSwitch();
 
   const sidebarClasses = isMobile
     ? "w-full h-full flex flex-col px-4 py-4"
-    : " w-[302px] h-[calc(100vh-72px)] sticky top-[72px] z-30 flex flex-col px-4 py-4 border-r border-r-light-blue-gray";
+    : " w-[302px] h-[calc(100vh-90px)] sticky top-[88px] z-30 flex flex-col px-4 py-4 border-r border-r-light-blue-gray";
 
   const handleLogout = async () => {
     try {
@@ -134,11 +135,15 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
       <nav className="flex-1 overflow-y-auto z-50 -mt-4">
         <ul className="space-y-0">
           <ShareLinkButton className="mb-5" />
-          {filteredNavItems.map((item) => (
+          {filteredNavItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
             <li key={item.label}>
               <Link
                 href={item.href}
-                className="flex items-center gap-3 px-2 py-0 mt-[3px] h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue font-figtree"
+                className={`flex items-center gap-3 px-2 py-0 mt-[3px] h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue font-figtree ${
+                  isActive ? 'bg-[#F7F9FB]' : ''
+                }`}
               >
                 <Image src={item.icon} alt="" width={22} height={22} />
                 <span className="flex-1 text-[12px] lg:text-[15px] font-medium font-figtree">
@@ -161,7 +166,8 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
                 </svg>
               </Link>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </nav>
       {!hasExpertProfile && (

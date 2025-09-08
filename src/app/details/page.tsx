@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button as ButtonUI } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -23,10 +22,12 @@ import ProfessionalCard from "../home/ProfessionalCard";
 
 import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointments";
 import { useGetCustomer } from "@/api/customer/useCustomer";
+import { Expert, useSearchExperts } from "@/api/listExpert/useListExpert";
 import { useGetProExpertById } from "@/api/proExpert/useProExpert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
 import { useDetailsLogic } from "@/hooks/useDetailsLogic";
+import { useUserStore } from "@/store/useUser";
 
 // Type definitions based on actual API response
 interface Patient {
@@ -141,14 +142,13 @@ function ProfessionalDetailContent() {
   const { data: appointments } = useGetPatientAppointmentsById(
     customer?.id || ""
   ) as { data: Appointment[] };
-  console.log({ appointments });
+  const { user: userClient } = useUserStore();
   const isMobile = useIsMobile();
   const isMobileOrTablet = useIsMobileOrTablet();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isPaid } = usePayStore();
   const { isPlaning } = usePlaningStore();
-  const { appointment } = useAppointmentStore(); // Added line
 
   // Récupérer l'ID depuis les paramètres de recherche
   const expertId = searchParams.get("id");
@@ -160,26 +160,38 @@ function ProfessionalDetailContent() {
     error,
   } = useGetProExpertById(expertId || "");
 
+  const {
+    data: expertsimilar,
+    isLoading: isLoadingExpertSimilar,
+    error: errorExpertSimilar,
+  } = useSearchExperts();
+
+  console.log({ expertsimilar });
+
   // Utilisation du hook pour isoler la logique
   const {
     professional,
     expertiseNames,
     isOfferSheetOpen,
-    likedProfs,
     isDescriptionExpanded,
     toggleLike,
     isLiked,
-    openOfferSheet,
-    closeOfferSheet,
     setIsOfferSheetOpen,
     toggleDescriptionExpanded,
-    setIsDescriptionExpanded,
   } = useDetailsLogic(expertData);
+
   useEffect(() => {
     if (!expertId) {
       router.push("/");
     }
   }, [expertId, router]);
+
+  useEffect(() => {
+    if (userClient.type === "expert") {
+      console.log("expert");
+      router.push("/");
+    }
+  }, [userClient, router]);
 
   // États de chargement et d'erreur
   if (isLoading) {
@@ -232,7 +244,10 @@ function ProfessionalDetailContent() {
             <div className="flex justify-center flex-col md:flex-row gap-6 mt-3">
               <div className="relative">
                 <ProfessionalCard
-                  professional={professional}
+                  professional={{
+                    ...professional,
+                    description: professional.job || professional.description,
+                  }}
                   isLiked={isExpertLiked}
                   onToggleLike={() => toggleLike(String(professional.id))}
                   imageWidth={imageWidth}
@@ -257,7 +272,7 @@ function ProfessionalDetailContent() {
                   <ButtonUI
                     onClick={toggleDescriptionExpanded}
                     variant="link"
-                    className="text-sm font-bold p-0 h-auto text-cobalt-blue underline font-inter cursor-pointer"
+                    className="text-sm font-bold p-0 h-auto text-cobalt-blue underline cursor-pointer"
                   >
                     {isDescriptionExpanded ? "Voir moins" : "Voir plus"}{" "}
                     <ChevronDown className="h-4 w-4 ml-1" />
@@ -273,7 +288,7 @@ function ProfessionalDetailContent() {
                       (expertiseName: string, index: number) => (
                         <Badge
                           key={index}
-                          className="p-2 text-xs lg:text-[10px] xl:text-xs text-[#1F2937] font-medium bg-[#F3F4F6] hover:bg-[#F3F4F6] max-w-fit font-inter mb-2"
+                          className="p-2 text-xs lg:text-[10px] xl:text-xs text-[#1F2937] font-medium bg-[#F3F4F6] hover:bg-[#F3F4F6] max-w-fit mb-2"
                           variant="secondary"
                         >
                           {expertiseName}
@@ -368,7 +383,7 @@ function ProfessionalDetailContent() {
             </div>
             {/* How it works */}
             <div>
-              <h2 className="text-lg font-bold mb-2.5 text-charcoal-blue font-inter">
+              <h2 className="text-lg font-bold mb-2.5 text-charcoal-blue">
                 Comment ça marche ?
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -399,31 +414,34 @@ function ProfessionalDetailContent() {
             <div>
               <div>
                 <div className="flex items-center justify-between mb-6 mt-3">
-                  <h2 className="text-xl font-bold font-inter">
-                    Experts similaires
-                  </h2>
+                  <h2 className="text-xl font-bold">Experts similaires</h2>
                   <ButtonUI variant="link" className="text-blue-600">
                     Tout voir <ChevronRight className="h-4 w-4 ml-1" />
                   </ButtonUI>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-                  {professionalsSimilar.map((professional) => (
-                    <ProfessionalCard
-                      key={professional.id}
-                      professional={professional}
-                      isLiked={isLiked(String(professional.id))}
-                      onToggleLike={() => toggleLike(String(professional.id))}
-                    />
-                  ))}
+                  {expertsimilar
+                    ?.filter((expert: Expert) => expert.id !== expertId)
+                    ?.map((professional: Expert) => (
+                      <ProfessionalCard
+                        key={professional.id}
+                        professional={{
+                          ...professional,
+                          description:
+                            professional.job || professional.description,
+                        }}
+                        isLiked={isLiked(String(professional.id))}
+                        onToggleLike={() => toggleLike(String(professional.id))}
+                        onProfessionalClick={() => router.push(`/details?id=${professional.id}`)}
+                      />
+                    ))}
                 </div>
               </div>
             </div>
 
             {/* FAQ */}
             <div>
-              <h2 className="text-xl font-bold mb-6 font-inter">
-                Questions fréquentes
-              </h2>
+              <h2 className="text-xl font-bold mb-6">Questions fréquentes</h2>
               <Accordion
                 items={[
                   {
@@ -556,7 +574,7 @@ function ProfessionalDetailContent() {
                 className="mb-8"
               />
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-charcoal-blue mb-4 font-inter">
+                <h2 className="text-2xl font-bold text-charcoal-blue mb-4">
                   Félicitations !
                 </h2>
                 <p className="text-lg text-black font-medium mb-6 font-figtree">
