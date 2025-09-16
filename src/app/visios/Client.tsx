@@ -19,7 +19,7 @@ export default function Client() {
   const [selectedSession, setSelectedSession] = useState<SessionData | null>(
     null
   );
-  console.log(selectedSession);
+
   const { isVideoCallOpen, setIsVideoCallOpen } = useCallStore();
 
   const handleViewDetails = (sessionData: SessionData) => {
@@ -31,7 +31,6 @@ export default function Client() {
   };
 
   const handleStartVideoCall = (appointmentId: string) => {
-    console.log({ appointmentId });
     setAppointmentId(appointmentId);
     setIsVideoCallOpen(true);
     setSelectedSession(null); // Fermer le sheet modal
@@ -47,12 +46,6 @@ export default function Client() {
     if (!appointments) return { upcomingConfirmed: [], otherUpcoming: [] };
     return filterAndSortAppointments(appointments as ApiAppointment[]);
   }, [appointments]);
-
-  const upcomingSessionsData = useMemo(
-    () =>
-      upcomingConfirmed.map((apt) => transformAppointmentToSessionData(apt)),
-    [upcomingConfirmed]
-  );
 
   const otherSessionsData = useMemo(
     () => otherUpcoming.map((apt) => transformAppointmentToSessionData(apt)),

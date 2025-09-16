@@ -115,12 +115,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
   };
 
   return (
-    <header className="container lg:border-b-2 lg:border-snow-blue py-4 sticky top-0 z-20 bg-white">
+    <header className="container pt-9 lg:border-b-2 lg:border-snow-blue py-2 sticky top-0 z-20 bg-white">
       <div className="flex items-center justify-between px-4">
         {/* Section gauche - Photo de profil et message */}
         <div className="w-full max-w-[320px] flex flex-col items-start gap-4">
           {isBack || text ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 py-4">
               {isBack && (
                 <ButtonUI
                   onClick={handleHome}
@@ -167,7 +167,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
               <Switch
                 checked={isExpertMode}
                 onCheckedChange={handleModeSwitch}
-                className="data-[state=checked]:bg-[#1E293B]"
+                className="data-[state=checked]:bg-[#1E293B] transition-all duration-500"
               />
             </div>
           ) : (

@@ -254,6 +254,8 @@ function ProfessionalDetailContent() {
                   imageHeight={imageHeight}
                   maxWidth={maxWidth}
                   lineClamp={1}
+                  nameSize="text-[20px]"
+                  iconSize={24}
                 />
               </div>
 
@@ -382,7 +384,7 @@ function ProfessionalDetailContent() {
               </div>
             </div>
             {/* How it works */}
-            <div>
+            <div className="mb-15">
               <h2 className="text-lg font-bold mb-2.5 text-charcoal-blue">
                 Comment ça marche ?
               </h2>
@@ -411,7 +413,7 @@ function ProfessionalDetailContent() {
             </div>
 
             {/* Similar Experts */}
-            <div>
+            <div className="mb-15">
               <div>
                 <div className="flex items-center justify-between mb-6 mt-3">
                   <h2 className="text-xl font-bold">Experts similaires</h2>
@@ -432,7 +434,9 @@ function ProfessionalDetailContent() {
                         }}
                         isLiked={isLiked(String(professional.id))}
                         onToggleLike={() => toggleLike(String(professional.id))}
-                        onProfessionalClick={() => router.push(`/details?id=${professional.id}`)}
+                        onProfessionalClick={() =>
+                          router.push(`/details?id=${professional.id}`)
+                        }
                       />
                     ))}
                 </div>
