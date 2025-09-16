@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/header/Header";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { useUserStore } from "@/store/useUser";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Client from "./home/Client";
 import Expert from "./home/Expert";
 
@@ -32,11 +32,11 @@ function Home() {
           {currentUserType === "client" ? <HeaderClient /> : <Header />}
         </div>
         <div className="w-full flex-1 container px-5 relative overflow-hidden">
-          <div 
+          <div
             className={`transition-all duration-300 ease-in-out transform ${
-              isTransitioning 
-                ? 'opacity-0 translate-y-2 scale-[0.98]' 
-                : 'opacity-100 translate-y-0 scale-100'
+              isTransitioning
+                ? "opacity-0 translate-y-2 scale-[0.98]"
+                : "opacity-100 translate-y-0 scale-100"
             }`}
           >
             {currentUserType === "client" ? <Client /> : <Expert />}

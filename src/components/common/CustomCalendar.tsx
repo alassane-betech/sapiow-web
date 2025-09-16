@@ -215,7 +215,7 @@ export default function CustomCalendar({
             <span
               className={`text-xs font-bold leading-4 tracking-wide ${
                 todayIndicator
-                  ? "bg-[#0F172A] w-[17px] h-[16px] px-[5px] text-xs font-bold text-white rounded-full"
+                  ? "bg-[#0F172A] min-w-[17px] h-[16px] flex items-center justify-center text-xs font-bold text-white rounded-full px-1"
                   : ""
               }`}
               style={{

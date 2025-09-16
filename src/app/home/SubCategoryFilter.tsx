@@ -55,12 +55,26 @@ export default function SubCategoryFilter({
   // Afficher loading si on charge les expertises
   if (isDomainId && isLoadingExpertises) {
     return (
-      <div className="flex items-center justify-between gap-4 py-3 px-0 lg:px-6">
-        <div className="flex items-center gap-4">
-          <div className="text-ash-gray text-sm">
+      <div className="flex items-center justify-between mt-5 mb-2 px-0">
+        <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 min-w-0">
+          <div className="text-ash-gray text-base font-normal font-figtree px-4 py-2">
             Chargement des expertises...
           </div>
         </div>
+
+        <div className="w-[2px] h-10 bg-light-blue-gray"></div>
+
+        <button className="w-[98px] h-[40px] rounded-[8px] border border-light-blue-gray flex items-center justify-center gap-1 px-3 py-2 text-sm text-gray-500 cursor-pointer flex-shrink-0 opacity-50">
+          <Image
+            src="/assets/icons/sort.svg"
+            alt="Sort"
+            width={24}
+            height={24}
+          />
+          <span className="text-exford-blue text-base font-bold font-figtree">
+            Trier
+          </span>
+        </button>
       </div>
     );
   }
@@ -70,7 +84,7 @@ export default function SubCategoryFilter({
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 py-3 mt-5 mb-2 px-0 lg:px-6">
+    <div className="flex items-center justify-between mt-5 mb-2 px-0">
       <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide flex-1 min-w-0">
         {currentSubCategories.map((subCategory) => (
           <button

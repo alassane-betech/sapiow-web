@@ -15,6 +15,8 @@ interface ProfessionalCardProps {
   maxWidth?: string;
   lineClamp?: number;
   isLoadingFavorite?: boolean;
+  nameSize?: string;
+  iconSize?: number;
 }
 
 export default function ProfessionalCard({
@@ -27,6 +29,8 @@ export default function ProfessionalCard({
   maxWidth = "max-w-[175px]",
   lineClamp = 3,
   isLoadingFavorite = false,
+  nameSize = "text-sm",
+  iconSize = 16,
 }: ProfessionalCardProps) {
   return (
     <Card
@@ -92,7 +96,7 @@ export default function ProfessionalCard({
       <CardContent className="flex items-center justify-between p-0 m-0">
         <div>
           <div className="flex items-center mb-1">
-            <h3 className="font-bold text-black text-sm truncate">
+            <h3 className={`font-bold text-black ${nameSize} truncate`}>
               {professional.name ||
                 `${professional.first_name || ""} ${
                   professional.last_name || ""
@@ -103,8 +107,8 @@ export default function ProfessionalCard({
               <Image
                 src="/assets/icons/verified.svg"
                 alt="Verified"
-                width={16}
-                height={16}
+                width={iconSize}
+                height={iconSize}
                 className="transition-all duration-200"
               />
             )}
@@ -112,8 +116,8 @@ export default function ProfessionalCard({
               <Image
                 src="/assets/icons/top-verified.svg"
                 alt="Verified"
-                width={16}
-                height={16}
+                width={iconSize}
+                height={iconSize}
                 className="transition-all duration-200"
               />
             )}

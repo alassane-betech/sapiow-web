@@ -44,7 +44,7 @@ export function AppSidebar({
     <>
       {/* Sidebar verticale (desktop) */}
       <div
-        className={`w-[90px] xl:w-[106px] h-screen bg-snow-blue border-r border-soft-ice-gray flex-col sticky left-0 top-0 z-10 hidden lg:flex ${className}`}
+        className={` h-screen bg-snow-blue border-r border-soft-ice-gray flex-col sticky left-0 top-0 z-10 hidden lg:flex ${className}`}
         {...props}
       >
         {/* Header avec logo */}
@@ -55,9 +55,10 @@ export function AppSidebar({
         <div className="flex-1 px-[20px]">
           <nav className="space-y-8">
             {items.map((item) => {
-              const isActive = item.title === "Compte" 
-                ? pathname.startsWith("/compte")
-                : pathname === item.url;
+              const isActive =
+                item.title === "Compte"
+                  ? pathname.startsWith("/compte")
+                  : pathname === item.url;
               return (
                 <Link
                   key={item.title}
@@ -95,9 +96,10 @@ export function AppSidebar({
       {!hideMobileNav && (
         <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-soft-ice-gray flex justify-around items-center z-20 py-2">
           {items.map((item) => {
-            const isActive = item.title === "Compte" 
-              ? pathname.startsWith("/compte")
-              : pathname === item.url;
+            const isActive =
+              item.title === "Compte"
+                ? pathname.startsWith("/compte")
+                : pathname === item.url;
             return (
               <Link
                 key={item.title}

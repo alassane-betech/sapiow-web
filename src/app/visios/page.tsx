@@ -1,8 +1,8 @@
 "use client";
+import { withAuth } from "@/components/common/withAuth";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { useCallStore } from "@/store/useCall";
 import { useUserStore } from "@/store/useUser";
-import { withAuth } from "@/components/common/withAuth";
 import Client from "./Client";
 import Expert from "./Expert";
 
@@ -16,7 +16,6 @@ function Visios() {
     <div className="flex">
       <AppSidebar hideMobileNav={isVideoCallOpen} />
       <div className="w-full flex-1 container pb-10">
-        {/* <Client /> */}
         {user.type === "client" ? (
           <Client />
         ) : (
