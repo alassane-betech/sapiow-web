@@ -39,11 +39,11 @@ export default function CategorySection({
         <h2 className="text-lg font-bold text-exford-blue font-figtree">
           {categoryDisplayNames[category] || category}
         </h2>
-        <button className="text-xs text-cobalt-blue font-medium cursor-pointer">
+        <button className="text-xs text-cobalt-blue font-medium cursor-pointer pr-4">
           Voir tout →
         </button>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4">
         {professionals.map((professional) => {
           const profIdString = professional.id.toString();
           const isLiked = likedProfs[profIdString] || false;

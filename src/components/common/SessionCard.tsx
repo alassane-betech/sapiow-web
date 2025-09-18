@@ -80,7 +80,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
 
   return (
     <Card
-      className={`w-full max-w-[370px] bg-snow-blue shadow-none border border-soft-ice-gray rounded-[12px] p-0 ${className}`}
+      className={`w-full max-w-[470px] bg-snow-blue shadow-none border border-soft-ice-gray rounded-[12px] p-0 ${className}`}
     >
       {/* En-tête avec date et heure */}
       <CardHeader className="m-0">

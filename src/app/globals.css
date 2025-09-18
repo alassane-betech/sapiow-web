@@ -79,7 +79,7 @@
 /* Container réutilisable avec largeur max 1173px */
 .container {
   width: 100%;
-  max-width: 1173px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 

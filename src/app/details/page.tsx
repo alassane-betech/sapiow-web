@@ -237,10 +237,10 @@ function ProfessionalDetailContent() {
     <div className="flex">
       <AppSidebar />
       <div className="w-full flex-1">
-        <HeaderClient isBack />
+        <HeaderClient isBack classNameIsBack="py-1" />
         {/* <Expert /> */}
         <div className="w-full grid grid-cols-1 lg:grid-cols-[2fr_1fr] xl:grid-cols-[1fr_386px] gap-6 pl-5 container pb-20 lg:pb-0">
-          <div className="">
+          <div className="w-full max-w-[753px]">
             <div className="flex justify-center flex-col md:flex-row gap-6 mt-3">
               <div className="relative">
                 <ProfessionalCard
@@ -319,7 +319,7 @@ function ProfessionalDetailContent() {
                 <h2 className="text-base font-bold mb-4 px-4 pt-3 font-figtree">
                   Questions à poser
                 </h2>
-                <ul className="space-y-3 text-gray-700 pl-6 pb-4 text-base font-figtree">
+                <ul className="space-y-3 text-gray-700 pl-6 pb-4 text-base font-figtree pr-1">
                   <li className="flex items-start gap-2">
                     <span className="text-gray-700 mt-1">•</span>
                     <span>
@@ -353,7 +353,7 @@ function ProfessionalDetailContent() {
               <div className="bg-soft-ice-gray px-1 py-0.5 rounded-[8px] border border-soft-ice-gray">
                 <h2 className="text-base font-bold mb-4 pl-6 pt-3">Attentes</h2>
                 <div className="space-y-4 text-base">
-                  <div className="pl-6">
+                  <div className="pl-6 pr-1">
                     <h3 className="text-base font-normal">Visio 15mn</h3>
                     <ul className="mt-2 space-y-2 text-gray-700 pl-2 font-figtree">
                       <li className="flex items-start gap-2">
@@ -421,7 +421,7 @@ function ProfessionalDetailContent() {
                     Tout voir <ChevronRight className="h-4 w-4 ml-1" />
                   </ButtonUI>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4">
                   {expertsimilar
                     ?.filter((expert: Expert) => expert.id !== expertId)
                     ?.map((professional: Expert) => (

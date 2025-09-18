@@ -92,7 +92,11 @@ function Favori() {
       <div className="flex">
         <AppSidebar />
         <div className="w-full flex-1">
-          <HeaderClient text="Mes Favoris" isBack={true} />
+          <HeaderClient
+            text="Mes Favoris"
+            isBack={true}
+            classNameIsBack="py-1"
+          />
           <div className="container">
             <div className="text-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-exford-blue mx-auto"></div>
@@ -109,7 +113,11 @@ function Favori() {
       <div className="flex">
         <AppSidebar />
         <div className="w-full flex-1">
-          <HeaderClient text="Mes Favoris" isBack={true} />
+          <HeaderClient
+            text="Mes Favoris"
+            isBack={true}
+            classNameIsBack="py-1"
+          />
           <div className="container">
             <div className="text-center py-12">
               <div className="text-red-500 text-lg mb-4">
@@ -129,7 +137,7 @@ function Favori() {
     <div className="flex">
       <AppSidebar />
       <div className="w-full flex-1">
-        <HeaderClient text="Mes Favoris" isBack={true} />
+        <HeaderClient text="Mes Favoris" isBack={true} classNameIsBack="py-1" />
         <div className="container">
           {favoriteProfessionals.length === 0 ? (
             <div className="text-center py-12">
@@ -141,7 +149,7 @@ function Favori() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:px-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-4 md:px-4">
               {favoriteProfessionals.map((professional) => (
                 <ProfessionalCard
                   key={professional.id}

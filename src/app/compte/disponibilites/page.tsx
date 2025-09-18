@@ -83,6 +83,8 @@ export default function Disponibilites() {
 
   // Gérer le retour de Google OAuth (authorization code dans l'URL)
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
 

@@ -18,9 +18,14 @@ import React, { useEffect, useRef, useState } from "react";
 interface HeaderClientProps {
   isBack?: boolean;
   text?: string;
+  classNameIsBack?: string;
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({
+  isBack,
+  text,
+  classNameIsBack = "py-4",
+}) => {
   const router = useRouter();
   const { isFavoriActive, handleFavoriToggle } = useFavorites();
   const { setIsPaid } = usePayStore();
@@ -79,23 +84,6 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    try {
-      const unreadNotifications =
-        notifications?.filter((n) => n.read_at === null) || [];
-      await Promise.all(
-        unreadNotifications.map((notification) =>
-          markNotificationAsRead(notification.id)
-        )
-      );
-    } catch (error) {
-      console.error(
-        "Erreur lors du marquage de toutes les notifications comme lues:",
-        error
-      );
-    }
-  };
-
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -120,7 +108,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ isBack, text }) => {
         {/* Section gauche - Photo de profil et message */}
         <div className="w-full max-w-[320px] flex flex-col items-start gap-4">
           {isBack || text ? (
-            <div className="flex items-center gap-2 py-4">
+            <div className={`flex items-center gap-2 ${classNameIsBack}`}>
               {isBack && (
                 <ButtonUI
                   onClick={handleHome}

@@ -28,7 +28,7 @@ function Home() {
     <div className="flex font-figtree">
       <AppSidebar />
       <div className="w-full">
-        <div className="transition-all duration-300 ease-in-out">
+        <div className="transition-all duration-300 ease-in-out sticky top-0 z-20">
           {currentUserType === "client" ? <HeaderClient /> : <Header />}
         </div>
         <div className="w-full flex-1 container px-5 relative overflow-hidden">
