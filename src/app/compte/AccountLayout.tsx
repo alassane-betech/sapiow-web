@@ -1,8 +1,10 @@
 "use client";
 import { AuthGuard } from "@/components/common/AuthGuard";
 import { AccountSidebar } from "@/components/layout/AccountSidebar";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { Header } from "@/components/layout/header/Header";
+import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
+import { useUserStore } from "@/store/useUser";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -23,6 +25,8 @@ export default function AccountLayout({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const { user } = useUserStore();
+
   return (
     <AuthGuard>
       <div className={`flex ${className}`}>
@@ -31,7 +35,11 @@ export default function AccountLayout({
         {/* Layout principal */}
         <div className="w-full flex-1">
           {/* Header desktop */}
-          <PageHeader title="Compte" showSearch={false} />
+          {user?.type === "client" ? (
+            <HeaderClient text="Compte" />
+          ) : (
+            <Header hideProfile text="Compte" isBorder />
+          )}
 
           {/* Header mobile */}
           <div className="lg:hidden flex justify-between items-center w-full bg-white px-4 py-3 border-b border-light-blue-gray sticky top-0 z-20">

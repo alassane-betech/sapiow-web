@@ -74,7 +74,7 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
 
   const sidebarClasses = isMobile
     ? "w-full h-full flex flex-col px-4 py-4"
-    : " w-[302px] h-[calc(100vh-90px)] sticky top-[88px] z-30 flex flex-col px-4 py-4 border-r border-r-light-blue-gray";
+    : " w-[302px] h-[calc(100vh-105px)] sticky top-[102px] z-30 flex flex-col px-4 py-4 border-r border-r-light-blue-gray";
 
   const handleLogout = async () => {
     try {
@@ -138,34 +138,34 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
           {filteredNavItems.map((item) => {
             const isActive = pathname === item.href;
             return (
-            <li key={item.label}>
-              <Link
-                href={item.href}
-                className={`flex items-center gap-3 px-2 py-0 mt-[3px] h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue font-figtree ${
-                  isActive ? 'bg-[#F7F9FB]' : ''
-                }`}
-              >
-                <Image src={item.icon} alt="" width={22} height={22} />
-                <span className="flex-1 text-[12px] lg:text-[15px] font-medium font-figtree">
-                  {item.label}
-                </span>
-                <svg
-                  width="18"
-                  height="18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="text-[#1E293B] opacity-60 group-hover:opacity-100"
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 px-2 py-0 mt-[3px] h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue font-figtree ${
+                    isActive ? "bg-[#F7F9FB]" : ""
+                  }`}
                 >
-                  <path
-                    d="M7 13l4-4-4-4"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </Link>
-            </li>
+                  <Image src={item.icon} alt="" width={22} height={22} />
+                  <span className="flex-1 text-[12px] lg:text-[15px] font-medium font-figtree">
+                    {item.label}
+                  </span>
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="text-[#1E293B] opacity-60 group-hover:opacity-100"
+                  >
+                    <path
+                      d="M7 13l4-4-4-4"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </Link>
+              </li>
             );
           })}
         </ul>

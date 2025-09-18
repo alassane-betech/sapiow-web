@@ -25,7 +25,7 @@ export default function Expert({ handleNotificationClick }: ExpertProps) {
           title="Session avec Moussa Diagne"
         />
       ) : (
-        <Header />
+        <Header isBorder />
       )}
 
       {/* Onglets des visios */}

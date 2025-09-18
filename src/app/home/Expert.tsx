@@ -89,7 +89,7 @@ export default function Expert() {
         <div>
           {" "}
           <div>
-            <h1 className="text-xl font-semibold text-exford-blue font-figtree">
+            <h1 className="text-xl font-semibold text-exford-blue font-figtree mt-5">
               Bonjour{" "}
               {user ? `${user.first_name} ${user.last_name}` : "Utilisateur"}
             </h1>
