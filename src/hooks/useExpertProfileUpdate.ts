@@ -39,6 +39,7 @@ export const useExpertProfileUpdate = ({
   // États pour la gestion de l'interface
   const [isEditing, setIsEditing] = useState(false);
   const [avatar, setAvatar] = useState<File | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Hook pour la mutation
   const {
@@ -104,11 +105,85 @@ export const useExpertProfileUpdate = ({
     []
   );
 
-  // Gestion du changement d'avatar
-  const handleAvatarChange = useCallback((file: File | null) => {
-    setAvatar(file);
-    setIsEditing(true);
-  }, []);
+  // Gestion du changement d'avatar avec upload automatique
+  const handleAvatarChange = useCallback(
+    async (file: File | null) => {
+      if (!file) return;
+
+      setAvatar(file);
+      setIsUploadingAvatar(true);
+
+      try {
+        const updateData: UpdateProExpertData = {
+          avatar: file,
+        };
+
+        console.log("Upload automatique de l'avatar:", updateData);
+        console.log(
+          "Type de fichier:",
+          file instanceof File ? "File" : typeof file
+        );
+        console.log("Taille du fichier:", file.size, "bytes");
+
+        updateProExpert(updateData, {
+          onSuccess: () => {
+            setIsUploadingAvatar(false);
+            console.log("Avatar uploadé avec succès");
+            // Ne pas réinitialiser setAvatar ici pour garder l'aperçu
+          },
+          onError: (error) => {
+            setIsUploadingAvatar(false);
+            console.error("Erreur lors de l'upload de l'avatar:", error);
+            // En cas d'erreur, on peut réinitialiser l'avatar
+            setAvatar(null);
+          },
+        });
+      } catch (error) {
+        setIsUploadingAvatar(false);
+        console.error("Erreur lors de la préparation de l'upload:", error);
+        setAvatar(null);
+      }
+    },
+    [updateProExpert]
+  );
+
+  // Gestion de la suppression d'avatar
+  const handleAvatarDelete = useCallback(async () => {
+    try {
+      setIsUploadingAvatar(true);
+
+      const updateData: UpdateProExpertData = {
+        avatar: null, // Envoyer null pour supprimer l'avatar
+      };
+
+      console.log("Suppression de l'avatar expert:", updateData);
+      console.log(
+        "Avatar à supprimer:",
+        updateData.avatar === null ? "NULL" : updateData.avatar
+      );
+
+      updateProExpert(updateData, {
+        onSuccess: () => {
+          setIsUploadingAvatar(false);
+          setAvatar(null);
+          console.log("Avatar expert supprimé avec succès");
+        },
+        onError: (error) => {
+          setIsUploadingAvatar(false);
+          console.error(
+            "Erreur lors de la suppression de l'avatar expert:",
+            error
+          );
+        },
+      });
+    } catch (error) {
+      setIsUploadingAvatar(false);
+      console.error(
+        "Erreur lors de la préparation de la suppression expert:",
+        error
+      );
+    }
+  }, [updateProExpert]);
 
   // Gestion de la sauvegarde
   const handleSave = useCallback(async () => {
@@ -184,11 +259,13 @@ export const useExpertProfileUpdate = ({
     isEditing,
     avatar,
     isUpdating,
+    isUploadingAvatar,
     updateError,
 
     // Actions
     handleFieldChange,
     handleAvatarChange,
+    handleAvatarDelete,
     handleSave,
     handleDeleteAccount,
     resetForm,

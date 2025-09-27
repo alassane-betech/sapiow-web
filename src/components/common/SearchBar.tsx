@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import React, { useState } from "react";
 
@@ -10,9 +11,10 @@ interface SearchBarProps {
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
-  placeholder = "Rechercher",
+  placeholder,
   className = "",
 }) => {
+  const t = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +37,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         />
         <input
           type="text"
-          placeholder={placeholder}
+          placeholder={placeholder || t("search.placeholder")}
           value={searchQuery}
           onChange={handleSearch}
           className="flex-1 bg-transparent outline-none text-gray-600 placeholder:text-gray-400"

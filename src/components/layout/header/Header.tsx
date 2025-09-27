@@ -8,6 +8,7 @@ import { ShareLinkButton } from "@/components/common/ShareLinkButton";
 import { Button } from "@/components/ui/button";
 import { useModeSwitch } from "@/hooks/useModeSwitch";
 import { useTodayVisios } from "@/hooks/useTodayVisios";
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { Switch } from "../../ui/switch";
@@ -23,6 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   hideProfile,
   isBorder,
 }) => {
+  const t = useI18n();
   const { isExpertMode, handleModeSwitch } = useModeSwitch();
   const { user } = useTodayVisios();
   const { data: notifications } = useProNotifications();
@@ -58,10 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
     try {
       await markNotificationAsRead(notificationId);
     } catch (error) {
-      console.error(
-        "Erreur lors du marquage de la notification comme lue:",
-        error
-      );
+      console.error(t("header.markAsReadError"), error);
     }
   };
 
@@ -72,12 +71,12 @@ export const Header: React.FC<HeaderProps> = ({
       (now.getTime() - date.getTime()) / (1000 * 60)
     );
 
-    if (diffInMinutes < 1) return "À l'instant";
-    if (diffInMinutes < 60) return `Il y a ${diffInMinutes}min`;
+    if (diffInMinutes < 1) return t("header.justNow");
+    if (diffInMinutes < 60) return `${t("header.minutesAgo")} ${diffInMinutes}${t("header.minutes")}`;
     if (diffInMinutes < 1440)
-      return `Il y a ${Math.floor(diffInMinutes / 60)}h`;
+      return `${t("header.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t("header.hours")}`;
 
-    return date.toLocaleDateString("fr-FR", {
+    return date.toLocaleDateString(undefined, {
       day: "2-digit",
       month: "2-digit",
     });
@@ -100,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
           {!hideProfile && (
             <ProfileAvatar
               src={user?.avatar || "/assets/memoji.jpg"}
-              alt="Photo de profil"
+              alt={t("header.profileAlt")}
               size="lg"
             />
           )}
@@ -113,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Mode expert switch */}
           <div className="flex items-center gap-3 bg-exford-blue px-3 py-2 rounded-full">
-            <span className="text-white font-bold">Mode expert</span>
+            <span className="text-white font-bold">{t("header.expertMode")}</span>
             <Switch
               checked={isExpertMode}
               onCheckedChange={handleModeSwitch}
@@ -148,11 +147,11 @@ export const Header: React.FC<HeaderProps> = ({
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="font-semibold text-gray-900">
-                        Notifications
+                        {t("header.notifications")}
                       </h3>
                       {unreadCount > 0 && (
                         <p className="text-sm text-gray-500">
-                          {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
+                          {unreadCount} {unreadCount > 1 ? t("header.unreadPlural") : t("header.unreadSingular")}
                         </p>
                       )}
                     </div>
@@ -205,7 +204,7 @@ export const Header: React.FC<HeaderProps> = ({
                   ) : (
                     <div className="p-6 text-center text-gray-500">
                       <span className="text-2xl mb-2 block">🔔</span>
-                      <p className="text-sm">Aucune notification</p>
+                      <p className="text-sm">{t("header.noNotifications")}</p>
                     </div>
                   )}
                 </div>
@@ -213,7 +212,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {notifications && notifications.length > 0 && (
                   <div className="p-3 border-t border-gray-100 bg-gray-50">
                     <button className="w-full text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                      Voir toutes les notifications
+                      {t("header.seeAllNotifications")}
                     </button>
                   </div>
                 )}

@@ -1,5 +1,13 @@
 import { Transaction, PaymentHistoryItem, FilterOption } from "@/types/revenue";
 
+// Fonction pour générer les options de filtre avec traductions
+export const getFilterOptions = (t: any): FilterOption[] => [
+  { label: t("revenue.thisMonth"), value: "Ce mois-ci" },
+  { label: t("revenue.thisQuarter"), value: "Ce trimestre" },
+  { label: t("revenue.custom"), value: "Personnalisé" },
+];
+
+// Options de filtre statiques (pour compatibilité)
 export const filterOptions: FilterOption[] = [
   { label: "Ce mois-ci", value: "Ce mois-ci" },
   { label: "Ce trimestre", value: "Ce trimestre" },

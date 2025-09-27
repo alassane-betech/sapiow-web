@@ -29,6 +29,7 @@ export const useClientProfileUpdate = ({
   // États pour la gestion de l'interface
   const [isEditing, setIsEditing] = useState(false);
   const [avatar, setAvatar] = useState<File | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Hook pour la mutation
   const {
@@ -72,11 +73,81 @@ export const useClientProfileUpdate = ({
     setIsEditing(true);
   }, []);
 
-  // Gestion du changement d'avatar
-  const handleAvatarChange = useCallback((file: File | null) => {
-    setAvatar(file);
-    setIsEditing(true);
-  }, []);
+  // Gestion du changement d'avatar avec upload automatique
+  const handleAvatarChange = useCallback(
+    async (file: File | null) => {
+      if (!file) return;
+
+      setAvatar(file);
+      setIsUploadingAvatar(true);
+
+      try {
+        const updateData: UpdateCustomerData = {
+          avatar: file,
+        };
+
+        updateCustomer(updateData, {
+          onSuccess: () => {
+            setIsUploadingAvatar(false);
+            console.log("Avatar client uploadé avec succès");
+            // Ne pas réinitialiser setAvatar ici pour garder l'aperçu
+          },
+          onError: (error) => {
+            setIsUploadingAvatar(false);
+            console.error("Erreur lors de l'upload de l'avatar client:", error);
+            // En cas d'erreur, on peut réinitialiser l'avatar
+            setAvatar(null);
+          },
+        });
+      } catch (error) {
+        setIsUploadingAvatar(false);
+        console.error(
+          "Erreur lors de la préparation de l'upload client:",
+          error
+        );
+        setAvatar(null);
+      }
+    },
+    [updateCustomer]
+  );
+
+  // Gestion de la suppression d'avatar
+  const handleAvatarDelete = useCallback(async () => {
+    try {
+      setIsUploadingAvatar(true);
+
+      const updateData: UpdateCustomerData = {
+        avatar: null, // Envoyer null pour supprimer l'avatar
+      };
+
+      console.log("Suppression de l'avatar client:", updateData);
+      console.log(
+        "Avatar à supprimer:",
+        updateData.avatar === null ? "NULL" : updateData.avatar
+      );
+
+      updateCustomer(updateData, {
+        onSuccess: () => {
+          setIsUploadingAvatar(false);
+          setAvatar(null);
+          console.log("Avatar client supprimé avec succès");
+        },
+        onError: (error) => {
+          setIsUploadingAvatar(false);
+          console.error(
+            "Erreur lors de la suppression de l'avatar client:",
+            error
+          );
+        },
+      });
+    } catch (error) {
+      setIsUploadingAvatar(false);
+      console.error(
+        "Erreur lors de la préparation de la suppression client:",
+        error
+      );
+    }
+  }, [updateCustomer]);
 
   // Gestion de la sauvegarde
   const handleSave = useCallback(async () => {
@@ -140,12 +211,14 @@ export const useClientProfileUpdate = ({
     isEditing,
     avatar,
     isUpdating,
+    isUploadingAvatar,
     updateError,
 
     // Actions
     handleFieldChange,
     handleDomainToggle,
     handleAvatarChange,
+    handleAvatarDelete,
     handleSave,
     handleDeleteAccount,
     resetForm,

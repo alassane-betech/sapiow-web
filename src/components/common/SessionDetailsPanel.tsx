@@ -12,6 +12,7 @@ import {
   formatFullDate,
   formatTimeForSession,
 } from "@/utils/dateFormat";
+import { useI18n, useCurrentLocale } from "@/locales/client";
 
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
@@ -24,6 +25,9 @@ export const SessionDetailsPanel = ({
   showTimeSlotsManager,
   confirmedAppointments = [],
 }: SessionDetailsPanelProps) => {
+  const t = useI18n();
+  const currentLocale = useCurrentLocale();
+  
   // Stores et API
   const { proExpertData, setProExpertData } = useProExpertStore();
   const { addTimeSlotLocal } = useTimeSlotsStore();
@@ -61,14 +65,14 @@ export const SessionDetailsPanel = ({
         id: appointment.id,
         clientName: appointment.patient?.first_name && appointment.patient?.last_name 
           ? `${appointment.patient.first_name} ${appointment.patient.last_name}`
-          : 'Client',
+          : t("sessionDetailsPanel.client"),
         avatar: appointment.patient?.avatar || '/assets/icons/defaultAvatar.png',
-        time: new Date(appointment.appointment_at).toLocaleTimeString('fr-FR', {
+        time: new Date(appointment.appointment_at).toLocaleTimeString(currentLocale === 'fr' ? 'fr-FR' : 'en-US', {
           hour: '2-digit',
           minute: '2-digit'
         }),
         duration: appointment.session?.session_type || '30 min',
-        description: appointment.session?.name || 'Consultation',
+        description: appointment.session?.name || t("sessionDetailsPanel.consultation"),
         type: 'active',
       })),
     };
@@ -124,10 +128,20 @@ export const SessionDetailsPanel = ({
             <EmptySessionCard
               message={
                 <>
-                  Aucune session n'est <br /> prévue pour aujourd'hui.
+                  {t("sessionDetailsPanel.noSessionToday").split(' ').map((word, index, array) => {
+                    if (index === Math.floor(array.length / 2)) {
+                      return (
+                        <span key={index}>
+                          <br />
+                          {word + ' '}
+                        </span>
+                      );
+                    }
+                    return word + ' ';
+                  })}
                 </>
               }
-              buttonLabel="Ajouter une disponibilité"
+              buttonLabel={t("sessionDetailsPanel.addAvailability")}
               onAdd={handleAddAvailability}
             />
           )}
@@ -135,8 +149,17 @@ export const SessionDetailsPanel = ({
       ) : (
         <div className="w-full flex flex-col items-center justify-center h-[100vh]">
           <p className="text-slate-200 text-center text-base font-medium">
-            Sélectionnez une date pour
-            <br /> voir les détails.
+            {t("sessionDetailsPanel.selectDateToView").split(' ').map((word, index, array) => {
+              if (index === Math.floor(array.length / 2)) {
+                return (
+                  <span key={index}>
+                    <br />
+                    {word + ' '}
+                  </span>
+                );
+              }
+              return word + ' ';
+            })}
           </p>
         </div>
       )}

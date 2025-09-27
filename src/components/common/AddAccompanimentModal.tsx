@@ -11,6 +11,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useAddSessionModal } from "@/hooks/useAddSessionModal";
+import { useI18n } from "@/locales/client";
 import { Check, X } from "lucide-react";
 import Image from "next/image";
 import { FormField } from "./FormField";
@@ -27,14 +28,15 @@ interface SessionData extends SessionCreate {
   // SessionData hérite de SessionCreate du hook API
 }
 
-const availableFeatures = [
-  { key: "one_on_one", label: "Session individuelle 1:1" },
-  { key: "video_call", label: "Appel vidéo" },
-  { key: "strategic_session", label: "Session stratégique" },
-  { key: "exclusive_ressources", label: "Ressources exclusives" },
-  { key: "support", label: "Support client" },
-  { key: "mentorship", label: "Mentorat" },
-  { key: "webinar", label: "Webinaire" },
+// Fonction pour générer les fonctionnalités avec traductions
+const getAvailableFeatures = (t: any) => [
+  { key: "one_on_one", label: t("offers.oneOnOne") },
+  { key: "video_call", label: t("offers.videoCall") },
+  { key: "strategic_session", label: t("offers.strategicSession") },
+  { key: "exclusive_ressources", label: t("offers.exclusiveResources") },
+  { key: "support", label: t("offers.support") },
+  { key: "mentorship", label: t("offers.mentorship") },
+  { key: "webinar", label: t("offers.webinar") },
 ];
 
 export default function AddAccompanimentModal({
@@ -44,6 +46,9 @@ export default function AddAccompanimentModal({
   editData,
   isEditMode = false,
 }: AddAccompanimentModalProps) {
+  const t = useI18n();
+  const availableFeatures = getAvailableFeatures(t);
+  
   const {
     formData,
     selectedFeatures,
@@ -67,7 +72,7 @@ export default function AddAccompanimentModal({
           <SheetHeader className="p-6 pb-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl font-semibold text-gray-900 font-figtree">
-                {isEditMode ? "Modifier la session" : "Ajouter une session"}
+                {isEditMode ? t("offers.editSession") : t("offers.addSession")}
               </SheetTitle>
               <button
                 onClick={onClose}
@@ -83,11 +88,11 @@ export default function AddAccompanimentModal({
             {/* Nom */}
             <div className="space-y-2">
               <FormField
-                label="Nom de la session"
+                label={t("offers.sessionName")}
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder="Ex: Consultation stratégique"
+                placeholder={t("offers.sessionNamePlaceholder")}
                 className="w-full h-[56px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
               />
             </div>
@@ -95,16 +100,16 @@ export default function AddAccompanimentModal({
             {/* Prix */}
             <div className="space-y-2">
               <FormField
-                label="Prix (€)"
+                label={t("offers.price")}
                 type="number"
                 id="price"
                 value={formData.price}
                 onChange={(e) => handleInputChange("price", e.target.value)}
-                placeholder="Ex: 120"
+                placeholder={t("offers.pricePlaceholder")}
                 rightIcon={
                   <Image
                     src="/assets/icons/mdi_euro.svg"
-                    alt="Euro"
+                    alt={t("offers.euroAlt")}
                     width={24}
                     height={24}
                   />
@@ -129,7 +134,7 @@ export default function AddAccompanimentModal({
             {/* Fonctionnalités */}
             <div className="space-y-4 border border-light-blue-gray rounded-[12px] p-4">
               <Label className="text-sm font-medium text-gray-700 font-figtree">
-                Fonctionnalités incluses
+                {t("offers.includedFeatures")}
               </Label>
               <div className="space-y-4">
                 {availableFeatures.map((feature) => (
@@ -170,7 +175,7 @@ export default function AddAccompanimentModal({
           <div className="p-6">
             <div className="flex gap-4">
               <Button
-                label="Annuler"
+                label={t("cancel")}
                 onClick={handleCancel}
                 className="flex-1 py-3 bg-white text-base font-bold text-gray-700 border-gray-300 hover:bg-gray-50 h-[56px] border-none shadow-none"
               />
@@ -179,11 +184,11 @@ export default function AddAccompanimentModal({
                 label={
                   isPending
                     ? isEditMode
-                      ? "Modification..."
-                      : "Création..."
+                      ? t("offers.editing")
+                      : t("offers.creating")
                     : isEditMode
-                    ? "Modifier"
-                    : "Ajouter"
+                    ? t("bankAccount.modify")
+                    : t("bankAccount.add")
                 }
                 onClick={handleSubmit}
                 disabled={!isFormValid}

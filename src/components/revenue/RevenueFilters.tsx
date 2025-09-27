@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/common/Button";
 import { Calendar } from "@/components/ui/calendar";
-import { filterOptions } from "@/data/mockRevenue";
+import { getFilterOptions } from "@/data/mockRevenue";
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -16,11 +17,14 @@ export default function RevenueFilters({
   activeFilter,
   onFilterChange,
 }: RevenueFiltersProps) {
+  const t = useI18n();
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState<
     DateRange | undefined
   >();
   const calendarRef = useRef<HTMLDivElement>(null);
+  
+  const filterOptions = getFilterOptions(t);
 
   const handleFilterChange = (filter: string) => {
     onFilterChange(filter);
@@ -73,7 +77,7 @@ export default function RevenueFilters({
             option.value === "Personnalisé" ? (
               <Image
                 src="/assets/icons/calendar.svg"
-                alt="Calendar"
+                alt={t("revenue.calendarAlt")}
                 width={20}
                 height={20}
               />
@@ -89,7 +93,7 @@ export default function RevenueFilters({
           className="absolute top-full left-0 mt-2 p-4 bg-white rounded-lg border border-gray-200 shadow-lg w-fit z-50"
         >
           <h3 className="text-sm font-medium text-charcoal-blue mb-3">
-            Sélectionner une période personnalisée
+            {t("revenue.selectCustomPeriod")}
           </h3>
           <Calendar
             mode="range"
@@ -100,9 +104,9 @@ export default function RevenueFilters({
           />
           {selectedDateRange?.from && selectedDateRange?.to && (
             <div className="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
-              <strong>Période sélectionnée :</strong>
+              <strong>{t("revenue.selectedPeriod")}</strong>
               <br />
-              Du {selectedDateRange.from.toLocaleDateString("fr-FR")} au{" "}
+              {t("revenue.from")} {selectedDateRange.from.toLocaleDateString("fr-FR")} {t("revenue.to")}{" "}
               {selectedDateRange.to.toLocaleDateString("fr-FR")}
             </div>
           )}

@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/common/Button";
 import { RadioGroup } from "@/components/ui/radio-group";
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import React from "react";
 
@@ -15,10 +16,12 @@ export const UserTypeSelector: React.FC<UserTypeSelectorProps> = ({
   onUserTypeChange,
   onContinue,
 }) => {
+  const t = useI18n();
+  
   return (
     <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px]">
       <h1 className="text-2xl sm:text-[26px] lg:text-[28px] leading-[32px] sm:leading-[34px] lg:leading-[36px] font-bold text-center lg:text-left mb-14">
-        Que voulez-vous faire sur Sapiow ?
+        {t("onboarding.whatDoYouWant")}
       </h1>
       <div className="space-y-4 mb-6">
         <RadioGroup
@@ -39,7 +42,7 @@ export const UserTypeSelector: React.FC<UserTypeSelectorProps> = ({
                 userType === "client" ? "text-white" : "text-exford-blue"
               }`}
             >
-              Je cherche un expert
+              {t("onboarding.lookingForExpert")}
             </label>
             <Image
               src="/assets/logo_check.svg"
@@ -92,7 +95,7 @@ export const UserTypeSelector: React.FC<UserTypeSelectorProps> = ({
                 userType === "expert" ? "text-white" : "text-exford-blue"
               }`}
             >
-              Je suis un expert
+              {t("onboarding.iAmExpert")}
             </label>
             <div className="flex-shrink-0">
               {userType === "expert" ? (
@@ -121,7 +124,7 @@ export const UserTypeSelector: React.FC<UserTypeSelectorProps> = ({
         </RadioGroup>
       </div>
       <Button
-        label="Continuer"
+        label={t("continue")}
         className="w-full rounded-[8px] h-[56px] text-base font-medium"
         onClick={onContinue}
       />

@@ -3,6 +3,7 @@ import {
   useProNotifications,
 } from "@/api/notifications/useNotification";
 import { SearchBar } from "@/components/common/SearchBar";
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -17,10 +18,11 @@ interface PageHeaderProps {
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   onNotificationClick,
-  searchPlaceholder = "Rechercher",
+  searchPlaceholder,
   className = "",
   showSearch = true,
 }) => {
+  const t = useI18n();
   const { data: notifications } = useProNotifications();
   const { mutateAsync: markNotificationAsRead } = useMarkNotificationAsRead();
 
@@ -56,7 +58,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       await markNotificationAsRead(notificationId);
     } catch (error) {
       console.error(
-        "Erreur lors du marquage de la notification comme lue:",
+        t("pageHeader.notificationError"),
         error
       );
     }
@@ -73,7 +75,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       );
     } catch (error) {
       console.error(
-        "Erreur lors du marquage de toutes les notifications comme lues:",
+        t("pageHeader.notificationError"),
         error
       );
     }
@@ -86,12 +88,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       (now.getTime() - date.getTime()) / (1000 * 60)
     );
 
-    if (diffInMinutes < 1) return "À l'instant";
-    if (diffInMinutes < 60) return `Il y a ${diffInMinutes}min`;
+    if (diffInMinutes < 1) return t("pageHeader.justNow");
+    if (diffInMinutes < 60) return `${t("pageHeader.minutesAgo")} ${diffInMinutes}${t("pageHeader.minutes")}`;
     if (diffInMinutes < 1440)
-      return `Il y a ${Math.floor(diffInMinutes / 60)}h`;
+      return `${t("pageHeader.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t("pageHeader.hours")}`;
 
-    return date.toLocaleDateString("fr-FR", {
+    return date.toLocaleDateString(undefined, {
       day: "2-digit",
       month: "2-digit",
     });
@@ -107,7 +109,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
         {showSearch && (
           <div className="w-40 sm:w-64 md:w-80">
-            <SearchBar onSearch={() => {}} placeholder={searchPlaceholder} />
+            <SearchBar onSearch={() => {}} placeholder={searchPlaceholder || t("search.searchPlaceholder")} />
           </div>
         )}
 
@@ -119,7 +121,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           >
             <Image
               src="/assets/icons/notif.svg"
-              alt="notifications"
+              alt={t("pageHeader.notifications")}
               width={24}
               height={24}
             />

@@ -9,6 +9,7 @@ import { Button as ButtonUI } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useI18n } from "@/locales/client";
 import { usePayStore } from "@/store/usePay";
 import { ChevronLeft, Search } from "lucide-react";
 import Image from "next/image";
@@ -26,6 +27,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   text,
   classNameIsBack = "py-4",
 }) => {
+  const t = useI18n();
   const router = useRouter();
   const { isFavoriActive, handleFavoriToggle } = useFavorites();
   const { setIsPaid } = usePayStore();
@@ -77,10 +79,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
     try {
       await markNotificationAsRead(notificationId);
     } catch (error) {
-      console.error(
-        "Erreur lors du marquage de la notification comme lue:",
-        error
-      );
+      console.error(t("header.markAsReadError"), error);
     }
   };
 
@@ -91,12 +90,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
       (now.getTime() - date.getTime()) / (1000 * 60)
     );
 
-    if (diffInMinutes < 1) return "À l'instant";
-    if (diffInMinutes < 60) return `Il y a ${diffInMinutes}min`;
+    if (diffInMinutes < 1) return t("header.justNow");
+    if (diffInMinutes < 60) return `${t("header.minutesAgo")} ${diffInMinutes}${t("header.minutes")}`;
     if (diffInMinutes < 1440)
-      return `Il y a ${Math.floor(diffInMinutes / 60)}h`;
+      return `${t("header.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t("header.hours")}`;
 
-    return date.toLocaleDateString("fr-FR", {
+    return date.toLocaleDateString(undefined, {
       day: "2-digit",
       month: "2-digit",
     });
@@ -124,10 +123,10 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
           ) : (
             <>
               <FormField
-                label="Rechercher"
+                label={t("headerClient.search")}
                 name="search"
                 type="text"
-                placeholder="Rechercher"
+                placeholder={t("headerClient.searchPlaceholder")}
                 leftIcon={
                   <Search className="w-6 h-6 text-slate-gray cursor-pointer hidden lg:block" />
                 }
@@ -135,7 +134,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               />
               <Image
                 src="/assets/logo_name.svg"
-                alt="search"
+                alt={t("headerClient.searchAlt")}
                 width={100}
                 height={30}
                 quality={100}
@@ -150,7 +149,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
           {hasExpertProfile ? (
             <div className="flex items-center gap-3 bg-exford-blue px-3 py-2 rounded-full">
               <span className="text-white font-bold">
-                {isExpertMode ? "Mode expert" : "Mode client"}
+                {isExpertMode ? t("header.expertMode") : t("headerClient.clientMode")}
               </span>
               <Switch
                 checked={isExpertMode}
@@ -160,7 +159,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
             </div>
           ) : (
             <Button
-              label="Devenir un expert"
+              label={t("headerClient.becomeExpert")}
               onClick={handleExpertModeSwitch}
               className="text-base text-exford-blue font-bold bg-white max-w-[163px] h-[48px] border border-light-blue-gray rounded-[8px] font-figtree hidden lg:flex"
             />
@@ -173,7 +172,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
             >
               <Image
                 src="/assets/icons/heartfavori.svg"
-                alt="heart"
+                alt={t("headerClient.heartAlt")}
                 width={20}
                 height={20}
                 className={`transition-all duration-200 ${
@@ -182,7 +181,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               />
               <Image
                 src="/assets/icons/heartblack.svg"
-                alt="heart"
+                alt={t("headerClient.heartAlt")}
                 width={20}
                 height={20}
                 className={`transition-all duration-200 absolute ${
@@ -198,7 +197,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
               >
                 <Image
                   src="/assets/icons/notif.svg"
-                  alt="notifications"
+                  alt={t("header.notifications")}
                   width={24}
                   height={24}
                 />
@@ -217,11 +216,11 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold text-gray-900">
-                          Notifications
+                          {t("header.notifications")}
                         </h3>
                         {unreadCount > 0 && (
                           <p className="text-sm text-gray-500">
-                            {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
+                            {unreadCount} {unreadCount > 1 ? t("header.unreadPlural") : t("header.unreadSingular")}
                           </p>
                         )}
                       </div>
@@ -274,7 +273,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
                     ) : (
                       <div className="p-6 text-center text-gray-500">
                         <span className="text-2xl mb-2 block">🔔</span>
-                        <p className="text-sm">Aucune notification</p>
+                        <p className="text-sm">{t("header.noNotifications")}</p>
                       </div>
                     )}
                   </div>
@@ -282,7 +281,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
                   {notifications && notifications.length > 0 && (
                     <div className="p-3 border-t border-gray-100 bg-gray-50">
                       <button className="w-full text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                        Voir toutes les notifications
+                        {t("header.seeAllNotifications")}
                       </button>
                     </div>
                   )}

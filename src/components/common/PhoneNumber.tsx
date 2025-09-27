@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from "@/locales/client";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { FC, useEffect } from "react";
@@ -23,13 +24,14 @@ const PhoneInput: FC<PhoneInputProps> = ({
   countryCode,
   onChange,
   onValidationChange,
-  placeholder = "06 06 06 06 06",
+  placeholder,
   className = "",
   disabled = false,
   defaultCountry = "FR",
   label,
   required = false,
 }) => {
+  const t = useI18n();
   const phoneInput = usePhoneInput({
     defaultCountry,
     initialValue: value,
@@ -79,7 +81,7 @@ const PhoneInput: FC<PhoneInputProps> = ({
         {/* Label flottant - n'apparaît que quand il y a du contenu */}
         {phoneInput.formattedValue && (
           <label className="absolute top-[5px] left-[120px] text-xs font-normal text-slate-gray bg-transparent px-1 transition-all duration-200 pointer-events-none z-10 font-figtree">
-            Numéro de téléphone
+            {t("phoneNumber.label")}
           </label>
         )}
 
@@ -116,7 +118,7 @@ const PhoneInput: FC<PhoneInputProps> = ({
                 <div className="p-3 border-b border-gray-200">
                   <input
                     type="text"
-                    placeholder="Rechercher un pays..."
+                    placeholder={t("phoneNumber.searchCountry")}
                     value={phoneInput.searchTerm}
                     onChange={(e) =>
                       phoneInput.handleSearchChange(e.target.value)
@@ -167,7 +169,7 @@ const PhoneInput: FC<PhoneInputProps> = ({
             onChange={(e) => phoneInput.handlePhoneChange(e.target.value)}
             onFocus={phoneInput.handleInputFocus}
             onBlur={phoneInput.handleInputBlur}
-            placeholder={placeholder}
+            placeholder={placeholder || t("phoneNumber.placeholder")}
             disabled={disabled}
             required={required}
             className={`flex-1 px-4 h-[56px] border rounded-[8px] focus:outline-none text-exford-blue font-medium placeholder-gray-500 text-base disabled:bg-gray-50 disabled:text-gray-500 transition-all ${

@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useI18n } from "@/locales/client";
 import { ArrowLeft } from "lucide-react";
 
 interface ChatHeaderProps {
@@ -14,6 +15,7 @@ export function ChatHeader({
   onBackClick,
   className = "",
 }: ChatHeaderProps) {
+  const t = useI18n();
   return (
     <div
       className={`border-b border-gray-200 p-4 flex items-center gap-2 ${className}`}
@@ -45,11 +47,8 @@ export function ChatHeader({
         <h2 className="font-semibold text-gray-900 font-figtree text-base">
           {activeConversation
             ? `${activeConversation.profile.first_name} ${activeConversation.profile.last_name}`
-            : "Sélectionnez une conversation"}
+            : t("messages.selectConversation")}
         </h2>
-        {/* {activeConversation && (
-          <p className="text-sm text-green-600">Actif maintenant</p>
-        )} */}
       </div>
     </div>
   );

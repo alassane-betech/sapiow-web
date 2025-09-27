@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import { useI18n } from "@/locales/client";
 
 interface ShareLinkButtonProps {
   className?: string;
@@ -9,8 +10,9 @@ interface ShareLinkButtonProps {
 
 export const ShareLinkButton = ({
   className = "",
-  linkText = "Partagez votre lien de réservation",
+  linkText,
 }: ShareLinkButtonProps) => {
+  const t = useI18n();
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
@@ -24,7 +26,7 @@ export const ShareLinkButton = ({
       // Reset après 2 secondes
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Erreur lors de la copie:", err);
+      console.error(t("shareLink.copyError"), err);
     }
   };
 
@@ -34,7 +36,7 @@ export const ShareLinkButton = ({
       className={`flex items-center gap-3 px-3 py-3 h-[40px] border border-light-blue-gray rounded-full transition-colors cursor-pointer ${className}`}
     >
       <span className="text-sm font-medium text-exford-blue font-figtree">
-        {copied ? "Lien copié !" : linkText}
+        {copied ? t("shareLink.copied") : (linkText || t("shareLink.defaultText"))}
       </span>
       <Image src="/assets/icons/copy.svg" alt="copy" width={20} height={20} />
     </button>

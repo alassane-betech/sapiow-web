@@ -1,39 +1,44 @@
 import { useListProPayouts } from "@/api/pro-payouts/useProPayouts";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useI18n, useCurrentLocale } from "@/locales/client";
 
 export default function PaymentHistory() {
+  const t = useI18n();
+  const currentLocale = useCurrentLocale();
   const { data: payouts, isLoading, error } = useListProPayouts();
 
-  // Fonction pour formater la date
+  // Fonction pour formater la date selon la locale
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString("fr-FR", {
+    const locale = currentLocale === 'fr' ? 'fr-FR' : 'en-US';
+    return new Date(timestamp * 1000).toLocaleDateString(locale, {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
   };
 
-  // Fonction pour formater le montant
+  // Fonction pour formater le montant selon la locale
   const formatAmount = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("fr-FR", {
+    const locale = currentLocale === 'fr' ? 'fr-FR' : 'en-US';
+    return new Intl.NumberFormat(locale, {
       style: "currency",
       currency: currency.toUpperCase(),
     }).format(amount / 100); // amount est en centimes
   };
 
-  // Fonction pour mapper le statut
-  const mapStatus = (status: string): "Payé" | "En attente" => {
-    return status === "succeeded" ? "Payé" : "En attente";
+  // Fonction pour mapper le statut avec traductions
+  const mapStatus = (status: string): string => {
+    return status === "succeeded" ? t("revenue.paid") : t("revenue.pending");
   };
 
   if (isLoading) {
     return (
       <div className="space-y-4">
         <h2 className="text-sm font-medium font-figtree text-charcoal-blue">
-          Historique des paiements
+          {t("account.paymentHistory")}
         </h2>
         <div className="text-center py-8">
-          <div className="animate-pulse text-slate-gray">Chargement...</div>
+          <div className="animate-pulse text-slate-gray">{t("loading")}</div>
         </div>
       </div>
     );
@@ -48,13 +53,13 @@ export default function PaymentHistory() {
     return (
       <div className="space-y-4">
         <h2 className="text-sm font-medium font-figtree text-charcoal-blue">
-          Historique des paiements
+          {t("account.paymentHistory")}
         </h2>
         <div className="text-center py-8">
           <div className="text-slate-gray">
             {isNoStripeAccount
-              ? "Aucun historique de paiement disponible. Configurez votre compte de paiement pour commencer à recevoir des revenus."
-              : "Erreur lors du chargement des paiements"}
+              ? t("revenue.noPaymentHistory")
+              : t("revenue.errorLoadingPayments")}
           </div>
         </div>
       </div>
@@ -65,13 +70,13 @@ export default function PaymentHistory() {
   return (
     <div className="space-y-4">
       <h2 className="text-sm font-medium font-figtree text-charcoal-blue">
-        Historique des paiements
+        {t("account.paymentHistory")}
       </h2>
 
       <div className="space-y-2">
         {payments.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-slate-gray">Aucun paiement trouvé</div>
+            <div className="text-slate-gray">{t("revenue.noPaymentsFound")}</div>
           </div>
         ) : (
           payments.map((payment, index) => (
@@ -107,7 +112,7 @@ export default function PaymentHistory() {
                 </div>
                 <div
                   className={`text-xs bg-snow-blue font-bold rounded-[100px] px-2 py-1 h-[24px] ${
-                    mapStatus(payment.status) === "Payé"
+                    mapStatus(payment.status) === t("revenue.paid")
                       ? "text-exford-blue"
                       : "text-[#CC5802]"
                   }`}
