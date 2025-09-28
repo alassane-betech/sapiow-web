@@ -2,11 +2,11 @@
 
 import {
   usePatientGetConversation,
-  usePatientGetMessages,
+  usePatientGetConversations,
 } from "@/api/patientMessages/usePatientMessage";
 import {
   useProGetConversation,
-  useProGetMessages,
+  useProGetConversations,
 } from "@/api/porMessages/useProMessage";
 import { withAuth } from "@/components/common/withAuth";
 import { Header } from "@/components/layout/header/Header";
@@ -20,7 +20,6 @@ import { useConversationStore } from "@/store/useConversationStore";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useUserStore } from "@/store/useUser";
 import {
-  extractConversationsFromMessages,
   findActiveConversation,
 } from "@/utils/messageHelpers";
 
@@ -37,12 +36,13 @@ function Messages() {
   const currentPatientId = currentUser?.id;
   const { user } = useUserStore();
 
-  // Récupérer tous les messages avec profils pour la liste des conversations
+  // Récupérer toutes les conversations avec profils
   const {
     data: messagesData,
     isLoading: messagesLoading,
     error: messagesError,
-  } = user?.type === "expert" ? useProGetMessages() : usePatientGetMessages();
+    unreadMessages,
+  } = user?.type === "expert" ? useProGetConversations() : usePatientGetConversations();
 
   // Récupérer les messages de la conversation sélectionnée
   const {
@@ -56,10 +56,8 @@ function Messages() {
         currentPatientId || ""
       );
 
-  // Extraire les conversations uniques des messages
-  const conversationsData = extractConversationsFromMessages(
-    messagesData || []
-  );
+  // Les données sont déjà des conversations, pas besoin d'extraction
+  const conversationsData = messagesData || [];
 
   const conversationsLoading = messagesLoading;
   const conversationsError = messagesError;

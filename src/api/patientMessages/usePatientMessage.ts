@@ -56,7 +56,18 @@ export const usePatientSendMessage = (senderId: string) => {
     mutationFn: async (data: SendMessageData) => {
       // Le backend attend des FormData
       const formData = new FormData();
-      formData.append("content", data.content);
+      
+      // Gérer différents types de contenu comme dans le code de référence
+      if (data.type === "audio" && data.content instanceof File) {
+        formData.append("content", data.content);
+      } else if (data.type === "image" && data.content instanceof File) {
+        formData.append("content", data.content);
+      } else if (typeof data.content === "string") {
+        formData.append("content", data.content);
+        formData.append("type", data.type); // Seulement pour les messages texte
+      } else {
+        formData.append("content", data.content);
+      }
 
       // Utiliser l'endpoint Supabase Function comme le backend l'attend
       const { data: messageData, error } = await supabase.functions.invoke(
@@ -79,26 +90,31 @@ export const usePatientSendMessage = (senderId: string) => {
         queryKey: ["conversation", variables.receiverId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["messages"],
+        queryKey: ["conversations"],
       });
     },
   });
 };
 
-// Hook pour récupérer les messages avec real-time
-export const usePatientGetMessages = () => {
-  const queryClient = useQueryClient();
+// Hook pour récupérer toutes les conversations avec real-time
+export const usePatientGetConversations = () => {
   const { currentUser } = useCurrentUserData();
   const currentPatientId = currentUser?.id;
+  const queryClient = useQueryClient();
 
-  const query = useQuery<Message[], Error>({
-    queryKey: ["messages"],
+  const query = useQuery<Conversation[], Error>({
+    queryKey: ["conversations"],
     queryFn: async () => {
+      if (!currentPatientId) return [];
+      
       try {
-        const response = await apiClient.get<Message[]>(`patient-messages`);
+        // Utiliser Supabase Functions comme dans le code de référence
+        const { data, error } = await supabase.functions.invoke("patient-messages", {
+          method: "GET",
+        });
 
-        // L'API retourne directement l'objet expert
-        return response;
+        if (error) throw error;
+        return data as Conversation[];
       } catch (error: any) {
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
@@ -106,29 +122,36 @@ export const usePatientGetMessages = () => {
 
         throw new Error(
           error.message ||
-            "Une erreur est survenue lors de la récupération de l'expert"
+            "Une erreur est survenue lors de la récupération des conversations"
         );
       }
     },
+    enabled: !!currentPatientId,
   });
 
-  // Real-time pour tous les messages du patient
+  // Real-time pour tous les nouveaux messages reçus par le patient
   useEffect(() => {
+    if (!currentPatientId) return;
+
     const channel = supabase
-      .channel("messages")
+      .channel("patient-messages")
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "messages",
-          filter: `or(sender_id.eq.${currentPatientId},receiver_id.eq.${currentPatientId})`,
+          filter: `receiver_id=eq.${currentPatientId}`,
         },
         (payload) => {
           console.log("Real-time patient messages update:", payload);
-          // Invalider la liste des messages pour mettre à jour
+          // Invalider les conversations pour mettre à jour la liste
           queryClient.invalidateQueries({
-            queryKey: ["messages"],
+            queryKey: ["conversations"],
+          });
+          // Aussi invalider la conversation spécifique
+          queryClient.invalidateQueries({
+            queryKey: ["conversation", payload.new.sender_id],
           });
         }
       )
@@ -137,11 +160,23 @@ export const usePatientGetMessages = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient, currentPatientId]);
+  }, [currentPatientId, queryClient]);
 
-  return query;
+  // Obtenir les messages non lus
+  const unreadMessages = query.data?.filter(
+    (conversation) =>
+      conversation.latest_message &&
+      conversation.latest_message.receiver_id === currentPatientId &&
+      !conversation.latest_message.read_at
+  );
+
+  return {
+    ...query,
+    unreadMessages,
+  };
 };
 
+// Hook pour récupérer les messages d'une conversation spécifique
 export const usePatientGetConversation = (
   proId: string,
   currentPatientId: string
@@ -151,14 +186,19 @@ export const usePatientGetConversation = (
   const query = useQuery<Message[], Error>({
     queryKey: ["conversation", proId],
     queryFn: async () => {
-      if (!proId) return [];
+      if (!proId || !currentPatientId) return [];
 
       try {
-        const response = await apiClient.get<Message[]>(
-          `patient-messages/${proId}`
+        // Utiliser Supabase Functions comme dans le code de référence
+        const { data, error } = await supabase.functions.invoke(
+          `patient-messages/${proId}?limit=10000`,
+          {
+            method: "GET",
+          }
         );
 
-        return response;
+        if (error) throw error;
+        return data as Message[];
       } catch (error: any) {
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
@@ -170,32 +210,32 @@ export const usePatientGetConversation = (
         );
       }
     },
-    enabled: !!proId, // Ne pas exécuter si patientId est vide
+    enabled: !!proId && !!currentPatientId,
   });
 
-  // Real-time pour les messages de cette conversation
+  // Real-time pour les messages de cette conversation spécifique
   useEffect(() => {
-    if (!proId) return;
+    if (!proId || !currentPatientId) return;
 
     const channel = supabase
-      .channel(`messages`)
+      .channel(`conversation-${proId}`)
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "messages",
           filter: `or(and(sender_id.eq.${currentPatientId},receiver_id.eq.${proId}),and(sender_id.eq.${proId},receiver_id.eq.${currentPatientId}))`,
         },
         (payload) => {
-          console.log("Real-time message update:", payload);
+          console.log("Real-time conversation update:", payload);
           // Invalider et refetch les messages de cette conversation
           queryClient.invalidateQueries({
             queryKey: ["conversation", proId],
           });
           // Aussi invalider la liste des conversations pour mettre à jour le dernier message
           queryClient.invalidateQueries({
-            queryKey: ["messages"],
+            queryKey: ["conversations"],
           });
         }
       )
@@ -207,6 +247,33 @@ export const usePatientGetConversation = (
   }, [proId, queryClient, currentPatientId]);
 
   return query;
+};
+
+// Hook pour marquer un message comme lu
+export const usePatientMarkAsRead = () => {
+  const { currentUser } = useCurrentUserData();
+  const currentPatientId = currentUser?.id;
+  const queryClient = useQueryClient();
+
+  return useMutation<Message, Error, string>({
+    mutationFn: async (messageId: string) => {
+      if (!currentPatientId) throw new Error("User ID is required");
+      
+      const { data, error } = await supabase
+        .from("messages")
+        .update({ read_at: new Date().toISOString() })
+        .eq("id", messageId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Message;
+    },
+    onSuccess: () => {
+      // Invalider les conversations pour mettre à jour les compteurs de messages non lus
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+  });
 };
 
 // Validation des fichiers
