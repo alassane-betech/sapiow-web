@@ -1,18 +1,12 @@
+import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { EmptySessionCard } from "@/components/common/EmptySessionCard";
-import { SessionPreviewCard } from "@/components/common/SessionPreviewCard";
 import TimeSlotsManager from "@/components/common/TimeSlotsManager";
-import { mockAvailabilityEvents } from "@/data/mockAvailability";
+import { useCurrentLocale, useI18n } from "@/locales/client";
 import { useProExpertStore } from "@/store/useProExpert";
 import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
-import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { SessionDetailsData } from "@/types/availability";
 import { ApiSchedule, getDayOfWeekFromDate } from "@/types/schedule";
-import {
-  formatDateForSession,
-  formatFullDate,
-  formatTimeForSession,
-} from "@/utils/dateFormat";
-import { useI18n, useCurrentLocale } from "@/locales/client";
+import { formatFullDate } from "@/utils/dateFormat";
 
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
@@ -27,7 +21,7 @@ export const SessionDetailsPanel = ({
 }: SessionDetailsPanelProps) => {
   const t = useI18n();
   const currentLocale = useCurrentLocale();
-  
+
   // Stores et API
   const { proExpertData, setProExpertData } = useProExpertStore();
   const { addTimeSlotLocal } = useTimeSlotsStore();
@@ -63,17 +57,23 @@ export const SessionDetailsPanel = ({
       event: { type: "active", users: [] },
       sessions: appointmentsForDate.map((appointment) => ({
         id: appointment.id,
-        clientName: appointment.patient?.first_name && appointment.patient?.last_name 
-          ? `${appointment.patient.first_name} ${appointment.patient.last_name}`
-          : t("sessionDetailsPanel.client"),
-        avatar: appointment.patient?.avatar || '/assets/icons/defaultAvatar.png',
-        time: new Date(appointment.appointment_at).toLocaleTimeString(currentLocale === 'fr' ? 'fr-FR' : 'en-US', {
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        duration: appointment.session?.session_type || '30 min',
-        description: appointment.session?.name || t("sessionDetailsPanel.consultation"),
-        type: 'active',
+        clientName:
+          appointment.patient?.first_name && appointment.patient?.last_name
+            ? `${appointment.patient.first_name} ${appointment.patient.last_name}`
+            : t("sessionDetailsPanel.client"),
+        avatar:
+          appointment.patient?.avatar || "/assets/icons/defaultAvatar.png",
+        time: new Date(appointment.appointment_at).toLocaleTimeString(
+          currentLocale === "fr" ? "fr-FR" : "en-US",
+          {
+            hour: "2-digit",
+            minute: "2-digit",
+          }
+        ),
+        duration: appointment.session?.session_type || "30 min",
+        description:
+          appointment.session?.name || t("sessionDetailsPanel.consultation"),
+        type: "active",
       })),
     };
   };
@@ -83,9 +83,9 @@ export const SessionDetailsPanel = ({
   // Fonction pour ajouter une disponibilité localement (sans appel réseau)
   const handleAddAvailability = () => {
     if (!selectedDate || !proExpertData?.schedules) return;
-    
+
     const result = addTimeSlotLocal(proExpertData.schedules, selectedDate);
-    
+
     // Mettre à jour le store principal avec les nouvelles données locales
     setProExpertData({
       ...proExpertData,
@@ -99,13 +99,21 @@ export const SessionDetailsPanel = ({
         <div className="space-y-4">
           <div className="w-full flex items-center justify-center gap-2 mb-6">
             <h3 className="text-lg text-center font-semibold text-gray-900">
-              {formatFullDate(selectedDate)}
+              {selectedDate.toLocaleDateString(
+                currentLocale === "fr" ? "fr-FR" : "en-US",
+                {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }
+              )}
             </h3>
           </div>
 
           {sessionDetails && (
             <div className="space-y-3">
-              {sessionDetails.sessions.map((session) => (
+              {/* {sessionDetails.sessions.map((session) => (
                 <SessionPreviewCard
                   key={session.id}
                   date={formatDateForSession(sessionDetails.date)}
@@ -116,7 +124,7 @@ export const SessionDetailsPanel = ({
                   sessionDescription={session.description}
                   className="w-full"
                 />
-              ))}
+              ))} */}
             </div>
           )}
 
@@ -128,17 +136,19 @@ export const SessionDetailsPanel = ({
             <EmptySessionCard
               message={
                 <>
-                  {t("sessionDetailsPanel.noSessionToday").split(' ').map((word, index, array) => {
-                    if (index === Math.floor(array.length / 2)) {
-                      return (
-                        <span key={index}>
-                          <br />
-                          {word + ' '}
-                        </span>
-                      );
-                    }
-                    return word + ' ';
-                  })}
+                  {t("sessionDetailsPanel.noSessionToday")
+                    .split(" ")
+                    .map((word, index, array) => {
+                      if (index === Math.floor(array.length / 2)) {
+                        return (
+                          <span key={index}>
+                            <br />
+                            {word + " "}
+                          </span>
+                        );
+                      }
+                      return word + " ";
+                    })}
                 </>
               }
               buttonLabel={t("sessionDetailsPanel.addAvailability")}
@@ -149,17 +159,19 @@ export const SessionDetailsPanel = ({
       ) : (
         <div className="w-full flex flex-col items-center justify-center h-[100vh]">
           <p className="text-slate-200 text-center text-base font-medium">
-            {t("sessionDetailsPanel.selectDateToView").split(' ').map((word, index, array) => {
-              if (index === Math.floor(array.length / 2)) {
-                return (
-                  <span key={index}>
-                    <br />
-                    {word + ' '}
-                  </span>
-                );
-              }
-              return word + ' ';
-            })}
+            {t("sessionDetailsPanel.selectDateToView")
+              .split(" ")
+              .map((word, index, array) => {
+                if (index === Math.floor(array.length / 2)) {
+                  return (
+                    <span key={index}>
+                      <br />
+                      {word + " "}
+                    </span>
+                  );
+                }
+                return word + " ";
+              })}
           </p>
         </div>
       )}

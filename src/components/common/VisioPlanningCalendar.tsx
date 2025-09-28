@@ -412,6 +412,7 @@ export default function VisioPlanningCalendar({
             {availableDurations.map((duration: any) => (
               <button
                 key={duration.value}
+                onClick={() => setSelectedDuration(duration.value)}
                 className={`
                 rounded-lg text-base font-bold transition-colors w-[80px] h-[40px] cursor-pointer
                 ${

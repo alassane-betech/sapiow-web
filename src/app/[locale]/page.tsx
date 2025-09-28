@@ -25,13 +25,13 @@ function Home() {
   }, [user.type, currentUserType]);
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen">
       <AppSidebar />
-      <div className="w-full">
+      <div className="flex-1 flex flex-col">
         <div className="transition-all duration-300 ease-in-out sticky top-0 z-20">
           {currentUserType === "client" ? <HeaderClient /> : <Header />}
         </div>
-        <div className="w-full flex-1 container px-5 relative overflow-hidden">
+        <div className="flex-1 container px-5 relative overflow-hidden">
           <div
             className={`transition-all duration-300 ease-in-out transform ${
               isTransitioning

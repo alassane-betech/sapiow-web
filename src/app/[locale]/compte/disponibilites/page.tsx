@@ -9,11 +9,9 @@ import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { AvailabilityButtons } from "@/components/common/AvailabilityButtons";
 import AvailabilitySheet from "@/components/common/AvailabilitySheet";
 import { BlockDaySection } from "@/components/common/BlockDaySection";
-import { Button } from "@/components/common/Button";
 import CustomCalendar from "@/components/common/CustomCalendar";
 import { PeriodToggle, PeriodType } from "@/components/common/PeriodToggle";
 import { SessionDetailsPanel } from "@/components/common/SessionDetailsPanel";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
@@ -21,14 +19,15 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
+import { useCurrentLocale, useI18n } from "@/locales/client";
 import { useCalendarStore } from "@/store/useCalendar";
 import { useProExpertStore } from "@/store/useProExpert";
-import { formatFullDate } from "@/utils/dateFormat";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
 export default function Disponibilites() {
+  const t = useI18n();
+  const currentLocale = useCurrentLocale();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("semaine");
   const { selectedDate } = useCalendarStore();
   const [isBlocked, setIsBlocked] = useState(false);
@@ -84,7 +83,7 @@ export default function Disponibilites() {
   // Gérer le retour de Google OAuth (authorization code dans l'URL)
   useEffect(() => {
     if (typeof window === "undefined") return;
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get("code");
 
@@ -122,9 +121,7 @@ export default function Disponibilites() {
   const handleSyncCalendars = () => {
     if (isGoogleConnected) {
       // La synchronisation est automatique via le cron job backend
-      alert(
-        "La synchronisation est automatique ! Vos rendez-vous sont synchronisés toutes les 15 minutes."
-      );
+      alert(t("disponibilites.syncAutomatic"));
     } else {
       // Si pas connecté, ouvrir le sheet de gestion
       setShowAvailabilitySheet(true);
@@ -162,8 +159,16 @@ export default function Disponibilites() {
           <SheetHeader>
             <SheetTitle>
               {selectedDate
-                ? formatFullDate(selectedDate)
-                : "Détails de la session"}
+                ? selectedDate.toLocaleDateString(
+                    currentLocale === "fr" ? "fr-FR" : "en-US",
+                    {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    }
+                  )
+                : t("disponibilites.sessionDetails")}
             </SheetTitle>
           </SheetHeader>
           <div className="mt-6 flex flex-col items-center justify-center">
@@ -192,15 +197,14 @@ export default function Disponibilites() {
                 onSyncCalendars={handleSyncCalendars}
               />
 
-              <Card className="w-full fixed bottom-16 lg:bottom-0 max-w-[380px] bg-white border-none shadow-none h-[183px] mt-4">
+              {/* <Card className="w-full fixed bottom-16 lg:bottom-0 max-w-[380px] bg-white border-none shadow-none h-[183px] mt-4">
                 <CardContent className="p-4 space-y-3">
                   <div>
                     <h4 className="text-base font-bold font-figtree text-black">
-                      Synchronisation avec Google Agenda
+                      {t("disponibilites.googleCalendarSync")}
                     </h4>
                     <p className="text-sm font-medium font-figtree text-slate-600">
-                      Connectez votre compte Google pour éviter les réservations
-                      en double.
+                      {t("disponibilites.googleCalendarDescription")}
                     </p>
                   </div>
                   <div className="flex justify-between items-center border border-frost-gray rounded-[12px] p-2 gap-2">
@@ -213,21 +217,23 @@ export default function Disponibilites() {
                       />
                       <div>
                         <p className="text-sm font-medium font-figtree text-slate-600">
-                          Google Agenda
+                          {t("disponibilites.googleCalendar")}
                         </p>
                         <p className="text-sm font-medium font-figtree text-slate-600">
                           {isGoogleConnected
                             ? googleStatus?.data?.connectedAt
-                              ? `Connecté depuis le ${new Date(
+                              ? `${t("disponibilites.connectedSince")} ${new Date(
                                   googleStatus.data.connectedAt
-                                ).toLocaleDateString("fr-FR")}`
-                              : "Connecté"
-                            : "Non connecté"}
+                                ).toLocaleDateString(
+                                  currentLocale === "fr" ? "fr-FR" : "en-US"
+                                )}`
+                              : t("disponibilites.connected")
+                            : t("disponibilites.notConnected")}
                         </p>
                       </div>
                     </div>
                     <Button
-                      label={isGoogleConnected ? "Déconnecter" : "Connecter"}
+                      label={isGoogleConnected ? t("disponibilites.disconnect") : t("disponibilites.connect")}
                       className={`text-sm font-bold font-figtree ${
                         isGoogleConnected
                           ? "text-red-600 bg-red-50 border border-red-200"
@@ -238,7 +244,7 @@ export default function Disponibilites() {
                     />
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
             </div>
           </div>
 

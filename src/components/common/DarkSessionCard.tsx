@@ -1,5 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useCurrentLocale, useI18n } from "@/locales/client";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Button } from "./Button";
@@ -18,14 +19,64 @@ interface UpcomingVideoCallProps {
   sessionTime?: string; // Format: "14h30 - 15h30"
 }
 
+// Fonction pour formater la date selon la locale
+const formatDateByLocale = (dateString: string, locale: string): string => {
+  try {
+    // Debug: log the input to understand the format
+    console.log("formatDateByLocale input:", dateString, "locale:", locale);
+
+    // Si la chaîne est déjà formatée (contient des lettres), la retourner telle quelle
+    if (/[a-zA-Z]/.test(dateString)) {
+      console.log("Date already formatted, returning as is:", dateString);
+      return dateString;
+    }
+
+    let date: Date;
+
+    // Essayer différents formats de parsing
+    if (dateString.includes("/")) {
+      // Format DD/MM/YYYY ou MM/DD/YYYY
+      date = new Date(dateString);
+    } else if (dateString.includes("-")) {
+      // Format YYYY-MM-DD ou DD-MM-YYYY
+      date = new Date(dateString);
+    } else {
+      // Essayer le parsing direct
+      date = new Date(dateString);
+    }
+
+    // Vérifier si la date est valide
+    if (isNaN(date.getTime())) {
+      console.warn("Invalid date detected, using fallback:", dateString);
+      return dateString; // Fallback to original string if date is invalid
+    }
+
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    };
+
+    const formatted = date.toLocaleDateString(
+      locale === "fr" ? "fr-FR" : "en-US",
+      options
+    );
+    console.log("Formatted date:", formatted);
+    return formatted;
+  } catch (error) {
+    console.warn("Error formatting date:", error);
+    return dateString; // Fallback to original string if parsing fails
+  }
+};
+
 // Fonction pour calculer le temps restant
-const calculateTimeRemaining = (appointmentAt: string): string => {
+const calculateTimeRemaining = (appointmentAt: string, t: any): string => {
   const now = new Date();
   const appointmentDate = new Date(appointmentAt);
   const diffMs = appointmentDate.getTime() - now.getTime();
 
   if (diffMs <= 0) {
-    return "Maintenant";
+    return t("upcomingCall.now");
   }
 
   const diffMinutes = Math.floor(diffMs / (1000 * 60));
@@ -33,14 +84,20 @@ const calculateTimeRemaining = (appointmentAt: string): string => {
   const diffDays = Math.floor(diffHours / 24);
 
   if (diffDays > 0) {
-    return `Dans ${diffDays} jour${diffDays > 1 ? "s" : ""}`;
+    const dayText =
+      diffDays > 1 ? t("upcomingCall.days") : t("upcomingCall.day");
+    return `${t("upcomingCall.inDays")} ${diffDays} ${dayText}`;
   } else if (diffHours > 0) {
     const remainingMinutes = diffMinutes % 60;
     return remainingMinutes > 0
-      ? `Dans ${diffHours}h${remainingMinutes.toString().padStart(2, "0")}`
-      : `Dans ${diffHours}h`;
+      ? `${t("upcomingCall.inHours")} ${diffHours}${t(
+          "upcomingCall.hours"
+        )}${remainingMinutes.toString().padStart(2, "0")}`
+      : `${t("upcomingCall.inHours")} ${diffHours}${t("upcomingCall.hours")}`;
   } else {
-    return `Dans ${diffMinutes} min`;
+    return `${t("upcomingCall.inMinutes")} ${diffMinutes} ${t(
+      "upcomingCall.minutes"
+    )}`;
   }
 };
 
@@ -56,19 +113,21 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
   showButton = true,
   sessionTime,
 }) => {
+  const t = useI18n();
+  const currentLocale = useCurrentLocale();
   const isDark = variant === "dark";
   const [timeRemaining, setTimeRemaining] = useState<string>(
-    calculateTimeRemaining(appointmentAt)
+    calculateTimeRemaining(appointmentAt, t)
   );
 
   // Mettre à jour le temps restant chaque minute
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeRemaining(calculateTimeRemaining(appointmentAt));
+      setTimeRemaining(calculateTimeRemaining(appointmentAt, t));
     }, 60000); // Update every minute
 
     return () => clearInterval(interval);
-  }, [appointmentAt]);
+  }, [appointmentAt, t]);
 
   const cardClasses = isDark
     ? "text-white"
@@ -105,19 +164,19 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
           <div className="flex items-center gap-2">
             <Image
               src="/assets/icons/calendar.svg"
-              alt="calendar"
+              alt={t("upcomingCall.calendarAlt")}
               width={24}
               height={24}
               className={iconFilter}
             />
             <span className={`text-xs font-medium ${textClasses.dateTime}`}>
-              {date}
+              {formatDateByLocale(date, currentLocale)}
             </span>
           </div>
           <div className="flex items-center gap-2 ">
             <Image
               src="/assets/icons/clock.svg"
-              alt="clock"
+              alt={t("upcomingCall.clockAlt")}
               width={24}
               height={24}
               className={iconFilter}
@@ -172,7 +231,7 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
         {/* Bouton d'action ou informations de session */}
         {showButton && (
           <Button
-            label="Voir détail"
+            label={t("sessionDetail.viewDetails")}
             onClick={onViewDetails}
             className={`w-full ${buttonClasses} font-bold rounded-[8px] transition-all duration-200 mt-2.5 mb-1`}
           />

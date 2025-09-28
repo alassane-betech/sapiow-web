@@ -156,6 +156,90 @@ export default {
     noConversationsFound: "No conversations found",
   },
 
+  // Availability Buttons
+  availabilityButtons: {
+    manageAvailability: "Manage my availability",
+    syncCalendars: "Sync my calendars",
+  },
+
+  // Availability Sheet
+  availabilitySheet: {
+    title: "Manage my availability",
+    availablePeriod: "Available period",
+    availability: "Availability",
+    availableDays: "Available days",
+    startDate: "Start date",
+    endDate: "End date",
+    unavailable: "Unavailable",
+    session: "session",
+    sessions: "sessions",
+    addSession: "Add session",
+    to: "to",
+    // Days of the week
+    sunday: "Sunday",
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
+    saturday: "Saturday",
+    // Time periods
+    threeMonths: "3 months",
+  },
+
+  // Time Slots Manager
+  timeSlotsManager: {
+    selectDatePrompt: "Select a date to manage time slots",
+    saving: "Saving...",
+    addAvailability: "Add availability",
+    to: "to",
+  },
+
+  // Block Day Section
+  blockDaySection: {
+    title: "Block this day?",
+    description: "It is not possible to have a session on this date.",
+  },
+
+  // Disponibilites Page
+  disponibilites: {
+    sessionDetails: "Session details",
+    googleCalendarSync: "Google Calendar synchronization",
+    googleCalendarDescription: "Connect your Google account to avoid double bookings.",
+    googleCalendar: "Google Calendar",
+    connected: "Connected",
+    connectedSince: "Connected since",
+    notConnected: "Not connected",
+    connect: "Connect",
+    disconnect: "Disconnect",
+    syncAutomatic: "Synchronization is automatic! Your appointments are synced every 15 minutes.",
+  },
+
+  // Visio Sessions Config
+  visioSessionsConfig: {
+    loadingSessions: "Loading sessions...",
+    loadingError: "Error loading sessions",
+    price: "Price",
+    expectations: "Expectations",
+    questionExamples: "Question examples",
+    // Expectations list
+    expectation1: "Ask three or more questions",
+    expectation2: "Advice for starting a successful business",
+    expectation3: "Advice for getting your first 10,000 customers",
+    expectation4: "Growth tips and startup scaling",
+    // Question examples
+    question1: "I'm thinking about starting a business. What are the next things I should focus on?",
+    question2: "How do I know if my business idea will work?",
+    question3: "How should I approach growing my startup?",
+  },
+
+  // Payment Page
+  paymentPage: {
+    pay: "Pay",
+    loading: "Loading...",
+    paymentError: "Payment error",
+  },
+
   // Account Pages
   account: {
     profile: "My Profile",
@@ -411,6 +495,24 @@ export default {
     congratulations: "Congratulations!",
     sessionBookedSuccess: "Your session has been successfully booked!",
     addToCalendar: "Add to calendar",
+  },
+  // Session Detail Sheet
+  sessionDetail: {
+    title: "Details",
+    startVideo: "Start video call",
+    sendMessage: "Send message",
+    askQuestion: "Ask a question",
+    questionsAndAnswers: "Questions and answers",
+    noQuestions: "No questions asked yet",
+    noQuestionsDescription: "Ask your first question to the expert",
+    writeQuestion: "Write your question...",
+    send: "Send",
+    cancel: "Cancel",
+    questionSubmitError: "Error submitting question",
+    cancelAppointment: "Cancel appointment",
+    confirmCancel: "Are you sure you want to cancel this appointment?",
+    cancelSuccess: "Appointment cancelled successfully",
+    cancelError: "Error cancelling appointment",
     dateNotAvailable: "Date not available",
     timeNotAvailable: "Time not available",
     session: "Session",
@@ -422,6 +524,28 @@ export default {
     magnifierAlt: "Magnifier",
     calendarAlt: "Calendar",
     videoCameraAlt: "Video camera",
+    // Questions section
+    dontHesitateAskQuestions: "Don't hesitate to ask your questions before the session",
+    submitQuestionsAdvance: "You have the possibility to submit your questions in advance so that the expert can better prepare for you.",
+    submitMyQuestions: "Submit my questions",
+    typeQuestionHere: "Type your question here...",
+    addAnotherQuestion: "Add another question",
+    questionsOrComments: "Questions or comments",
+    viewDetails: "View details",
+  },
+
+  // Dark Session Card / Upcoming Video Call
+  upcomingCall: {
+    now: "Now",
+    inDays: "In",
+    day: "day",
+    days: "days",
+    inHours: "In",
+    hours: "h",
+    inMinutes: "In",
+    minutes: "min",
+    calendarAlt: "Calendar",
+    clockAlt: "Clock",
   },
 
   // Video Call

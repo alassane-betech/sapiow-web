@@ -138,13 +138,11 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-family: var(--font-figtree), system-ui;
-    /* Réserver l'espace pour la scrollbar pour éviter les décalages */
-    /* overflow-y: scroll; */
   }
   html {
     font-family: var(--font-figtree), system-ui;
-    /* Réserver l'espace pour la scrollbar au niveau racine */
-    /* overflow-y: scroll; */
+    /* Réserve l'espace pour la scrollbar pour éviter les décalages de layout */
+    scrollbar-gutter: stable;
   }
 
   .font-figtree {

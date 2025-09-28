@@ -1,5 +1,6 @@
 "use client";
 import { withAuth } from "@/components/common/withAuth";
+import { useI18n } from "@/locales/client";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import {
   Elements,
@@ -13,6 +14,7 @@ import React, { useState } from "react";
 
 // Bouton de paiement
 function CheckoutForm() {
+  const t = useI18n();
   const [loading, setLoading] = useState(false);
   const stripe = useStripe();
   const elements = useElements();
@@ -39,7 +41,7 @@ function CheckoutForm() {
     if (error) {
       console.error(error.message);
       setLoading(false);
-      alert(error.message);
+      alert(`${t("paymentPage.paymentError")}: ${error.message}`);
     }
     // Note: Si le paiement réussit, Stripe redirige automatiquement vers return_url
   };
@@ -55,7 +57,7 @@ function CheckoutForm() {
         disabled={!stripe || loading}
         className="bg-blue-600 text-white p-2 rounded cursor-pointer"
       >
-        {stripe && !loading ? "Payer" : "Chargement..."}
+        {stripe && !loading ? t("paymentPage.pay") : t("paymentPage.loading")}
       </button>
     </form>
   );
@@ -63,10 +65,11 @@ function CheckoutForm() {
 
 // Page principale
 function PaymentPage() {
+  const t = useI18n();
   const { payment } = useAppointmentStore();
 
   if (!payment) {
-    return <p>Chargement...</p>;
+    return <p>{t("paymentPage.loading")}</p>;
   }
 
   const stripePromise = loadStripe(payment.publishableKey);

@@ -158,6 +158,90 @@ export default {
     noConversationsFound: "Aucune conversation trouvée",
   },
 
+  // Availability Buttons
+  availabilityButtons: {
+    manageAvailability: "Gérer mes disponibilités",
+    syncCalendars: "Synchroniser mes calendriers",
+  },
+
+  // Availability Sheet
+  availabilitySheet: {
+    title: "Gérer mes disponibilités",
+    availablePeriod: "Période disponible",
+    availability: "Disponibilité",
+    availableDays: "Jours disponible",
+    startDate: "Date début",
+    endDate: "Date fin",
+    unavailable: "Indisponible",
+    session: "session",
+    sessions: "sessions",
+    addSession: "Ajouter une session",
+    to: "à",
+    // Days of the week
+    sunday: "Dimanche",
+    monday: "Lundi",
+    tuesday: "Mardi",
+    wednesday: "Mercredi",
+    thursday: "Jeudi",
+    friday: "Vendredi",
+    saturday: "Samedi",
+    // Time periods
+    threeMonths: "3 mois",
+  },
+
+  // Time Slots Manager
+  timeSlotsManager: {
+    selectDatePrompt: "Sélectionnez une date pour gérer les créneaux horaires",
+    saving: "Sauvegarde...",
+    addAvailability: "Ajouter une disponibilité",
+    to: "à",
+  },
+
+  // Block Day Section
+  blockDaySection: {
+    title: "Bloquer cette journée ?",
+    description: "Il n'est pas possible d'avoir une session à cette date.",
+  },
+
+  // Disponibilites Page
+  disponibilites: {
+    sessionDetails: "Détails de la session",
+    googleCalendarSync: "Synchronisation avec Google Agenda",
+    googleCalendarDescription: "Connectez votre compte Google pour éviter les réservations en double.",
+    googleCalendar: "Google Agenda",
+    connected: "Connecté",
+    connectedSince: "Connecté depuis le",
+    notConnected: "Non connecté",
+    connect: "Connecter",
+    disconnect: "Déconnecter",
+    syncAutomatic: "La synchronisation est automatique ! Vos rendez-vous sont synchronisés toutes les 15 minutes.",
+  },
+
+  // Visio Sessions Config
+  visioSessionsConfig: {
+    loadingSessions: "Chargement des sessions...",
+    loadingError: "Erreur lors du chargement des sessions",
+    price: "Prix",
+    expectations: "Attentes",
+    questionExamples: "Exemples de questions",
+    // Expectations list
+    expectation1: "Posez trois questions ou plus",
+    expectation2: "Conseils pour démarrer une entreprise prospère",
+    expectation3: "Conseils pour obtenir vos 10 000 premiers clients",
+    expectation4: "Astuces de croissance et démarrage de la croissance",
+    // Question examples
+    question1: "Je pense à créer une entreprise. Quelles sont les prochaines choses auxquelles je devrais me concentrer ?",
+    question2: "Comment savoir si mon idée d'entreprise va fonctionner ?",
+    question3: "Comment aborder votre le croissance de ma startup ?",
+  },
+
+  // Payment Page
+  paymentPage: {
+    pay: "Payer",
+    loading: "Chargement...",
+    paymentError: "Erreur de paiement",
+  },
+
   // Account Pages
   account: {
     profile: "Mon profil",
@@ -413,6 +497,24 @@ export default {
     congratulations: "Félicitations !",
     sessionBookedSuccess: "Votre session a été réservée avec succès !",
     addToCalendar: "Ajouter au calendrier",
+  },
+  // Session Detail Sheet
+  sessionDetail: {
+    title: "Détails",
+    startVideo: "Commencer la visio",
+    sendMessage: "Envoyer un message",
+    askQuestion: "Poser une question",
+    questionsAndAnswers: "Questions et réponses",
+    noQuestions: "Aucune question posée pour le moment",
+    noQuestionsDescription: "Posez votre première question à l'expert",
+    writeQuestion: "Écrivez votre question...",
+    send: "Envoyer",
+    cancel: "Annuler",
+    questionSubmitError: "Erreur lors de la soumission de la question",
+    cancelAppointment: "Annuler le rendez-vous",
+    confirmCancel: "Êtes-vous sûr de vouloir annuler ce rendez-vous ?",
+    cancelSuccess: "Rendez-vous annulé avec succès",
+    cancelError: "Erreur lors de l'annulation du rendez-vous",
     dateNotAvailable: "Date non disponible",
     timeNotAvailable: "Heure non disponible",
     session: "Session",
@@ -424,6 +526,28 @@ export default {
     magnifierAlt: "Loupe",
     calendarAlt: "Calendrier",
     videoCameraAlt: "Caméra vidéo",
+    // Questions section
+    dontHesitateAskQuestions: "N'hésitez pas à poser vos questions avant la session",
+    submitQuestionsAdvance: "Vous avez la possibilité de soumettre vos questions à l'avance afin que l'expert puisse mieux se préparer pour vous.",
+    submitMyQuestions: "Soumettre mes questions",
+    typeQuestionHere: "Tapez votre question ici...",
+    addAnotherQuestion: "Ajoute une autre question",
+    questionsOrComments: "Questions ou commentaires",
+    viewDetails: "Voir détail",
+  },
+
+  // Dark Session Card / Upcoming Video Call
+  upcomingCall: {
+    now: "Maintenant",
+    inDays: "Dans",
+    day: "jour",
+    days: "jours",
+    inHours: "Dans",
+    hours: "h",
+    inMinutes: "Dans",
+    minutes: "min",
+    calendarAlt: "Calendrier",
+    clockAlt: "Horloge",
   },
 
   // Video Call

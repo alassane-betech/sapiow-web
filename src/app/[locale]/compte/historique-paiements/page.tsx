@@ -6,16 +6,20 @@ import { ChevronRightIcon, Search } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
+import { usePatientPaymentHistoryDisplay } from "@/api/patientPayment/usePatientPayment";
 
 export default function Disponibilites() {
   const t = useI18n();
-  const [selectedTransaction, setSelectedTransaction] = useState<number | null>(
+  const [selectedTransaction, setSelectedTransaction] = useState<string | null>(
     null
   );
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false); // 1024px-1140px
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+
+  // Récupération des données de paiement via l'API
+  const { data: history = [], isLoading, error } = usePatientPaymentHistoryDisplay();
 
   // Détection des breakpoints
   useEffect(() => {
@@ -31,7 +35,7 @@ export default function Disponibilites() {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const handleTransactionClick = (transactionId: number) => {
+  const handleTransactionClick = (transactionId: string) => {
     setSelectedTransaction(transactionId);
     if (isMobile) {
       setShowMobileDetail(true);
@@ -47,132 +51,32 @@ export default function Disponibilites() {
     setSelectedTransaction(null);
   };
 
-  // Helper function to get default status with correct type
-  const getDefaultStatus = (): "Effectué" | "En attente" | "Annulé" => "Effectué";
+  // Gestion des états de chargement et d'erreur
+  if (isLoading) {
+    return (
+      <AccountLayout className="h-screen overflow-hidden">
+        <div className="container h-screen overflow-hidden lg:px-5 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-gray-500">{t("loading")}</p>
+          </div>
+        </div>
+      </AccountLayout>
+    );
+  }
 
-  const history = [
-    {
-      id: 1,
-      title: "Paiement consultation avec Dr. Mohamed El Fadil",
-      date: "20/08/2025",
-      amount: "43$",
-      session: "60-minute Deep Dive",
-      expert: "Dr Amandine Bergère",
-      dateHeure: "18 Fév. 2025 à 15:19",
-      statut: "Effectué" as const,
-      transactionId: "YSH03987266283B",
-    },
-    {
-      id: 2,
-      title: "Paiement consultation avec Dr. Sarah Martin",
-      date: "15/08/2025",
-      amount: "65$",
-      session: "90-minute Consultation",
-      expert: "Dr Sarah Martin",
-      dateHeure: "15 Fév. 2025 à 10:30",
-      statut: "Effectué" as const,
-      transactionId: "YSH03987266284C",
-    },
-    {
-      id: 3,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-    {
-      id: 4,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-    {
-      id: 5,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-    {
-      id: 6,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-    {
-      id: 7,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-    {
-      id: 8,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-    {
-      id: 9,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-    {
-      id: 10,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-    {
-      id: 11,
-      title: "Paiement consultation avec Dr. Jean Dupont",
-      date: "10/08/2025",
-      amount: "55$",
-      session: "45-minute Session",
-      expert: "Dr Jean Dupont",
-      dateHeure: "10 Fév. 2025 à 14:00",
-      statut: "En attente" as const,
-      transactionId: "YSH03987266285D",
-    },
-  ];
+  if (error) {
+    return (
+      <AccountLayout className="h-screen overflow-hidden">
+        <div className="container h-screen overflow-hidden lg:px-5 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-500">{t("error")}</p>
+            <p className="text-gray-500 mt-2">{error.message}</p>
+          </div>
+        </div>
+      </AccountLayout>
+    );
+  }
+
   return (
     <AccountLayout className="h-screen overflow-hidden">
       <div
@@ -206,7 +110,13 @@ export default function Disponibilites() {
                 </div>
               </div>
               <div className="space-y-3 mt-4 px-4 lg:px-0 lg:max-w-[343px] lg:mx-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
-                {history.map((transaction) => (
+                {history.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">Aucune transaction</p>
+                    <p className="text-gray-400 text-sm mt-2">Vos transactions de paiement apparaîtront ici</p>
+                  </div>
+                ) : (
+                  history.map((transaction) => (
                   <div
                     key={transaction.id}
                     onClick={() => handleTransactionClick(transaction.id)}
@@ -240,7 +150,8 @@ export default function Disponibilites() {
                       <ChevronRightIcon className="w-5 h-5 text-slate-gray" />
                     ) : null}
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
@@ -320,7 +231,13 @@ export default function Disponibilites() {
               {!showDetails ? (
                 /* Liste des transactions */
                 <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
-                  {history.map((transaction) => (
+                  {history.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Aucune transaction</p>
+                      <p className="text-gray-400 text-sm mt-2">Vos transactions de paiement apparaîtront ici</p>
+                    </div>
+                  ) : (
+                    history.map((transaction) => (
                     <div
                       key={transaction.id}
                       onClick={() => handleTransactionClick(transaction.id)}
@@ -348,7 +265,8 @@ export default function Disponibilites() {
                       </span>
                       <ChevronRightIcon className="w-5 h-5 text-slate-gray" />
                     </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               ) : (
                 /* Panneau de détails - Tablette */
@@ -358,7 +276,7 @@ export default function Disponibilites() {
                     className="mb-4 flex items-center gap-2 text-cobalt-blue hover:text-cobalt-blue-600 transition-colors"
                   >
                     <ChevronRightIcon className="w-5 h-5 rotate-180" />
-                    {t("paymentHistory.backToList")}
+                    Retour à la liste
                   </button>
                   {selectedTransaction && (
                     <TransactionDetails
@@ -380,7 +298,7 @@ export default function Disponibilites() {
                       }
                       statut={
                         history.find((t) => t.id === selectedTransaction)
-                          ?.statut || getDefaultStatus()
+                          ?.statut || "Effectué"
                       }
                       id={
                         history.find((t) => t.id === selectedTransaction)

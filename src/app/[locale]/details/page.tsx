@@ -140,7 +140,7 @@ const professionalsSimilar = [
 
 function ProfessionalDetailContent() {
   const t = useI18n();
-  const currentLocale = useCurrentLocale();
+  const locale = useCurrentLocale();
   const { data: customer } = useGetCustomer();
   const { data: appointments } = useGetPatientAppointmentsById(
     customer?.id || ""
@@ -391,21 +391,21 @@ function ProfessionalDetailContent() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 <HowItWorksCard
                   iconSrc="/assets/icons/magnifer.svg"
-                  iconAlt={t("expertDetails.magnifierAlt")}
+                  iconAlt={t("sessionDetail.magnifierAlt")}
                   title={t("expertDetails.findExpert")}
                   description={t("expertDetails.findExpertDesc")}
                 />
 
                 <HowItWorksCard
                   iconSrc="/assets/icons/calendar1.svg"
-                  iconAlt={t("expertDetails.calendarAlt")}
+                  iconAlt={t("sessionDetail.calendarAlt")}
                   title={t("expertDetails.bookOrSubscribe")}
                   description={t("expertDetails.bookOrSubscribeDesc")}
                 />
 
                 <HowItWorksCard
                   iconSrc="/assets/icons/videocameraRecord.svg"
-                  iconAlt={t("expertDetails.videoCameraAlt")}
+                  iconAlt={t("sessionDetail.videoCameraAlt")}
                   title={t("expertDetails.virtualConsultation")}
                   description={t("expertDetails.virtualConsultationDesc")}
                 />
@@ -479,7 +479,7 @@ function ProfessionalDetailContent() {
               <aside className="w-full">
                 <Image
                   src="/assets/icons/congruation.svg"
-                  alt={t("expertDetails.congratulationAlt")}
+                  alt={t("sessionDetail.congratulationAlt")}
                   width={421}
                   height={381}
                   className="-mt-29"
@@ -498,32 +498,32 @@ function ProfessionalDetailContent() {
                       appointments?.[0]?.appointment_at
                         ? new Date(
                             appointments[0].appointment_at
-                          ).toLocaleDateString(currentLocale === 'fr' ? 'fr-FR' : 'en-US', {
+                          ).toLocaleDateString(locale, {
                             weekday: "long",
                             year: "numeric",
                             month: "long",
                             day: "numeric",
                           })
-                        : t("expertDetails.dateNotAvailable")
+                        : t("sessionDetail.dateNotAvailable")
                     }
                     time={
                       appointments?.[0]?.appointment_at
                         ? new Date(
                             appointments[0].appointment_at
-                          ).toLocaleTimeString(currentLocale === 'fr' ? 'fr-FR' : 'en-US', {
+                          ).toLocaleTimeString(locale, {
                             hour: "2-digit",
                             minute: "2-digit",
                           })
-                        : t("expertDetails.timeNotAvailable")
+                        : t("sessionDetail.timeNotAvailable")
                     }
                     duration={appointments?.[0]?.session?.name}
-                    sessionType={t("expertDetails.session")}
+                    sessionType={t("sessionDetail.session")}
                     professionalName={
                       appointments?.[0]?.pro?.first_name +
                         " " +
-                        appointments?.[0]?.pro?.last_name || t("expertDetails.expert")
+                        appointments?.[0]?.pro?.last_name || t("sessionDetail.expert")
                     }
-                    professionalTitle={t("expertDetails.expert")}
+                    professionalTitle={t("sessionDetail.expert")}
                     profileImage={
                       appointments?.[0]?.pro?.avatar || "/assets/icons/pro2.png"
                     }
@@ -563,7 +563,7 @@ function ProfessionalDetailContent() {
             <div className="min-h-full flex flex-col items-center justify-center px-6 py-8">
               <Image
                 src="/assets/icons/congruation.svg"
-                alt={t("expertDetails.congratulationAlt")}
+                alt={t("sessionDetail.congratulationAlt")}
                 width={300}
                 height={250}
                 className="mb-8"
@@ -582,32 +582,32 @@ function ProfessionalDetailContent() {
                     appointments?.[0]?.appointment_at
                       ? new Date(
                           appointments[0].appointment_at
-                        ).toLocaleDateString(currentLocale === 'fr' ? 'fr-FR' : 'en-US', {
+                        ).toLocaleDateString(locale, {
                           weekday: "long",
                           year: "numeric",
                           month: "long",
                           day: "numeric",
                         })
-                      : t("expertDetails.dateNotAvailable")
+                      : t("sessionDetail.dateNotAvailable")
                   }
                   time={
                     appointments?.[0]?.appointment_at
                       ? new Date(
                           appointments[0].appointment_at
-                        ).toLocaleTimeString(currentLocale === 'fr' ? 'fr-FR' : 'en-US', {
+                        ).toLocaleTimeString(locale, {
                           hour: "2-digit",
                           minute: "2-digit",
                         })
-                      : t("expertDetails.timeNotAvailable")
+                      : t("sessionDetail.timeNotAvailable")
                   }
                   duration="60 minutes"
-                  sessionType={t("expertDetails.quickVideoSession")}
+                  sessionType={t("sessionDetail.quickVideoSession")}
                   professionalName={
                     appointments?.[0]?.pro?.first_name +
                       " " +
-                      appointments?.[0]?.pro?.last_name || t("expertDetails.expert")
+                      appointments?.[0]?.pro?.last_name || t("sessionDetail.expert")
                   }
-                  professionalTitle={t("expertDetails.expert")}
+                  professionalTitle={t("sessionDetail.expert")}
                   profileImage={professional?.image || "/assets/icons/pro2.png"}
                 />
               </div>
@@ -627,7 +627,7 @@ function ProfessionalDetailContent() {
           <Sheet open={isOfferSheetOpen} onOpenChange={setIsOfferSheetOpen}>
             <SheetTrigger asChild>
               <Button
-                label={t("expertDetails.bookSession")}
+                label={t("sessionDetail.bookSession")}
                 className="w-full h-[48px] bg-exford-blue text-white font-bold font-figtree"
               />
             </SheetTrigger>
@@ -659,7 +659,7 @@ function ProfessionalDetailContent() {
 
 function ProfessionalDetail() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{"Chargement..."}</div>}>
       <ProfessionalDetailContent />
     </Suspense>
   );

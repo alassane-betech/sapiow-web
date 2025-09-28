@@ -129,15 +129,14 @@ export function filterAndSortAppointments(appointments: ApiAppointment[]) {
   );
   const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  // Séparer les appointments confirmés (aujourd'hui ou à venir dans les 7 prochains jours)
+  // Séparer les appointments confirmés (tous les rendez-vous confirmés à venir)
   const upcomingConfirmed = appointments
     .filter((apt) => {
       const aptDate = parseISO(apt.appointment_at);
       const isConfirmed = apt.status === "confirmed";
       const isTodayOrLater = aptDate >= startOfToday; // Inclut aujourd'hui même si passé
-      const isWithinWeek = aptDate <= sevenDaysFromNow;
 
-      return isConfirmed && isTodayOrLater && isWithinWeek;
+      return isConfirmed && isTodayOrLater;
     })
     .sort(
       (a, b) =>
@@ -145,17 +144,14 @@ export function filterAndSortAppointments(appointments: ApiAppointment[]) {
         new Date(b.appointment_at).getTime()
     );
 
-  // Autres appointments (en attente, aujourd'hui ou à venir)
+  // Autres appointments (seulement les rendez-vous en attente)
   const otherUpcoming = appointments
     .filter((apt) => {
       const aptDate = parseISO(apt.appointment_at);
       const isTodayOrLater = aptDate >= startOfToday;
-      const isValidStatus = ["confirmed", "pending"].includes(apt.status);
-      const isNotInUpcomingConfirmed = !upcomingConfirmed.find(
-        (confirmed) => confirmed.id === apt.id
-      );
+      const isPending = apt.status === "pending";
 
-      return isTodayOrLater && isValidStatus && isNotInUpcomingConfirmed;
+      return isTodayOrLater && isPending;
     })
     .sort(
       (a, b) =>

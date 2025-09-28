@@ -21,18 +21,19 @@ export const metadata: Metadata = {
   description: "Sapiow",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }>) {
+  const { locale } = await params;
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
         <QueryProvider>
-          <Provider locale={params.locale}>
+          <Provider locale={locale}>
             <FavoritesProvider>{children}</FavoritesProvider>
           </Provider>
         </QueryProvider>
@@ -40,3 +41,4 @@ export default function RootLayout({
     </html>
   );
 }
+

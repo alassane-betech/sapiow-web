@@ -78,7 +78,9 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   };
 
   // Détermine le texte du bouton et le titre du modal selon le contexte
-  const viewButtonText = isUpcoming ? t("visios.viewDetails") : t("visios.viewRequest");
+  const viewButtonText = isUpcoming
+    ? t("visios.viewDetails")
+    : t("visios.viewRequest");
 
   return (
     <Card
@@ -156,9 +158,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
               )
             }
             icon={!loadingState ? icon : undefined}
-            className={`h-[40px] px-6 rounded-[8px] font-bold font-figtree text-base lg:text-[13px] xl:text-base ${
-              isFlex1 ? "flex-1" : ""
-            }`}
+            className="h-[40px] px-6 rounded-[8px] font-bold font-figtree text-base lg:text-[13px] xl:text-base flex-1"
             disabled={
               buttonStates.acceptDisabled || loadingState === "confirming"
             }
@@ -179,9 +179,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
               <Button
                 onClick={handleViewRequest}
                 label={viewButtonText}
-                className={`text-exford-blue h-[40px] font-bold font-figtree px-6 rounded-[8px] border border-light-blue-gray bg-white text-base lg:text-[13px] xl:text-base hover:bg-gray-200 ${
-                  isFlex1 ? "flex-1" : ""
-                }`}
+                className="text-exford-blue h-[40px] font-bold font-figtree px-6 rounded-[8px] border border-light-blue-gray bg-white text-base lg:text-[13px] xl:text-base hover:bg-gray-200 flex-1"
                 disabled={buttonStates.viewDisabled}
               />
             }

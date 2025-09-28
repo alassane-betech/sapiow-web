@@ -85,7 +85,9 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                         appointment.patient?.last_name || ""
                       }`.trim() || t("patient")
                     }
-                    sessionDescription={appointment.session?.name || t("session")}
+                    sessionDescription={
+                      appointment.session?.name || t("session")
+                    }
                     onAccept={() =>
                       handleStartVideoCallCombined(appointment.id)
                     }
@@ -142,7 +144,9 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                         appointment.patient?.last_name || ""
                       }`.trim() || t("patient")
                     }
-                    sessionDescription={appointment.session?.name || t("session")}
+                    sessionDescription={
+                      appointment.session?.name || t("session")
+                    }
                     onAccept={() => handleConfirmAppointment(appointment.id)}
                     onCancel={() => handleCancelAppointment(appointment.id)}
                     onViewRequest={() => {}}
@@ -187,10 +191,14 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                         appointment.patient?.last_name || ""
                       }`.trim() || t("patient")
                     }
-                    sessionDescription={appointment.session?.name || t("session")}
+                    sessionDescription={
+                      appointment.session?.name || t("session")
+                    }
                     onViewRequest={() => {}}
                     textButton={
-                      appointment.status === "cancelled" ? t("visios.cancelled") : t("visios.completed")
+                      appointment.status === "cancelled"
+                        ? t("visios.cancelled")
+                        : t("visios.completed")
                     }
                     buttonStates={{ acceptDisabled: true, viewDisabled: false }}
                     isUpcoming={true}
