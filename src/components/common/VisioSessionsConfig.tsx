@@ -1,6 +1,7 @@
 "use client";
 
 import { Switch } from "@/components/ui/switch";
+import { useI18n } from "@/locales/client";
 import { useProSessionsConfig } from "@/hooks/useProSessionsConfig";
 
 interface VisioSessionsConfigProps {
@@ -10,6 +11,8 @@ interface VisioSessionsConfigProps {
 export default function VisioSessionsConfig({
   className,
 }: VisioSessionsConfigProps) {
+  const t = useI18n();
+  
   const {
     sessions,
     isInitialLoading,
@@ -22,16 +25,16 @@ export default function VisioSessionsConfig({
   } = useProSessionsConfig();
 
   const expectations = [
-    "Posez trois questions ou plus",
-    "Conseils pour démarrer une entreprise prospère",
-    "Conseils pour obtenir vos 10 000 premiers clients",
-    "Astuces de croissance et démarrage de la croissance",
+    t("visioSessionsConfig.expectation1"),
+    t("visioSessionsConfig.expectation2"),
+    t("visioSessionsConfig.expectation3"),
+    t("visioSessionsConfig.expectation4"),
   ];
 
   const questionExamples = [
-    "Je pense à créer une entreprise. Quelles sont les prochaines choses auxquelles je devrais me concentrer ?",
-    "Comment savoir si mon idée d'entreprise va fonctionner ?",
-    "Comment aborder votre le croissance de ma startup ?",
+    t("visioSessionsConfig.question1"),
+    t("visioSessionsConfig.question2"),
+    t("visioSessionsConfig.question3"),
   ];
 
   // Loading initial seulement si on n'a pas encore de données
@@ -39,7 +42,7 @@ export default function VisioSessionsConfig({
     return (
       <div className={`space-y-6 ${className}`}>
         <div className="text-center py-8">
-          <p className="text-gray-600">Chargement des sessions...</p>
+          <p className="text-gray-600">{t("visioSessionsConfig.loadingSessions")}</p>
         </div>
       </div>
     );
@@ -49,7 +52,7 @@ export default function VisioSessionsConfig({
     <div className={`space-y-6 ${className}`}>
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600 text-sm">Erreur lors du chargement des sessions</p>
+          <p className="text-red-600 text-sm">{t("visioSessionsConfig.loadingError")}</p>
         </div>
       )}
 
@@ -71,7 +74,7 @@ export default function VisioSessionsConfig({
                 </span>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Prix</span>
+                  <span className="text-sm text-gray-600">{t("visioSessionsConfig.price")}</span>
                   <input
                     type="number"
                     value={session.price}
@@ -109,7 +112,7 @@ export default function VisioSessionsConfig({
 
       {/* Section Attentes */}
       <div className="space-y-4 border border-light-blue-gray pt-4 rounded-[8px] px-4 py-2">
-        <h3 className="text-xs font-normal text-slate-gray">Attentes</h3>
+        <h3 className="text-xs font-normal text-slate-gray">{t("visioSessionsConfig.expectations")}</h3>
         <div className="space-y-2 pl-2">
           {expectations.map((expectation, index) => (
             <div key={index} className="flex items-start gap-2">
@@ -123,7 +126,7 @@ export default function VisioSessionsConfig({
       {/* Section Exemples de questions */}
       <div className="space-y-4 border border-light-blue-gray pt-4 rounded-[8px] px-4 py-2">
         <h3 className="text-xs font-normal text-slate-gray">
-          Exemples de questions
+          {t("visioSessionsConfig.questionExamples")}
         </h3>
         <div className="space-y-2 pl-2">
           {questionExamples.map((question, index) => (

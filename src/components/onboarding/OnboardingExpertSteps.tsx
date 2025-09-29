@@ -4,6 +4,7 @@ import { FormField } from "@/components/common/FormField";
 import { Textarea } from "@/components/ui/textarea";
 import { DOMAIN_ID_MAPPING } from "@/constants/onboarding";
 import { useOnboardingExpert } from "@/hooks/useOnboardingExpert";
+import { useI18n } from "@/locales/client";
 import React from "react";
 import { DomainSelector } from "./DomainSelector";
 import { Pagination } from "./Pagination";
@@ -12,6 +13,7 @@ import { SpecialtySelector } from "./SpecialtySelector";
 import { VisioConfiguration } from "./VisioConfiguration";
 
 export const OnboardingExpertSteps: React.FC = () => {
+  const t = useI18n();
   const {
     step,
     firstName,
@@ -55,17 +57,16 @@ export const OnboardingExpertSteps: React.FC = () => {
     return (
       <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px]">
         <h1 className="text-2xl sm:text-lg lg:text-xl font-bold text-center mb-2">
-          Faisons connaissance
+          {t("onboarding.letsGetAcquainted")}
         </h1>
         <p className="text-base sm:text-base font-normal my-4 text-center text-ash-gray mb-8">
-          Nous avons besoin de quelques informations pour personnaliser créer
-          votre compte Expert.
+          {t("onboarding.createExpertAccount")}
         </p>
         <div className="space-y-6 mb-8">
           <FormField
             type="text"
-            placeholder="Votre prénom"
-            label="Votre prénom"
+            placeholder={t("onboarding.firstName")}
+            label={t("onboarding.firstName")}
             value={firstName}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setFirstName(e.target.value)
@@ -74,8 +75,8 @@ export const OnboardingExpertSteps: React.FC = () => {
           />
           <FormField
             type="text"
-            placeholder="Votre nom de famille"
-            label="Votre nom de famille"
+            placeholder={t("onboarding.lastName")}
+            label={t("onboarding.lastName")}
             value={lastName}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setLastName(e.target.value)
@@ -84,8 +85,8 @@ export const OnboardingExpertSteps: React.FC = () => {
           />
           <FormField
             type="text"
-            placeholder="Votre Profession"
-            label="Votre profession"
+            placeholder={t("onboarding.profession")}
+            label={t("onboarding.profession")}
             value={profession}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setProfession(e.target.value)
@@ -94,8 +95,8 @@ export const OnboardingExpertSteps: React.FC = () => {
           />
           <FormField
             type="email"
-            placeholder="Votre Email"
-            label="Votre email"
+            placeholder={t("onboarding.email")}
+            label={t("onboarding.email")}
             value={email}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setEmail(e.target.value)
@@ -105,7 +106,7 @@ export const OnboardingExpertSteps: React.FC = () => {
         </div>
         <Pagination currentStep={1} totalSteps={5} />
         <Button
-          label="Suivant"
+          label={t("onboarding.next")}
           className="w-full rounded-[8px] h-[56px] text-base font-medium"
           disabled={!isFormValid}
           onClick={nextStep}
@@ -119,8 +120,8 @@ export const OnboardingExpertSteps: React.FC = () => {
     return (
       <div className="w-full max-w-[343px] sm:max-w-[380px] lg:max-w-[343px]">
         <DomainSelector
-          title="Dans quelle domaine exercez vous ?"
-          subtitle="Nous avons besoin de quelques informations pour personnaliser créer votre compte Expert."
+          title={t("onboarding.exerciseDomain")}
+          subtitle={t("onboarding.needDomainInfo")}
           domains={domains}
           isLoading={isLoadingDomains}
           selectedDomain={
@@ -139,7 +140,7 @@ export const OnboardingExpertSteps: React.FC = () => {
         />
         <Pagination currentStep={2} totalSteps={5} />
         <Button
-          label="Suivant"
+          label={t("onboarding.next")}
           className="w-full rounded-[8px] h-[56px] text-base font-medium"
           disabled={!isDomainValid}
           onClick={nextStep}
@@ -162,13 +163,13 @@ export const OnboardingExpertSteps: React.FC = () => {
         <Pagination currentStep={3} totalSteps={5} />
         <div className="flex gap-4 w-full">
           <Button
-            label="Plus tard"
+            label={t("onboarding.later")}
             className="w-1/2 rounded-[8px] h-[56px] text-base font-medium bg-white border border-gray-300 text-exford-blue hover:bg-gray-50"
             variant="outline"
             onClick={nextStep}
           />
           <Button
-            label="Suivant"
+            label={t("onboarding.next")}
             className="w-1/2 rounded-[8px] h-[56px] text-base font-medium"
             disabled={!isSpecialtyValid}
             onClick={nextStep}
@@ -183,18 +184,17 @@ export const OnboardingExpertSteps: React.FC = () => {
     return (
       <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px]">
         <h1 className="text-base sm:text-lg lg:text-xl font-bold text-center mb-2">
-          Terminez votre profil !
+          {t("onboarding.completeProfile")}
         </h1>
         <p className="text-sm sm:text-base font-normal my-4 text-center text-gray-600 mb-8">
-          Nous avons besoin de quelques <br /> informations pour personnaliser
-          créer <br /> votre compte Expert.
+          {t("onboarding.describeYourself")}
         </p>
 
         <ProfilePhotoUpload onPhotoSelect={handleAvatarChange} />
 
         <div className="space-y-6 mb-8">
           <Textarea
-            placeholder="À propos de vous"
+            placeholder={t("onboarding.aboutMePlaceholder")}
             value={aboutMe}
             onChange={(e) => setAboutMe(e.target.value)}
             rows={6}
@@ -202,8 +202,8 @@ export const OnboardingExpertSteps: React.FC = () => {
           />
           <FormField
             type="url"
-            placeholder="Lien de votre LinkedIn"
-            label="Lien de votre LinkedIn"
+            placeholder={t("onboarding.linkedinUrl")}
+            label={t("onboarding.linkedinUrl")}
             value={linkedinUrl}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setLinkedinUrl(e.target.value)
@@ -212,8 +212,8 @@ export const OnboardingExpertSteps: React.FC = () => {
           />
           <FormField
             type="url"
-            placeholder="Lien de votre Siteweb"
-            label="Lien de votre Siteweb"
+            placeholder={t("onboarding.websiteUrl")}
+            label={t("onboarding.websiteUrl")}
             value={websiteUrl}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setWebsiteUrl(e.target.value)
@@ -225,13 +225,13 @@ export const OnboardingExpertSteps: React.FC = () => {
         <Pagination currentStep={4} totalSteps={5} />
         <div className="flex gap-4 w-full">
           <Button
-            label="Plus tard"
+            label={t("onboarding.later")}
             className="w-1/2 rounded-[8px] h-[56px] text-base font-medium bg-white border border-gray-300 text-exford-blue hover:bg-gray-50"
             variant="outline"
             onClick={nextStep}
           />
           <Button
-            label="Suivant"
+            label={t("onboarding.next")}
             className="w-1/2 rounded-[8px] h-[56px] text-base font-medium"
             onClick={nextStep}
           />
@@ -251,13 +251,13 @@ export const OnboardingExpertSteps: React.FC = () => {
         <Pagination currentStep={5} totalSteps={5} />
         <div className="flex gap-4 w-full">
           <Button
-            label="Plus tard"
+            label={t("onboarding.later")}
             className="w-1/2 rounded-[8px] h-[56px] text-base font-medium bg-white border border-gray-300 text-exford-blue hover:bg-gray-50"
             variant="outline"
             onClick={completeOnboardingWithoutSessions}
           />
           <Button
-            label={isSubmitting ? "En cours..." : "Terminer"}
+            label={isSubmitting ? t("loading") : t("onboarding.finish")}
             className="w-1/2 rounded-[8px] h-[56px] text-base font-medium"
             disabled={!isVisioValid || isSubmitting}
             onClick={completeOnboarding}

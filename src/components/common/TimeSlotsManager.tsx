@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
+import { useI18n } from "@/locales/client";
 import { Link, Plus, Trash2 } from "lucide-react";
 
 interface TimeSlotsManagerProps {
@@ -19,6 +20,8 @@ interface TimeSlotsManagerProps {
 export default function TimeSlotsManager({
   selectedDate,
 }: TimeSlotsManagerProps) {
+  const t = useI18n();
+  
   const {
     timeSlots,
     timeOptions,
@@ -39,7 +42,7 @@ export default function TimeSlotsManager({
       <div className="w-full mx-auto p-4 sm:p-6">
         <Card className="p-4 sm:p-6 bg-gray-50 border-gray-200">
           <div className="text-center text-gray-500">
-            Sélectionnez une date pour gérer les créneaux horaires
+            {t("timeSlotsManager.selectDatePrompt")}
           </div>
         </Card>
       </div>
@@ -52,7 +55,7 @@ export default function TimeSlotsManager({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             {isLoadingAny && (
-              <div className="text-sm text-blue-600">Sauvegarde...</div>
+              <div className="text-sm text-blue-600">{t("timeSlotsManager.saving")}</div>
             )}
           </div>
 
@@ -100,7 +103,7 @@ export default function TimeSlotsManager({
                   </SelectContent>
                 </Select>
                 <span className="text-gray-500 text-sm whitespace-nowrap">
-                  à
+                  {t("timeSlotsManager.to")}
                 </span>
                 <Select
                   value={slot.endTime}
@@ -168,7 +171,7 @@ export default function TimeSlotsManager({
             className="w-full mt-6 py-4 sm:py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-400 hover:bg-gray-50 text-gray-700 text-sm sm:text-base cursor-pointer"
           >
             <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-            Ajouter une disponibilité
+            {t("timeSlotsManager.addAvailability")}
           </Button>
         </div>
       </Card>

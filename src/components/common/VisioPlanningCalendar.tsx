@@ -4,6 +4,7 @@ import {
   useGetProAppointments,
 } from "@/api/appointments/useAppointments";
 import { Button } from "@/components/common/Button";
+import { useCurrentLocale, useI18n } from "@/locales/client";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePlaningStore } from "@/store/usePlaning";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
@@ -17,22 +18,6 @@ interface VisioPlanningCalendarProps {
   professionalName?: string; // Nom de l'expert
   onAppointmentCreated?: (appointmentData: any) => void; // Callback après création
 }
-
-const daysOfWeek = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
-const months = [
-  "Janvier",
-  "Février",
-  "Mars",
-  "Avril",
-  "Mai",
-  "Juin",
-  "Juillet",
-  "Août",
-  "Septembre",
-  "Octobre",
-  "Novembre",
-  "Décembre",
-];
 
 // Mapping des jours de la semaine
 const dayOfWeekMapping = {
@@ -111,7 +96,7 @@ const generateTimeSlots = (
             minute: "2-digit",
             hour12: false,
           });
-          
+
           // Vérifier si c'est le même jour et la même heure
           return (
             appointmentDate.toDateString() === selectedDate.toDateString() &&
@@ -122,7 +107,7 @@ const generateTimeSlots = (
         timeSlots.push({
           time: timeString,
           available: !isSlotTaken,
-          status: isSlotTaken ? "Complet" : null,
+          status: isSlotTaken ? "taken" : null,
         });
       }
 
@@ -139,12 +124,53 @@ export default function VisioPlanningCalendar({
   onDateTimeSelect,
   className = "",
   expertData,
+  professionalName,
   onAppointmentCreated,
 }: VisioPlanningCalendarProps) {
+  const t = useI18n();
+  const currentLocale = useCurrentLocale();
+
+  // Variables traduites selon la locale
+  const daysOfWeek =
+    currentLocale === "fr"
+      ? ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
+      : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const months =
+    currentLocale === "fr"
+      ? [
+          "Janvier",
+          "Février",
+          "Mars",
+          "Avril",
+          "Mai",
+          "Juin",
+          "Juillet",
+          "Août",
+          "Septembre",
+          "Octobre",
+          "Novembre",
+          "Décembre",
+        ]
+      : [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+
   const searchParams = useSearchParams();
   const expertId = searchParams.get("id");
   const { data: appointments } = useGetProAppointments(expertId?.toString());
-  console.log({ appointments });
+
   const { setIsPlaning } = usePlaningStore();
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(
@@ -208,14 +234,20 @@ export default function VisioPlanningCalendar({
 
     // Définir le premier créneau disponible comme sélectionné par défaut si pas encore sélectionné
     if (!selectedTime && slots.length > 0) {
-      const firstAvailableSlot = slots.find(slot => slot.available);
+      const firstAvailableSlot = slots.find((slot) => slot.available);
       if (firstAvailableSlot) {
         setSelectedTime(firstAvailableSlot.time);
       }
     }
 
     return slots;
-  }, [expertData?.schedules, currentDate, selectedDate, selectedDuration, appointments]);
+  }, [
+    expertData?.schedules,
+    currentDate,
+    selectedDate,
+    selectedDuration,
+    appointments,
+  ]);
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -353,8 +385,6 @@ export default function VisioPlanningCalendar({
     return days;
   };
 
-  console.log(availableDurations);
-
   return (
     <div className={`bg-white rounded-lg max-w-md mx-auto ${className}`}>
       {/* Header avec retour */}
@@ -364,7 +394,9 @@ export default function VisioPlanningCalendar({
           onClick={() => setIsPlaning(false)}
         />
         <h2 className="text-xl font-bold text-black px-6">
-          Planifier votre visio
+          {currentLocale === "fr"
+            ? "Planifier votre visio"
+            : "Plan your video call"}
         </h2>
       </div>
 
@@ -372,7 +404,9 @@ export default function VisioPlanningCalendar({
         {/* Sélection de durée */}
         <div className="mb-6">
           <h3 className="text-sm font-bold text-[#1F2937] mb-3">
-            Durée de la visio
+            {currentLocale === "fr"
+              ? "Durée de la visio"
+              : "Video call duration"}
           </h3>
           <div className="flex gap-2">
             {availableDurations.map((duration: any) => (
@@ -400,7 +434,7 @@ export default function VisioPlanningCalendar({
             onClick={() => navigateMonth("prev")}
             className="p-1 hover:bg-gray-100 rounded"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <ChevronLeft className="w-5 h-5 text-gray-600 cursor-pointer" />
           </button>
           <h3 className="text-lg font-semibold text-gray-900">
             {months[currentDate.getMonth()]} {currentDate.getFullYear()}
@@ -409,7 +443,7 @@ export default function VisioPlanningCalendar({
             onClick={() => navigateMonth("next")}
             className="p-1 hover:bg-gray-100 rounded"
           >
-            <ChevronRight className="w-5 h-5 text-gray-600" />
+            <ChevronRight className="w-5 h-5 text-gray-600 cursor-pointer" />
           </button>
         </div>
 
@@ -430,7 +464,9 @@ export default function VisioPlanningCalendar({
         {/* Créneaux horaires */}
         <div className="mb-6">
           <h3 className="text-sm font-bold text-[#1F2937] mb-3">
-            Créneaux disponibles
+            {currentLocale === "fr"
+              ? "Créneaux disponibles"
+              : "Available slots"}
           </h3>
           {timeSlots.length > 0 ? (
             <div
@@ -457,12 +493,12 @@ export default function VisioPlanningCalendar({
                       ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       : "bg-gray-50 text-gray-400 cursor-not-allowed"
                   }
-                ${slot.status === "Complet" ? "text-left" : ""}`}
+                ${slot.status === "taken" ? "text-left" : ""}`}
                   >
                     {slot.time}
                     {slot.status && (
                       <span className="absolute top-3 left-[41%] w-[57px] h-[22px] bg-[#94A3B8] text-white text-[10px] font-bold rounded-[8px] flex justify-center items-center">
-                        {slot.status}
+                        {currentLocale === "fr" ? "Complet" : "Full"}
                       </span>
                     )}
                   </button>
@@ -472,10 +508,14 @@ export default function VisioPlanningCalendar({
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500 text-sm">
-                Aucun créneau disponible pour ce jour.
+                {currentLocale === "fr"
+                  ? "Aucun créneau disponible pour ce jour."
+                  : "No slots available for this day."}
               </p>
               <p className="text-gray-400 text-xs mt-1">
-                Veuillez sélectionner une autre date.
+                {currentLocale === "fr"
+                  ? "Veuillez sélectionner une autre date."
+                  : "Please select another date."}
               </p>
             </div>
           )}
@@ -485,7 +525,11 @@ export default function VisioPlanningCalendar({
         <div className="border-t pt-4">
           <div className="mb-4">
             <h4 className="text-sm font-semibold text-gray-900 mb-1">
-              Session rapide visio - {selectedDuration} minutes
+              {currentLocale === "fr"
+                ? "Session rapide visio"
+                : "Quick video session"}{" "}
+              - {selectedDuration}{" "}
+              {currentLocale === "fr" ? "minutes" : "minutes"}
             </h4>
             <p className="text-sm text-gray-600">
               Ven {selectedDate} {months[currentDate.getMonth()].toLowerCase()}{" "}
@@ -502,8 +546,12 @@ export default function VisioPlanningCalendar({
           <Button
             label={
               createAppointmentMutation.isPending
-                ? "Réservation..."
-                : "Réserver"
+                ? currentLocale === "fr"
+                  ? "Réservation..."
+                  : "Booking..."
+                : currentLocale === "fr"
+                ? "Réserver"
+                : "Book"
             }
             onClick={handleReserve}
             disabled={
@@ -524,7 +572,9 @@ export default function VisioPlanningCalendar({
 
           {createAppointmentMutation.isError && (
             <div className="mt-2 text-sm text-red-600 text-center">
-              Erreur lors de la réservation. Veuillez réessayer.
+              {currentLocale === "fr"
+                ? "Erreur lors de la réservation. Veuillez réessayer."
+                : "Booking error. Please try again."}
             </div>
           )}
         </div>

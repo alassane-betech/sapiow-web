@@ -48,7 +48,7 @@ export const PeriodToggle: React.FC<PeriodToggleProps> = ({
   return (
     <div
       className={cn(
-        "inline-flex bg-light-blue-gray rounded-[10.2px] transition-all duration-300",
+        "inline-flex bg-light-blue-gray rounded-[10.2px] transition-all duration-300 mt-10",
         containerSizeClasses[size],
         disabled && "opacity-50 cursor-not-allowed",
         className

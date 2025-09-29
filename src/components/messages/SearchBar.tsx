@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { useI18n } from "@/locales/client";
 import { Search, Mic } from "lucide-react";
 
 interface SearchBarProps {
@@ -7,15 +8,17 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ 
-  placeholder = "Rechercher", 
+  placeholder, 
   className = "" 
 }: SearchBarProps) {
+  const t = useI18n();
+  
   return (
     <div className={`px-4 mb-5 pt-0 ${className}`}>
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input
-          placeholder={placeholder}
+          placeholder={placeholder || t("search.placeholder")}
           className="pl-10 pr-10 bg-gray-50 border-none"
         />
         <Mic className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />

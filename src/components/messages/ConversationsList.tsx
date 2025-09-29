@@ -1,5 +1,6 @@
 import { ConversationItem } from "./ConversationItem";
 import { SearchBar } from "./SearchBar";
+import { useI18n } from "@/locales/client";
 
 interface ConversationsListProps {
   conversationsData: any[];
@@ -22,6 +23,8 @@ export function ConversationsList({
   className = "",
   searchBarClassName = "",
 }: ConversationsListProps) {
+  const t = useI18n();
+  
   return (
     <div className={`flex flex-col ${className}`}>
       {showSearchBar && <SearchBar className={searchBarClassName} />}
@@ -33,7 +36,7 @@ export function ConversationsList({
           </div>
         ) : conversationsError ? (
           <div className="flex items-center justify-center h-32">
-            <p className="text-red-500">Erreur: {conversationsError.message}</p>
+            <p className="text-red-500">{t("messages.conversationError")} {conversationsError.message}</p>
           </div>
         ) : conversationsData && conversationsData.length > 0 ? (
           conversationsData.map((conversation) => (
@@ -46,7 +49,7 @@ export function ConversationsList({
           ))
         ) : (
           <div className="flex items-center justify-center h-32">
-            <p className="text-gray-500">Aucune conversation trouvée</p>
+            <p className="text-gray-500">{t("messages.noConversationsFound")}</p>
           </div>
         )}
       </div>

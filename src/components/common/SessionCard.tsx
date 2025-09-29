@@ -5,6 +5,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "./Button";
@@ -59,13 +60,14 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   classFooter = "",
   duration,
   isComming = false,
-  textButton = "Accepter",
+  textButton,
   buttonStates = { acceptDisabled: false, viewDisabled: false },
   isUpcoming = false,
   isFlex1 = false,
   questions = [],
   loadingState = null,
 }) => {
+  const t = useI18n();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleViewRequest = () => {
@@ -76,7 +78,9 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   };
 
   // Détermine le texte du bouton et le titre du modal selon le contexte
-  const viewButtonText = isUpcoming ? "Voir détails" : "Voir la demande";
+  const viewButtonText = isUpcoming
+    ? t("visios.viewDetails")
+    : t("visios.viewRequest");
 
   return (
     <Card
@@ -89,7 +93,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             <div className="w-4.5 h-4.5 flex items-center justify-center">
               <Image
                 src="/assets/icons/calendar.svg"
-                alt="calendar"
+                alt={t("visios.calendarAlt")}
                 width={18}
                 height={18}
               />
@@ -103,13 +107,13 @@ export const SessionCard: React.FC<SessionCardProps> = ({
               <div className="w-4.5 h-4.5 flex items-center justify-center">
                 <Image
                   src="/assets/icons/clock.svg"
-                  alt="clock"
+                  alt={t("visios.clockAlt")}
                   width={18}
                   height={18}
                 />
               </div>
               <span className="text-xs font-figtree font-medium text-gray-900">
-                visio de {duration}
+                {t("visios.sessionDuration")} {duration}
               </span>
             </div>
           )}{" "}
@@ -150,13 +154,11 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                   <LoadingSpinner size="sm" />
                 </div>
               ) : (
-                textButton
+                textButton || t("accept")
               )
             }
             icon={!loadingState ? icon : undefined}
-            className={`h-[40px] px-6 rounded-[8px] font-bold font-figtree text-base lg:text-[13px] xl:text-base ${
-              isFlex1 ? "flex-1" : ""
-            }`}
+            className="h-[40px] px-6 rounded-[8px] font-bold font-figtree text-base lg:text-[13px] xl:text-base flex-1"
             disabled={
               buttonStates.acceptDisabled || loadingState === "confirming"
             }
@@ -177,9 +179,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
               <Button
                 onClick={handleViewRequest}
                 label={viewButtonText}
-                className={`text-exford-blue h-[40px] font-bold font-figtree px-6 rounded-[8px] border border-light-blue-gray bg-white text-base lg:text-[13px] xl:text-base hover:bg-gray-200 ${
-                  isFlex1 ? "flex-1" : ""
-                }`}
+                className="text-exford-blue h-[40px] font-bold font-figtree px-6 rounded-[8px] border border-light-blue-gray bg-white text-base lg:text-[13px] xl:text-base hover:bg-gray-200 flex-1"
                 disabled={buttonStates.viewDisabled}
               />
             }

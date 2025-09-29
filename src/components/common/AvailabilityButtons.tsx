@@ -1,4 +1,5 @@
 import { Button as ButtonUI } from "@/components/ui/button";
+import { useI18n } from "@/locales/client";
 import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 
@@ -33,17 +34,21 @@ interface AvailabilityButtonsProps {
 export const AvailabilityButtons = ({
   onManageAvailability,
   onSyncCalendars,
-}: AvailabilityButtonsProps) => (
-  <div className="space-y-4 w-full mb-40 md:mb-0">
-    <AvailabilityButton
-      icon="/assets/icons/calendar.svg"
-      label="Gérer mes disponibilités"
-      onClick={onManageAvailability}
-    />
-    <AvailabilityButton
-      icon="/assets/icons/calendar.svg"
-      label="Synchroniser mes calendriers"
-      onClick={onSyncCalendars}
-    />
-  </div>
-);
+}: AvailabilityButtonsProps) => {
+  const t = useI18n();
+  
+  return (
+    <div className="space-y-4 w-full mb-40 md:mb-0">
+      <AvailabilityButton
+        icon="/assets/icons/calendar.svg"
+        label={t("availabilityButtons.manageAvailability")}
+        onClick={onManageAvailability}
+      />
+      <AvailabilityButton
+        icon="/assets/icons/calendar.svg"
+        label={t("availabilityButtons.syncCalendars")}
+        onClick={onSyncCalendars}
+      />
+    </div>
+  );
+};

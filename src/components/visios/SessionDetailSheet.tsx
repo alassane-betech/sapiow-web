@@ -1,5 +1,6 @@
 "use client";
 import {
+  useCancelPatientAppointment,
   useSubmitAppointmentQuestion,
   type AppointmentQuestion,
 } from "@/api/appointments/useAppointments";
@@ -12,8 +13,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useI18n } from "@/locales/client";
 import { useConversationStore } from "@/store/useConversationStore";
-import { Send, X } from "lucide-react";
+import { ChevronRight, Send, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -47,6 +49,7 @@ export function SessionDetailSheet({
   onClose,
   onStartVideoCall,
 }: SessionDetailSheetProps) {
+  const t = useI18n();
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const { setSelectedConversation, setSelectedProfessional } =
     useConversationStore();
@@ -58,6 +61,7 @@ export function SessionDetailSheet({
   );
 
   const submitQuestionMutation = useSubmitAppointmentQuestion();
+  const cancelAppointmentMutation = useCancelPatientAppointment();
 
   // Mettre à jour les questions locales quand la session change
   const currentQuestions = session?.appointment_questions || [];
@@ -85,7 +89,7 @@ export function SessionDetailSheet({
       setQuestion("");
       setShowQuestionForm(false);
     } catch (error) {
-      console.error("Erreur lors de la soumission de la question:", error);
+      console.error(t("sessionDetail.questionSubmitError"), error);
     }
   };
 
@@ -93,6 +97,18 @@ export function SessionDetailSheet({
     setShowQuestionForm(!showQuestionForm);
     if (showQuestionForm) {
       setQuestion("");
+    }
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!session?.id) return;
+
+    try {
+      await cancelAppointmentMutation.mutateAsync(session.id);
+      // Optionnel : fermer le sheet après annulation réussie
+      onClose();
+    } catch (error) {
+      console.error(t("sessionDetail.cancelError"), error);
     }
   };
 
@@ -124,7 +140,7 @@ export function SessionDetailSheet({
         <SheetHeader className="p-6 pb-4 border-b border-light-blue-gray bg-white">
           <div className="flex items-center justify-between">
             <SheetTitle className="text-lg font-semibold text-gray-900">
-              Détails
+              {t("sessionDetail.title")}
             </SheetTitle>
             <SheetClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
               <X className="h-4 w-4 cursor-pointer" />
@@ -156,17 +172,15 @@ export function SessionDetailSheet({
                 {allQuestions.length === 0 && (
                   <div className="bg-[#E8F2FF] rounded-[8px] p-4">
                     <h1 className="text-exford-blue text-base font-bold font-figtree">
-                      N'hésitez pas à poser vos questions avant la session
+                      {t("sessionDetail.dontHesitateAskQuestions")}
                     </h1>
                     <p className="text-sm text-exford-blue font-figtree font-normal leading-relaxed">
-                      Vous avez la possibilité de soumettre vos questions à
-                      l'avance afin que l'expert puisse mieux se préparer pour
-                      vous.
+                      {t("sessionDetail.submitQuestionsAdvance")}
                     </p>
 
                     {!showQuestionForm ? (
                       <Button
-                        label="Soumettre mes questions"
+                        label={t("sessionDetail.submitMyQuestions")}
                         className="h-[40px] w-full rounded-[8px] mt-2 text-base font-bold font-figtree"
                         onClick={handleToggleQuestionForm}
                       />
@@ -176,7 +190,7 @@ export function SessionDetailSheet({
                           <textarea
                             value={question}
                             onChange={(e) => setQuestion(e.target.value)}
-                            placeholder="Tapez votre question ici..."
+                            placeholder={t("sessionDetail.typeQuestionHere")}
                             className="w-full p-3 pr-12 border border-gray-200 rounded-[8px] resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             rows={3}
                             disabled={submitQuestionMutation.isPending}
@@ -194,10 +208,10 @@ export function SessionDetailSheet({
                         </div>
                         <button
                           onClick={handleToggleQuestionForm}
-                          className="text-sm text-gray-500 hover:text-gray-700"
+                          className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer"
                           disabled={submitQuestionMutation.isPending}
                         >
-                          Annuler
+                          {t("sessionDetail.cancel")}
                         </button>
                       </div>
                     )}
@@ -209,7 +223,7 @@ export function SessionDetailSheet({
                   <div className="mb-4">
                     {!showQuestionForm ? (
                       <Button
-                        label="Ajoute une autre question"
+                        label={t("sessionDetail.addAnotherQuestion")}
                         className="h-[40px] w-full rounded-[8px] text-base font-bold font-figtree"
                         onClick={handleToggleQuestionForm}
                       />
@@ -219,7 +233,7 @@ export function SessionDetailSheet({
                           <textarea
                             value={question}
                             onChange={(e) => setQuestion(e.target.value)}
-                            placeholder="Tapez votre question ici..."
+                            placeholder={t("sessionDetail.typeQuestionHere")}
                             className="w-full p-3 pr-12 border border-gray-200 rounded-[8px] resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             rows={3}
                             disabled={submitQuestionMutation.isPending}
@@ -240,7 +254,7 @@ export function SessionDetailSheet({
                           className="text-sm text-gray-500 hover:text-gray-700"
                           disabled={submitQuestionMutation.isPending}
                         >
-                          Annuler
+                          {t("sessionDetail.cancel")}
                         </button>
                       </div>
                     )}
@@ -251,7 +265,7 @@ export function SessionDetailSheet({
                 {allQuestions.length > 0 && (
                   <div className="mt-4">
                     <h3 className="text-sm font-semibold text-gray-700 mb-2">
-                      Questions ou commentaires
+                      {t("sessionDetail.questionsOrComments")}
                     </h3>
                     <div className="space-y-2">
                       {allQuestions.map((question) => (
@@ -278,32 +292,58 @@ export function SessionDetailSheet({
                 {/* Video consultation button - only for confirmed appointments */}
                 {session?.status === "confirmed" && onStartVideoCall && (
                   <Button
-                    label="Commencer la visio"
-                    className="h-[40px] w-full rounded-[8px] text-base font-bold font-figtree"
-                    onClick={() => onStartVideoCall(session.id)}
-                    icon={
-                      <Image
-                        src="/assets/icons/videocamera.svg"
-                        width={20}
-                        height={20}
-                        alt="icon"
-                      />
-                    }
-                  />
+                    label={t("sessionDetail.startVideo")}
+                    onClick={() => onStartVideoCall?.(session.id)}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Image
+                      src="/assets/icons/video-camera.svg"
+                      alt={t("sessionDetail.videoCameraAlt")}
+                      width={16}
+                      height={16}
+                      className="mr-2"
+                    />
+                  </Button>
+                )}
+
+                {/* Cancel appointment button - only for pending appointments */}
+                {session?.status === "pending" && (
+                  <div
+                    className="w-full flex items-center justify-between bg-white border border-[#E2E8F0] rounded-[8px]"
+                    onClick={handleCancelAppointment}
+                  >
+                    <Button
+                      label={t("sessionDetail.cancelAppointment")}
+                      icon="/assets/icons/forbiddenCircle.svg"
+                      iconSize={20}
+                      className="flex-1 bg-white text-exford-blue font-bold hover:bg-gray-50"
+                      disabled={cancelAppointmentMutation.isPending}
+                    >
+                      <div>
+                        {cancelAppointmentMutation.isPending ? (
+                          <span>{t("loading")}</span>
+                        ) : (
+                          <span>{t("sessionDetail.cancelAppointment")}</span>
+                        )}
+                      </div>
+                    </Button>
+                    <span className="mr-4">
+                      <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </div>
                 )}
                 <div className="w-full max-w-[90%] mx-auto flex items-center justify-center">
                   <ButtonUI
                     variant="outline"
                     className="w-full max-w-[360px] text-exford-blue font-bold border-gray-300 hover:bg-gray-50 bg-transparent font-figtree mr-2 cursor-pointer"
-                    onClick={onClose}
                   >
                     <Image
                       src="/assets/icons/calendar.svg"
                       width={20}
                       height={20}
-                      alt="icon"
+                      alt={t("sessionDetail.calendarAlt")}
                     />
-                    Ajouter au calendrier
+                    {t("expertDetails.addToCalendar")}
                   </ButtonUI>
                   <ButtonUI
                     variant="outline"
@@ -314,7 +354,7 @@ export function SessionDetailSheet({
                       src="/assets/icons/chatDots.svg"
                       width={20}
                       height={20}
-                      alt="icon"
+                      alt={t("sessionDetail.sendMessage")}
                     />
                   </ButtonUI>
                 </div>

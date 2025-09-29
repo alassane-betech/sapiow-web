@@ -5,9 +5,11 @@ import { useGetDomaines } from "@/api/domaine/useDomaine";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { ProfilePhotoUpload } from "@/components/onboarding/ProfilePhotoUpload";
+import { useI18n } from "@/locales/client";
 import { useClientProfileUpdate } from "@/hooks/useClientProfileUpdate";
 
 export default function ClientProfile() {
+  const t = useI18n();
   const { data: customer, isLoading, error } = useGetCustomer();
   const { data: domains = [] } = useGetDomaines();
 
@@ -16,10 +18,12 @@ export default function ClientProfile() {
     formData,
     isEditing,
     isUpdating,
+    isUploadingAvatar,
     updateError,
     handleFieldChange,
     handleDomainToggle,
     handleAvatarChange,
+    handleAvatarDelete,
     handleSave,
     handleDeleteAccount,
   } = useClientProfileUpdate({ customer });
@@ -28,7 +32,7 @@ export default function ClientProfile() {
     return (
       <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
         <div className="flex justify-center items-center h-64">
-          <div className="text-slate-gray">Chargement du profil...</div>
+          <div className="text-slate-gray">{t("profile.loadingProfile")}</div>
         </div>
       </div>
     );
@@ -39,7 +43,7 @@ export default function ClientProfile() {
       <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
         <div className="flex justify-center items-center h-64">
           <div className="text-red-500">
-            Erreur lors du chargement du profil : {error.message}
+            {t("profile.errorLoadingProfile")} {error.message}
           </div>
         </div>
       </div>
@@ -52,31 +56,33 @@ export default function ClientProfile() {
         <ProfilePhotoUpload
           isCompte
           onPhotoSelect={handleAvatarChange}
+          onPhotoDelete={handleAvatarDelete}
           currentAvatar={customer?.avatar}
+          isUploading={isUploadingAvatar}
         />
       </div>
 
       <div className="w-full max-w-[343px] mx-auto grid grid-cols-1 gap-y-4 gap-x-6">
         <FormField
           type="text"
-          placeholder="Votre prénom"
-          label="Votre prénom"
+          placeholder={t("onboarding.firstName")}
+          label={t("onboarding.firstName")}
           value={formData.firstName}
           onChange={(e) => handleFieldChange("firstName", e.target.value)}
           className="h-[56px]"
         />
         <FormField
           type="text"
-          placeholder="Votre nom"
-          label="Votre nom"
+          placeholder={t("profile.yourName")}
+          label={t("profile.yourName")}
           value={formData.lastName}
           onChange={(e) => handleFieldChange("lastName", e.target.value)}
           className="h-[56px]"
         />
         <FormField
           type="email"
-          placeholder="Votre email"
-          label="Votre email"
+          placeholder={t("onboarding.email")}
+          label={t("onboarding.email")}
           value={formData.email}
           onChange={(e) => handleFieldChange("email", e.target.value)}
           className="h-[56px] md:col-span-2"
@@ -85,12 +91,12 @@ export default function ClientProfile() {
 
       <div className="mt-16 mb-6 flex flex-col-reverse md:flex-row justify-between items-end gap-y-4 gap-x-6 px-10">
         <Button
-          label="Supprimer mon compte"
+          label={t("profile.deleteAccount")}
           className="bg-white text-red-500 rounded-[8px] shadow-none h-[56px] max-w-[331px] w-full font-bold text-base hover:bg-white"
           onClick={handleDeleteAccount}
         />
         <Button
-          label={isUpdating ? "Sauvegarde..." : "Enregistrer changement"}
+          label={isUpdating ? t("profile.saving") : t("profile.saveChanges")}
           className="h-[56px] max-w-[331px] w-full font-bold text-base font-figtree"
           disabled={!isEditing || isUpdating}
           onClick={handleSave}

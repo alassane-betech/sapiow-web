@@ -1,5 +1,6 @@
 import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 import { supabase } from "@/lib/supabase/client";
+import { useI18n } from "@/locales/client";
 import { useUserStore } from "@/store/useUser";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,54 +9,54 @@ import { useState } from "react";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
 
-const navItems = [
+const getNavItems = (t: any) => [
   {
-    label: "Mon profil",
+    label: t("account.profile"),
     icon: "/assets/icons/profile.svg",
     href: "/compte/profile",
   },
   {
-    label: "Mes disponibilités",
+    label: t("account.availability"),
     icon: "/assets/icons/calendar.svg",
     href: "/compte/disponibilites",
   },
   {
-    label: "Historique des paiements",
+    label: t("account.paymentHistory"),
     icon: "/assets/icons/card.svg",
     href: "/compte/historique-paiements",
   },
   {
-    label: "Mes offres",
+    label: t("account.offers"),
     icon: "/assets/icons/tag.svg",
     href: "/compte/offres",
   },
   {
-    label: "Revenus",
+    label: t("account.revenue"),
     icon: "/assets/icons/wallet.svg",
     href: "/compte/revenus",
   },
   {
-    label: "Notifications",
+    label: t("account.notifications"),
     icon: "/assets/icons/notif.svg",
     href: "/compte/notifications",
   },
   {
-    label: "Langue",
+    label: t("account.language"),
     icon: "/assets/icons/lang.svg",
     href: "/compte/langue",
   },
   {
-    label: "Besoin d'aide ?",
+    label: t("account.support"),
     icon: "/assets/icons/help.svg",
     href: "/compte/support",
   },
   {
-    label: "Mentions légales",
+    label: t("account.legalMentions"),
     icon: "/assets/icons/shield.svg",
     href: "/compte/mentions-legales",
   },
   {
-    label: "A propos",
+    label: t("account.about"),
     icon: "/assets/icons/info.svg",
     href: "/compte/a-propos",
   },
@@ -66,11 +67,13 @@ interface AccountSidebarProps {
 }
 
 export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
+  const t = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user } = useUserStore();
   const { handleExpertModeSwitch, hasExpertProfile } = useExpertModeSwitch();
+  const navItems = getNavItems(t);
 
   const sidebarClasses = isMobile
     ? "w-full h-full flex flex-col px-4 py-4"
@@ -108,21 +111,20 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
   const getFilteredNavItems = () => {
     if (user.type === "client") {
       // Client : Mon profil, Historique des paiements, Notifications, Langue, Besoin d'aide ?, Mentions légales, A propos
-      return navItems.filter((item) =>
-        [
-          "Mon profil",
-          "Historique des paiements",
-          "Notifications",
-          "Langue",
-          "Besoin d'aide ?",
-          "Mentions légales",
-          "A propos",
-        ].includes(item.label)
-      );
+      const allowedLabels = [
+        t("account.profile"),
+        t("account.paymentHistory"),
+        t("account.notifications"),
+        t("account.language"),
+        t("account.support"),
+        t("account.legalMentions"),
+        t("account.about"),
+      ];
+      return navItems.filter((item) => allowedLabels.includes(item.label));
     } else {
       // Expert : Tous sauf Historique des paiements
       return navItems.filter(
-        (item) => item.label !== "Historique des paiements"
+        (item) => item.label !== t("account.paymentHistory")
       );
     }
   };
@@ -134,9 +136,11 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto z-50 -mt-4">
         <ul className="space-y-0">
-          <ShareLinkButton className="mb-5" />
+          <ShareLinkButton className="mb-5 mt-5" />
           {filteredNavItems.map((item) => {
-            const isActive = pathname === item.href;
+            // Extraire le chemin sans la locale (fr/en) pour la comparaison
+            const pathWithoutLocale = pathname.replace(/^\/(fr|en)/, "") || "/";
+            const isActive = pathWithoutLocale === item.href;
             return (
               <li key={item.label}>
                 <Link
@@ -173,21 +177,20 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
       {!hasExpertProfile && (
         <div className="flex flex-col w-full max-w-[302px] h-[172px] bg-[#E8F2FF] rounded-[12px] p-4">
           <h2 className="text-base font-bold text-exford-blue font-figtree">
-            Devenez expert
+            {t("account.becomeExpert")}
           </h2>
           <p className="text-sm text-exford-blue font-figtree font-normal">
-            Devenez expert et accédez à notre plateforme pour offrir des
-            consultations vidéo à votre audience.
+            {t("account.becomeExpertDescription")}
           </p>
           <div className="flex mt-5">
             <Link
               href="/compte/devenir-expert"
               className="w-full text-sm text-charcoal-blue font-semibold font-figtree py-2 rounded-xl hover:bg-[#F7F9FB] transition"
             >
-              En savoir plus
+              {t("account.learnMore")}
             </Link>
             <Button
-              label="Devenir expert"
+              label={t("account.becomeExpertButton")}
               className="h-10 font-bold text-base font-figtree w-full max-w-[130px]"
               onClick={handleExpertModeSwitch}
             />
@@ -205,7 +208,7 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
           disabled={isLoggingOut}
           className="w-full text-center text-[#1E293B] font-bold text-[15px] py-2 rounded-xl hover:bg-[#F7F9FB] transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-figtree"
         >
-          {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+          {isLoggingOut ? t("account.loggingOut") : t("account.logout")}
         </button>
       </div>
     </aside>

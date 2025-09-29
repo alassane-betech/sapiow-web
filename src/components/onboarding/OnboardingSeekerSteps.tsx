@@ -2,11 +2,13 @@
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { useOnboardingSeeker } from "@/hooks/useOnboardingSeeker";
+import { useI18n } from "@/locales/client";
 import React from "react";
 import { DomainSelector } from "./DomainSelector";
 import { Pagination } from "./Pagination";
 
 export const OnboardingSeekerSteps: React.FC = () => {
+  const t = useI18n();
   const {
     step,
     firstName,
@@ -33,17 +35,16 @@ export const OnboardingSeekerSteps: React.FC = () => {
       {step === 1 && (
         <>
           <h1 className="text-2xl sm:text-lg lg:text-xl font-bold text-center mb-2">
-            Faisons connaissance
+            {t("onboarding.letsGetAcquainted")}
           </h1>
           <p className="text-base sm:text-base font-normal my-4 text-center text-ash-gray mb-8">
-            Nous avons besoin de quelques <br /> informations pour personnaliser
-            votre <br /> expérience.
+            {t("onboarding.personalizeExperience")}
           </p>
           <div className="space-y-6 mb-8">
             <FormField
               type="text"
-              placeholder="Votre prénom"
-              label="Votre prénom"
+              placeholder={t("onboarding.firstName")}
+              label={t("onboarding.firstName")}
               value={firstName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setFirstName(e.target.value)
@@ -52,8 +53,8 @@ export const OnboardingSeekerSteps: React.FC = () => {
             />
             <FormField
               type="text"
-              placeholder="Votre nom de famille"
-              label="Votre nom de famille"
+              placeholder={t("onboarding.lastName")}
+              label={t("onboarding.lastName")}
               value={lastName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setLastName(e.target.value)
@@ -62,8 +63,8 @@ export const OnboardingSeekerSteps: React.FC = () => {
             />
             <FormField
               type="email"
-              placeholder="Votre Email"
-              label="Votre email"
+              placeholder={t("onboarding.email")}
+              label={t("onboarding.email")}
               value={email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setEmail(e.target.value)
@@ -73,7 +74,7 @@ export const OnboardingSeekerSteps: React.FC = () => {
           </div>
           <Pagination currentStep={1} totalSteps={2} />
           <Button
-            label="Suivant"
+            label={t("onboarding.next")}
             className="w-full rounded-[8px] h-[56px] text-base font-medium"
             disabled={!isFormValid || isSubmitting}
             onClick={nextStep}
@@ -85,13 +86,8 @@ export const OnboardingSeekerSteps: React.FC = () => {
       {step === 2 && (
         <div className="w-full max-w-[343px] sm:max-w-[380px] lg:max-w-[343px]">
           <DomainSelector
-            title="Votre domaine préféré ?"
-            subtitle={
-              <>
-                Nous allons mettre en avant les <br /> experts qui vous
-                intéressent le plus.
-              </>
-            }
+            title={t("onboarding.preferredDomain")}
+            subtitle={t("onboarding.highlightExperts")}
             domains={domains}
             selectedDomains={selectedDomains}
             onDomainSelect={handleDomainSelect}
@@ -104,13 +100,13 @@ export const OnboardingSeekerSteps: React.FC = () => {
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[8px]">
               <p className="text-sm text-red-600 text-center">
-                {error || "Une erreur est survenue lors de l'inscription"}
+                {error || t("onboarding.errorOccurred")}
               </p>
             </div>
           )}
 
           <Button
-            label={isSubmitting ? "Inscription en cours..." : "Confirmer"}
+            label={isSubmitting ? t("onboarding.registering") : t("onboarding.confirm")}
             className="w-full rounded-[8px] h-[56px] text-base font-medium"
             disabled={!isDomainValid || isSubmitting}
             onClick={completeOnboarding}

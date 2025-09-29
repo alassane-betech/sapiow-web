@@ -1,6 +1,7 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
+import { useI18n } from "@/locales/client";
 import CustomCalendar from "../common/CustomCalendar";
 import { SessionCard } from "../common/SessionCard";
 
@@ -9,6 +10,7 @@ interface VisiosTabsProps {
 }
 
 export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
+  const t = useI18n();
   const {
     confirmedAppointments,
     pendingAppointments,
@@ -34,20 +36,20 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
             value="a-venir"
             className="relative px-4 py-4 text-lg font-bold text-slate-400 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none hover:text-slate-900 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
           >
-            A venir
+            {t("visios.upcoming")}
           </TabsTrigger>
           <TabsTrigger
             value="en-attente"
             className="relative px-4 py-4 text-lg font-bold text-slate-400 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none hover:text-slate-900 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
           >
-            En attente
+            {t("visios.pending")}
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
           </TabsTrigger>
           <TabsTrigger
             value="historique"
             className="relative px-4 py-4 text-lg font-bold text-slate-400 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none hover:text-slate-900 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
           >
-            Historique
+            {t("visios.history")}
           </TabsTrigger>
         </TabsList>
 
@@ -60,7 +62,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                 const isToday =
                   appointmentDate.toDateString() === today.toDateString();
                 const dateDisplay = isToday
-                  ? "Aujourd'hui"
+                  ? t("today")
                   : appointmentDate.toLocaleDateString("fr-FR");
                 const timeDisplay = appointmentDate.toLocaleTimeString(
                   "fr-FR",
@@ -81,17 +83,19 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     name={
                       `${appointment.patient?.first_name || ""} ${
                         appointment.patient?.last_name || ""
-                      }`.trim() || "Patient"
+                      }`.trim() || t("patient")
                     }
-                    sessionDescription={appointment.session?.name || "Session"}
+                    sessionDescription={
+                      appointment.session?.name || t("session")
+                    }
                     onAccept={() =>
                       handleStartVideoCallCombined(appointment.id)
                     }
                     onViewRequest={() => {}}
                     isComming={true}
-                    duration="45mn"
+                    duration={t("visios.duration")}
                     classFooter="!flex-col"
-                    textButton="Commencer la visio"
+                    textButton={t("visios.startVideo")}
                     icon="/assets/icons/videocamera.svg"
                     isUpcoming={true}
                     questions={appointment.appointment_questions || []}
@@ -100,7 +104,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
               })
             ) : (
               <div className="col-span-full text-center py-8 text-gray-500">
-                Aucune visio confirmée à venir
+                {t("visios.noUpcomingVisios")}
               </div>
             )}
           </div>
@@ -115,7 +119,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                 const isToday =
                   appointmentDate.toDateString() === today.toDateString();
                 const dateDisplay = isToday
-                  ? "Aujourd'hui"
+                  ? t("today")
                   : appointmentDate.toLocaleDateString("fr-FR");
                 const timeDisplay = appointmentDate.toLocaleTimeString(
                   "fr-FR",
@@ -138,13 +142,15 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     name={
                       `${appointment.patient?.first_name || ""} ${
                         appointment.patient?.last_name || ""
-                      }`.trim() || "Patient"
+                      }`.trim() || t("patient")
                     }
-                    sessionDescription={appointment.session?.name || "Session"}
+                    sessionDescription={
+                      appointment.session?.name || t("session")
+                    }
                     onAccept={() => handleConfirmAppointment(appointment.id)}
                     onCancel={() => handleCancelAppointment(appointment.id)}
                     onViewRequest={() => {}}
-                    textButton="Accepter"
+                    textButton={t("accept")}
                     questions={appointment.appointment_questions || []}
                     loadingState={loadingState}
                   />
@@ -152,7 +158,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
               })
             ) : (
               <div className="col-span-full text-center py-8 text-gray-500">
-                Aucune demande en attente
+                {t("visios.noPendingRequests")}
               </div>
             )}
           </div>
@@ -183,12 +189,16 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     name={
                       `${appointment.patient?.first_name || ""} ${
                         appointment.patient?.last_name || ""
-                      }`.trim() || "Patient"
+                      }`.trim() || t("patient")
                     }
-                    sessionDescription={appointment.session?.name || "Session"}
+                    sessionDescription={
+                      appointment.session?.name || t("session")
+                    }
                     onViewRequest={() => {}}
                     textButton={
-                      appointment.status === "cancelled" ? "Annulé" : "Terminé"
+                      appointment.status === "cancelled"
+                        ? t("visios.cancelled")
+                        : t("visios.completed")
                     }
                     buttonStates={{ acceptDisabled: true, viewDisabled: false }}
                     isUpcoming={true}
@@ -198,7 +208,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
               })
             ) : (
               <div className="col-span-full text-center py-8 text-gray-500">
-                Aucun historique disponible
+                {t("visios.noHistoryVisios")}
               </div>
             )}
           </div>

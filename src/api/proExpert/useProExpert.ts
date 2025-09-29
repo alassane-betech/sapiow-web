@@ -73,7 +73,7 @@ export interface ProSessionData {
 export interface UpdateProExpertData {
   first_name?: string;
   last_name?: string;
-  avatar?: File | string; // File pour nouvel upload, string pour URL existante
+  avatar?: File | string | null; // File pour nouvel upload, string pour URL existante, null pour suppression
   domain_id?: number;
   description?: string;
   job?: string;
@@ -150,9 +150,24 @@ export const transformUpdateDataToFormData = (
   if (data.availability_end_date !== undefined)
     formData.append("availability_end_date", data.availability_end_date);
 
-  // Avatar (seulement si c'est un File)
-  if (data.avatar && data.avatar instanceof File) {
-    formData.append("avatar", data.avatar);
+  // Avatar (File pour upload, null pour suppression)
+  if (data.avatar !== undefined) {
+    if (data.avatar instanceof File) {
+      console.log(
+        "📎 Ajout du fichier au FormData:",
+        data.avatar.name,
+        data.avatar.size + " bytes"
+      );
+      formData.append("avatar", data.avatar);
+    } else if (data.avatar === null) {
+      // Envoyer un blob vide + flag de suppression pour supprimer l'avatar
+      console.log(
+        "🗑️ Suppression avatar: ajout d'un blob vide + flag de suppression au FormData"
+      );
+      const emptyBlob = new Blob([], { type: "image/jpeg" });
+      formData.append("avatar", emptyBlob, "delete.jpg");
+      formData.append("remove_avatar", "true");
+    }
   }
 
   // Champs de notification

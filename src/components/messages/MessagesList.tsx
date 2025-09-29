@@ -1,3 +1,4 @@
+import { useI18n } from "@/locales/client";
 import { MessageItem } from "./MessageItem";
 
 interface MessagesListProps {
@@ -19,11 +20,12 @@ export function MessagesList({
   selectedConversation,
   className = "",
 }: MessagesListProps) {
+  const t = useI18n();
   if (!selectedConversation) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
         <p className="text-gray-500 font-figtree">
-          Sélectionnez une conversation pour voir les messages
+          {t("messages.selectConversationToView")}
         </p>
       </div>
     );
@@ -40,7 +42,7 @@ export function MessagesList({
   if (conversationError) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
-        <p className="text-red-500">Erreur lors du chargement des messages</p>
+        <p className="text-red-500">{t("messages.errorLoadingMessages")}</p>
       </div>
     );
   }
@@ -48,7 +50,7 @@ export function MessagesList({
   if (!conversationMessages || conversationMessages.length === 0) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
-        <p className="text-gray-500">Aucun message dans cette conversation</p>
+        <p className="text-gray-500">{t("messages.noMessagesInConversation")}</p>
       </div>
     );
   }
@@ -58,7 +60,7 @@ export function MessagesList({
       {/* Date Separator */}
       <div className="flex justify-center">
         {/* <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
-          Aujourd'hui
+          {t("messages.today")}
         </span> */}
       </div>
 
@@ -71,7 +73,7 @@ export function MessagesList({
         .map((message: any) => {
           const isOwn = message.sender_id === currentUserId;
           const messageTime = new Date(message.created_at).toLocaleTimeString(
-            "fr-FR",
+            undefined,
             {
               hour: "2-digit",
               minute: "2-digit",

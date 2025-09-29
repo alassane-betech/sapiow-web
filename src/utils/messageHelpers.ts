@@ -12,9 +12,7 @@ export function extractConversationsFromMessages(messagesData: any[]) {
     if (
       !conversationsMap.has(profileId) ||
       new Date(messageItem.latest_message.created_at) >
-        new Date(
-          conversationsMap.get(profileId).latest_message.created_at
-        )
+        new Date(conversationsMap.get(profileId).latest_message.created_at)
     ) {
       conversationsMap.set(profileId, {
         profile: messageItem.profile,
@@ -50,7 +48,11 @@ export function findActiveConversation(
   return activeConversation;
 }
 
-export function formatMessageForDisplay(message: any, currentUserId: string | undefined, activeConversation: any) {
+export function formatMessageForDisplay(
+  message: any,
+  currentUserId: string | undefined,
+  activeConversation: any
+) {
   const isOwn = message.sender_id === currentUserId;
   const messageTime = new Date(message.created_at).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
@@ -67,8 +69,7 @@ export function formatMessageForDisplay(message: any, currentUserId: string | un
     avatar: !isOwn
       ? activeConversation?.profile.avatar || undefined
       : undefined,
-    hasImage:
-      message.type === "image" || message.type === "document",
+    hasImage: message.type === "image" || message.type === "document",
     type: message.type,
   };
 }

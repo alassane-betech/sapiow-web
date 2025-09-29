@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useI18n } from "@/locales/client";
 import { X } from "lucide-react";
 import Image from "next/image";
 import React from "react";
@@ -50,8 +51,10 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   questions = [],
   loadingState = null,
 }) => {
+  const t = useI18n();
+  
   // Détermine le titre du modal selon le contexte
-  const modalTitle = isUpcoming ? "Détail de la visio" : "Demande en attente";
+  const modalTitle = isUpcoming ? t("visios.sessionDetail") : t("visios.pendingRequest");
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -67,7 +70,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
             </SheetTitle>
             <SheetClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
               <X className="h-4 w-4 cursor-pointer" />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{t("visios.close")}</span>
             </SheetClose>
           </div>
         </SheetHeader>
@@ -76,7 +79,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           {/* Requested by section */}
           <div>
             <p className="text-sm text-slate-gray font-medium font-figtree mb-3">
-              Requested by :
+              {t("visios.requestedBy")}
             </p>
             <div className="flex items-center space-x-3">
               <Avatar className="h-10 w-10">
@@ -102,7 +105,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           {/* Session details */}
           <div>
             <p className="text-xs font-figtree font-medium text-slate-gray mb-2">
-              Session name :
+              {t("visios.sessionName")}
             </p>
             <p className="text-sm text-gunmetal-gray font-bold font-figtree">
               {sessionDescription}
@@ -113,7 +116,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
           {questions.length > 0 && (
             <div>
               <p className="text-xs font-figtree font-medium text-slate-gray mb-2">
-                Questions ou commentaires
+                {t("visios.questionsComments")}
               </p>
               <div className="space-y-3">
                 {questions.map((question) => (
@@ -138,7 +141,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               // Modal pour "A venir" - Bouton Commencer la visio + Annuler
               <>
                 <ButtonUI
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 cursor-pointer"
                   onClick={() => {
                     onAccept?.();
                     onOpenChange(false);
@@ -150,14 +153,14 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                     width={24}
                     height={24}
                   />
-                  Commencer la visio
+                  {t("visios.startVideo")}
                 </ButtonUI>
                 <ButtonUI
                   variant="outline"
                   className="w-full text-gray-700 border-gray-300 hover:bg-gray-50 bg-transparent"
                   onClick={() => onOpenChange(false)}
                 >
-                  Annuler
+                  {t("cancel")}
                 </ButtonUI>
               </>
             ) : (
@@ -165,7 +168,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               <div className="flex space-x-3">
                 <Button
                   variant="outline"
-                  className="flex-1 text-charcoal-blue font-figtree font-bold text-xs md:text-base border-none shadow-none hover:bg-gray-50 bg-transparent h-14 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 text-charcoal-blue font-figtree font-bold text-xs md:text-base border-none shadow-none hover:bg-gray-50 bg-transparent h-14 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   onClick={() => {
                     onCancel?.();
                     onOpenChange(false);
@@ -175,10 +178,10 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                     loadingState === "cancelling" ? (
                       <div className="flex items-center gap-2">
                         <LoadingSpinner size="sm" />
-                        Annulation...
+                        {t("visios.cancelling")}
                       </div>
                     ) : (
-                      "Refuser"
+                      t("visios.refuse")
                     )
                   }
                 />
@@ -194,10 +197,10 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                     loadingState === "confirming" ? (
                       <div className="flex items-center gap-2">
                         <LoadingSpinner size="sm" />
-                        Confirmation...
+                        {t("visios.confirming")}
                       </div>
                     ) : (
-                      "Accepter"
+                      t("accept")
                     )
                   }
                 />

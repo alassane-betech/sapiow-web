@@ -1,31 +1,32 @@
 "use client";
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type * as React from "react";
 
 // Menu items avec les icônes du dossier iconSidebar
-const items = [
+const getItems = (t: any) => [
   {
-    title: "Accueil",
+    title: t("nav.home"),
     url: "/",
     icon: "/assets/iconSidebare/home.svg",
     iconActive: "/assets/iconSidebare/homeActif.svg",
   },
   {
-    title: "visios",
+    title: t("nav.visios"),
     url: "/visios",
     icon: "/assets/iconSidebare/record.svg",
     iconActive: "/assets/iconSidebare/recordActif.svg",
   },
   {
-    title: "Messages",
+    title: t("nav.messages"),
     url: "/messages",
     icon: "/assets/iconSidebare/chat.svg",
     iconActive: "/assets/iconSidebare/chatActif.svg",
   },
   {
-    title: "Compte",
+    title: t("nav.account"),
     url: "/compte/profile",
     icon: "/assets/iconSidebare/user.svg",
     iconActive: "/assets/iconSidebare/userActif.svg",
@@ -38,13 +39,15 @@ export function AppSidebar({
   hideMobileNav = false,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & { hideMobileNav?: boolean }) {
+  const t = useI18n();
   const pathname = usePathname();
+  const items = getItems(t);
 
   return (
     <>
       {/* Sidebar verticale (desktop) */}
       <div
-        className={` h-screen bg-snow-blue border-r border-soft-ice-gray flex-col sticky left-0 top-0 z-10 hidden lg:flex ${className}`}
+        className={`h-screen bg-snow-blue border-r border-soft-ice-gray flex-col sticky left-0 top-0 z-10 hidden lg:flex ${className}`}
         {...props}
       >
         {/* Header avec logo */}
@@ -55,10 +58,13 @@ export function AppSidebar({
         <div className="flex-1 px-[20px]">
           <nav className="space-y-8">
             {items.map((item) => {
+              // Extraire le chemin sans la locale (fr/en) pour la comparaison
+              const pathWithoutLocale =
+                pathname.replace(/^\/(fr|en)/, "") || "/";
               const isActive =
-                item.title === "Compte"
-                  ? pathname.startsWith("/compte")
-                  : pathname === item.url;
+                item.title === t("nav.account")
+                  ? pathWithoutLocale.startsWith("/compte")
+                  : pathWithoutLocale === item.url;
               return (
                 <Link
                   key={item.title}
@@ -96,10 +102,12 @@ export function AppSidebar({
       {!hideMobileNav && (
         <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-soft-ice-gray flex justify-around items-center z-20 py-2">
           {items.map((item) => {
+            // Extraire le chemin sans la locale (fr/en) pour la comparaison
+            const pathWithoutLocale = pathname.replace(/^\/(fr|en)/, "") || "/";
             const isActive =
-              item.title === "Compte"
-                ? pathname.startsWith("/compte")
-                : pathname === item.url;
+              item.title === t("nav.account")
+                ? pathWithoutLocale.startsWith("/compte")
+                : pathWithoutLocale === item.url;
             return (
               <Link
                 key={item.title}

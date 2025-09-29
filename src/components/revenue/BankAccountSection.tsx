@@ -4,6 +4,7 @@ import {
 } from "@/api/proBank/useBank";
 import { Button } from "@/components/common/Button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -18,6 +19,7 @@ export default function BankAccountSection({
   onAddBankAccount,
   onModifyBankAccount,
 }: BankAccountSectionProps) {
+  const t = useI18n();
   const { mutate: initializeStripeAccount } = useCreateAccountStripe();
   const { data: bankAccount } = useGetInfoStripeAccount();
 
@@ -45,7 +47,7 @@ export default function BankAccountSection({
   return (
     <div className="space-y-6 ml-0 lg:ml-5">
       <h2 className="text-sm font-medium font-figtree text-charcoal-blue hidden lg:block">
-        Votre Compte bancaire
+        {t("bankAccount.title")}
       </h2>
 
       <Card className="bg-white border-gray-200 h-[60px]">
@@ -58,7 +60,7 @@ export default function BankAccountSection({
                   <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
                     <Image
                       src="/assets/icons/stripe.svg"
-                      alt="Bank"
+                      alt={t("bankAccount.bankAlt")}
                       width={24}
                       height={24}
                     />
@@ -67,11 +69,11 @@ export default function BankAccountSection({
                     XXX XXXX XXXXXXXXX XXX
                   </div>
                   <div className="text-xs font-medium text-gray-600 xl:hidden">
-                    Ajoutez votre RIB
+                    {t("bankAccount.addRib")}
                   </div>
                 </div>
                 <Button
-                  label={initiateBankAccount ? "En cours..." : "Ajouter"}
+                  label={initiateBankAccount ? t("bankAccount.inProgress") : t("bankAccount.add")}
                   onClick={handleAddBankAccount}
                   className="border border-light-blue-gray rounded-full text-exford-blue font-bold font-figtree px-4 py-2 mb-6 bg-transparent text-sm shadow-none"
                 />
@@ -96,7 +98,7 @@ export default function BankAccountSection({
                   </div>
                 </div>
                 <Button
-                  label="Modifier"
+                  label={t("bankAccount.modify")}
                   onClick={onModifyBankAccount}
                   className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 bg-transparent text-sm pb-6"
                 />

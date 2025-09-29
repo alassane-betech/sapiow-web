@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useUpdateProExpert, useGetProExpert } from "@/api/proExpert/useProExpert";
 import { useGetCustomer, useUpdateCustomer } from "@/api/customer/useCustomer";
 import { useUserStore } from "@/store/useUser";
+import { useI18n } from "@/locales/client";
 
 // Interface pour les paramètres de notification basée sur l'API
 export interface NotificationSettings {
@@ -23,47 +24,49 @@ export interface NotificationItem {
   type: 'sms' | 'email';
 }
 
-// Configuration des notifications UI mappées sur les champs API
-const NOTIFICATION_CONFIG: NotificationItem[] = [
+// Fonction pour générer la configuration des notifications avec traductions
+const getNotificationConfig = (t: any): NotificationItem[] => [
   {
     key: 'appointment_notification_sms',
     icon: '/assets/icons/calendar.svg',
-    label: 'Notifications de Rendez-vous',
+    label: t('notificationSettings.appointmentNotifications'),
     type: 'sms'
   },
   {
     key: 'message_notification_sms',
     icon: '/assets/icons/chatunread.svg',
-    label: 'Notifications de Messagerie',
+    label: t('notificationSettings.messageNotifications'),
     type: 'sms'
   },
   {
     key: 'promotions_notification_sms',
     icon: '/assets/icons/sale.svg',
-    label: 'Promotions & Offres spéciales',
+    label: t('notificationSettings.promotionsNotifications'),
     type: 'sms'
   },
   {
     key: 'appointment_notification_email',
     icon: '/assets/icons/calendar.svg',
-    label: 'Notifications de Rendez-vous',
+    label: t('notificationSettings.appointmentNotifications'),
     type: 'email'
   },
   {
     key: 'message_notification_email',
     icon: '/assets/icons/chatunread.svg',
-    label: 'Notifications de Messagerie',
+    label: t('notificationSettings.messageNotifications'),
     type: 'email'
   },
   {
     key: 'promotions_notification_email',
     icon: '/assets/icons/sale.svg',
-    label: 'Promotions & Offres spéciales',
+    label: t('notificationSettings.promotionsNotifications'),
     type: 'email'
   }
 ];
 
 export const useNotificationSettings = () => {
+  const t = useI18n();
+  
   // États locaux pour les paramètres de notification
   const [settings, setSettings] = useState<NotificationSettings>({
     appointment_notification_sms: true,
@@ -75,6 +78,9 @@ export const useNotificationSettings = () => {
   });
 
   const [error, setError] = useState<string | null>(null);
+
+  // Configuration des notifications avec traductions
+  const NOTIFICATION_CONFIG = getNotificationConfig(t);
 
   // Détection du type d'utilisateur
   const { user } = useUserStore();
@@ -111,10 +117,10 @@ export const useNotificationSettings = () => {
   // Gérer les erreurs de récupération
   useEffect(() => {
     if (fetchError) {
-      setError('Erreur lors du chargement des paramètres de notification');
+      setError(t('notificationSettings.errorLoadingSettings'));
       console.error('Error loading notification settings:', fetchError);
     }
-  }, [fetchError]);
+  }, [fetchError, t]);
 
   // Fonction pour mettre à jour un paramètre de notification
   const updateNotificationSetting = useCallback(async (
@@ -142,33 +148,33 @@ export const useNotificationSettings = () => {
         [key]: !value
       }));
       
-      setError('Erreur lors de la mise à jour des paramètres');
+      setError(t('notificationSettings.errorUpdatingSettings'));
       console.error('Error updating notification setting:', err);
     }
-  }, [updateMutation]);
+  }, [updateMutation, t]);
 
   // Fonctions utilitaires pour filtrer les notifications par type
   const getSmsNotifications = useCallback(() => {
     return NOTIFICATION_CONFIG
-      .filter(config => config.type === 'sms')
-      .map(config => ({
+      .filter((config: NotificationItem) => config.type === 'sms')
+      .map((config: NotificationItem) => ({
         id: config.key,
         icon: config.icon,
         label: config.label,
         checked: settings[config.key]
       }));
-  }, [settings]);
+  }, [settings, NOTIFICATION_CONFIG]);
 
   const getEmailNotifications = useCallback(() => {
     return NOTIFICATION_CONFIG
-      .filter(config => config.type === 'email')
-      .map(config => ({
+      .filter((config: NotificationItem) => config.type === 'email')
+      .map((config: NotificationItem) => ({
         id: config.key,
         icon: config.icon,
         label: config.label,
         checked: settings[config.key]
       }));
-  }, [settings]);
+  }, [settings, NOTIFICATION_CONFIG]);
 
   // Fonction pour gérer le changement d'une notification SMS
   const handleSmsNotificationChange = useCallback((id: string, checked: boolean) => {

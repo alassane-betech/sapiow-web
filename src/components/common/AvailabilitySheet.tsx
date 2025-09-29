@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
+import { useI18n } from "@/locales/client";
 import { Check, Plus } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -44,15 +45,17 @@ export default function AvailabilitySheet({
   isOpen,
   onClose,
 }: AvailabilitySheetProps) {
+  const t = useI18n();
+  
   // Définir les jours de la semaine
   const weekDays: DayAvailability[] = [
-    { day: "Dimanche", dayOfWeek: "sunday", available: false },
-    { day: "Lundi", dayOfWeek: "monday", available: true },
-    { day: "Mardi", dayOfWeek: "tuesday", available: true },
-    { day: "Mercredi", dayOfWeek: "wednesday", available: false },
-    { day: "Jeudi", dayOfWeek: "thursday", available: true },
-    { day: "Vendredi", dayOfWeek: "friday", available: true },
-    { day: "Samedi", dayOfWeek: "saturday", available: false },
+    { day: t("availabilitySheet.sunday"), dayOfWeek: "sunday", available: false },
+    { day: t("availabilitySheet.monday"), dayOfWeek: "monday", available: true },
+    { day: t("availabilitySheet.tuesday"), dayOfWeek: "tuesday", available: true },
+    { day: t("availabilitySheet.wednesday"), dayOfWeek: "wednesday", available: false },
+    { day: t("availabilitySheet.thursday"), dayOfWeek: "thursday", available: true },
+    { day: t("availabilitySheet.friday"), dayOfWeek: "friday", available: true },
+    { day: t("availabilitySheet.saturday"), dayOfWeek: "saturday", available: false },
   ];
 
   // Créer des dates fictives pour chaque jour de la semaine (pour utiliser le hook)
@@ -104,7 +107,7 @@ export default function AvailabilitySheet({
   const [availabilityPeriod, setAvailabilityPeriod] = useState({
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
-    displayText: "3 mois",
+    displayText: t("availabilitySheet.threeMonths"),
   });
 
   // Obtenir le manager pour un jour donné
@@ -176,7 +179,7 @@ export default function AvailabilitySheet({
         >
           <SheetHeader className="pb-6">
             <SheetTitle className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-4">
-              Gérer mes disponibilités
+              {t("availabilitySheet.title")}
             </SheetTitle>
           </SheetHeader>
 
@@ -184,7 +187,7 @@ export default function AvailabilitySheet({
             {/* Période disponible */}
             <div>
               <h2 className="text-base font-medium text-slate-800 mb-2.5">
-                Période disponible
+                {t("availabilitySheet.availablePeriod")}
               </h2>
               <Card className="border border-gray-200 h-fit p-0">
                 <CardContent className="h-fit">
@@ -192,7 +195,7 @@ export default function AvailabilitySheet({
                     <div className="flex items-center justify-between h-14">
                       <div className="flex justify-between ">
                         <div className="font-semibold text-gray-900">
-                          Disponibilité
+                          {t("availabilitySheet.availability")}
                         </div>
                         <div className="text-gray-500 ml-3">
                           {availabilityPeriod.displayText}
@@ -216,7 +219,7 @@ export default function AvailabilitySheet({
                     <div className="pb-4 pt-0">
                       <div className="flex items-center justify-between mb-6">
                         <div className="font-semibold text-gray-900">
-                          Disponibilité {availabilityPeriod.displayText}
+                          {t("availabilitySheet.availability")} {availabilityPeriod.displayText}
                         </div>
                         <Button
                           variant="ghost"
@@ -237,7 +240,7 @@ export default function AvailabilitySheet({
                               startDate: date,
                             }))
                           }
-                          label="Date début"
+                          label={t("availabilitySheet.startDate")}
                           disabled={(date) => date < new Date()}
                         />
 
@@ -249,7 +252,7 @@ export default function AvailabilitySheet({
                               endDate: date,
                             }))
                           }
-                          label="Date fin"
+                          label={t("availabilitySheet.endDate")}
                           disabled={(date) =>
                             date < new Date() ||
                             (availabilityPeriod.startDate
@@ -267,7 +270,7 @@ export default function AvailabilitySheet({
             {/* Jours disponibles */}
             <div>
               <h2 className="text-base font-medium text-slate-800 mb-2.5">
-                Jours disponible
+                {t("availabilitySheet.availableDays")}
               </h2>
               <div className="space-y-4">
                 {weekDays.map((dayData) => {
@@ -287,12 +290,11 @@ export default function AvailabilitySheet({
                             </div>
                             {isAvailable ? (
                               <div className="text-sm text-slate-gray mb-2">
-                                {manager.timeSlots.length} session
-                                {manager.timeSlots.length > 1 ? "s" : ""}
+                                {manager.timeSlots.length} {manager.timeSlots.length > 1 ? t("availabilitySheet.sessions") : t("availabilitySheet.session")}
                               </div>
                             ) : (
                               <div className="text-sm text-slate-gray">
-                                Indisponible
+                                {t("availabilitySheet.unavailable")}
                               </div>
                             )}
                           </div>
@@ -365,7 +367,7 @@ export default function AvailabilitySheet({
                                     </SelectContent>
                                   </Select>
                                   <span className="text-gray-500 text-sm whitespace-nowrap">
-                                    à
+                                    {t("availabilitySheet.to")}
                                   </span>
                                   <Select
                                     value={session.endTime}
@@ -452,7 +454,7 @@ export default function AvailabilitySheet({
                               disabled={manager.isLoadingAny}
                             >
                               <Plus className="h-4 w-4 mr-2" />
-                              Ajouter une session
+                              {t("availabilitySheet.addSession")}
                             </Button>
                           </div>
                         )}

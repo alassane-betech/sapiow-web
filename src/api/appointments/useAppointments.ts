@@ -139,3 +139,36 @@ export const useUpdateProAppointment = () => {
     },
   });
 };
+
+export const useCancelPatientAppointment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (appointmentId: string) => {
+      return apiClient.delete(`patient-appointment-cancel/${appointmentId}`);
+    },
+    onSuccess: (_, appointmentId) => {
+      // Invalider le cache pour recharger les données de l'appointment spécifique
+      queryClient.invalidateQueries({
+        queryKey: ["appointment", appointmentId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["patient-appointments"],
+      });
+
+      // Invalider aussi la liste des rendez-vous du patient
+      queryClient.invalidateQueries({
+        queryKey: ["patient-appointments", appointmentId],
+      });
+
+      // Invalider la liste générale des appointments
+      queryClient.invalidateQueries({
+        queryKey: ["appointments"],
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to cancel patient appointment:", error);
+    },
+  });
+};

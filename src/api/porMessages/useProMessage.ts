@@ -56,7 +56,18 @@ export const useProSendMessage = (senderId: string) => {
     mutationFn: async (data: SendMessageData) => {
       // Le backend attend des FormData
       const formData = new FormData();
-      formData.append("content", data.content);
+      
+      // Gérer différents types de contenu comme dans le code de référence
+      if (data.type === "audio" && data.content instanceof File) {
+        formData.append("content", data.content);
+      } else if (data.type === "image" && data.content instanceof File) {
+        formData.append("content", data.content);
+      } else if (typeof data.content === "string") {
+        formData.append("content", data.content);
+        formData.append("type", data.type); // Seulement pour les messages texte
+      } else {
+        formData.append("content", data.content);
+      }
 
       // Utiliser l'endpoint Supabase Function comme le backend l'attend
       const { data: messageData, error } = await supabase.functions.invoke(
@@ -79,26 +90,31 @@ export const useProSendMessage = (senderId: string) => {
         queryKey: ["conversation", variables.receiverId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["messages"],
+        queryKey: ["conversations"],
       });
     },
   });
 };
 
-// Hook pour récupérer les messages avec real-time
-export const useProGetMessages = () => {
+// Hook pour récupérer toutes les conversations avec real-time
+export const useProGetConversations = () => {
   const { currentUser } = useCurrentUserData();
   const currentProId = currentUser?.id;
   const queryClient = useQueryClient();
 
-  const query = useQuery<Message[], Error>({
-    queryKey: ["messages"],
+  const query = useQuery<Conversation[], Error>({
+    queryKey: ["conversations"],
     queryFn: async () => {
+      if (!currentProId) return [];
+      
       try {
-        const response = await apiClient.get<Message[]>(`pro-messages`);
+        // Utiliser Supabase Functions comme dans le code de référence
+        const { data, error } = await supabase.functions.invoke("pro-messages", {
+          method: "GET",
+        });
 
-        // L'API retourne directement l'objet expert
-        return response;
+        if (error) throw error;
+        return data as Conversation[];
       } catch (error: any) {
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
@@ -106,31 +122,36 @@ export const useProGetMessages = () => {
 
         throw new Error(
           error.message ||
-            "Une erreur est survenue lors de la récupération de l'expert"
+            "Une erreur est survenue lors de la récupération des conversations"
         );
       }
     },
+    enabled: !!currentProId,
   });
 
-  // Real-time pour tous les messages du pro
+  // Real-time pour tous les nouveaux messages reçus par le pro
   useEffect(() => {
     if (!currentProId) return;
 
     const channel = supabase
-      .channel(`pro-messages-${currentProId}`)
+      .channel("pro-messages")
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "messages",
-          filter: `or(sender_id.eq.${currentProId},receiver_id.eq.${currentProId})`,
+          filter: `receiver_id=eq.${currentProId}`,
         },
         (payload) => {
           console.log("Real-time pro messages update:", payload);
-          // Invalider la liste des messages pour mettre à jour
+          // Invalider les conversations pour mettre à jour la liste
           queryClient.invalidateQueries({
-            queryKey: ["messages"],
+            queryKey: ["conversations"],
+          });
+          // Aussi invalider la conversation spécifique
+          queryClient.invalidateQueries({
+            queryKey: ["conversation", payload.new.sender_id],
           });
         }
       )
@@ -139,11 +160,23 @@ export const useProGetMessages = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [queryClient, currentProId]);
+  }, [currentProId, queryClient]);
 
-  return query;
+  // Obtenir les messages non lus
+  const unreadMessages = query.data?.filter(
+    (conversation) =>
+      conversation.latest_message &&
+      conversation.latest_message.receiver_id === currentProId &&
+      !conversation.latest_message.read_at
+  );
+
+  return {
+    ...query,
+    unreadMessages,
+  };
 };
 
+// Hook pour récupérer les messages d'une conversation spécifique
 export const useProGetConversation = (
   patientId: string,
   currentProId: string
@@ -153,14 +186,19 @@ export const useProGetConversation = (
   const query = useQuery<Message[], Error>({
     queryKey: ["conversation", patientId],
     queryFn: async () => {
-      if (!patientId) return [];
+      if (!patientId || !currentProId) return [];
 
       try {
-        const response = await apiClient.get<Message[]>(
-          `pro-messages/${patientId}`
+        // Utiliser Supabase Functions comme dans le code de référence
+        const { data, error } = await supabase.functions.invoke(
+          `pro-messages/${patientId}?limit=10000`,
+          {
+            method: "GET",
+          }
         );
 
-        return response;
+        if (error) throw error;
+        return data as Message[];
       } catch (error: any) {
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
@@ -172,15 +210,15 @@ export const useProGetConversation = (
         );
       }
     },
-    enabled: !!patientId, // Ne pas exécuter si patientId est vide
+    enabled: !!patientId && !!currentProId,
   });
 
-  // Real-time pour les messages de cette conversation
+  // Real-time pour les messages de cette conversation spécifique
   useEffect(() => {
     if (!patientId || !currentProId) return;
 
     const channel = supabase
-      .channel(`pro-conversation-${currentProId}-${patientId}`)
+      .channel(`conversation-${patientId}`)
       .on(
         "postgres_changes",
         {
@@ -197,7 +235,7 @@ export const useProGetConversation = (
           });
           // Aussi invalider la liste des conversations pour mettre à jour le dernier message
           queryClient.invalidateQueries({
-            queryKey: ["messages"],
+            queryKey: ["conversations"],
           });
         }
       )
@@ -209,6 +247,33 @@ export const useProGetConversation = (
   }, [patientId, queryClient, currentProId]);
 
   return query;
+};
+
+// Hook pour marquer un message comme lu
+export const useProMarkAsRead = () => {
+  const { currentUser } = useCurrentUserData();
+  const currentProId = currentUser?.id;
+  const queryClient = useQueryClient();
+
+  return useMutation<Message, Error, string>({
+    mutationFn: async (messageId: string) => {
+      if (!currentProId) throw new Error("User ID is required");
+      
+      const { data, error } = await supabase
+        .from("messages")
+        .update({ read_at: new Date().toISOString() })
+        .eq("id", messageId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Message;
+    },
+    onSuccess: () => {
+      // Invalider les conversations pour mettre à jour les compteurs de messages non lus
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    },
+  });
 };
 
 // Validation des fichiers

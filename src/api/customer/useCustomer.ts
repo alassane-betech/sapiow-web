@@ -82,7 +82,7 @@ export interface UpdateCustomerData {
   first_name?: string;
   last_name?: string;
   email?: string;
-  avatar?: File;
+  avatar?: File | null; // File pour upload, null pour suppression
   language?: string;
   appointment_notification_sms?: boolean;
   appointment_notification_email?: boolean;
@@ -153,9 +153,24 @@ const transformUpdateCustomerToFormData = (
     }
   });
 
-  // Ajouter l'avatar s'il existe
-  if (data.avatar) {
-    formData.append("avatar", data.avatar);
+  // Avatar (File pour upload, null pour suppression)
+  if (data.avatar !== undefined) {
+    if (data.avatar instanceof File) {
+      console.log(
+        "📎 Ajout du fichier au FormData client:",
+        data.avatar.name,
+        data.avatar.size + " bytes"
+      );
+      formData.append("avatar", data.avatar);
+    } else if (data.avatar === null) {
+      // Envoyer un blob vide + flag de suppression pour supprimer l'avatar
+      console.log(
+        "🗑️ Suppression avatar client: ajout d'un blob vide + flag de suppression au FormData"
+      );
+      const emptyBlob = new Blob([], { type: "image/jpeg" });
+      formData.append("avatar", emptyBlob, "delete.jpg");
+      formData.append("remove_avatar", "true");
+    }
   }
 
   return formData;

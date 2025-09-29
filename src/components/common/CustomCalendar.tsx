@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/locales/client";
 import { useCalendarStore } from "@/store/useCalendar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -10,28 +11,22 @@ interface CustomCalendarProps {
   confirmedAppointments?: any[];
 }
 
-// Plus de données statiques - utilisation des vraies données d'API
-
-const daysOfWeek = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
-const months = [
-  "Janvier",
-  "Février",
-  "Mars",
-  "Avril",
-  "Mai",
-  "Juin",
-  "Juillet",
-  "Août",
-  "Septembre",
-  "Octobre",
-  "Novembre",
-  "Décembre",
-];
-
 export default function CustomCalendar({
   className,
   confirmedAppointments = [],
 }: CustomCalendarProps) {
+  const t = useI18n();
+  
+  // Get translated arrays
+  const months = [
+    t("calendar.january"), t("calendar.february"), t("calendar.march"), t("calendar.april"),
+    t("calendar.may"), t("calendar.june"), t("calendar.july"), t("calendar.august"),
+    t("calendar.september"), t("calendar.october"), t("calendar.november"), t("calendar.december")
+  ];
+  const daysOfWeek = [
+    t("calendar.sunday"), t("calendar.monday"), t("calendar.tuesday"), t("calendar.wednesday"),
+    t("calendar.thursday"), t("calendar.friday"), t("calendar.saturday")
+  ];
   const {
     currentDate,
     selectedDate,
@@ -57,18 +52,18 @@ export default function CustomCalendar({
           name:
             appointment.patient?.first_name && appointment.patient?.last_name
               ? `${appointment.patient.first_name} ${appointment.patient.last_name}`
-              : "Client",
+              : t("calendar.defaultClient"),
           avatar:
             appointment.patient?.avatar || "/assets/icons/defaultAvatar.png",
           time: new Date(appointment.appointment_at).toLocaleTimeString(
-            "fr-FR",
+            undefined,
             {
               hour: "2-digit",
               minute: "2-digit",
             }
           ),
-          duration: appointment.session?.session_type || "30 min",
-          description: appointment.session?.name || "Consultation",
+          duration: appointment.session?.session_type || t("calendar.defaultDuration"),
+          description: appointment.session?.name || t("calendar.defaultConsultation"),
         };
 
         if (mergedEvents[day]) {
@@ -346,7 +341,7 @@ export default function CustomCalendar({
 
       {/* Jours de la semaine */}
       <div className="grid grid-cols-7 gap-1 mb-2">
-        {daysOfWeek.map((day) => (
+        {daysOfWeek.map((day: string) => (
           <div
             key={day}
             className="h-12 flex items-center justify-center text-gray-500 font-medium font-figtree"

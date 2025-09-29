@@ -5,10 +5,12 @@ import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { ProfilePhotoUpload } from "@/components/onboarding/ProfilePhotoUpload";
 import { Textarea } from "@/components/ui/textarea";
+import { useI18n } from "@/locales/client";
 import { useExpertProfileUpdate } from "@/hooks/useExpertProfileUpdate";
 import Image from "next/image";
 
 export default function ExpertProfile() {
+  const t = useI18n();
   const { data: user, isLoading, error } = useGetProExpert();
 
   // Hook personnalisé pour gérer la mise à jour du profil
@@ -16,9 +18,11 @@ export default function ExpertProfile() {
     formData,
     isEditing,
     isUpdating,
+    isUploadingAvatar,
     updateError,
     handleFieldChange,
     handleAvatarChange,
+    handleAvatarDelete,
     handleSave,
     handleDeleteAccount,
   } = useExpertProfileUpdate({ user });
@@ -27,7 +31,7 @@ export default function ExpertProfile() {
     return (
       <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
         <div className="flex justify-center items-center h-64">
-          <div className="text-slate-gray">Chargement du profil...</div>
+          <div className="text-slate-gray">{t("profile.loadingProfile")}</div>
         </div>
       </div>
     );
@@ -38,7 +42,7 @@ export default function ExpertProfile() {
       <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
         <div className="flex justify-center items-center h-64">
           <div className="text-red-500">
-            Erreur lors du chargement du profil : {error.message}
+            {t("profile.errorLoadingProfile")} {error.message}
           </div>
         </div>
       </div>
@@ -49,7 +53,7 @@ export default function ExpertProfile() {
   const displayUpdateError = updateError ? (
     <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
       <div className="text-red-600 text-sm">
-        Erreur lors de la mise à jour : {updateError.message}
+        {t("profile.errorUpdatingProfile")} {updateError.message}
       </div>
     </div>
   ) : null;
@@ -61,55 +65,57 @@ export default function ExpertProfile() {
         <ProfilePhotoUpload
           isCompte
           onPhotoSelect={handleAvatarChange}
+          onPhotoDelete={handleAvatarDelete}
           currentAvatar={user?.avatar}
+          isUploading={isUploadingAvatar}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
         <FormField
           type="text"
-          placeholder="Votre prénom"
-          label="Votre prénom"
+          placeholder={t("onboarding.firstName")}
+          label={t("onboarding.firstName")}
           value={formData.firstName}
           onChange={(e) => handleFieldChange("firstName", e.target.value)}
           className="h-[56px]"
         />
         <FormField
           type="text"
-          placeholder="Votre nom"
-          label="Votre nom"
+          placeholder={t("profile.yourName")}
+          label={t("profile.yourName")}
           value={formData.lastName}
           onChange={(e) => handleFieldChange("lastName", e.target.value)}
           className="h-[56px]"
         />
         <FormField
           type="text"
-          placeholder="Votre métier"
-          label="Votre métier"
+          placeholder={t("profile.yourJob")}
+          label={t("profile.yourJob")}
           value={formData.job}
           onChange={(e) => handleFieldChange("job", e.target.value)}
           className="h-[56px]"
         />
         <FormField
           type="email"
-          placeholder="Votre email"
-          label="Votre email"
+          placeholder={t("onboarding.email")}
+          label={t("onboarding.email")}
           value={formData.email}
           onChange={(e) => handleFieldChange("email", e.target.value)}
           className="h-[56px]"
         />
         <FormField
           type="text"
-          placeholder="Lien LinkedIn"
-          label="Lien LinkedIn"
+          placeholder={t("profile.linkedinLink")}
+          label={t("profile.linkedinLink")}
           value={formData.linkedin}
           onChange={(e) => handleFieldChange("linkedin", e.target.value)}
           className="h-[56px]"
         />
         <FormField
           type="text"
-          placeholder="Site web"
-          label="Site web"
+          placeholder={t("profile.website")}
+          label={t("profile.website")}
           value={formData.website}
           onChange={(e) => handleFieldChange("website", e.target.value)}
           className="h-[56px]"
@@ -119,8 +125,8 @@ export default function ExpertProfile() {
       <div className="mt-6">
         <FormField
           type="text"
-          placeholder="Domaine d'expertise"
-          label="Domaine d'expertise"
+          placeholder={t("profile.expertiseDomain")}
+          label={t("profile.expertiseDomain")}
           value={formData.domainName}
           onChange={(e) => handleFieldChange("domainName", e.target.value)}
           rightIcon={
@@ -135,7 +141,7 @@ export default function ExpertProfile() {
           className="h-[56px]"
         />
         <Textarea
-          placeholder="À propos de vous"
+          placeholder={t("profile.aboutYouPlaceholder")}
           value={formData.description}
           onChange={(e) => handleFieldChange("description", e.target.value)}
           rows={6}
@@ -148,10 +154,10 @@ export default function ExpertProfile() {
           className="bg-white text-red-500 rounded-[8px] shadow-none h-[56px] max-w-[331px] w-full font-bold text-base hover:bg-white cursor-pointer"
           onClick={handleDeleteAccount}
         >
-          Supprimer mon compte
+          {t("profile.deleteAccount")}
         </button>
         <Button
-          label={isUpdating ? "Sauvegarde..." : "Enregistrer changement"}
+          label={isUpdating ? t("profile.saving") : t("profile.saveChanges")}
           className="h-[56px] max-w-[331px] w-full font-bold text-base font-figtree"
           disabled={!isEditing || isUpdating}
           onClick={handleSave}

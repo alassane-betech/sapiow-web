@@ -6,6 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useI18n } from "@/locales/client";
 import { useState } from "react";
 import { Button } from "./Button";
 import { FormField } from "./FormField";
@@ -21,6 +22,7 @@ export default function AddBankAccountModal({
   onClose,
   onSuccess,
 }: AddBankAccountModalProps) {
+  const t = useI18n();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -69,7 +71,7 @@ export default function AddBankAccountModal({
           <SheetHeader className="p-6 pb-4 border-b border-soft-ice-gray">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-sm font-medium text-charcoal-blue">
-                Ajouter un compte bancaire
+                {t("bankAccount.addBankAccount")}
               </SheetTitle>
             </div>
           </SheetHeader>
@@ -78,9 +80,9 @@ export default function AddBankAccountModal({
           <div className="flex-1 p-6 space-y-0">
             {/* Prénom */}
             <FormField
-              label="Prénom"
+              label={t("onboarding.firstName")}
               name="firstName"
-              placeholder="Prénom"
+              placeholder={t("onboarding.firstName")}
               value={formData.firstName}
               onChange={(e) => handleInputChange("firstName", e.target.value)}
               className="h-[56px] mb-3"
@@ -88,9 +90,9 @@ export default function AddBankAccountModal({
 
             {/* Nom de famille */}
             <FormField
-              label="Nom de famille"
+              label={t("onboarding.lastName")}
               name="lastName"
-              placeholder="Nom de famille"
+              placeholder={t("onboarding.lastName")}
               value={formData.lastName}
               onChange={(e) => handleInputChange("lastName", e.target.value)}
               className="h-[56px]"
@@ -98,16 +100,15 @@ export default function AddBankAccountModal({
 
             {/* Message d'information */}
             <p className="text-sm text-gray-500 leading-relaxed font-normal mt-2 mb-5">
-              Assurez-vous que cela correspond au nom figurant sur votre pièce
-              d'identité gouvernementale.
+              {t("bankAccount.nameMatchId")}
             </p>
 
             {/* IBAN */}
             <div className="space-y-1">
               <FormField
-                label="IBAN"
+                label={t("bankAccount.iban")}
                 name="iban"
-                placeholder="IBAN"
+                placeholder={t("bankAccount.iban")}
                 value={formData.iban}
                 onChange={(e) => handleInputChange("iban", e.target.value)}
                 className="h-[56px] mb-3"
@@ -117,9 +118,9 @@ export default function AddBankAccountModal({
             {/* Code BIC/SWIFT */}
             <div className="space-y-1">
               <FormField
-                label="Code BIC/SWIFT"
+                label={t("bankAccount.bicSwift")}
                 name="bicSwift"
-                placeholder="Code BIC/SWIFT"
+                placeholder={t("bankAccount.bicSwift")}
                 value={formData.bicSwift}
                 onChange={(e) => handleInputChange("bicSwift", e.target.value)}
                 className="h-[56px]"
@@ -131,13 +132,13 @@ export default function AddBankAccountModal({
           <div className="p-6 border-t border-soft-ice-gray">
             <div className="flex gap-4">
               <Button
-                label="Annuler"
+                label={t("cancel")}
                 onClick={handleCancel}
                 className="flex-1 py-3 text-base text-charcoal-blue bg-white shadow-none border-none h-[56px]"
               />
 
               <Button
-                label="Ajouter"
+                label={t("bankAccount.add")}
                 onClick={handleSubmit}
                 disabled={
                   !formData.firstName ||
