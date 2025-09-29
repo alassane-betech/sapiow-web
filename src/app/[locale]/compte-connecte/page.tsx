@@ -5,25 +5,27 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/common/Button";
 import { withAuth } from "@/components/common/withAuth";
+import { useCurrentLocale } from "@/locales/client";
 import Image from "next/image";
 
 function CompteConnecte() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const locale = useCurrentLocale();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Redirection directe vers compte/revenus
-    router.push('/compte/revenus');
-  }, [router]);
+    // Redirection directe vers compte/revenus avec locale
+    router.push(`/${locale}/compte/revenus`);
+  }, [router, locale]);
 
   const handleReturnToAccount = () => {
-    router.push('/compte/revenus');
+    router.push(`/${locale}/compte/revenus`);
   };
 
   const handleRetry = () => {
-    router.push('/compte/revenus');
+    router.push(`/${locale}/compte/revenus`);
   };
 
   return (
