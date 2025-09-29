@@ -1,13 +1,14 @@
 "use client";
 import {
   useCreatePatientAppointment,
+  useGetProAppointmentBlocks,
   useGetProAppointments,
 } from "@/api/appointments/useAppointments";
 import { Button } from "@/components/common/Button";
-import { useCurrentLocale, useI18n } from "@/locales/client";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePlaningStore } from "@/store/usePlaning";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -127,8 +128,8 @@ export default function VisioPlanningCalendar({
   professionalName,
   onAppointmentCreated,
 }: VisioPlanningCalendarProps) {
-  const t = useI18n();
-  const currentLocale = useCurrentLocale();
+  const t = useTranslations();
+  const currentLocale = useLocale();
 
   // Variables traduites selon la locale
   const daysOfWeek =
@@ -181,6 +182,18 @@ export default function VisioPlanningCalendar({
   const router = useRouter();
   // Hook pour créer un appointment
   const createAppointmentMutation = useCreatePatientAppointment();
+
+  // Hook pour récupérer les dates bloquées
+  const { data: blockedDates } = useGetProAppointmentBlocks();
+  console.log("blockedDates", blockedDates);
+  // Fonction pour vérifier si une date est bloquée
+  const isDateBlocked = (date: Date) => {
+    if (!blockedDates || !Array.isArray(blockedDates)) return false;
+    return blockedDates.some(
+      (block: any) =>
+        new Date(block.date).toDateString() === date.toDateString()
+    );
+  };
 
   // Créer les durées dynamiques basées sur les sessions de l'expert
 
@@ -361,6 +374,7 @@ export default function VisioPlanningCalendar({
         day
       );
       const isClickable = dayDate >= today; // Seuls les jours futurs ou aujourd'hui sont cliquables
+      const isBlocked = isDateBlocked(dayDate); // Vérifier si la date est bloquée
 
       days.push(
         <div
@@ -370,12 +384,12 @@ export default function VisioPlanningCalendar({
             ${
               isSelected
                 ? "bg-exford-blue text-white font-bold"
-                : isClickable
+                : isClickable && !isBlocked
                 ? "hover:bg-gray-100 text-gray-900"
                 : "text-gray-300 cursor-not-allowed"
             }
           `}
-          onClick={() => isClickable && handleDateClick(day)}
+          onClick={() => isClickable && !isBlocked && handleDateClick(day)}
         >
           <span className="text-sm font-medium">{day}</span>
         </div>
@@ -569,14 +583,6 @@ export default function VisioPlanningCalendar({
                 : "bg-cobalt-blue hover:bg-cobalt-blue/90 text-white"
             }`}
           />
-
-          {createAppointmentMutation.isError && (
-            <div className="mt-2 text-sm text-red-600 text-center">
-              {currentLocale === "fr"
-                ? "Erreur lors de la réservation. Veuillez réessayer."
-                : "Booking error. Please try again."}
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "./Button";
 import { FormField } from "./FormField";
@@ -22,7 +22,7 @@ export default function AddBankAccountModal({
   onClose,
   onSuccess,
 }: AddBankAccountModalProps) {
-  const t = useI18n();
+  const t = useTranslations();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",

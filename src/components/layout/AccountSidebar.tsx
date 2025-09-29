@@ -1,7 +1,7 @@
 import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 import { supabase } from "@/lib/supabase/client";
-import { useI18n } from "@/locales/client";
 import { useUserStore } from "@/store/useUser";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -67,7 +67,7 @@ interface AccountSidebarProps {
 }
 
 export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
-  const t = useI18n();
+  const t = useTranslations();
   const router = useRouter();
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);

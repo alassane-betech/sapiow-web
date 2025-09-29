@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
-import { useI18n } from "@/locales/client";
 import { Link, Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface TimeSlotsManagerProps {
   selectedDate: Date | null;
@@ -20,8 +20,8 @@ interface TimeSlotsManagerProps {
 export default function TimeSlotsManager({
   selectedDate,
 }: TimeSlotsManagerProps) {
-  const t = useI18n();
-  
+  const t = useTranslations();
+
   const {
     timeSlots,
     timeOptions,
@@ -55,7 +55,9 @@ export default function TimeSlotsManager({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             {isLoadingAny && (
-              <div className="text-sm text-blue-600">{t("timeSlotsManager.saving")}</div>
+              <div className="text-sm text-blue-600">
+                {t("timeSlotsManager.saving")}
+              </div>
             )}
           </div>
 

@@ -1,4 +1,6 @@
+// next.config.js ou next.config.ts
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   images: {
@@ -17,6 +19,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Suppression de la config i18n car on utilise next-international avec App Router
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin();
+
+export default withNextIntl(nextConfig);

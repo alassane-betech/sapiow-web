@@ -1,15 +1,15 @@
 import { useListProPayouts } from "@/api/pro-payouts/useProPayouts";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useI18n, useCurrentLocale } from "@/locales/client";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function PaymentHistory() {
-  const t = useI18n();
-  const currentLocale = useCurrentLocale();
+  const t = useTranslations();
+  const currentLocale = useLocale();
   const { data: payouts, isLoading, error } = useListProPayouts();
 
   // Fonction pour formater la date selon la locale
   const formatDate = (timestamp: number) => {
-    const locale = currentLocale === 'fr' ? 'fr-FR' : 'en-US';
+    const locale = currentLocale === "fr" ? "fr-FR" : "en-US";
     return new Date(timestamp * 1000).toLocaleDateString(locale, {
       day: "2-digit",
       month: "2-digit",
@@ -19,7 +19,7 @@ export default function PaymentHistory() {
 
   // Fonction pour formater le montant selon la locale
   const formatAmount = (amount: number, currency: string) => {
-    const locale = currentLocale === 'fr' ? 'fr-FR' : 'en-US';
+    const locale = currentLocale === "fr" ? "fr-FR" : "en-US";
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency: currency.toUpperCase(),
@@ -76,7 +76,9 @@ export default function PaymentHistory() {
       <div className="space-y-2">
         {payments.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-slate-gray">{t("revenue.noPaymentsFound")}</div>
+            <div className="text-slate-gray">
+              {t("revenue.noPaymentsFound")}
+            </div>
           </div>
         ) : (
           payments.map((payment, index) => (

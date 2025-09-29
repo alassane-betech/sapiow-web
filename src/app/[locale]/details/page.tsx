@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button as ButtonUI } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useI18n, useCurrentLocale } from "@/locales/client";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
 import { ChevronDown, ChevronRight } from "lucide-react";
@@ -29,6 +28,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
 import { useDetailsLogic } from "@/hooks/useDetailsLogic";
 import { useUserStore } from "@/store/useUser";
+import { useLocale, useTranslations } from "next-intl";
 
 // Type definitions based on actual API response
 interface Patient {
@@ -139,8 +139,8 @@ const professionalsSimilar = [
 ];
 
 function ProfessionalDetailContent() {
-  const t = useI18n();
-  const locale = useCurrentLocale();
+  const t = useTranslations();
+  const locale = useLocale();
   const { data: customer } = useGetCustomer();
   const { data: appointments } = useGetPatientAppointmentsById(
     customer?.id || ""
@@ -224,7 +224,9 @@ function ProfessionalDetailContent() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-lg text-gray-600">{t("expertDetails.expertNotFound")}</p>
+          <p className="text-lg text-gray-600">
+            {t("expertDetails.expertNotFound")}
+          </p>
         </div>
       </div>
     );
@@ -279,7 +281,9 @@ function ProfessionalDetailContent() {
                     variant="link"
                     className="text-sm font-bold p-0 h-auto text-cobalt-blue underline cursor-pointer"
                   >
-                    {isDescriptionExpanded ? t("expertDetails.seeLess") : t("expertDetails.seeMore")}{" "}
+                    {isDescriptionExpanded
+                      ? t("expertDetails.seeLess")
+                      : t("expertDetails.seeMore")}{" "}
                     <ChevronDown className="h-4 w-4 ml-1" />
                   </ButtonUI>
                 </div>
@@ -325,36 +329,32 @@ function ProfessionalDetailContent() {
                 <ul className="space-y-3 text-gray-700 pl-6 pb-4 text-base font-figtree pr-1">
                   <li className="flex items-start gap-2">
                     <span className="text-gray-700 mt-1">•</span>
-                    <span>
-                      {t("expertDetails.question1")}
-                    </span>
+                    <span>{t("expertDetails.question1")}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-gray-700 mt-1">•</span>
-                    <span>
-                      {t("expertDetails.question2")}
-                    </span>
+                    <span>{t("expertDetails.question2")}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-gray-700 mt-1">•</span>
-                    <span>
-                      {t("expertDetails.question3")}
-                    </span>
+                    <span>{t("expertDetails.question3")}</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-gray-700 mt-1">•</span>
-                    <span>
-                      {t("expertDetails.question4")}
-                    </span>
+                    <span>{t("expertDetails.question4")}</span>
                   </li>
                 </ul>
               </div>
 
               <div className="bg-soft-ice-gray px-1 py-0.5 rounded-[8px] border border-soft-ice-gray">
-                <h2 className="text-base font-bold mb-4 pl-6 pt-3">{t("expertDetails.expectations")}</h2>
+                <h2 className="text-base font-bold mb-4 pl-6 pt-3">
+                  {t("expertDetails.expectations")}
+                </h2>
                 <div className="space-y-4 text-base">
                   <div className="pl-6 pr-1">
-                    <h3 className="text-base font-normal">{t("expertDetails.visio15min")}</h3>
+                    <h3 className="text-base font-normal">
+                      {t("expertDetails.visio15min")}
+                    </h3>
                     <ul className="mt-2 space-y-2 text-gray-700 pl-2 font-figtree">
                       <li className="flex items-start gap-2">
                         <span className="text-gray-700 mt-1">•</span>
@@ -362,21 +362,15 @@ function ProfessionalDetailContent() {
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-gray-700 mt-1">•</span>
-                        <span>
-                          {t("expertDetails.expectation2")}
-                        </span>
+                        <span>{t("expertDetails.expectation2")}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-gray-700 mt-1">•</span>
-                        <span>
-                          {t("expertDetails.expectation3")}
-                        </span>
+                        <span>{t("expertDetails.expectation3")}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-gray-700 mt-1">•</span>
-                        <span>
-                          {t("expertDetails.expectation4")}
-                        </span>
+                        <span>{t("expertDetails.expectation4")}</span>
                       </li>
                     </ul>
                   </div>
@@ -416,9 +410,12 @@ function ProfessionalDetailContent() {
             <div className="mb-15">
               <div>
                 <div className="flex items-center justify-between mb-6 mt-3">
-                  <h2 className="text-xl font-bold">{t("expertDetails.similarExperts")}</h2>
+                  <h2 className="text-xl font-bold">
+                    {t("expertDetails.similarExperts")}
+                  </h2>
                   <ButtonUI variant="link" className="text-blue-600">
-                    {t("expertDetails.seeAll")} <ChevronRight className="h-4 w-4 ml-1" />
+                    {t("expertDetails.seeAll")}{" "}
+                    <ChevronRight className="h-4 w-4 ml-1" />
                   </ButtonUI>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4">
@@ -445,7 +442,9 @@ function ProfessionalDetailContent() {
 
             {/* FAQ */}
             <div>
-              <h2 className="text-xl font-bold mb-6">{t("expertDetails.frequentQuestions")}</h2>
+              <h2 className="text-xl font-bold mb-6">
+                {t("expertDetails.frequentQuestions")}
+              </h2>
               <Accordion
                 items={[
                   {
@@ -521,7 +520,8 @@ function ProfessionalDetailContent() {
                     professionalName={
                       appointments?.[0]?.pro?.first_name +
                         " " +
-                        appointments?.[0]?.pro?.last_name || t("sessionDetail.expert")
+                        appointments?.[0]?.pro?.last_name ||
+                      t("sessionDetail.expert")
                     }
                     professionalTitle={t("sessionDetail.expert")}
                     profileImage={
@@ -605,7 +605,8 @@ function ProfessionalDetailContent() {
                   professionalName={
                     appointments?.[0]?.pro?.first_name +
                       " " +
-                      appointments?.[0]?.pro?.last_name || t("sessionDetail.expert")
+                      appointments?.[0]?.pro?.last_name ||
+                    t("sessionDetail.expert")
                   }
                   professionalTitle={t("sessionDetail.expert")}
                   profileImage={professional?.image || "/assets/icons/pro2.png"}

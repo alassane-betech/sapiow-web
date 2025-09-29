@@ -1,6 +1,6 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -44,7 +44,7 @@ const getTabs = (t: any) => [
 ];
 
 export default function MentionsLegales() {
-  const t = useI18n();
+  const t = useTranslations();
   const [activeIdx, setActiveIdx] = useState(0);
 
   const navItems = getNavItems(t);

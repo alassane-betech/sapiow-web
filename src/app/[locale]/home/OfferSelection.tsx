@@ -6,10 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useI18n } from "@/locales/client";
 
 interface OfferSelectionProps {
   price: string;
@@ -20,7 +20,7 @@ export default function OfferSelection({
   price,
   expertData,
 }: OfferSelectionProps) {
-  const t = useI18n();
+  const t = useTranslations();
   const [selectedOption, setSelectedOption] = useState<"session" | string>(
     "session"
   );
@@ -134,7 +134,8 @@ export default function OfferSelection({
                     {t("offers.perfectForSpecificQuestions")}
                   </p>
                   <p className="text-sm text-gray-700 mb-6 font-figtree">
-                    {t("offers.startingFrom")} <span className="font-semibold">{price}</span>
+                    {t("offers.startingFrom")}{" "}
+                    <span className="font-semibold">{price}</span>
                   </p>
                 </div>
                 <div className="ml-4">

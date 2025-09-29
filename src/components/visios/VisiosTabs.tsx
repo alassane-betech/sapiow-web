@@ -1,7 +1,7 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import CustomCalendar from "../common/CustomCalendar";
 import { SessionCard } from "../common/SessionCard";
 
@@ -10,7 +10,7 @@ interface VisiosTabsProps {
 }
 
 export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
-  const t = useI18n();
+  const t = useTranslations();
   const {
     confirmedAppointments,
     pendingAppointments,
@@ -214,7 +214,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
           </div>
         </TabsContent>
       </Tabs>
-      <div>
+      <div className="w-full max-w-[343px] mx-auto">
         <CustomCalendar
           className="hidden xl:block"
           confirmedAppointments={confirmedAppointments}

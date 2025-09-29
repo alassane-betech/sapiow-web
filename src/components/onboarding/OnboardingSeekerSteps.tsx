@@ -2,13 +2,13 @@
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { useOnboardingSeeker } from "@/hooks/useOnboardingSeeker";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import React from "react";
 import { DomainSelector } from "./DomainSelector";
 import { Pagination } from "./Pagination";
 
 export const OnboardingSeekerSteps: React.FC = () => {
-  const t = useI18n();
+  const t = useTranslations();
   const {
     step,
     firstName,
@@ -106,7 +106,11 @@ export const OnboardingSeekerSteps: React.FC = () => {
           )}
 
           <Button
-            label={isSubmitting ? t("onboarding.registering") : t("onboarding.confirm")}
+            label={
+              isSubmitting
+                ? t("onboarding.registering")
+                : t("onboarding.confirm")
+            }
             className="w-full rounded-[8px] h-[56px] text-base font-medium"
             disabled={!isDomainValid || isSubmitting}
             onClick={completeOnboarding}

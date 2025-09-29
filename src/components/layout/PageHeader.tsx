@@ -3,7 +3,7 @@ import {
   useProNotifications,
 } from "@/api/notifications/useNotification";
 import { SearchBar } from "@/components/common/SearchBar";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -22,7 +22,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   className = "",
   showSearch = true,
 }) => {
-  const t = useI18n();
+  const t = useTranslations();
   const { data: notifications } = useProNotifications();
   const { mutateAsync: markNotificationAsRead } = useMarkNotificationAsRead();
 
@@ -57,10 +57,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     try {
       await markNotificationAsRead(notificationId);
     } catch (error) {
-      console.error(
-        t("pageHeader.notificationError"),
-        error
-      );
+      console.error(t("pageHeader.notificationError"), error);
     }
   };
 
@@ -74,10 +71,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         )
       );
     } catch (error) {
-      console.error(
-        t("pageHeader.notificationError"),
-        error
-      );
+      console.error(t("pageHeader.notificationError"), error);
     }
   };
 
@@ -89,9 +83,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     );
 
     if (diffInMinutes < 1) return t("pageHeader.justNow");
-    if (diffInMinutes < 60) return `${t("pageHeader.minutesAgo")} ${diffInMinutes}${t("pageHeader.minutes")}`;
+    if (diffInMinutes < 60)
+      return `${t("pageHeader.minutesAgo")} ${diffInMinutes}${t(
+        "pageHeader.minutes"
+      )}`;
     if (diffInMinutes < 1440)
-      return `${t("pageHeader.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t("pageHeader.hours")}`;
+      return `${t("pageHeader.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t(
+        "pageHeader.hours"
+      )}`;
 
     return date.toLocaleDateString(undefined, {
       day: "2-digit",
@@ -109,7 +108,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
         {showSearch && (
           <div className="w-40 sm:w-64 md:w-80">
-            <SearchBar onSearch={() => {}} placeholder={searchPlaceholder || t("search.searchPlaceholder")} />
+            <SearchBar
+              onSearch={() => {}}
+              placeholder={searchPlaceholder || t("search.searchPlaceholder")}
+            />
           </div>
         )}
 

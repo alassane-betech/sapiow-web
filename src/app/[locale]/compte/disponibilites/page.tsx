@@ -1,5 +1,9 @@
 "use client";
 import {
+  useCreateProAppointmentBlock,
+  useGetProAppointmentBlocks,
+} from "@/api/appointments/useAppointments";
+import {
   useGoogleCalendarAuthUrl,
   useGoogleCalendarConnect,
   useGoogleCalendarDisconnect,
@@ -19,18 +23,19 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
-import { useCurrentLocale, useI18n } from "@/locales/client";
 import { useCalendarStore } from "@/store/useCalendar";
 import { useProExpertStore } from "@/store/useProExpert";
+import { Loader2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
 export default function Disponibilites() {
-  const t = useI18n();
-  const currentLocale = useCurrentLocale();
+  const t = useTranslations();
+  const currentLocale = useLocale();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("semaine");
   const { selectedDate } = useCalendarStore();
-  const [isBlocked, setIsBlocked] = useState(false);
+  // Supprimé car maintenant calculé dynamiquement avec isDateBlocked
   const [showTimeSlotsManager, setShowTimeSlotsManager] = useState(false);
   const [showAvailabilitySheet, setShowAvailabilitySheet] = useState(false);
   const [showSessionDetailsSheet, setShowSessionDetailsSheet] = useState(false);
@@ -54,6 +59,20 @@ export default function Disponibilites() {
   // Hook pour récupérer les rendez-vous confirmés
   const { confirmedAppointments } = useVisiosAppointments();
 
+  // Hooks pour la gestion des blocs de dates
+  const { data: blockedDates, isLoading: isLoadingBlocks } =
+    useGetProAppointmentBlocks();
+  const createBlockMutation = useCreateProAppointmentBlock();
+
+  // Vérifier si la date sélectionnée est bloquée
+  const isDateBlocked =
+    selectedDate && blockedDates && Array.isArray(blockedDates)
+      ? blockedDates.some(
+          (block: any) =>
+            new Date(block.date).toDateString() === selectedDate.toDateString()
+        )
+      : false;
+
   // Fonction réutilisable pour éviter la duplication mobile/desktop
   const renderSessionDetailsPanel = (isMobile: boolean = false) => (
     <>
@@ -64,9 +83,10 @@ export default function Disponibilites() {
       />
       {selectedDate && (
         <BlockDaySection
-          isBlocked={isBlocked}
+          isBlocked={isDateBlocked}
           onToggle={handleBlocked}
           isMobile={isMobile}
+          isLoading={createBlockMutation.isPending || isLoadingBlocks}
         />
       )}
     </>
@@ -106,14 +126,26 @@ export default function Disponibilites() {
     }
   };
 
-  const handleBlocked = (checked: boolean) => {
-    setIsBlocked(checked);
+  const handleBlocked = async (checked: boolean) => {
+    if (!selectedDate) return;
+
+    if (checked) {
+      // Bloquer la date
+      const dateString = selectedDate.toISOString().split("T")[0]; // Format: "2025-06-12"
+      try {
+        await createBlockMutation.mutateAsync({ date: dateString });
+      } catch (error) {
+        console.error("Erreur lors du blocage de la date:", error);
+      }
+    } else {
+      // TODO: Implémenter la suppression du bloc (DELETE endpoint)
+      console.log("Déblocage de la date - endpoint DELETE à implémenter");
+    }
   };
 
   const handleAddAvailability = () => {
     setShowTimeSlotsManager(true);
   };
-
   const handleManageAvailability = () => {
     setShowAvailabilitySheet(true);
   };
@@ -139,6 +171,20 @@ export default function Disponibilites() {
       setShowSessionDetailsSheet(true);
     }
   }, [selectedDate]);
+
+  // Afficher un loader si les données essentielles se chargent
+  if (isLoadingApi || isGoogleStatusLoading) {
+    return (
+      <AccountLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <p className="text-sm text-gray-600">{t("loading")}</p>
+          </div>
+        </div>
+      </AccountLayout>
+    );
+  }
 
   return (
     <AccountLayout>
@@ -187,7 +233,7 @@ export default function Disponibilites() {
                 size="sm"
               />
             </div>
-            <div className="w-full max-w-[414px] lg:max-w-[400px]">
+            <div className="w-full max-w-[414px] lg:max-w-[343px] mx-auto">
               <CustomCalendar confirmedAppointments={confirmedAppointments} />
             </div>
             {/* Section Gestion des disponibilités */}
@@ -233,12 +279,18 @@ export default function Disponibilites() {
                       </div>
                     </div>
                     <Button
-                      label={isGoogleConnected ? t("disponibilites.disconnect") : t("disponibilites.connect")}
+                      label={
+                        isGoogleLoading 
+                          ? "..." 
+                          : isGoogleConnected 
+                            ? t("disponibilites.disconnect") 
+                            : t("disponibilites.connect")
+                      }
                       className={`text-sm font-bold font-figtree ${
                         isGoogleConnected
                           ? "text-red-600 bg-red-50 border border-red-200"
                           : "text-white"
-                      }`}
+                      } ${isGoogleLoading ? "opacity-70" : ""}`}
                       onClick={handleConnectGoogle}
                       disabled={isGoogleLoading}
                     />

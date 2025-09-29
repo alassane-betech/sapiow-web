@@ -8,7 +8,7 @@ import { ShareLinkButton } from "@/components/common/ShareLinkButton";
 import { Button } from "@/components/ui/button";
 import { useModeSwitch } from "@/hooks/useModeSwitch";
 import { useTodayVisios } from "@/hooks/useTodayVisios";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { Switch } from "../../ui/switch";
@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   hideProfile,
   isBorder,
 }) => {
-  const t = useI18n();
+  const t = useTranslations();
   const { isExpertMode, handleModeSwitch } = useModeSwitch();
   const { user } = useTodayVisios();
   const { data: notifications } = useProNotifications();
@@ -72,9 +72,12 @@ export const Header: React.FC<HeaderProps> = ({
     );
 
     if (diffInMinutes < 1) return t("header.justNow");
-    if (diffInMinutes < 60) return `${t("header.minutesAgo")} ${diffInMinutes}${t("header.minutes")}`;
+    if (diffInMinutes < 60)
+      return `${t("header.minutesAgo")} ${diffInMinutes}${t("header.minutes")}`;
     if (diffInMinutes < 1440)
-      return `${t("header.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t("header.hours")}`;
+      return `${t("header.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t(
+        "header.hours"
+      )}`;
 
     return date.toLocaleDateString(undefined, {
       day: "2-digit",
@@ -112,7 +115,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Mode expert switch */}
           <div className="flex items-center gap-3 bg-exford-blue px-3 py-2 rounded-full">
-            <span className="text-white font-bold">{t("header.expertMode")}</span>
+            <span className="text-white font-bold">
+              {t("header.expertMode")}
+            </span>
             <Switch
               checked={isExpertMode}
               onCheckedChange={handleModeSwitch}
@@ -151,7 +156,10 @@ export const Header: React.FC<HeaderProps> = ({
                       </h3>
                       {unreadCount > 0 && (
                         <p className="text-sm text-gray-500">
-                          {unreadCount} {unreadCount > 1 ? t("header.unreadPlural") : t("header.unreadSingular")}
+                          {unreadCount}{" "}
+                          {unreadCount > 1
+                            ? t("header.unreadPlural")
+                            : t("header.unreadSingular")}
                         </p>
                       )}
                     </div>

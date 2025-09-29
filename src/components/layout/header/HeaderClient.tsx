@@ -9,9 +9,9 @@ import { Button as ButtonUI } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 import { useFavorites } from "@/hooks/useFavorites";
-import { useI18n } from "@/locales/client";
 import { usePayStore } from "@/store/usePay";
 import { ChevronLeft, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
@@ -27,7 +27,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   text,
   classNameIsBack = "py-4",
 }) => {
-  const t = useI18n();
+  const t = useTranslations();
   const router = useRouter();
   const { isFavoriActive, handleFavoriToggle } = useFavorites();
   const { setIsPaid } = usePayStore();
@@ -91,9 +91,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
     );
 
     if (diffInMinutes < 1) return t("header.justNow");
-    if (diffInMinutes < 60) return `${t("header.minutesAgo")} ${diffInMinutes}${t("header.minutes")}`;
+    if (diffInMinutes < 60)
+      return `${t("header.minutesAgo")} ${diffInMinutes}${t("header.minutes")}`;
     if (diffInMinutes < 1440)
-      return `${t("header.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t("header.hours")}`;
+      return `${t("header.hoursAgo")} ${Math.floor(diffInMinutes / 60)}${t(
+        "header.hours"
+      )}`;
 
     return date.toLocaleDateString(undefined, {
       day: "2-digit",
@@ -149,7 +152,9 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
           {hasExpertProfile ? (
             <div className="flex items-center gap-3 bg-exford-blue px-3 py-2 rounded-full">
               <span className="text-white font-bold">
-                {isExpertMode ? t("header.expertMode") : t("headerClient.clientMode")}
+                {isExpertMode
+                  ? t("header.expertMode")
+                  : t("headerClient.clientMode")}
               </span>
               <Switch
                 checked={isExpertMode}
@@ -220,7 +225,10 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
                         </h3>
                         {unreadCount > 0 && (
                           <p className="text-sm text-gray-500">
-                            {unreadCount} {unreadCount > 1 ? t("header.unreadPlural") : t("header.unreadSingular")}
+                            {unreadCount}{" "}
+                            {unreadCount > 1
+                              ? t("header.unreadPlural")
+                              : t("header.unreadSingular")}
                           </p>
                         )}
                       </div>

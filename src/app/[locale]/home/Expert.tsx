@@ -8,16 +8,17 @@ import { useGetStatistics } from "@/api/statistics/useStatistics";
 import { SessionCard } from "@/components/common/SessionCard";
 import { StatsCard } from "@/components/common/StatsCard";
 import { useTodayVisios } from "@/hooks/useTodayVisios";
-import { useI18n } from "@/locales/client";
 import { useCallStore } from "@/store/useCall";
 import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import VideoConsultation from "../VideoCall/video-consultation";
 
 export default function Expert() {
-  const t = useI18n();
+  const t = useTranslations();
+
   const { isVideoCallOpen, setIsVideoCallOpen, setAppointmentId } =
     useCallStore();
   const { todayVisiosCount, user } = useTodayVisios();

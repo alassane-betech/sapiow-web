@@ -1,7 +1,7 @@
 "use client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
-import { useI18n } from "@/locales/client";
 
 interface ShareLinkButtonProps {
   className?: string;
@@ -12,7 +12,7 @@ export const ShareLinkButton = ({
   className = "",
   linkText,
 }: ShareLinkButtonProps) => {
-  const t = useI18n();
+  const t = useTranslations();
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
@@ -36,7 +36,9 @@ export const ShareLinkButton = ({
       className={`flex items-center gap-3 px-3 py-3 h-[40px] border border-light-blue-gray rounded-full transition-colors cursor-pointer ${className}`}
     >
       <span className="text-sm font-medium text-exford-blue font-figtree">
-        {copied ? t("shareLink.copied") : (linkText || t("shareLink.defaultText"))}
+        {copied
+          ? t("shareLink.copied")
+          : linkText || t("shareLink.defaultText")}
       </span>
       <Image src="/assets/icons/copy.svg" alt="copy" width={20} height={20} />
     </button>

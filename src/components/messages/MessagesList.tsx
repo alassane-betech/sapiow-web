@@ -1,4 +1,4 @@
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import { MessageItem } from "./MessageItem";
 
 interface MessagesListProps {
@@ -20,7 +20,7 @@ export function MessagesList({
   selectedConversation,
   className = "",
 }: MessagesListProps) {
-  const t = useI18n();
+  const t = useTranslations();
   if (!selectedConversation) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
@@ -50,7 +50,9 @@ export function MessagesList({
   if (!conversationMessages || conversationMessages.length === 0) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
-        <p className="text-gray-500">{t("messages.noMessagesInConversation")}</p>
+        <p className="text-gray-500">
+          {t("messages.noMessagesInConversation")}
+        </p>
       </div>
     );
   }

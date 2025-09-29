@@ -2,9 +2,9 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useI18n } from "@/locales/client";
 import { useCalendarStore } from "@/store/useCalendar";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface CustomCalendarProps {
   className?: string;
@@ -15,17 +15,31 @@ export default function CustomCalendar({
   className,
   confirmedAppointments = [],
 }: CustomCalendarProps) {
-  const t = useI18n();
-  
+  const t = useTranslations();
+
   // Get translated arrays
   const months = [
-    t("calendar.january"), t("calendar.february"), t("calendar.march"), t("calendar.april"),
-    t("calendar.may"), t("calendar.june"), t("calendar.july"), t("calendar.august"),
-    t("calendar.september"), t("calendar.october"), t("calendar.november"), t("calendar.december")
+    t("calendar.january"),
+    t("calendar.february"),
+    t("calendar.march"),
+    t("calendar.april"),
+    t("calendar.may"),
+    t("calendar.june"),
+    t("calendar.july"),
+    t("calendar.august"),
+    t("calendar.september"),
+    t("calendar.october"),
+    t("calendar.november"),
+    t("calendar.december"),
   ];
   const daysOfWeek = [
-    t("calendar.sunday"), t("calendar.monday"), t("calendar.tuesday"), t("calendar.wednesday"),
-    t("calendar.thursday"), t("calendar.friday"), t("calendar.saturday")
+    t("calendar.sunday"),
+    t("calendar.monday"),
+    t("calendar.tuesday"),
+    t("calendar.wednesday"),
+    t("calendar.thursday"),
+    t("calendar.friday"),
+    t("calendar.saturday"),
   ];
   const {
     currentDate,
@@ -62,8 +76,10 @@ export default function CustomCalendar({
               minute: "2-digit",
             }
           ),
-          duration: appointment.session?.session_type || t("calendar.defaultDuration"),
-          description: appointment.session?.name || t("calendar.defaultConsultation"),
+          duration:
+            appointment.session?.session_type || t("calendar.defaultDuration"),
+          description:
+            appointment.session?.name || t("calendar.defaultConsultation"),
         };
 
         if (mergedEvents[day]) {

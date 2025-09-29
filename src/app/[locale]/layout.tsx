@@ -1,9 +1,13 @@
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { routing } from "@/i18n/routing";
 import { QueryProvider } from "@/providers/QueryProvider";
 import type { Metadata } from "next";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { Figtree, Geist_Mono } from "next/font/google";
+import { notFound } from "next/navigation";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { Provider } from "./providers";
 
 const figtree = Figtree({
   variable: "--font-figtree",
@@ -21,6 +25,10 @@ export const metadata: Metadata = {
   description: "Sapiow",
 };
 
+export const generateStaticParams = () => {
+  return routing.locales.map((locale) => ({ locale }));
+};
+
 export default async function RootLayout({
   children,
   params,
@@ -29,14 +37,49 @@ export default async function RootLayout({
   params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  setRequestLocale(locale);
+
+  const messages = await getMessages();
+
   return (
-    <html lang={locale}>
+    <html>
       <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
-        <QueryProvider>
-          <Provider locale={locale}>
-            <FavoritesProvider>{children}</FavoritesProvider>
-          </Provider>
-        </QueryProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <QueryProvider>
+            <FavoritesProvider>
+              {children}
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: '#363636',
+                    color: '#fff',
+                  },
+                  success: {
+                    duration: 3000,
+                    iconTheme: {
+                      primary: '#4ade80',
+                      secondary: '#fff',
+                    },
+                  },
+                  error: {
+                    duration: 4000,
+                    iconTheme: {
+                      primary: '#ef4444',
+                      secondary: '#fff',
+                    },
+                  },
+                }}
+              />
+            </FavoritesProvider>
+          </QueryProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

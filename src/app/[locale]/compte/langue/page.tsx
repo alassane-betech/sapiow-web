@@ -1,9 +1,10 @@
 "use client";
 
 import { useLanguageSettings } from "@/hooks/useLanguageSettings";
-import { useI18n, useChangeLocale, useCurrentLocale } from "@/locales/client";
 import { Check, Loader2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AccountLayout from "../AccountLayout";
 
@@ -16,32 +17,32 @@ interface Language {
 // Fonction pour générer les langues disponibles avec traductions
 const getAvailableLanguages = (t: any): Language[] => [
   {
-    id: "fr", // Utiliser les codes de locale de next-international
+    id: "fr", // Utiliser les codes de locale de next-intl
     name: t("languagePage.french"),
     flagUrl: "https://flagcdn.com/24x18/fr.png",
   },
   {
-    id: "en", // Utiliser les codes de locale de next-international
+    id: "en", // Utiliser les codes de locale de next-intl
     name: t("languagePage.english"),
     flagUrl: "https://flagcdn.com/24x18/us.png",
   },
 ];
 
 export default function LanguePage() {
-  const t = useI18n();
-  const changeLocale = useChangeLocale();
-  const currentLocale = useCurrentLocale();
+  const t = useTranslations();
+  const currentLocale = useLocale();
+  const router = useRouter();
   const { currentLanguage, isLoading, error, handleLanguageChange } =
     useLanguageSettings();
 
   const [updatingLanguage, setUpdatingLanguage] = useState<string | null>(null);
-  
+
   const availableLanguages = getAvailableLanguages(t);
 
   // Mapper les codes de locale aux noms de langue pour l'API
   const localeToLanguageMap = {
-    'fr': 'French',
-    'en': 'English'
+    fr: "French",
+    en: "English",
   };
 
   const handleLanguageSelect = async (localeId: string) => {
@@ -49,14 +50,27 @@ export default function LanguePage() {
 
     setUpdatingLanguage(localeId);
     try {
-      // 1. Changer la locale de l'interface (next-international)
-      changeLocale(localeId as 'fr' | 'en');
-      
-      // 2. Sauvegarder dans la base de données (API)
-      const languageName = localeToLanguageMap[localeId as keyof typeof localeToLanguageMap];
+      // 1. Sauvegarder dans la base de données (API)
+      const languageName =
+        localeToLanguageMap[localeId as keyof typeof localeToLanguageMap];
       if (languageName) {
         await handleLanguageChange(languageName);
       }
+
+      // 2. Changer la locale de l'interface (next-intl)
+      // Rediriger vers la nouvelle locale
+      const currentPath = window.location.pathname;
+      // Extraire le chemin sans la locale actuelle
+      const segments = currentPath.split('/').filter(Boolean);
+      // Le premier segment est la locale actuelle, on la remplace
+      if (segments.length > 0 && (segments[0] === 'fr' || segments[0] === 'en')) {
+        segments[0] = localeId;
+      } else {
+        // Si pas de locale dans l'URL, on l'ajoute au début
+        segments.unshift(localeId);
+      }
+      const newPath = '/' + segments.join('/');
+      router.push(newPath);
     } catch (error) {
       console.error(t("languagePage.errorChangingLanguage"), error);
     } finally {
@@ -69,9 +83,13 @@ export default function LanguePage() {
     return (
       <AccountLayout>
         <div className="container px-6 space-y-6">
-          <h1 className="text-2xl font-bold text-gray-900 mt-5">{t("account.language")}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mt-5">
+            {t("account.language")}
+          </h1>
           <div className="text-center py-8">
-            <p className="text-gray-600">{t("notificationSettings.loadingSettings")}</p>
+            <p className="text-gray-600">
+              {t("notificationSettings.loadingSettings")}
+            </p>
           </div>
         </div>
       </AccountLayout>
@@ -81,7 +99,9 @@ export default function LanguePage() {
   return (
     <AccountLayout>
       <div className="container px-6 space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900 mt-5">{t("account.language")}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mt-5">
+          {t("account.language")}
+        </h1>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">

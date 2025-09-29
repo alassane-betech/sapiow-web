@@ -3,7 +3,7 @@
 import { Button } from "@/components/common/Button";
 import { Calendar } from "@/components/ui/calendar";
 import { getFilterOptions } from "@/data/mockRevenue";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -17,13 +17,13 @@ export default function RevenueFilters({
   activeFilter,
   onFilterChange,
 }: RevenueFiltersProps) {
-  const t = useI18n();
+  const t = useTranslations();
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState<
     DateRange | undefined
   >();
   const calendarRef = useRef<HTMLDivElement>(null);
-  
+
   const filterOptions = getFilterOptions(t);
 
   const handleFilterChange = (filter: string) => {
@@ -106,7 +106,9 @@ export default function RevenueFilters({
             <div className="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
               <strong>{t("revenue.selectedPeriod")}</strong>
               <br />
-              {t("revenue.from")} {selectedDateRange.from.toLocaleDateString("fr-FR")} {t("revenue.to")}{" "}
+              {t("revenue.from")}{" "}
+              {selectedDateRange.from.toLocaleDateString("fr-FR")}{" "}
+              {t("revenue.to")}{" "}
               {selectedDateRange.to.toLocaleDateString("fr-FR")}
             </div>
           )}

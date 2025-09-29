@@ -4,7 +4,7 @@ import { FormField } from "@/components/common/FormField";
 import { Textarea } from "@/components/ui/textarea";
 import { DOMAIN_ID_MAPPING } from "@/constants/onboarding";
 import { useOnboardingExpert } from "@/hooks/useOnboardingExpert";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import React from "react";
 import { DomainSelector } from "./DomainSelector";
 import { Pagination } from "./Pagination";
@@ -13,7 +13,7 @@ import { SpecialtySelector } from "./SpecialtySelector";
 import { VisioConfiguration } from "./VisioConfiguration";
 
 export const OnboardingExpertSteps: React.FC = () => {
-  const t = useI18n();
+  const t = useTranslations();
   const {
     step,
     firstName,

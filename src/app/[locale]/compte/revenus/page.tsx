@@ -6,13 +6,13 @@ import BankAccountSection from "@/components/revenue/BankAccountSection";
 import PaymentHistory from "@/components/revenue/PaymentHistory";
 import RevenueDisplay from "@/components/revenue/RevenueDisplay";
 import RevenueFilters from "@/components/revenue/RevenueFilters";
-import { useI18n } from "@/locales/client";
 import { getDateRangeByFilter } from "@/utils/dateFilters";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
 export default function Revenus() {
-  const t = useI18n();
+  const t = useTranslations();
   const [isAddBankModalOpen, setIsAddBankModalOpen] = useState(false);
   const [hasBankAccount, setHasBankAccount] = useState(false);
   const [activeFilter, setActiveFilter] = useState("Ce mois-ci");

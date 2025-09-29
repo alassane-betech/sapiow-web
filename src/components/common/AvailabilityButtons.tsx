@@ -1,6 +1,6 @@
 import { Button as ButtonUI } from "@/components/ui/button";
-import { useI18n } from "@/locales/client";
 import { ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 interface AvailabilityButtonProps {
@@ -35,8 +35,8 @@ export const AvailabilityButtons = ({
   onManageAvailability,
   onSyncCalendars,
 }: AvailabilityButtonsProps) => {
-  const t = useI18n();
-  
+  const t = useTranslations();
+
   return (
     <div className="space-y-4 w-full mb-40 md:mb-0">
       <AvailabilityButton

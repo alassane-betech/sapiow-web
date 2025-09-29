@@ -1,6 +1,6 @@
 "use client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useCurrentLocale, useI18n } from "@/locales/client";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { Button } from "./Button";
@@ -113,8 +113,8 @@ export const UpcomingVideoCall: React.FC<UpcomingVideoCallProps> = ({
   showButton = true,
   sessionTime,
 }) => {
-  const t = useI18n();
-  const currentLocale = useCurrentLocale();
+  const t = useTranslations();
+  const currentLocale = useLocale();
   const isDark = variant === "dark";
   const [timeRemaining, setTimeRemaining] = useState<string>(
     calculateTimeRemaining(appointmentAt, t)

@@ -3,13 +3,13 @@ import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointment
 import { useGetCustomer } from "@/api/customer/useCustomer";
 import { UpcomingVideoCall } from "@/components/common/DarkSessionCard";
 import { useClientHome } from "@/hooks/useClientHome";
-import { useI18n } from "@/locales/client";
 import { Professional } from "@/types/professional";
 import {
   filterAndSortAppointments,
   transformAppointmentToSessionData,
   type ApiAppointment,
 } from "@/utils/appointmentUtils";
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import CategoryFilter from "./CategoryFilter";
 import CategorySection from "./CategorySection";
@@ -17,7 +17,7 @@ import ProfessionalCard from "./ProfessionalCard";
 import SubCategoryFilter from "./SubCategoryFilter";
 
 export default function Client() {
-  const t = useI18n();
+  const t = useTranslations();
   const {
     selectedCategory,
     selectedSubCategory,

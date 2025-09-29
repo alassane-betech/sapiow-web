@@ -1,5 +1,5 @@
 "use client";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -39,7 +39,7 @@ export function AppSidebar({
   hideMobileNav = false,
   ...props
 }: React.HTMLAttributes<HTMLDivElement> & { hideMobileNav?: boolean }) {
-  const t = useI18n();
+  const t = useTranslations();
   const pathname = usePathname();
   const items = getItems(t);
 

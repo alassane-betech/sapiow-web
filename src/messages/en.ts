@@ -757,4 +757,29 @@ export default {
     client: "Client",
     consultation: "Consultation",
   },
+
+  // Toast Messages
+  toast: {
+    // Questions
+    questionSubmitted: "Question submitted successfully!",
+    questionUpdated: "Question updated successfully!",
+    questionSubmitError: "Error submitting question",
+    questionUpdateError: "Error updating question",
+    
+    // Appointments
+    appointmentCreated: "Appointment created successfully!",
+    appointmentConfirmed: "Appointment confirmed successfully!",
+    appointmentCancelled: "Appointment cancelled successfully!",
+    appointmentCreateError: "Error creating appointment",
+    appointmentUpdateError: "Error updating appointment",
+    appointmentCancelError: "Error cancelling appointment",
+    
+    // Date Blocking
+    dateBlocked: "Date blocked successfully!",
+    dateBlockError: "Error blocking date",
+    
+    // Video Call
+    callConnectionError: "Error connecting to video call",
+    callTokenError: "Error retrieving call token",
+  },
 } as const;

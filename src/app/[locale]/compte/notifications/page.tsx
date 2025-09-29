@@ -1,13 +1,13 @@
 "use client";
 
 import { Switch } from "@/components/ui/switch";
-import { useI18n } from "@/locales/client";
 import { useNotificationSettings } from "@/hooks/useNotificationSettings";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import AccountLayout from "../AccountLayout";
 
 export default function Notifications() {
-  const t = useI18n();
+  const t = useTranslations();
   const {
     smsNotifications,
     emailNotifications,
@@ -23,7 +23,9 @@ export default function Notifications() {
       <AccountLayout>
         <div className="container w-full py-0 px-5">
           <div className="flex justify-center items-center py-8">
-            <div className="text-gray-600">{t("notificationSettings.loadingSettings")}</div>
+            <div className="text-gray-600">
+              {t("notificationSettings.loadingSettings")}
+            </div>
           </div>
         </div>
       </AccountLayout>

@@ -5,7 +5,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "./Button";
@@ -67,7 +67,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   questions = [],
   loadingState = null,
 }) => {
-  const t = useI18n();
+  const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleViewRequest = () => {

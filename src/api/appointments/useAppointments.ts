@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { showToast } from "@/utils/toast";
 
 export const useGetProAppointments = (professionalId: string | undefined) => {
   return useQuery({
@@ -55,6 +56,17 @@ export interface UpdateAppointmentData {
   status: "confirmed" | "cancelled";
 }
 
+export interface BlockAppointmentData {
+  date: string; // Format: "2025-06-12"
+}
+
+export interface BlockAppointmentResponse {
+  id: number;
+  pro_id: string;
+  date: string;
+  created_at: string;
+}
+
 export const useSubmitAppointmentQuestion = () => {
   const queryClient = useQueryClient();
 
@@ -69,6 +81,11 @@ export const useSubmitAppointmentQuestion = () => {
       queryClient.invalidateQueries({
         queryKey: ["appointment", variables.appointmentId],
       });
+      showToast.success("questionSubmitted");
+    },
+    onError: (error: any) => {
+      console.error("Failed to submit question:", error);
+      showToast.error("questionSubmitError", error?.message);
     },
   });
 };
@@ -87,6 +104,11 @@ export const useUpdateAppointmentQuestion = () => {
       queryClient.invalidateQueries({
         queryKey: ["appointment", variables.questionId],
       });
+      showToast.success("questionUpdated");
+    },
+    onError: (error: any) => {
+      console.error("Failed to update question:", error);
+      showToast.error("questionUpdateError", error?.message);
     },
   });
 };
@@ -106,9 +128,11 @@ export const useCreatePatientAppointment = () => {
 
       // Ajouter le nouvel appointment au cache si besoin
       queryClient.setQueryData(["appointment", data.id], data);
+      showToast.success("appointmentCreated");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Failed to create appointment:", error);
+      showToast.error("appointmentCreateError", error?.message);
     },
   });
 };
@@ -136,6 +160,16 @@ export const useUpdateProAppointment = () => {
       queryClient.invalidateQueries({
         queryKey: ["appointments"],
       });
+      
+      const status = variables.updateData.status;
+      const messageKey = status === "confirmed" 
+        ? "appointmentConfirmed" 
+        : "appointmentCancelled";
+      showToast.success(messageKey);
+    },
+    onError: (error: any) => {
+      console.error("Failed to update appointment:", error);
+      showToast.error("appointmentUpdateError", error?.message);
     },
   });
 };
@@ -166,9 +200,46 @@ export const useCancelPatientAppointment = () => {
       queryClient.invalidateQueries({
         queryKey: ["appointments"],
       });
+      
+      showToast.success("appointmentCancelled");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Failed to cancel patient appointment:", error);
+      showToast.error("appointmentCancelError", error?.message);
+    },
+  });
+};
+
+export const useGetProAppointmentBlocks = () => {
+  return useQuery({
+    queryKey: ["pro-appointment-blocks"],
+    queryFn: () => apiClient.get(`pro-appointment-block`),
+  });
+};
+
+export const useCreateProAppointmentBlock = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<BlockAppointmentResponse, Error, BlockAppointmentData>({
+    mutationFn: async (blockData: BlockAppointmentData) => {
+      return apiClient.post("pro-appointment-block", blockData);
+    },
+    onSuccess: (data, variables) => {
+      // Invalider le cache des blocs de rendez-vous
+      queryClient.invalidateQueries({
+        queryKey: ["pro-appointment-blocks"],
+      });
+
+      // Invalider aussi les rendez-vous du professionnel pour refléter les changements
+      queryClient.invalidateQueries({
+        queryKey: ["appointments"],
+      });
+      
+      showToast.success("dateBlocked");
+    },
+    onError: (error: any) => {
+      console.error("Failed to create appointment block:", error);
+      showToast.error("dateBlockError", error?.message);
     },
   });
 };
