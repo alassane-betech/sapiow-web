@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
 import { usePatientPaymentHistoryDisplay } from "@/api/patientPayment/usePatientPayment";
 
-export default function Disponibilites() {
+export default function HistoriquePaiements() {
   const t = useI18n();
   const [selectedTransaction, setSelectedTransaction] = useState<string | null>(
     null
@@ -102,7 +102,7 @@ export default function Disponibilites() {
                 <div className="flex-shrink-0">
                   <Image
                     src="/assets/icons/card_icon.svg"
-                    alt="card"
+                    alt={t("paymentHistory.transactionDetails")}
                     width={48}
                     height={48}
                     className="w-[48px] h-[48px] text-slate-gray cursor-pointer"
@@ -112,8 +112,8 @@ export default function Disponibilites() {
               <div className="space-y-3 mt-4 px-4 lg:px-0 lg:max-w-[343px] lg:mx-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
                 {history.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-500">Aucune transaction</p>
-                    <p className="text-gray-400 text-sm mt-2">Vos transactions de paiement apparaîtront ici</p>
+                    <p className="text-gray-500">{t("paymentHistory.noTransactions")}</p>
+                    <p className="text-gray-400 text-sm mt-2">{t("paymentHistory.noTransactionsDescription")}</p>
                   </div>
                 ) : (
                   history.map((transaction) => (
@@ -129,7 +129,7 @@ export default function Disponibilites() {
                     <div className="w-[40px] h-[40px] rounded-full flex items-center justify-center border border-light-blue-gray flex-shrink-0">
                       <Image
                         src="/assets/icons/master-card.svg"
-                        alt="card"
+                        alt={t("paymentHistory.transactionDetails")}
                         width={24}
                         height={24}
                         className="w-[24px] h-[24px]"
@@ -233,8 +233,8 @@ export default function Disponibilites() {
                 <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
                   {history.length === 0 ? (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">Aucune transaction</p>
-                      <p className="text-gray-400 text-sm mt-2">Vos transactions de paiement apparaîtront ici</p>
+                      <p className="text-gray-500">{t("paymentHistory.noTransactions")}</p>
+                      <p className="text-gray-400 text-sm mt-2">{t("paymentHistory.noTransactionsDescription")}</p>
                     </div>
                   ) : (
                     history.map((transaction) => (
@@ -246,7 +246,7 @@ export default function Disponibilites() {
                       <div className="w-[40px] h-[40px] rounded-full flex items-center justify-center border border-light-blue-gray flex-shrink-0">
                         <Image
                           src="/assets/icons/master-card.svg"
-                          alt="card"
+                          alt={t("paymentHistory.transactionDetails")}
                           width={24}
                           height={24}
                           className="w-[24px] h-[24px]"
@@ -276,7 +276,7 @@ export default function Disponibilites() {
                     className="mb-4 flex items-center gap-2 text-cobalt-blue hover:text-cobalt-blue-600 transition-colors"
                   >
                     <ChevronRightIcon className="w-5 h-5 rotate-180" />
-                    Retour à la liste
+                    {t("paymentHistory.backToList")}
                   </button>
                   {selectedTransaction && (
                     <TransactionDetails
@@ -298,7 +298,7 @@ export default function Disponibilites() {
                       }
                       statut={
                         history.find((t) => t.id === selectedTransaction)
-                          ?.statut || "Effectué"
+                          ?.statut || ("Effectué" as const)
                       }
                       id={
                         history.find((t) => t.id === selectedTransaction)
@@ -329,7 +329,7 @@ export default function Disponibilites() {
             }
             statut={
               history.find((t) => t.id === selectedTransaction)?.statut ||
-              "Effectué"
+              ("Effectué" as const)
             }
             id={
               history.find((t) => t.id === selectedTransaction)
