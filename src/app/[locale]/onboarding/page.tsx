@@ -21,7 +21,7 @@ function Onboarding() {
   // Afficher le loading pendant la vérification
   if (isCheckingProfiles) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="container min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">{t("onboarding.checkingProfile")}</p>
@@ -36,7 +36,7 @@ function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
+    <div className="container min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
       {/* Section image - cachée sur mobile et tablette, visible sur desktop */}
       <div className="hidden lg:block relative">
         <Image

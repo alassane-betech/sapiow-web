@@ -22,7 +22,7 @@ export default function VerifyCode() {
 
   return (
     <RedirectIfAuthenticated>
-      <div className="min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
+      <div className="container min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
         {/* Section image - cachée sur mobile et tablette, visible sur desktop */}
         <div className="hidden lg:block relative">
           <Image
