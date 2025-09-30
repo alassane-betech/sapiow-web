@@ -5,12 +5,12 @@ import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { ProfilePhotoUpload } from "@/components/onboarding/ProfilePhotoUpload";
 import { Textarea } from "@/components/ui/textarea";
-import { useI18n } from "@/locales/client";
 import { useExpertProfileUpdate } from "@/hooks/useExpertProfileUpdate";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 export default function ExpertProfile() {
-  const t = useI18n();
+  const t = useTranslations();
   const { data: user, isLoading, error } = useGetProExpert();
 
   // Hook personnalisé pour gérer la mise à jour du profil

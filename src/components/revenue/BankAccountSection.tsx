@@ -4,7 +4,7 @@ import {
 } from "@/api/proBank/useBank";
 import { Button } from "@/components/common/Button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -19,7 +19,7 @@ export default function BankAccountSection({
   onAddBankAccount,
   onModifyBankAccount,
 }: BankAccountSectionProps) {
-  const t = useI18n();
+  const t = useTranslations();
   const { mutate: initializeStripeAccount } = useCreateAccountStripe();
   const { data: bankAccount } = useGetInfoStripeAccount();
 
@@ -73,7 +73,11 @@ export default function BankAccountSection({
                   </div>
                 </div>
                 <Button
-                  label={initiateBankAccount ? t("bankAccount.inProgress") : t("bankAccount.add")}
+                  label={
+                    initiateBankAccount
+                      ? t("bankAccount.inProgress")
+                      : t("bankAccount.add")
+                  }
                   onClick={handleAddBankAccount}
                   className="border border-light-blue-gray rounded-full text-exford-blue font-bold font-figtree px-4 py-2 mb-6 bg-transparent text-sm shadow-none"
                 />

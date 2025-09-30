@@ -11,12 +11,12 @@ import {
   type ApiAppointment,
   type SessionData,
 } from "@/utils/appointmentUtils";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import VideoConsultation from "../VideoCall/video-consultation";
-import { useI18n } from "@/locales/client";
 
 export default function Client() {
-  const t = useI18n();
+  const t = useTranslations();
   const { setAppointmentId } = useCallStore();
   const [selectedSession, setSelectedSession] = useState<SessionData | null>(
     null
@@ -110,9 +110,7 @@ export default function Client() {
             </div>
           ) : (
             <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
-              <p className="text-gray-500">
-                {t("visios.noConfirmedUpcoming")}
-              </p>
+              <p className="text-gray-500">{t("visios.noConfirmedUpcoming")}</p>
             </div>
           )}
 
@@ -140,9 +138,7 @@ export default function Client() {
             </div>
           ) : (
             <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-10">
-              <p className="text-gray-500">
-                {t("visios.noOtherScheduled")}
-              </p>
+              <p className="text-gray-500">{t("visios.noOtherScheduled")}</p>
             </div>
           )}
         </div>

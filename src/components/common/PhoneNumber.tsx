@@ -1,6 +1,6 @@
 "use client";
-import { useI18n } from "@/locales/client";
 import { ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { FC, useEffect } from "react";
 import { Country } from "../../constants/countries";
@@ -31,7 +31,7 @@ const PhoneInput: FC<PhoneInputProps> = ({
   label,
   required = false,
 }) => {
-  const t = useI18n();
+  const t = useTranslations();
   const phoneInput = usePhoneInput({
     defaultCountry,
     initialValue: value,

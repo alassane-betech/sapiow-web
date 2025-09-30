@@ -8,10 +8,10 @@ import { AppSidebar } from "@/components/layout/Sidebare";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { useUserStore } from "@/store/useUser";
 import { Professional } from "@/types/professional";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import ProfessionalCard from "../home/ProfessionalCard";
-import { useI18n } from "@/locales/client";
 
 // Fonction pour convertir les données API en format Professional
 const mapFavoriteToProfessional = (favorite: any, t: any): Professional => {
@@ -61,14 +61,16 @@ const mapFavoriteToProfessional = (favorite: any, t: any): Professional => {
     topExpertise: false,
     description:
       pro.description ||
-      `${pro.job || t("expertDetails.expert")} ${t("categories.specializedIn")} ${getCategoryDisplayName(pro.domains?.name)}`,
+      `${pro.job || t("expertDetails.expert")} ${t(
+        "categories.specializedIn"
+      )} ${getCategoryDisplayName(pro.domains?.name)}`,
     linkedin: pro.linkedin,
     job: pro.job,
   };
 };
 
 function Favori() {
-  const t = useI18n();
+  const t = useTranslations();
   const { user: userClient } = useUserStore();
   const { data: favoritesData, isLoading, error } = useGetFavorites();
   const removeFavoriteMutation = useRemoveFavorite();
@@ -77,7 +79,9 @@ function Favori() {
   // Convertir les favoris API en format Professional
   const favoriteProfessionals = useMemo(() => {
     if (!favoritesData || !Array.isArray(favoritesData)) return [];
-    return favoritesData.map((favorite) => mapFavoriteToProfessional(favorite, t));
+    return favoritesData.map((favorite) =>
+      mapFavoriteToProfessional(favorite, t)
+    );
   }, [favoritesData, t]);
 
   const handleToggleLike = async (profId: string) => {
@@ -148,7 +152,11 @@ function Favori() {
     <div className="flex">
       <AppSidebar />
       <div className="w-full flex-1">
-        <HeaderClient text={t("favorites.title")} isBack={true} classNameIsBack="py-1" />
+        <HeaderClient
+          text={t("favorites.title")}
+          isBack={true}
+          classNameIsBack="py-1"
+        />
         <div className="container">
           {favoriteProfessionals.length === 0 ? (
             <div className="text-center py-12">

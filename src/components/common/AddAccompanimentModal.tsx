@@ -11,8 +11,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useAddSessionModal } from "@/hooks/useAddSessionModal";
-import { useI18n } from "@/locales/client";
 import { Check, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { FormField } from "./FormField";
 
@@ -46,9 +46,9 @@ export default function AddAccompanimentModal({
   editData,
   isEditMode = false,
 }: AddAccompanimentModalProps) {
-  const t = useI18n();
+  const t = useTranslations();
   const availableFeatures = getAvailableFeatures(t);
-  
+
   const {
     formData,
     selectedFeatures,

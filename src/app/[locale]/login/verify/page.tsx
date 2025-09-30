@@ -3,11 +3,11 @@ import { Button } from "@/components/common/Button";
 import OTPInput from "@/components/common/OTPInput";
 import { RedirectIfAuthenticated } from "@/components/common/RedirectIfAuthenticated";
 import { useVerifyOtp } from "@/hooks/useVerifyOtp";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 export default function VerifyCode() {
-  const t = useI18n();
+  const t = useTranslations();
   const {
     code,
     isCodeComplete,

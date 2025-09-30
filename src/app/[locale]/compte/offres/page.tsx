@@ -8,9 +8,9 @@ import { SessionCreate, useUpdateProSession } from "@/api/sessions/useSessions";
 import AddAccompanimentModal from "@/components/common/AddAccompanimentModal";
 import { Button } from "@/components/common/Button";
 import VisioSessionsConfig from "@/components/common/VisioSessionsConfig";
-import { useI18n } from "@/locales/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronRight, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
@@ -62,7 +62,7 @@ const getSessionFeatures = (session: ProExpertSession, t: any): string[] => {
 };
 
 export default function OffresPage() {
-  const t = useI18n();
+  const t = useTranslations();
   const [selectedOffer, setSelectedOffer] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -119,7 +119,9 @@ export default function OffresPage() {
     }
 
     // Trouver la session complète dans les données locales
-    const sessionToDelete = subscriptionSessions.find(s => s.id === sessionId);
+    const sessionToDelete = subscriptionSessions.find(
+      (s) => s.id === sessionId
+    );
     if (!sessionToDelete) {
       console.error("Session non trouvée dans les données locales");
       return;
@@ -135,8 +137,10 @@ export default function OffresPage() {
           session_nature: sessionToDelete.session_nature as any,
           one_on_one: (sessionToDelete as any).one_on_one || false,
           video_call: (sessionToDelete as any).video_call || false,
-          strategic_session: (sessionToDelete as any).strategic_session || false,
-          exclusive_ressources: (sessionToDelete as any).exclusive_ressources || false,
+          strategic_session:
+            (sessionToDelete as any).strategic_session || false,
+          exclusive_ressources:
+            (sessionToDelete as any).exclusive_ressources || false,
           support: (sessionToDelete as any).support || false,
           mentorship: (sessionToDelete as any).mentorship || false,
           webinar: (sessionToDelete as any).webinar || false,
@@ -192,7 +196,9 @@ export default function OffresPage() {
 
         {error && (
           <div className="flex items-center justify-center h-32">
-            <p className="text-red-500">{t("error")}: {error.message}</p>
+            <p className="text-red-500">
+              {t("error")}: {error.message}
+            </p>
           </div>
         )}
 
@@ -256,7 +262,9 @@ export default function OffresPage() {
                             {/* Titre de l'offre */}
                             <h2 className="text-base xl:text-lg font-medium text-[#1F2937] mb-6 font-figtree">
                               {session.name ||
-                                `${t("offers.monthlyAccompanimentDefault")} ${index + 1}`}
+                                `${t("offers.monthlyAccompanimentDefault")} ${
+                                  index + 1
+                                }`}
                             </h2>
 
                             <h6 className="text-sm xl:text-base font-normal text-[#6B7280] mb-2.5 font-figtree">

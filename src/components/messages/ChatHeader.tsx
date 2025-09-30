@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useI18n } from "@/locales/client";
 import { ArrowLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ChatHeaderProps {
   activeConversation: any;
@@ -15,7 +15,7 @@ export function ChatHeader({
   onBackClick,
   className = "",
 }: ChatHeaderProps) {
-  const t = useI18n();
+  const t = useTranslations();
   return (
     <div
       className={`border-b border-gray-200 p-4 flex items-center gap-2 ${className}`}

@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 import { useQuery } from "@tanstack/react-query";
+import { showToast } from "@/utils/toast";
 
 export interface StreamUser {
   id: string;
@@ -26,6 +27,12 @@ export const useGetStreamCall = (appointmentId: string | undefined) => {
 
 export const useGetStreamToken = (appointmentId: string | undefined) => {
   const query = useGetStreamCall(appointmentId);
+
+  // Gérer les erreurs avec toast
+  if (query.isError && query.error) {
+    console.error("Failed to get stream call:", query.error);
+    showToast.error("callConnectionError", (query.error as any)?.message);
+  }
 
   return {
     ...query,

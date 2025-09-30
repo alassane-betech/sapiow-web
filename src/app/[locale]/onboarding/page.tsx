@@ -4,11 +4,11 @@ import { OnboardingExpertSteps } from "@/components/onboarding/OnboardingExpertS
 import { OnboardingSeekerSteps } from "@/components/onboarding/OnboardingSeekerSteps";
 import { UserTypeSelector } from "@/components/onboarding/UserTypeSelector";
 import { useOnboardingLogic } from "@/hooks/useOnboardingLogic";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 function Onboarding() {
-  const t = useI18n();
+  const t = useTranslations();
   const {
     isCheckingProfiles,
     shouldShowOnboarding,

@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
-import { useI18n } from "@/locales/client";
 import { Check, Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import DatePicker from "./DatePicker";
@@ -45,17 +45,45 @@ export default function AvailabilitySheet({
   isOpen,
   onClose,
 }: AvailabilitySheetProps) {
-  const t = useI18n();
-  
+  const t = useTranslations();
+
   // Définir les jours de la semaine
   const weekDays: DayAvailability[] = [
-    { day: t("availabilitySheet.sunday"), dayOfWeek: "sunday", available: false },
-    { day: t("availabilitySheet.monday"), dayOfWeek: "monday", available: true },
-    { day: t("availabilitySheet.tuesday"), dayOfWeek: "tuesday", available: true },
-    { day: t("availabilitySheet.wednesday"), dayOfWeek: "wednesday", available: false },
-    { day: t("availabilitySheet.thursday"), dayOfWeek: "thursday", available: true },
-    { day: t("availabilitySheet.friday"), dayOfWeek: "friday", available: true },
-    { day: t("availabilitySheet.saturday"), dayOfWeek: "saturday", available: false },
+    {
+      day: t("availabilitySheet.sunday"),
+      dayOfWeek: "sunday",
+      available: false,
+    },
+    {
+      day: t("availabilitySheet.monday"),
+      dayOfWeek: "monday",
+      available: true,
+    },
+    {
+      day: t("availabilitySheet.tuesday"),
+      dayOfWeek: "tuesday",
+      available: true,
+    },
+    {
+      day: t("availabilitySheet.wednesday"),
+      dayOfWeek: "wednesday",
+      available: false,
+    },
+    {
+      day: t("availabilitySheet.thursday"),
+      dayOfWeek: "thursday",
+      available: true,
+    },
+    {
+      day: t("availabilitySheet.friday"),
+      dayOfWeek: "friday",
+      available: true,
+    },
+    {
+      day: t("availabilitySheet.saturday"),
+      dayOfWeek: "saturday",
+      available: false,
+    },
   ];
 
   // Créer des dates fictives pour chaque jour de la semaine (pour utiliser le hook)
@@ -219,7 +247,8 @@ export default function AvailabilitySheet({
                     <div className="pb-4 pt-0">
                       <div className="flex items-center justify-between mb-6">
                         <div className="font-semibold text-gray-900">
-                          {t("availabilitySheet.availability")} {availabilityPeriod.displayText}
+                          {t("availabilitySheet.availability")}{" "}
+                          {availabilityPeriod.displayText}
                         </div>
                         <Button
                           variant="ghost"
@@ -290,7 +319,10 @@ export default function AvailabilitySheet({
                             </div>
                             {isAvailable ? (
                               <div className="text-sm text-slate-gray mb-2">
-                                {manager.timeSlots.length} {manager.timeSlots.length > 1 ? t("availabilitySheet.sessions") : t("availabilitySheet.session")}
+                                {manager.timeSlots.length}{" "}
+                                {manager.timeSlots.length > 1
+                                  ? t("availabilitySheet.sessions")
+                                  : t("availabilitySheet.session")}
                               </div>
                             ) : (
                               <div className="text-sm text-slate-gray">

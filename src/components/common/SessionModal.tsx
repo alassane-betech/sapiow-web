@@ -9,8 +9,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useI18n } from "@/locales/client";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React from "react";
 import { Button } from "./Button";
@@ -51,10 +51,12 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   questions = [],
   loadingState = null,
 }) => {
-  const t = useI18n();
-  
+  const t = useTranslations();
+
   // Détermine le titre du modal selon le contexte
-  const modalTitle = isUpcoming ? t("visios.sessionDetail") : t("visios.pendingRequest");
+  const modalTitle = isUpcoming
+    ? t("visios.sessionDetail")
+    : t("visios.pendingRequest");
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>

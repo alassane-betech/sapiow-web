@@ -1,18 +1,15 @@
 import { Input } from "@/components/ui/input";
-import { useI18n } from "@/locales/client";
-import { Search, Mic } from "lucide-react";
+import { Mic, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface SearchBarProps {
   placeholder?: string;
   className?: string;
 }
 
-export function SearchBar({ 
-  placeholder, 
-  className = "" 
-}: SearchBarProps) {
-  const t = useI18n();
-  
+export function SearchBar({ placeholder, className = "" }: SearchBarProps) {
+  const t = useTranslations();
+
   return (
     <div className={`px-4 mb-5 pt-0 ${className}`}>
       <div className="relative">

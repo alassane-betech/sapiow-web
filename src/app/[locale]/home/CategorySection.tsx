@@ -1,7 +1,7 @@
 "use client";
 import { Professional } from "@/types/professional";
+import { useTranslations } from "next-intl";
 import ProfessionalCard from "./ProfessionalCard";
-import { useI18n } from "@/locales/client";
 
 interface CategorySectionProps {
   category: string;
@@ -20,7 +20,7 @@ export default function CategorySection({
   onProfessionalClick,
   isMutatingFavorite = false,
 }: CategorySectionProps) {
-  const t = useI18n();
+  const t = useTranslations();
 
   // Fonction pour obtenir le nom traduit de la catégorie
   const getCategoryDisplayName = (categoryKey: string) => {
@@ -33,8 +33,11 @@ export default function CategorySection({
       sport: t("categories.sport"),
       artisanat: t("categories.artisanat"),
     };
-    
-    return categoryTranslations[categoryKey] || categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
+
+    return (
+      categoryTranslations[categoryKey] ||
+      categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)
+    );
   };
   if (professionals.length === 0) {
     return null;

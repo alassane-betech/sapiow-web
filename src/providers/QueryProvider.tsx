@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState, type ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useState, type ReactNode } from "react";
 
 interface QueryProviderProps {
   children: ReactNode;
@@ -20,10 +20,9 @@ export function QueryProvider({ children }: QueryProviderProps) {
             staleTime: 1000 * 60 * 5,
             // Durée de conservation en cache (10 minutes)
             gcTime: 1000 * 60 * 10,
-            // Réessai en cas d'échec
-            retry: 3,
-            // Intervalle de réessai
-            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+
+            retryDelay: (attemptIndex) =>
+              Math.min(1000 * 2 ** attemptIndex, 30000),
           },
         },
       })
@@ -33,8 +32,8 @@ export function QueryProvider({ children }: QueryProviderProps) {
     <QueryClientProvider client={queryClient}>
       {children}
       {/* DevTools uniquement en développement */}
-      <ReactQueryDevtools 
-        initialIsOpen={false} 
+      <ReactQueryDevtools
+        initialIsOpen={false}
         position="bottom"
         buttonPosition="bottom-left"
       />

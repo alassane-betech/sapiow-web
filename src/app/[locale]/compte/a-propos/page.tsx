@@ -1,12 +1,12 @@
 "use client";
 import { Button } from "@/components/common/Button";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import AccountLayout from "../AccountLayout";
 
 export default function APropos() {
-  const t = useI18n();
+  const t = useTranslations();
 
   return (
     <AccountLayout>

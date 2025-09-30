@@ -1,9 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useI18n } from "@/locales/client";
 import AccountLayout from "../AccountLayout";
 
 // Fonction pour générer les éléments de navigation avec traductions
@@ -45,9 +45,9 @@ const getTabs = (t: any) => [
 ];
 
 export default function MentionsLegales() {
-  const t = useI18n();
+  const t = useTranslations();
   const [activeIdx, setActiveIdx] = useState(0);
-  
+
   const navItems = getNavItems(t);
   const TABS = getTabs(t);
   const activeTab = TABS[activeIdx];

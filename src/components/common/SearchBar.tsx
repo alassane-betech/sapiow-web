@@ -1,5 +1,5 @@
 "use client";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React, { useState } from "react";
 
@@ -14,7 +14,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   placeholder,
   className = "",
 }) => {
-  const t = useI18n();
+  const t = useTranslations();
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

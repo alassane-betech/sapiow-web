@@ -13,9 +13,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useI18n } from "@/locales/client";
 import { useConversationStore } from "@/store/useConversationStore";
 import { ChevronRight, Send, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -49,7 +49,7 @@ export function SessionDetailSheet({
   onClose,
   onStartVideoCall,
 }: SessionDetailSheetProps) {
-  const t = useI18n();
+  const t = useTranslations();
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const { setSelectedConversation, setSelectedProfessional } =
     useConversationStore();

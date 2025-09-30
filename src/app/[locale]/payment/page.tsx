@@ -1,6 +1,5 @@
 "use client";
 import { withAuth } from "@/components/common/withAuth";
-import { useI18n } from "@/locales/client";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import {
   Elements,
@@ -9,12 +8,13 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 
 // Bouton de paiement
 function CheckoutForm() {
-  const t = useI18n();
+  const t = useTranslations();
   const [loading, setLoading] = useState(false);
   const stripe = useStripe();
   const elements = useElements();
@@ -65,7 +65,7 @@ function CheckoutForm() {
 
 // Page principale
 function PaymentPage() {
-  const t = useI18n();
+  const t = useTranslations();
   const { payment } = useAppointmentStore();
 
   if (!payment) {

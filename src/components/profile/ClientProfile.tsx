@@ -5,11 +5,11 @@ import { useGetDomaines } from "@/api/domaine/useDomaine";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
 import { ProfilePhotoUpload } from "@/components/onboarding/ProfilePhotoUpload";
-import { useI18n } from "@/locales/client";
 import { useClientProfileUpdate } from "@/hooks/useClientProfileUpdate";
+import { useTranslations } from "next-intl";
 
 export default function ClientProfile() {
-  const t = useI18n();
+  const t = useTranslations();
   const { data: customer, isLoading, error } = useGetCustomer();
   const { data: domains = [] } = useGetDomaines();
 

@@ -1,7 +1,7 @@
 "use client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React, { useRef, useState } from "react";
-import { useI18n } from "@/locales/client";
 
 interface ProfilePhotoUploadProps {
   onPhotoSelect?: (file: File) => void;
@@ -20,7 +20,7 @@ export const ProfilePhotoUpload: React.FC<ProfilePhotoUploadProps> = ({
   currentAvatar,
   isUploading = false,
 }) => {
-  const t = useI18n();
+  const t = useTranslations();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -88,7 +88,7 @@ export const ProfilePhotoUpload: React.FC<ProfilePhotoUploadProps> = ({
             </div>
           )}
         </div>
-        
+
         {/* Icône de suppression - visible au hover seulement si photo existe */}
         {hasPhoto && isCompte && onPhotoDelete && (
           <button
@@ -137,7 +137,7 @@ export const ProfilePhotoUpload: React.FC<ProfilePhotoUploadProps> = ({
             </svg>
           </button>
         )}
-        
+
         {!isCompte && (
           <>
             {" "}

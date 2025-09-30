@@ -4,8 +4,9 @@ import { AccountSidebar } from "@/components/layout/AccountSidebar";
 import { Header } from "@/components/layout/header/Header";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
-import { useI18n } from "@/locales/client";
+
 import { useUserStore } from "@/store/useUser";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -16,7 +17,7 @@ export default function AccountLayout({
   children: React.ReactNode;
   className?: string;
 }) {
-  const t = useI18n();
+  const t = useTranslations();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleNotificationClick = () => {
@@ -66,7 +67,9 @@ export default function AccountLayout({
                   />
                 </svg>
               </button>
-              <h1 className="text-lg font-bold text-cobalt-blue-500">{t("nav.account")}</h1>
+              <h1 className="text-lg font-bold text-cobalt-blue-500">
+                {t("nav.account")}
+              </h1>
             </div>
             <button
               onClick={handleNotificationClick}

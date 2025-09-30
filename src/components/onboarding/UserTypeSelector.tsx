@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/common/Button";
 import { RadioGroup } from "@/components/ui/radio-group";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React from "react";
 
@@ -16,8 +16,8 @@ export const UserTypeSelector: React.FC<UserTypeSelectorProps> = ({
   onUserTypeChange,
   onContinue,
 }) => {
-  const t = useI18n();
-  
+  const t = useTranslations();
+
   return (
     <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px]">
       <h1 className="text-2xl sm:text-[26px] lg:text-[28px] leading-[32px] sm:leading-[34px] lg:leading-[36px] font-bold text-center lg:text-left mb-14">

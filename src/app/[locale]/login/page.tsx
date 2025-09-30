@@ -3,12 +3,12 @@ import { Button } from "@/components/common/Button";
 import PhoneNumber from "@/components/common/PhoneNumber";
 import { RedirectIfAuthenticated } from "@/components/common/RedirectIfAuthenticated";
 import { useLogin } from "@/hooks/useLogin";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Login() {
-  const t = useI18n();
+  const t = useTranslations();
   const {
     phoneNumber,
     selectedCountry,

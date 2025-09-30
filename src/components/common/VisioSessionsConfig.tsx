@@ -1,8 +1,8 @@
 "use client";
 
 import { Switch } from "@/components/ui/switch";
-import { useI18n } from "@/locales/client";
 import { useProSessionsConfig } from "@/hooks/useProSessionsConfig";
+import { useTranslations } from "next-intl";
 
 interface VisioSessionsConfigProps {
   className?: string;
@@ -11,8 +11,8 @@ interface VisioSessionsConfigProps {
 export default function VisioSessionsConfig({
   className,
 }: VisioSessionsConfigProps) {
-  const t = useI18n();
-  
+  const t = useTranslations();
+
   const {
     sessions,
     isInitialLoading,
@@ -21,7 +21,7 @@ export default function VisioSessionsConfig({
     handlePriceChange,
     handleToggle,
     handlePriceBlur,
-    handleToggleUpdate
+    handleToggleUpdate,
   } = useProSessionsConfig();
 
   const expectations = [
@@ -42,7 +42,9 @@ export default function VisioSessionsConfig({
     return (
       <div className={`space-y-6 ${className}`}>
         <div className="text-center py-8">
-          <p className="text-gray-600">{t("visioSessionsConfig.loadingSessions")}</p>
+          <p className="text-gray-600">
+            {t("visioSessionsConfig.loadingSessions")}
+          </p>
         </div>
       </div>
     );
@@ -52,7 +54,9 @@ export default function VisioSessionsConfig({
     <div className={`space-y-6 ${className}`}>
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <p className="text-red-600 text-sm">{t("visioSessionsConfig.loadingError")}</p>
+          <p className="text-red-600 text-sm">
+            {t("visioSessionsConfig.loadingError")}
+          </p>
         </div>
       )}
 
@@ -60,12 +64,12 @@ export default function VisioSessionsConfig({
       <div className="space-y-4">
         {sessions.map((session) => {
           const sessionUpdating = isSessionUpdating(session.id);
-          
+
           return (
             <div
               key={session.id}
               className={`flex items-center justify-between p-4 bg-white rounded-[12px] border border-light-blue-gray ${
-                sessionUpdating ? 'opacity-70' : ''
+                sessionUpdating ? "opacity-70" : ""
               } transition-opacity duration-200`}
             >
               <div className="flex items-center gap-6">
@@ -74,12 +78,17 @@ export default function VisioSessionsConfig({
                 </span>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">{t("visioSessionsConfig.price")}</span>
+                  <span className="text-sm text-gray-600">
+                    {t("visioSessionsConfig.price")}
+                  </span>
                   <input
                     type="number"
                     value={session.price}
                     onChange={(e) =>
-                      handlePriceChange(session.id, parseInt(e.target.value) || 0)
+                      handlePriceChange(
+                        session.id,
+                        parseInt(e.target.value) || 0
+                      )
                     }
                     onBlur={() => handlePriceBlur(session.id)}
                     disabled={!session.enabled || sessionUpdating}
@@ -112,7 +121,9 @@ export default function VisioSessionsConfig({
 
       {/* Section Attentes */}
       <div className="space-y-4 border border-light-blue-gray pt-4 rounded-[8px] px-4 py-2">
-        <h3 className="text-xs font-normal text-slate-gray">{t("visioSessionsConfig.expectations")}</h3>
+        <h3 className="text-xs font-normal text-slate-gray">
+          {t("visioSessionsConfig.expectations")}
+        </h3>
         <div className="space-y-2 pl-2">
           {expectations.map((expectation, index) => (
             <div key={index} className="flex items-start gap-2">

@@ -1,15 +1,15 @@
 "use client";
+import { usePatientPaymentHistoryDisplay } from "@/api/patientPayment/usePatientPayment";
 import { FormField } from "@/components/common/FormField";
 import TransactionDetails from "@/components/common/TransactionDetails";
-import { useI18n } from "@/locales/client";
 import { ChevronRightIcon, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
-import { usePatientPaymentHistoryDisplay } from "@/api/patientPayment/usePatientPayment";
 
 export default function HistoriquePaiements() {
-  const t = useI18n();
+  const t = useTranslations();
   const [selectedTransaction, setSelectedTransaction] = useState<string | null>(
     null
   );
@@ -19,7 +19,11 @@ export default function HistoriquePaiements() {
   const [showDetails, setShowDetails] = useState(false);
 
   // Récupération des données de paiement via l'API
-  const { data: history = [], isLoading, error } = usePatientPaymentHistoryDisplay();
+  const {
+    data: history = [],
+    isLoading,
+    error,
+  } = usePatientPaymentHistoryDisplay();
 
   // Détection des breakpoints
   useEffect(() => {
@@ -112,44 +116,48 @@ export default function HistoriquePaiements() {
               <div className="space-y-3 mt-4 px-4 lg:px-0 lg:max-w-[343px] lg:mx-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
                 {history.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-500">{t("paymentHistory.noTransactions")}</p>
-                    <p className="text-gray-400 text-sm mt-2">{t("paymentHistory.noTransactionsDescription")}</p>
+                    <p className="text-gray-500">
+                      {t("paymentHistory.noTransactions")}
+                    </p>
+                    <p className="text-gray-400 text-sm mt-2">
+                      {t("paymentHistory.noTransactionsDescription")}
+                    </p>
                   </div>
                 ) : (
                   history.map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    onClick={() => handleTransactionClick(transaction.id)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-[12px] cursor-pointer transition-colors hover:bg-gray-50 ${
-                      selectedTransaction === transaction.id && !isMobile
-                        ? "bg-snow-blue "
-                        : ""
-                    }`}
-                  >
-                    <div className="w-[40px] h-[40px] rounded-full flex items-center justify-center border border-light-blue-gray flex-shrink-0">
-                      <Image
-                        src="/assets/icons/master-card.svg"
-                        alt={t("paymentHistory.transactionDetails")}
-                        width={24}
-                        height={24}
-                        className="w-[24px] h-[24px]"
-                      />
+                    <div
+                      key={transaction.id}
+                      onClick={() => handleTransactionClick(transaction.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-[12px] cursor-pointer transition-colors hover:bg-gray-50 ${
+                        selectedTransaction === transaction.id && !isMobile
+                          ? "bg-snow-blue "
+                          : ""
+                      }`}
+                    >
+                      <div className="w-[40px] h-[40px] rounded-full flex items-center justify-center border border-light-blue-gray flex-shrink-0">
+                        <Image
+                          src="/assets/icons/master-card.svg"
+                          alt={t("paymentHistory.transactionDetails")}
+                          width={24}
+                          height={24}
+                          className="w-[24px] h-[24px]"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="truncate text-base font-medium font-figtree text-exford-blue">
+                          {transaction.title}
+                        </p>
+                        <p className="truncate text-sm font-figtree text-slate-gray">
+                          {transaction.date}
+                        </p>
+                      </div>
+                      <span className="text-base font-bold font-figtree text-slate-600">
+                        {transaction.amount}
+                      </span>
+                      {selectedTransaction !== transaction.id ? (
+                        <ChevronRightIcon className="w-5 h-5 text-slate-gray" />
+                      ) : null}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="truncate text-base font-medium font-figtree text-exford-blue">
-                        {transaction.title}
-                      </p>
-                      <p className="truncate text-sm font-figtree text-slate-gray">
-                        {transaction.date}
-                      </p>
-                    </div>
-                    <span className="text-base font-bold font-figtree text-slate-600">
-                      {transaction.amount}
-                    </span>
-                    {selectedTransaction !== transaction.id ? (
-                      <ChevronRightIcon className="w-5 h-5 text-slate-gray" />
-                    ) : null}
-                  </div>
                   ))
                 )}
               </div>
@@ -233,38 +241,42 @@ export default function HistoriquePaiements() {
                 <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
                   {history.length === 0 ? (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">{t("paymentHistory.noTransactions")}</p>
-                      <p className="text-gray-400 text-sm mt-2">{t("paymentHistory.noTransactionsDescription")}</p>
+                      <p className="text-gray-500">
+                        {t("paymentHistory.noTransactions")}
+                      </p>
+                      <p className="text-gray-400 text-sm mt-2">
+                        {t("paymentHistory.noTransactionsDescription")}
+                      </p>
                     </div>
                   ) : (
                     history.map((transaction) => (
-                    <div
-                      key={transaction.id}
-                      onClick={() => handleTransactionClick(transaction.id)}
-                      className="w-full flex items-center gap-3 p-3 rounded-[12px] cursor-pointer transition-colors hover:bg-gray-50"
-                    >
-                      <div className="w-[40px] h-[40px] rounded-full flex items-center justify-center border border-light-blue-gray flex-shrink-0">
-                        <Image
-                          src="/assets/icons/master-card.svg"
-                          alt={t("paymentHistory.transactionDetails")}
-                          width={24}
-                          height={24}
-                          className="w-[24px] h-[24px]"
-                        />
+                      <div
+                        key={transaction.id}
+                        onClick={() => handleTransactionClick(transaction.id)}
+                        className="w-full flex items-center gap-3 p-3 rounded-[12px] cursor-pointer transition-colors hover:bg-gray-50"
+                      >
+                        <div className="w-[40px] h-[40px] rounded-full flex items-center justify-center border border-light-blue-gray flex-shrink-0">
+                          <Image
+                            src="/assets/icons/master-card.svg"
+                            alt={t("paymentHistory.transactionDetails")}
+                            width={24}
+                            height={24}
+                            className="w-[24px] h-[24px]"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate text-base font-medium font-figtree text-exford-blue">
+                            {transaction.title}
+                          </p>
+                          <p className="truncate text-sm font-figtree text-slate-gray">
+                            {transaction.date}
+                          </p>
+                        </div>
+                        <span className="text-base font-bold font-figtree text-slate-600">
+                          {transaction.amount}
+                        </span>
+                        <ChevronRightIcon className="w-5 h-5 text-slate-gray" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="truncate text-base font-medium font-figtree text-exford-blue">
-                          {transaction.title}
-                        </p>
-                        <p className="truncate text-sm font-figtree text-slate-gray">
-                          {transaction.date}
-                        </p>
-                      </div>
-                      <span className="text-base font-bold font-figtree text-slate-600">
-                        {transaction.amount}
-                      </span>
-                      <ChevronRightIcon className="w-5 h-5 text-slate-gray" />
-                    </div>
                     ))
                   )}
                 </div>

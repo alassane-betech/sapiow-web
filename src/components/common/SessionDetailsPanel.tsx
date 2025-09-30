@@ -1,12 +1,11 @@
 import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { EmptySessionCard } from "@/components/common/EmptySessionCard";
 import TimeSlotsManager from "@/components/common/TimeSlotsManager";
-import { useCurrentLocale, useI18n } from "@/locales/client";
 import { useProExpertStore } from "@/store/useProExpert";
 import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
 import { SessionDetailsData } from "@/types/availability";
 import { ApiSchedule, getDayOfWeekFromDate } from "@/types/schedule";
-import { formatFullDate } from "@/utils/dateFormat";
+import { useLocale, useTranslations } from "next-intl";
 
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
@@ -19,8 +18,8 @@ export const SessionDetailsPanel = ({
   showTimeSlotsManager,
   confirmedAppointments = [],
 }: SessionDetailsPanelProps) => {
-  const t = useI18n();
-  const currentLocale = useCurrentLocale();
+  const t = useTranslations();
+  const currentLocale = useLocale();
 
   // Stores et API
   const { proExpertData, setProExpertData } = useProExpertStore();

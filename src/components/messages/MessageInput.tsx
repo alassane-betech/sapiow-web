@@ -6,10 +6,10 @@ import {
 import { useProSendMessage } from "@/api/porMessages/useProMessage";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useI18n } from "@/locales/client";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useUserStore } from "@/store/useUser";
 import { Mic, Paperclip, Send, Square } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -18,7 +18,7 @@ interface MessageInputProps {
 }
 
 export function MessageInput({ receiverId }: MessageInputProps) {
-  const t = useI18n();
+  const t = useTranslations();
   const { currentUser } = useCurrentUserData();
   const currentProId = currentUser?.id;
   const currentPatientId = currentUser?.id;
@@ -210,11 +210,9 @@ export function MessageInput({ receiverId }: MessageInputProps) {
         setRecordedAudio(blob);
         setAudioUrl(URL.createObjectURL(blob));
         setMessage(
-          `${t("messages.audioRecording")} (${Math.floor(recordingTime / 60)}:${(
-            recordingTime % 60
-          )
-            .toString()
-            .padStart(2, "0")})`
+          `${t("messages.audioRecording")} (${Math.floor(
+            recordingTime / 60
+          )}:${(recordingTime % 60).toString().padStart(2, "0")})`
         );
         stream.getTracks().forEach((track) => track.stop());
       };
@@ -398,7 +396,9 @@ export function MessageInput({ receiverId }: MessageInputProps) {
           <div className="bg-white rounded-lg max-w-md w-full">
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">{t("messages.takePhoto")}</h3>
+                <h3 className="text-lg font-semibold">
+                  {t("messages.takePhoto")}
+                </h3>
                 <button
                   onClick={stopCamera}
                   className="text-gray-500 cursor-pointer hover:text-gray-700"

@@ -1,8 +1,8 @@
 "use client";
 
 import { FormField } from "@/components/common/FormField";
-import { useI18n } from "@/locales/client";
 import { Minus, Plus, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import AccountLayout from "../AccountLayout";
 
@@ -31,7 +31,7 @@ const getFaqData = (t: any) => [
 ];
 
 export default function Support() {
-  const t = useI18n();
+  const t = useTranslations();
   const [searchTerm, setSearchTerm] = useState("");
   const [openItems, setOpenItems] = useState<number[]>([1]); // Premier item ouvert par défaut
 
