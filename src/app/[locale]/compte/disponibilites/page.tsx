@@ -233,7 +233,7 @@ export default function Disponibilites() {
                 size="sm"
               />
             </div>
-            <div className="w-full max-w-[414px] lg:max-w-[343px] mx-auto">
+            <div className="w-full mx-auto">
               <CustomCalendar confirmedAppointments={confirmedAppointments} />
             </div>
             {/* Section Gestion des disponibilités */}
