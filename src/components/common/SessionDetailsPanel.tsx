@@ -5,7 +5,9 @@ import { useProExpertStore } from "@/store/useProExpert";
 import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
 import { SessionDetailsData } from "@/types/availability";
 import { ApiSchedule, getDayOfWeekFromDate } from "@/types/schedule";
+import { formatDateForSession } from "@/utils/dateFormat";
 import { useLocale, useTranslations } from "next-intl";
+import { SessionPreviewCard } from "./SessionPreviewCard";
 
 interface SessionDetailsPanelProps {
   selectedDate: Date | null;
@@ -93,7 +95,7 @@ export const SessionDetailsPanel = ({
   };
 
   return (
-    <div className="w-full max-w-[349px]">
+    <div className="w-full">
       {selectedDate ? (
         <div className="space-y-4">
           <div className="w-full flex items-center justify-center gap-2 mb-6">
@@ -112,7 +114,7 @@ export const SessionDetailsPanel = ({
 
           {sessionDetails && (
             <div className="space-y-3">
-              {/* {sessionDetails.sessions.map((session) => (
+              {sessionDetails.sessions.map((session) => (
                 <SessionPreviewCard
                   key={session.id}
                   date={formatDateForSession(sessionDetails.date)}
@@ -123,7 +125,7 @@ export const SessionDetailsPanel = ({
                   sessionDescription={session.description}
                   className="w-full"
                 />
-              ))} */}
+              ))}
             </div>
           )}
 

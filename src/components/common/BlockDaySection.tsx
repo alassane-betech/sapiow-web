@@ -18,7 +18,7 @@ export const BlockDaySection = ({
   const t = useTranslations();
   const containerClasses = isMobile
     ? "w-full flex items-center justify-between mt-6 p-4 border-t "
-    : "w-full flex items-center justify-end gap-4 fixed bottom-5";
+    : "w-full flex items-center justify-end gap-4 fixed bottom-10";
 
   const textContainerClasses = isMobile ? "" : "text-right";
 
