@@ -81,7 +81,7 @@ export default function Login() {
               <p className="text-xs sm:text-sm font-medium text-black mt-6 lg:mt-4 text-center lg:text-left leading-relaxed font-figtree">
                 {t("login.legalText")}{" "}
                 <Link
-                  href="/conditions-d-utilisation"
+                  href="/mentions-legales"
                   target="_blank"
                   className="text-cyan-cobalt hover:underline"
                 >
@@ -89,7 +89,7 @@ export default function Login() {
                 </Link>{" "}
                 {t("login.and")}{" "}
                 <Link
-                  href="/politique-de-confidentialite"
+                  href="/mentions-legales"
                   target="_blank"
                   className="text-cyan-cobalt hover:underline"
                 >

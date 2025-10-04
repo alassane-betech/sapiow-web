@@ -11,7 +11,7 @@ import VisioSessionsConfig from "@/components/common/VisioSessionsConfig";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronRight, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
 // Types pour les offres
@@ -73,6 +73,24 @@ export default function OffresPage() {
   const queryClient = useQueryClient();
   const updateSessionMutation = useUpdateProSession();
 
+  // États pour la gestion de l'affichage mobile
+  const [isMobile, setIsMobile] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Détecter si l'écran est en mode mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkIfMobile);
+    };
+  }, []);
+
   // Offres toujours disponibles (liens de navigation)
   const offers: Offer[] = useMemo(() => {
     const sessionOffers: Offer[] = [];
@@ -110,6 +128,13 @@ export default function OffresPage() {
 
   const handleOfferClick = (offerId: string) => {
     setSelectedOffer(offerId);
+    if (isMobile) {
+      setShowDetails(true);
+    }
+  };
+
+  const handleBackClick = () => {
+    setShowDetails(false);
   };
 
   const handleDeleteOffer = async (sessionId: string) => {
@@ -210,161 +235,342 @@ export default function OffresPage() {
 
         {!isLoading && !error && offers.length > 0 && (
           <div className="flex justify-between space-y-4 h-full">
-            {/* Colonne de gauche - Liste des offres */}
-            <div className="flex-1 min-w-0 w-full lg:max-w-[375px]">
-              <div className="space-y-3 px-4 lg:px-0 lg:max-w-[343px] lg:mx-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
-                {offers.map((offer, index) => (
-                  <div
-                    key={offer.id}
-                    onClick={() => handleOfferClick(offer.id)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-[12px] cursor-pointer transition-colors hover:bg-gray-50 ${
-                      selectedOffer === offer.id
-                        ? "bg-snow-blue border border-light-blue-gray"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="truncate text-base font-medium font-figtree text-exford-blue">
-                        {offer.title}
-                      </p>
-                    </div>
-                    {selectedOffer !== offer.id ? (
-                      <ChevronRight className="w-5 h-5 text-slate-gray" />
-                    ) : null}
+            {/* Version mobile avec navigation conditionnelle */}
+            {isMobile ? (
+              <div className="w-full px-4">
+                {!showDetails ? (
+                  // Liste des offres en mode mobile
+                  <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
+                    {offers.map((offer, index) => (
+                      <div
+                        key={offer.id}
+                        onClick={() => handleOfferClick(offer.id)}
+                        className="w-full flex items-center gap-3 p-3 rounded-[12px] cursor-pointer transition-colors hover:bg-gray-50 border border-light-blue-gray"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate text-base font-medium font-figtree text-exford-blue">
+                            {offer.title}
+                          </p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-slate-gray" />
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
+                ) : (
+                  // Détails de l'offre en mode mobile avec bouton retour
+                  <div className="w-full">
+                    {/* Bouton retour */}
+                    <div className="flex items-center mb-4">
+                      <button
+                        onClick={handleBackClick}
+                        className="mr-3 p-2 rounded-full hover:bg-[#F7F9FB]"
+                      >
+                        <svg
+                          width="20"
+                          height="20"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="text-[#1E293B]"
+                        >
+                          <path
+                            d="M12 16l-6-6 6-6"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+                      <h2 className="text-xl font-bold">
+                        {offers.find((o) => o.id === selectedOffer)?.title}
+                      </h2>
+                    </div>
 
-            {/* Barre verticale de séparation - cachée sur mobile */}
-            <div className="hidden md:block bg-soft-ice-gray w-[1px] min-h-screen lg:mr-2"></div>
+                    {/* Contenu spécifique selon l'offre sélectionnée */}
+                    {selectedOffer === "accompagnement-mensuel" && (
+                      <div className="w-full space-y-6 overflow-y-auto max-h-[calc(100vh-100px)] bg-red-700">
+                        {subscriptionSessions.length > 0 ? (
+                          // Affichage de toutes les sessions d'accompagnement
+                          <div className="space-y-4">
+                            {subscriptionSessions.map((session, index) => (
+                              <div
+                                key={session.id}
+                                className="bg-white rounded-[12px] border border-light-blue-gray p-6"
+                              >
+                                {/* Titre de l'offre */}
+                                <h2 className="text-base xl:text-lg font-medium text-[#1F2937] mb-6 font-figtree">
+                                  {session.name ||
+                                    `${t(
+                                      "offers.monthlyAccompanimentDefault"
+                                    )} ${index + 1}`}
+                                </h2>
 
-            {/* Panneau détails - caché sur mobile */}
-            <div className="w-full max-w-[412px]">
-              {!selectedOffer && (
-                <div className="w-full border border-light-blue-gray rounded-[16px] p-6 flex items-center justify-center ">
-                  <p className="w-full max-w-[220px] text-base text-center font-medium text-pale-blue-gray">
-                    {t("offers.selectOfferToSeeDetails")}
-                  </p>
-                </div>
-              )}
-              <div className="justify-center gap-2 w-full max-w-[412px] font-figtree mt-4 hidden lg:flex">
-                {selectedOffer === "accompagnement-mensuel" && (
-                  <div className="w-full space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
-                    {subscriptionSessions.length > 0 ? (
-                      // Affichage de toutes les sessions d'accompagnement
-                      <div className="space-y-4">
-                        {subscriptionSessions.map((session, index) => (
-                          <div
-                            key={session.id}
-                            className="bg-white rounded-[12px] border border-light-blue-gray p-6"
-                          >
-                            {/* Titre de l'offre */}
-                            <h2 className="text-base xl:text-lg font-medium text-[#1F2937] mb-6 font-figtree">
-                              {session.name ||
-                                `${t("offers.monthlyAccompanimentDefault")} ${
-                                  index + 1
-                                }`}
-                            </h2>
+                                <h6 className="text-sm xl:text-base font-normal text-[#6B7280] mb-2.5 font-figtree">
+                                  {t("offers.whatIsIncluded")}
+                                </h6>
 
-                            <h6 className="text-sm xl:text-base font-normal text-[#6B7280] mb-2.5 font-figtree">
-                              {t("offers.whatIsIncluded")}
-                            </h6>
+                                {/* Liste des caractéristiques */}
+                                <div className="space-y-3 mb-8 font-figtree">
+                                  {getSessionFeatures(session, t).map(
+                                    (feature: string, featureIndex: number) => (
+                                      <div
+                                        key={`${session.id}-feature-${featureIndex}`}
+                                        className="flex items-start gap-3"
+                                      >
+                                        <div className="relative w-4 h-4 bg-[#6B7280] rounded-full mt-2 flex-shrink-0">
+                                          <Check className="w-3 h-3 text-white font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                        </div>
+                                        <p className="text-base text-[#1E293B] leading-relaxed font-figtree">
+                                          {feature}
+                                        </p>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
 
-                            {/* Liste des caractéristiques */}
-                            <div className="space-y-3 mb-8 font-figtree">
-                              {getSessionFeatures(session, t).map(
-                                (feature: string, featureIndex: number) => (
-                                  <div
-                                    key={`${session.id}-feature-${featureIndex}`}
-                                    className="flex items-start gap-3"
-                                  >
-                                    <div className="relative w-4 h-4 bg-[#6B7280] rounded-full mt-2 flex-shrink-0">
-                                      <Check className="w-3 h-3 text-white font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                                    </div>
-                                    <p className="text-base text-[#1E293B] leading-relaxed font-figtree">
-                                      {feature}
-                                    </p>
-                                  </div>
-                                )
-                              )}
-                            </div>
+                                {/* Prix */}
+                                <div className="text-xl xl:text-3xl font-bold text-gray-900 mb-6 font-figtree">
+                                  {session.price} € {t("offers.perMonth")}
+                                </div>
 
-                            {/* Prix */}
-                            <div className="text-xl xl:text-3xl font-bold text-gray-900 mb-6 font-figtree">
-                              {session.price} € {t("offers.perMonth")}
-                            </div>
-
-                            {/* Boutons d'action */}
-                            <div className="flex gap-4 mb-6 font-figtree">
+                                {/* Boutons d'action */}
+                                <div className="flex gap-4 mb-6 font-figtree">
+                                  <Button
+                                    label={
+                                      updateSessionMutation.isPending
+                                        ? t("offers.deleting")
+                                        : t("offers.delete")
+                                    }
+                                    onClick={() =>
+                                      handleDeleteOffer(session.id)
+                                    }
+                                    disabled={updateSessionMutation.isPending}
+                                    className={`flex-1 bg-white text-base text-charcoal-blue font-bold hover:bg-gray-50 h-[40px] border-none shadow-none ${
+                                      updateSessionMutation.isPending
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                  />
+                                  <Button
+                                    label={t("bankAccount.modify")}
+                                    onClick={() => handleModifyOffer(session)}
+                                    className="flex-1 bg-white border border-light-blue-gray text-exford-blue font-bold  h-[40px]"
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          // État vide - Aucun accompagnement configuré
+                          <div className="bg-white rounded-[12px] border border-light-blue-gray p-6">
+                            <div className="text-center space-y-4">
+                              <h2 className="text-base xl:text-lg font-medium text-[#1F2937]">
+                                {t("offers.monthlyAccompaniment")}
+                              </h2>
+                              <p className="text-sm text-[#6B7280]">
+                                {t("offers.noMonthlyAccompaniment")}
+                              </p>
+                              <p className="text-sm text-[#9CA3AF]">
+                                {t("offers.createFirstOffer")}
+                              </p>
                               <Button
-                                label={
-                                  updateSessionMutation.isPending
-                                    ? t("offers.deleting")
-                                    : t("offers.delete")
-                                }
-                                onClick={() => handleDeleteOffer(session.id)}
-                                disabled={updateSessionMutation.isPending}
-                                className={`flex-1 bg-white text-base text-charcoal-blue font-bold hover:bg-gray-50 h-[40px] border-none shadow-none ${
-                                  updateSessionMutation.isPending
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
-                                }`}
-                              />
-                              <Button
-                                label={t("bankAccount.modify")}
-                                onClick={() => handleModifyOffer(session)}
-                                className="flex-1 bg-white border border-light-blue-gray text-exford-blue font-bold  h-[40px]"
+                                label={t("offers.createAccompaniment")}
+                                onClick={handleAddOffer}
+                                className="w-full bg-exford-blue text-white font-bold h-[44px] mt-6"
                               />
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      // État vide - Aucun accompagnement configuré
-                      <div className="bg-white rounded-[12px] border border-light-blue-gray p-6">
-                        <div className="text-center space-y-4">
-                          <h2 className="text-base xl:text-lg font-medium text-[#1F2937]">
-                            {t("offers.monthlyAccompaniment")}
-                          </h2>
-                          <p className="text-sm text-[#6B7280]">
-                            {t("offers.noMonthlyAccompaniment")}
-                          </p>
-                          <p className="text-sm text-[#9CA3AF]">
-                            {t("offers.createFirstOffer")}
-                          </p>
-                          <Button
-                            label={t("offers.createAccompaniment")}
+                        )}
+
+                        {/* Bouton Ajouter une offre (toujours visible) */}
+                        <div className="flex justify-center border border-light-blue-gray rounded-[8px]">
+                          <button
                             onClick={handleAddOffer}
-                            className="w-full bg-exford-blue text-white font-bold h-[44px] mt-6"
-                          />
+                            className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-figtree cursor-pointer"
+                          >
+                            <Plus className="w-4 h-4" />
+                            {t("offers.addOffer")}
+                          </button>
                         </div>
                       </div>
                     )}
 
-                    {/* Bouton Ajouter une offre (toujours visible) */}
-                    <div className="flex justify-center border border-light-blue-gray rounded-[8px]">
-                      <button
-                        onClick={handleAddOffer}
-                        className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-figtree cursor-pointer"
-                      >
-                        <Plus className="w-4 h-4" />
-                        {t("offers.addOffer")}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Configuration des Sessions visio - Toujours visible */}
-                {selectedOffer === "sessions-visio" && (
-                  <div className="w-full space-y-6 overflow-y-auto max-h-[calc(100vh-150px)]">
-                    <div className="bg-white p-6">
-                      <VisioSessionsConfig />
-                    </div>
+                    {/* Configuration des Sessions visio - Toujours visible */}
+                    {selectedOffer === "sessions-visio" && (
+                      <div className="w-full space-y-6 overflow-y-auto max-h-[calc(100vh-150px)]">
+                        <div className="bg-white p-6">
+                          <VisioSessionsConfig />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            </div>
+            ) : (
+              // Version desktop avec deux colonnes
+              <>
+                {/* Colonne de gauche - Liste des offres */}
+                <div className="flex-1 min-w-0 w-full lg:max-w-[375px]">
+                  <div className="space-y-3 px-4 lg:px-0 lg:max-w-[343px] lg:mx-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
+                    {offers.map((offer, index) => (
+                      <div
+                        key={offer.id}
+                        onClick={() => handleOfferClick(offer.id)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-[12px] cursor-pointer transition-colors hover:bg-gray-50 ${
+                          selectedOffer === offer.id
+                            ? "bg-snow-blue border border-light-blue-gray"
+                            : ""
+                        }`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate text-base font-medium font-figtree text-exford-blue">
+                            {offer.title}
+                          </p>
+                        </div>
+                        {selectedOffer !== offer.id ? (
+                          <ChevronRight className="w-5 h-5 text-slate-gray" />
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Barre verticale de séparation */}
+                <div className="hidden md:block bg-soft-ice-gray w-[1px] min-h-screen lg:mr-2"></div>
+
+                {/* Panneau détails */}
+                <div
+                  className="w-full max-w-[412px] overflow-y-auto h-[calc(100vh-200px)]"
+                  style={{ maxHeight: "calc(100vh - 100px)" }}
+                >
+                  {!selectedOffer && (
+                    <div className="w-full border border-light-blue-gray rounded-[16px] p-6 flex items-center justify-center">
+                      <p className="w-full max-w-[220px] text-base text-center font-medium text-pale-blue-gray">
+                        {t("offers.selectOfferToSeeDetails")}
+                      </p>
+                    </div>
+                  )}
+                  <div className="justify-center gap-2 w-full max-w-[412px] font-figtree mt-4 flex ">
+                    {selectedOffer === "accompagnement-mensuel" && (
+                      <div className="w-full space-y-6">
+                        {subscriptionSessions.length > 0 ? (
+                          // Affichage de toutes les sessions d'accompagnement
+                          <div className="space-y-4">
+                            {subscriptionSessions.map((session, index) => (
+                              <div
+                                key={session.id}
+                                className="bg-white rounded-[12px] border border-light-blue-gray p-6"
+                              >
+                                {/* Titre de l'offre */}
+                                <h2 className="text-base xl:text-lg font-medium text-[#1F2937] mb-6 font-figtree">
+                                  {session.name ||
+                                    `${t(
+                                      "offers.monthlyAccompanimentDefault"
+                                    )} ${index + 1}`}
+                                </h2>
+
+                                <h6 className="text-sm xl:text-base font-normal text-[#6B7280] mb-2.5 font-figtree">
+                                  {t("offers.whatIsIncluded")}
+                                </h6>
+
+                                {/* Liste des caractéristiques */}
+                                <div className="space-y-3 mb-8 font-figtree">
+                                  {getSessionFeatures(session, t).map(
+                                    (feature: string, featureIndex: number) => (
+                                      <div
+                                        key={`${session.id}-feature-${featureIndex}`}
+                                        className="flex items-start gap-3"
+                                      >
+                                        <div className="relative w-4 h-4 bg-[#6B7280] rounded-full mt-2 flex-shrink-0">
+                                          <Check className="w-3 h-3 text-white font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                                        </div>
+                                        <p className="text-base text-[#1E293B] leading-relaxed font-figtree">
+                                          {feature}
+                                        </p>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+
+                                {/* Prix */}
+                                <div className="text-xl xl:text-3xl font-bold text-gray-900 mb-6 font-figtree">
+                                  {session.price} € {t("offers.perMonth")}
+                                </div>
+
+                                {/* Boutons d'action */}
+                                <div className="flex gap-4 mb-6 font-figtree">
+                                  <Button
+                                    label={
+                                      updateSessionMutation.isPending
+                                        ? t("offers.deleting")
+                                        : t("offers.delete")
+                                    }
+                                    onClick={() =>
+                                      handleDeleteOffer(session.id)
+                                    }
+                                    disabled={updateSessionMutation.isPending}
+                                    className={`flex-1 bg-white text-base text-charcoal-blue font-bold hover:bg-gray-50 h-[40px] border-none shadow-none ${
+                                      updateSessionMutation.isPending
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                  />
+                                  <Button
+                                    label={t("bankAccount.modify")}
+                                    onClick={() => handleModifyOffer(session)}
+                                    className="flex-1 bg-white border border-light-blue-gray text-exford-blue font-bold  h-[40px]"
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          // État vide - Aucun accompagnement configuré
+                          <div className="bg-white rounded-[12px] border border-light-blue-gray p-6">
+                            <div className="text-center space-y-4">
+                              <h2 className="text-base xl:text-lg font-medium text-[#1F2937]">
+                                {t("offers.monthlyAccompaniment")}
+                              </h2>
+                              <p className="text-sm text-[#6B7280]">
+                                {t("offers.noMonthlyAccompaniment")}
+                              </p>
+                              <p className="text-sm text-[#9CA3AF]">
+                                {t("offers.createFirstOffer")}
+                              </p>
+                              <Button
+                                label={t("offers.createAccompaniment")}
+                                onClick={handleAddOffer}
+                                className="w-full bg-exford-blue text-white font-bold h-[44px] mt-6"
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Bouton Ajouter une offre (toujours visible) */}
+                        <div className="flex justify-center border border-light-blue-gray rounded-[8px]">
+                          <button
+                            onClick={handleAddOffer}
+                            className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-figtree cursor-pointer"
+                          >
+                            <Plus className="w-4 h-4" />
+                            {t("offers.addOffer")}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Configuration des Sessions visio - Toujours visible */}
+                    {selectedOffer === "sessions-visio" && (
+                      <div className="w-full space-y-6">
+                        <div className="bg-white p-6">
+                          <VisioSessionsConfig />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
