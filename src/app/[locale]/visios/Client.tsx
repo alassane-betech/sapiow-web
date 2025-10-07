@@ -12,7 +12,7 @@ import {
   type SessionData,
 } from "@/utils/appointmentUtils";
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import VideoConsultation from "../VideoCall/video-consultation";
 
 export default function Client() {
@@ -40,8 +40,22 @@ export default function Client() {
 
   const { data: customer } = useGetCustomer();
 
-  const { data: appointments, isLoading: isLoadingAppointments } =
+  const { data: appointments, isLoading: isLoadingAppointments, refetch } =
     useGetPatientAppointmentsById(customer?.id || "");
+
+  // Écouteur d'événement pour l'annulation de rendez-vous
+  useEffect(() => {
+    const handleAppointmentCancelled = () => {
+      // Rafraîchir les données après l'annulation
+      refetch();
+    };
+
+    window.addEventListener('appointment-cancelled', handleAppointmentCancelled);
+    
+    return () => {
+      window.removeEventListener('appointment-cancelled', handleAppointmentCancelled);
+    };
+  }, [refetch]);
 
   // Transformation et filtrage des données
   const { upcomingConfirmed, otherUpcoming } = useMemo(() => {

@@ -10,6 +10,11 @@ export interface GoogleCalendarConnectResponse {
   };
 }
 
+export interface GoogleCalendarConnectRequest {
+  authorizationCode: string;
+  codeVerifier?: string;
+}
+
 export interface GoogleCalendarDisconnectResponse {
   success: boolean;
   data: {
@@ -19,39 +24,39 @@ export interface GoogleCalendarDisconnectResponse {
 
 export interface GoogleCalendarStatusResponse {
   success: boolean;
-  data: {
-    connected: boolean;
-    connectedAt?: string;
-    totalAppointments?: number;
-    syncedAppointments?: number;
-    unsyncedAppointments?: number;
-    syncPercentage?: number;
-    note?: string;
-    message?: string;
-    instructions?: {
-      note: string;
-      endpoints: {
-        connect: string;
-        disconnect: string;
-      };
+  connected: boolean;
+  email?: string;
+  connectedAt?: string;
+  totalAppointments?: number;
+  syncedAppointments?: number;
+  unsyncedAppointments?: number;
+  syncPercentage?: number;
+  note?: string;
+  message?: string;
+  instructions?: {
+    note: string;
+    endpoints: {
+      connect: string;
+      disconnect: string;
     };
   };
 }
 
-// Hook pour connecter Google Calendar avec authorization code
+// Hook pour connecter Google Calendar avec authorization code et PKCE
 export function useGoogleCalendarConnect() {
   const queryClient = useQueryClient();
 
   return useMutation<
     GoogleCalendarConnectResponse,
     Error,
-    { authorizationCode: string }
+    GoogleCalendarConnectRequest
   >({
-    mutationFn: async ({ authorizationCode }) => {
+    mutationFn: async ({ authorizationCode, codeVerifier }) => {
       const response = await apiClient.post<GoogleCalendarConnectResponse>(
         "/google-calendar-sync",
         {
           authorizationCode,
+          codeVerifier,
         }
       );
       return response;

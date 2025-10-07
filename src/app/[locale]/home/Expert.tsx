@@ -13,10 +13,12 @@ import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import VideoConsultation from "../VideoCall/video-consultation";
 
 export default function Expert() {
+  const router = useRouter();
   const t = useTranslations();
 
   const { isVideoCallOpen, setIsVideoCallOpen, setAppointmentId } =
@@ -118,7 +120,10 @@ export default function Expert() {
           </div>
           <div className="lg:hidden w-[90%] mx-auto mt-5 bg-white rounded-[20px] border border-soft-ice-gray px-6">
             <div className="px-6 py-4 flex justify-center items-center gap-x-2">
-              <button className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
+              <button
+                className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+                onClick={() => router.push("/visios")}
+              >
                 <Image
                   src="/assets/icons/videorecord.svg"
                   alt="search"

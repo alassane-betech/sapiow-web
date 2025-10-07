@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { showToast } from "@/utils/toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ApiAppointment } from "@/utils/appointmentUtils";
 
 export const useGetProAppointments = (professionalId: string | undefined) => {
   return useQuery({
@@ -128,7 +129,7 @@ export const useCreatePatientAppointment = () => {
 
       // Ajouter le nouvel appointment au cache si besoin
       queryClient.setQueryData(["appointment", data.id], data);
-      showToast.success("appointmentCreated");
+      // showToast.success("appointmentCreated");
     },
     onError: (error: any) => {
       console.error("Failed to create appointment:", error);
@@ -160,11 +161,12 @@ export const useUpdateProAppointment = () => {
       queryClient.invalidateQueries({
         queryKey: ["appointments"],
       });
-      
+
       const status = variables.updateData.status;
-      const messageKey = status === "confirmed" 
-        ? "appointmentConfirmed" 
-        : "appointmentCancelled";
+      const messageKey =
+        status === "confirmed"
+          ? "appointmentConfirmed"
+          : "appointmentCancelled";
       showToast.success(messageKey);
     },
     onError: (error: any) => {
@@ -182,7 +184,26 @@ export const useCancelPatientAppointment = () => {
       return apiClient.delete(`patient-appointment-cancel/${appointmentId}`);
     },
     onSuccess: (_, appointmentId) => {
-      // Invalider le cache pour recharger les données de l'appointment spécifique
+      // Mettre à jour directement les données dans le cache
+      // 1. Récupérer les données actuelles
+      const updatePatientAppointments = (key: any) => {
+        const currentData = queryClient.getQueryData<ApiAppointment[]>(key);
+        if (currentData) {
+          // 2. Mettre à jour le statut du rendez-vous annulé
+          const updatedData = currentData.map(appointment => 
+            appointment.id === appointmentId 
+              ? { ...appointment, status: "cancelled" } 
+              : appointment
+          );
+          // 3. Mettre à jour le cache avec les nouvelles données
+          queryClient.setQueryData(key, updatedData);
+        }
+      };
+
+      // Mettre à jour les données dans tous les caches pertinents
+      updatePatientAppointments(["patient-appointments"]);
+      
+      // Invalider également les requêtes pour forcer un rechargement si nécessaire
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointmentId],
       });
@@ -200,7 +221,7 @@ export const useCancelPatientAppointment = () => {
       queryClient.invalidateQueries({
         queryKey: ["appointments"],
       });
-      
+
       showToast.success("appointmentCancelled");
     },
     onError: (error: any) => {
@@ -234,12 +255,50 @@ export const useCreateProAppointmentBlock = () => {
       queryClient.invalidateQueries({
         queryKey: ["appointments"],
       });
-      
+
       showToast.success("dateBlocked");
     },
     onError: (error: any) => {
       console.error("Failed to create appointment block:", error);
       showToast.error("dateBlockError", error?.message);
+    },
+  });
+};
+
+// Interface pour la suppression d'un bloc de rendez-vous
+interface DeleteBlockAppointmentData {
+  date: string; // Format: "YYYY-MM-DD"
+}
+
+/**
+ * Hook pour supprimer un bloc de rendez-vous pour un professionnel
+ * @returns Mutation pour supprimer un bloc de rendez-vous
+ */
+export const useDeleteProAppointmentBlock = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<any, Error, DeleteBlockAppointmentData>({
+    mutationFn: async (deleteData: DeleteBlockAppointmentData) => {
+      // Utilisation d'une URL avec paramètres pour la suppression
+      const dateParam = encodeURIComponent(deleteData.date);
+      return apiClient.delete(`pro-appointment-block?date=${dateParam}`);
+    },
+    onSuccess: (data, variables) => {
+      // Invalider le cache des blocs de rendez-vous
+      queryClient.invalidateQueries({
+        queryKey: ["pro-appointment-blocks"],
+      });
+
+      // Invalider aussi les rendez-vous du professionnel pour refléter les changements
+      queryClient.invalidateQueries({
+        queryKey: ["appointments"],
+      });
+
+      showToast.success("dateUnblocked");
+    },
+    onError: (error: any) => {
+      console.error("Failed to delete appointment block:", error);
+      showToast.error("dateUnblockError", error?.message);
     },
   });
 };

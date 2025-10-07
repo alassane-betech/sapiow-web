@@ -21,15 +21,24 @@ export const BlockDaySection = ({
     : "w-full flex items-center justify-end gap-4 fixed bottom-10";
 
   const textContainerClasses = isMobile ? "" : "text-right";
+  
+  // Déterminer le titre et la description en fonction de l'état actuel (bloqué ou non)
+  const title = isBlocked 
+    ? t("blockDaySection.unblockTitle") 
+    : t("blockDaySection.title");
+    
+  const description = isBlocked 
+    ? t("blockDaySection.unblockDescription") 
+    : t("blockDaySection.description");
 
   return (
     <div className={containerClasses}>
       <div className={textContainerClasses}>
         <h1 className="text-lg font-semibold text-charcoal-blue">
-          {t("blockDaySection.title")}
+          {title}
         </h1>
         <p className="text-sm font-normal text-gray-500">
-          {t("blockDaySection.description")}
+          {description}
         </p>
       </div>
       <div className="flex items-center gap-2">

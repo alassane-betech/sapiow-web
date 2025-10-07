@@ -2,6 +2,7 @@
 import { useGetDomaines } from "@/api/domaine/useDomaine";
 import { getDomainIcon } from "@/constants/onboarding";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface CategoryFilterProps {
   selectedCategory: string;
@@ -12,6 +13,7 @@ export default function CategoryFilter({
   selectedCategory,
   onCategoryChange,
 }: CategoryFilterProps) {
+  const t = useTranslations();
   const { data: domains = [], isLoading } = useGetDomaines();
 
   // Créer les catégories avec "Top" en premier + domaines API
@@ -27,7 +29,7 @@ export default function CategoryFilter({
   if (isLoading) {
     return (
       <div className="flex items-center gap-6 py-4">
-        <div className="text-ash-gray text-sm">Chargement...</div>
+        <div className="text-ash-gray text-sm">{t("loading")}...</div>
       </div>
     );
   }

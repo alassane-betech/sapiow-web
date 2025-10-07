@@ -1,4 +1,5 @@
 "use client";
+import { usePayStore } from "@/store/usePay";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -43,6 +44,8 @@ export function AppSidebar({
   const pathname = usePathname();
   const items = getItems(t);
 
+  const { setIsPaid } = usePayStore();
+
   return (
     <>
       {/* Sidebar verticale (desktop) */}
@@ -70,6 +73,7 @@ export function AppSidebar({
                   key={item.title}
                   href={item.url}
                   className="flex flex-col items-center gap-2"
+                  onClick={() => setIsPaid(false)}
                 >
                   <div
                     className={`p-2 transition-colors rounded-full ${

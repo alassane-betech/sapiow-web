@@ -199,6 +199,8 @@ export default {
   blockDaySection: {
     title: "Block this day?",
     description: "It is not possible to have a session on this date.",
+    unblockTitle: "Unblock this day?",
+    unblockDescription: "Allow bookings for this date.",
   },
 
   // Disponibilites Page
@@ -213,6 +215,31 @@ export default {
     connect: "Connect",
     disconnect: "Disconnect",
     syncAutomatic: "Synchronization is automatic! Your appointments are synced every 15 minutes.",
+  },
+
+  // Google Calendar Connect
+  googleCalendarConnect: {
+    connecting: "Connecting...",
+    connectButton: "Connect Google Calendar",
+  },
+
+  // OAuth Callback
+  oauthCallback: {
+    connecting: "Connecting to Google Calendar...",
+    pleaseWait: "Please wait",
+    error: "Error",
+    redirecting: "Redirecting to availability page...",
+    missingCode: "Authorization code missing",
+    connectionError: "Connection error",
+    processingError: "Error processing connection",
+  },
+
+  // Synced Calendars Sheet
+  syncedCalendars: {
+    title: "Synced calendars",
+    disconnect: "Disconnect",
+    disconnecting: "Disconnecting...",
+    addCalendar: "Add a calendar",
   },
 
   // Visio Sessions Config
@@ -532,6 +559,8 @@ export default {
     addAnotherQuestion: "Add another question",
     questionsOrComments: "Questions or comments",
     viewDetails: "View details",
+    consultationWith: "Consultation with",
+    videoConsultation: "Video consultation with",
   },
 
   // Dark Session Card / Upcoming Video Call
@@ -621,9 +650,10 @@ export default {
 
   // Payment
   payment: {
-    success: "Payment successful",
+    success: "Payment successful!",
     processing: "Processing payment...",
     failed: "Payment failed",
+    redirecting: "Redirecting...",
   },
 
   // Home Pages
@@ -777,6 +807,8 @@ export default {
     // Date Blocking
     dateBlocked: "Date blocked successfully!",
     dateBlockError: "Error blocking date",
+    dateUnblocked: "Date unblocked successfully!",
+    dateUnblockError: "Error unblocking date",
     
     // Video Call
     callConnectionError: "Error connecting to video call",
