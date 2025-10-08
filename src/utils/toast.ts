@@ -19,6 +19,8 @@ const defaultMessages = {
   // Date Blocking
   dateBlocked: "Date bloquée avec succès !",
   dateBlockError: "Erreur lors du blocage de la date",
+  dateUnblocked: "Date débloquée avec succès !",
+  dateUnblockError: "Erreur lors du déblocage de la date",
   
   // Video Call
   callConnectionError: "Erreur lors de la connexion à l'appel vidéo",

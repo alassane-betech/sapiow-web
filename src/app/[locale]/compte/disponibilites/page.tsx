@@ -1,11 +1,10 @@
 "use client";
 import {
   useCreateProAppointmentBlock,
+  useDeleteProAppointmentBlock,
   useGetProAppointmentBlocks,
 } from "@/api/appointments/useAppointments";
 import {
-  useGoogleCalendarAuthUrl,
-  useGoogleCalendarConnect,
   useGoogleCalendarDisconnect,
   useGoogleCalendarStatus,
 } from "@/api/google-calendar-sync/useGoogleCalendarSync";
@@ -14,8 +13,11 @@ import { AvailabilityButtons } from "@/components/common/AvailabilityButtons";
 import AvailabilitySheet from "@/components/common/AvailabilitySheet";
 import { BlockDaySection } from "@/components/common/BlockDaySection";
 import CustomCalendar from "@/components/common/CustomCalendar";
+import GoogleCalendarConnectButton from "@/components/common/GoogleCalendarConnectButton";
 import { PeriodToggle, PeriodType } from "@/components/common/PeriodToggle";
 import { SessionDetailsPanel } from "@/components/common/SessionDetailsPanel";
+import SyncedCalendarsSheet from "@/components/common/SyncedCalendarsSheet";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
@@ -27,6 +29,7 @@ import { useCalendarStore } from "@/store/useCalendar";
 import { useProExpertStore } from "@/store/useProExpert";
 import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
@@ -39,18 +42,17 @@ export default function Disponibilites() {
   const [showTimeSlotsManager, setShowTimeSlotsManager] = useState(false);
   const [showAvailabilitySheet, setShowAvailabilitySheet] = useState(false);
   const [showSessionDetailsSheet, setShowSessionDetailsSheet] = useState(false);
+  const [showSyncedCalendarsSheet, setShowSyncedCalendarsSheet] = useState(false);
 
   // Hooks Google Calendar
   const { data: googleStatus, isLoading: isGoogleStatusLoading } =
     useGoogleCalendarStatus();
-  const connectMutation = useGoogleCalendarConnect();
+
   const disconnectMutation = useGoogleCalendarDisconnect();
-  const { getAuthUrl } = useGoogleCalendarAuthUrl();
 
   // États dérivés
-  const isGoogleConnected = googleStatus?.data?.connected || false;
-  const isGoogleLoading =
-    connectMutation.isPending || disconnectMutation.isPending;
+  const isGoogleConnected = googleStatus?.connected || false;
+  const isGoogleLoading = disconnectMutation.isPending;
 
   // API et Store pour synchroniser les données proExpert
   const { data: proExpertData, isLoading: isLoadingApi } = useGetProExpert();
@@ -63,6 +65,7 @@ export default function Disponibilites() {
   const { data: blockedDates, isLoading: isLoadingBlocks } =
     useGetProAppointmentBlocks();
   const createBlockMutation = useCreateProAppointmentBlock();
+  const deleteBlockMutation = useDeleteProAppointmentBlock();
 
   // Vérifier si la date sélectionnée est bloquée
   const isDateBlocked =
@@ -86,7 +89,11 @@ export default function Disponibilites() {
           isBlocked={isDateBlocked}
           onToggle={handleBlocked}
           isMobile={isMobile}
-          isLoading={createBlockMutation.isPending || isLoadingBlocks}
+          isLoading={
+            createBlockMutation.isPending ||
+            deleteBlockMutation.isPending ||
+            isLoadingBlocks
+          }
         />
       )}
     </>
@@ -100,46 +107,31 @@ export default function Disponibilites() {
     }
   }, [proExpertData, isLoadingApi, setProExpertData, setLoading]);
 
-  // Gérer le retour de Google OAuth (authorization code dans l'URL)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const authCode = urlParams.get("code");
-
-    if (authCode && !isGoogleConnected) {
-      connectMutation.mutate({ authorizationCode: authCode });
-
-      // Nettoyer l'URL après récupération du code
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, [isGoogleConnected]);
-
-  const handleConnectGoogle = () => {
-    if (isGoogleConnected) {
-      // Si déjà connecté, déconnecter
-      disconnectMutation.mutate();
-    } else {
-      // Sinon, rediriger vers Google OAuth
-      const authUrl = getAuthUrl();
-      window.location.href = authUrl;
-    }
+  const handleDisconnectGoogle = () => {
+    disconnectMutation.mutate();
   };
 
   const handleBlocked = async (checked: boolean) => {
     if (!selectedDate) return;
 
-    if (checked) {
-      // Bloquer la date
-      const dateString = selectedDate.toISOString().split("T")[0]; // Format: "2025-06-12"
-      try {
+    // Format de date requis: "YYYY-MM-DD"
+    const dateString = selectedDate.toISOString().split("T")[0]; // Format: "2025-06-12"
+
+    try {
+      if (checked) {
+        // Bloquer la date
         await createBlockMutation.mutateAsync({ date: dateString });
-      } catch (error) {
-        console.error("Erreur lors du blocage de la date:", error);
+      } else {
+        // Débloquer la date
+        await deleteBlockMutation.mutateAsync({ date: dateString });
       }
-    } else {
-      // TODO: Implémenter la suppression du bloc (DELETE endpoint)
-      console.log("Déblocage de la date - endpoint DELETE à implémenter");
+    } catch (error) {
+      console.error(
+        checked
+          ? "Erreur lors du blocage de la date:"
+          : "Erreur lors du déblocage de la date:",
+        error
+      );
     }
   };
 
@@ -151,13 +143,8 @@ export default function Disponibilites() {
   };
 
   const handleSyncCalendars = () => {
-    if (isGoogleConnected) {
-      // La synchronisation est automatique via le cron job backend
-      alert(t("disponibilites.syncAutomatic"));
-    } else {
-      // Si pas connecté, ouvrir le sheet de gestion
-      setShowAvailabilitySheet(true);
-    }
+    // Ouvrir le sheet des calendriers synchronisés
+    setShowSyncedCalendarsSheet(true);
   };
 
   // Ouvrir automatiquement le sheet sur mobile seulement quand une date est sélectionnée
@@ -191,6 +178,13 @@ export default function Disponibilites() {
       <AvailabilitySheet
         isOpen={showAvailabilitySheet}
         onClose={() => setShowAvailabilitySheet(false)}
+      />
+
+      <SyncedCalendarsSheet
+        isOpen={showSyncedCalendarsSheet}
+        onClose={() => setShowSyncedCalendarsSheet(false)}
+        connectedEmail={googleStatus?.email}
+        isConnected={isGoogleConnected}
       />
 
       {/* Sheet pour mobile/tablette */}
@@ -243,60 +237,45 @@ export default function Disponibilites() {
                 onSyncCalendars={handleSyncCalendars}
               />
 
-              {/* <Card className="w-full fixed bottom-16 lg:bottom-0 max-w-[380px] bg-white border-none shadow-none h-[183px] mt-4">
-                <CardContent className="p-4 space-y-3">
-                  <div>
-                    <h4 className="text-base font-bold font-figtree text-black">
-                      {t("disponibilites.googleCalendarSync")}
-                    </h4>
-                    <p className="text-sm font-medium font-figtree text-slate-600">
-                      {t("disponibilites.googleCalendarDescription")}
-                    </p>
-                  </div>
-                  <div className="flex justify-between items-center border border-frost-gray rounded-[12px] p-2 gap-2">
-                    <div className="flex items-center gap-2">
-                      <Image
-                        src={"/assets/icons/googleCalendar.svg"}
-                        width={41}
-                        height={41}
-                        alt="google"
-                      />
-                      <div>
-                        <p className="text-sm font-medium font-figtree text-slate-600">
-                          {t("disponibilites.googleCalendar")}
-                        </p>
-                        <p className="text-sm font-medium font-figtree text-slate-600">
-                          {isGoogleConnected
-                            ? googleStatus?.data?.connectedAt
-                              ? `${t("disponibilites.connectedSince")} ${new Date(
-                                  googleStatus.data.connectedAt
-                                ).toLocaleDateString(
-                                  currentLocale === "fr" ? "fr-FR" : "en-US"
-                                )}`
-                              : t("disponibilites.connected")
-                            : t("disponibilites.notConnected")}
-                        </p>
-                      </div>
+              {/* Afficher la card de connexion seulement si Google Calendar n'est pas connecté */}
+              {!isGoogleConnected && (
+                <Card className="w-full fixed bottom-16 lg:bottom-0 max-w-[380px] bg-white border-none shadow-none h-[183px] mt-4">
+                  <CardContent className="p-4 space-y-3">
+                    <div>
+                      <h4 className="text-base font-bold font-figtree text-black">
+                        {t("disponibilites.googleCalendarSync")}
+                      </h4>
+                      <p className="text-sm font-medium font-figtree text-slate-600">
+                        {t("disponibilites.googleCalendarDescription")}
+                      </p>
                     </div>
-                    <Button
-                      label={
-                        isGoogleLoading 
-                          ? "..." 
-                          : isGoogleConnected 
-                            ? t("disponibilites.disconnect") 
-                            : t("disponibilites.connect")
-                      }
-                      className={`text-sm font-bold font-figtree ${
-                        isGoogleConnected
-                          ? "text-red-600 bg-red-50 border border-red-200"
-                          : "text-white"
-                      } ${isGoogleLoading ? "opacity-70" : ""}`}
-                      onClick={handleConnectGoogle}
-                      disabled={isGoogleLoading}
-                    />
-                  </div>
-                </CardContent>
-              </Card> */}
+                    <div className="flex justify-between items-center border border-frost-gray rounded-[12px] p-2 gap-2">
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={"/assets/icons/googleCalendar.svg"}
+                          width={41}
+                          height={41}
+                          alt="google"
+                        />
+                        <div>
+                          <p className="text-sm font-medium font-figtree text-slate-600">
+                            {t("disponibilites.googleCalendar")}
+                          </p>
+                          <p className="text-sm font-medium font-figtree text-slate-600">
+                            {t("disponibilites.notConnected")}
+                          </p>
+                        </div>
+                      </div>
+                      <GoogleCalendarConnectButton
+                        isLoading={isGoogleLoading}
+                        className="text-sm font-bold font-figtree"
+                      >
+                        {t("disponibilites.connect")}
+                      </GoogleCalendarConnectButton>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
 

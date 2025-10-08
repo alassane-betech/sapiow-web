@@ -80,6 +80,7 @@
 .container {
   width: 100%;
   max-width: 1440px;
+  /* background-color: #f8fafc; */
   margin: 0 auto;
 }
 

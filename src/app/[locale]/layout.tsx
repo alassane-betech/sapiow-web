@@ -48,7 +48,9 @@ export default async function RootLayout({
 
   return (
     <html>
-      <body className={`${figtree.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`container ${figtree.variable} ${geistMono.variable} antialiased`}
+      >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
             <FavoritesProvider>
@@ -58,21 +60,21 @@ export default async function RootLayout({
                 toastOptions={{
                   duration: 4000,
                   style: {
-                    background: '#363636',
-                    color: '#fff',
+                    background: "#363636",
+                    color: "#fff",
                   },
                   success: {
                     duration: 3000,
                     iconTheme: {
-                      primary: '#4ade80',
-                      secondary: '#fff',
+                      primary: "#4ade80",
+                      secondary: "#fff",
                     },
                   },
                   error: {
                     duration: 4000,
                     iconTheme: {
-                      primary: '#ef4444',
-                      secondary: '#fff',
+                      primary: "#ef4444",
+                      secondary: "#fff",
                     },
                   },
                 }}

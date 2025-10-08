@@ -5,13 +5,34 @@ import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { useUserStore } from "@/store/useUser";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import Client from "./home/Client";
 import Expert from "./home/Expert";
 
 function Home() {
   const { user } = useUserStore();
+  const router = useRouter();
+  const locale = useLocale();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [currentUserType, setCurrentUserType] = useState(user.type);
+  const [isRedirectingOAuth, setIsRedirectingOAuth] = useState(false);
+
+  // Gérer le retour OAuth de Google Calendar (doit être le premier useEffect)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authCode = params.get("code");
+    const scope = params.get("scope");
+    
+    // Si on a un code d'autorisation ET un scope Google Calendar, rediriger immédiatement
+    if (authCode && scope?.includes("googleapis.com/auth/calendar")) {
+      console.log("🔄 Code OAuth Google Calendar détecté, redirection immédiate...");
+      setIsRedirectingOAuth(true);
+      // Redirection immédiate sans délai
+      router.replace(`/${locale}/oauth-callback${window.location.search}`);
+      return;
+    }
+  }, [router, locale]);
 
   useEffect(() => {
     if (user.type !== currentUserType) {
@@ -24,14 +45,26 @@ function Home() {
     }
   }, [user.type, currentUserType]);
 
+  // Afficher un loader pendant la redirection OAuth
+  if (isRedirectingOAuth) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirection en cours...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-white">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <div className="transition-all duration-300 ease-in-out sticky top-0 z-20">
           {currentUserType === "client" ? <HeaderClient /> : <Header />}
         </div>
-        <div className="flex-1 container px-5 relative overflow-hidden">
+        <div className="flex-1 px-5 relative overflow-hidden">
           <div
             className={`transition-all duration-300 ease-in-out transform ${
               isTransitioning

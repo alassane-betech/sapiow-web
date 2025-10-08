@@ -3,11 +3,13 @@ import { usePayStore } from "@/store/usePay";
 import { useRouter, useSearchParams } from "next/navigation";
 import { withAuth } from "@/components/common/withAuth";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 function PaymentSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setIsPaid } = usePayStore();
+  const t = useTranslations();
   
   useEffect(() => {
     // Marquer comme payé
@@ -26,8 +28,8 @@ function PaymentSuccessPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-        <h1 className="text-2xl font-bold text-gray-900 mt-4">Paiement réussi !</h1>
-        <p className="text-gray-600 mt-2">Redirection en cours...</p>
+        <h1 className="text-2xl font-bold text-gray-900 mt-4">{t("payment.success")}</h1>
+        <p className="text-gray-600 mt-2">{t("payment.redirecting")}</p>
       </div>
     </div>
   );

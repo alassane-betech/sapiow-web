@@ -135,7 +135,8 @@ export default {
   // Messages
   messages: {
     selectConversation: "Sélectionnez une conversation",
-    selectConversationToView: "Sélectionnez une conversation pour voir les messages",
+    selectConversationToView:
+      "Sélectionnez une conversation pour voir les messages",
     errorLoadingMessages: "Erreur lors du chargement des messages",
     noMessagesInConversation: "Aucun message dans cette conversation",
     today: "Aujourd'hui",
@@ -201,20 +202,49 @@ export default {
   blockDaySection: {
     title: "Bloquer cette journée ?",
     description: "Il n'est pas possible d'avoir une session à cette date.",
+    unblockTitle: "Débloquer cette journée ?",
+    unblockDescription: "Permettre les réservations pour cette date.",
   },
 
   // Disponibilites Page
   disponibilites: {
     sessionDetails: "Détails de la session",
     googleCalendarSync: "Synchronisation avec Google Agenda",
-    googleCalendarDescription: "Connectez votre compte Google pour éviter les réservations en double.",
+    googleCalendarDescription:
+      "Connectez votre compte Google pour éviter les réservations en double.",
     googleCalendar: "Google Agenda",
     connected: "Connecté",
     connectedSince: "Connecté depuis le",
     notConnected: "Non connecté",
     connect: "Connecter",
     disconnect: "Déconnecter",
-    syncAutomatic: "La synchronisation est automatique ! Vos rendez-vous sont synchronisés toutes les 15 minutes.",
+    syncAutomatic:
+      "La synchronisation est automatique ! Vos rendez-vous sont synchronisés toutes les 15 minutes.",
+  },
+
+  // Google Calendar Connect
+  googleCalendarConnect: {
+    connecting: "Connexion...",
+    connectButton: "Connecter Google Calendar",
+  },
+
+  // OAuth Callback
+  oauthCallback: {
+    connecting: "Connexion à Google Calendar en cours...",
+    pleaseWait: "Veuillez patienter",
+    error: "Erreur",
+    redirecting: "Redirection vers la page des disponibilités...",
+    missingCode: "Code d'autorisation manquant",
+    connectionError: "Erreur de connexion",
+    processingError: "Erreur lors du traitement de la connexion",
+  },
+
+  // Synced Calendars Sheet
+  syncedCalendars: {
+    title: "Calendriers synchronisés",
+    disconnect: "Déconnecter",
+    disconnecting: "Déconnexion...",
+    addCalendar: "Ajouter un calendrier",
   },
 
   // Visio Sessions Config
@@ -230,7 +260,8 @@ export default {
     expectation3: "Conseils pour obtenir vos 10 000 premiers clients",
     expectation4: "Astuces de croissance et démarrage de la croissance",
     // Question examples
-    question1: "Je pense à créer une entreprise. Quelles sont les prochaines choses auxquelles je devrais me concentrer ?",
+    question1:
+      "Je pense à créer une entreprise. Quelles sont les prochaines choses auxquelles je devrais me concentrer ?",
     question2: "Comment savoir si mon idée d'entreprise va fonctionner ?",
     question3: "Comment aborder votre le croissance de ma startup ?",
   },
@@ -238,9 +269,10 @@ export default {
   // Payment Page
   paymentPage: {
     pay: "Payer",
-    loading: "Chargement...",
+    loading: "Encours...",
     paymentError: "Erreur de paiement",
   },
+
 
   // Account Pages
   account: {
@@ -296,7 +328,8 @@ export default {
     appointmentNotifications: "Notifications de Rendez-vous",
     messageNotifications: "Notifications de Messagerie",
     promotionsNotifications: "Promotions & Offres spéciales",
-    errorLoadingSettings: "Erreur lors du chargement des paramètres de notification",
+    errorLoadingSettings:
+      "Erreur lors du chargement des paramètres de notification",
     errorUpdatingSettings: "Erreur lors de la mise à jour des paramètres",
     // Page UI
     loadingSettings: "Chargement des paramètres...",
@@ -309,9 +342,12 @@ export default {
     termsOfService: "CGU",
     privacyPolicy: "Politique de confidentialité",
     openSourceLicenses: "Licences Open Source",
-    termsContent: "Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation de la plateforme Sapiow, accessible via notre site web et notre application mobile. Sapiow est une plateforme qui permet aux experts de s'inscrire et de proposer leurs services, et aux clients de consulter la liste des experts disponibles pour prendre rendez-vous avec eux. En utilisant Sapiow, vous acceptez de vous conformer à ces CGU. Sapiow se réserve le droit de modifier ces conditions à tout moment, et les utilisateurs seront informés des changements importants. L'utilisation continue de la plateforme après modification des CGU constitue une acceptation de ces modifications. Les experts s'engagent à fournir des informations exactes et à jour concernant leur profil, leurs compétences et leurs disponibilités. Les clients s'engagent à respecter les rendez-vous pris et à annuler dans un délai raisonnable si nécessaire. Sapiow n'est pas responsable de la qualité des services fournis par les experts, mais s'efforce de maintenir une communauté d'experts qualifiés.",
-    privacyContent: "La présente Politique de Confidentialité décrit comment Sapiow collecte, utilise et protège vos données personnelles lorsque vous utilisez notre plateforme. Nous accordons une grande importance à la protection de votre vie privée et nous nous engageons à traiter vos données conformément aux lois applicables sur la protection des données. Les informations que nous collectons incluent votre nom, adresse e-mail, numéro de téléphone, et pour les experts, leurs compétences professionnelles et disponibilités. Ces données sont utilisées pour faciliter la mise en relation entre experts et clients, améliorer nos services, et vous envoyer des notifications pertinentes. Nous ne partageons vos données avec des tiers que lorsque cela est nécessaire pour fournir nos services ou si la loi l'exige. Vous avez le droit d'accéder à vos données, de les corriger, de les supprimer ou d'en limiter le traitement. Pour toute question concernant notre politique de confidentialité, veuillez nous contacter.",
-    licensesContent: "Sapiow utilise plusieurs logiciels open source pour son fonctionnement. Nous sommes reconnaissants envers la communauté open source pour son travail remarquable. Notre application est construite avec Next.js sous licence MIT, React sous licence MIT, et utilise plusieurs bibliothèques comme TailwindCSS, React Query, et next-international pour la gestion des traductions. Toutes ces bibliothèques sont utilisées conformément à leurs licences respectives. Les licences complètes de ces logiciels sont disponibles dans notre dépôt de code ou sur demande. Nous nous engageons à respecter les termes des licences open source et à contribuer à la communauté open source lorsque cela est possible. Si vous êtes développeur et souhaitez contribuer à Sapiow, n'hésitez pas à nous contacter. Nous croyons en la puissance de la collaboration et du partage de connaissances pour créer des produits de qualité.",
+    termsContent:
+      "Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation de la plateforme Sapiow, accessible via notre site web et notre application mobile. Sapiow est une plateforme qui permet aux experts de s'inscrire et de proposer leurs services, et aux clients de consulter la liste des experts disponibles pour prendre rendez-vous avec eux. En utilisant Sapiow, vous acceptez de vous conformer à ces CGU. Sapiow se réserve le droit de modifier ces conditions à tout moment, et les utilisateurs seront informés des changements importants. L'utilisation continue de la plateforme après modification des CGU constitue une acceptation de ces modifications. Les experts s'engagent à fournir des informations exactes et à jour concernant leur profil, leurs compétences et leurs disponibilités. Les clients s'engagent à respecter les rendez-vous pris et à annuler dans un délai raisonnable si nécessaire. Sapiow n'est pas responsable de la qualité des services fournis par les experts, mais s'efforce de maintenir une communauté d'experts qualifiés.",
+    privacyContent:
+      "La présente Politique de Confidentialité décrit comment Sapiow collecte, utilise et protège vos données personnelles lorsque vous utilisez notre plateforme. Nous accordons une grande importance à la protection de votre vie privée et nous nous engageons à traiter vos données conformément aux lois applicables sur la protection des données. Les informations que nous collectons incluent votre nom, adresse e-mail, numéro de téléphone, et pour les experts, leurs compétences professionnelles et disponibilités. Ces données sont utilisées pour faciliter la mise en relation entre experts et clients, améliorer nos services, et vous envoyer des notifications pertinentes. Nous ne partageons vos données avec des tiers que lorsque cela est nécessaire pour fournir nos services ou si la loi l'exige. Vous avez le droit d'accéder à vos données, de les corriger, de les supprimer ou d'en limiter le traitement. Pour toute question concernant notre politique de confidentialité, veuillez nous contacter.",
+    licensesContent:
+      "Sapiow utilise plusieurs logiciels open source pour son fonctionnement. Nous sommes reconnaissants envers la communauté open source pour son travail remarquable. Notre application est construite avec Next.js sous licence MIT, React sous licence MIT, et utilise plusieurs bibliothèques comme TailwindCSS, React Query, et next-international pour la gestion des traductions. Toutes ces bibliothèques sont utilisées conformément à leurs licences respectives. Les licences complètes de ces logiciels sont disponibles dans notre dépôt de code ou sur demande. Nous nous engageons à respecter les termes des licences open source et à contribuer à la communauté open source lorsque cela est possible. Si vous êtes développeur et souhaitez contribuer à Sapiow, n'hésitez pas à nous contacter. Nous croyons en la puissance de la collaboration et du partage de connaissances pour créer des produits de qualité.",
   },
 
   // About Page
@@ -330,13 +366,17 @@ export default {
     // FAQ Data
     faq: {
       question1: "Comment créer un compte ?",
-      answer1: "Ouvrez l'application Tradebase pour commencer et suivez les étapes. Tradebase ne facture pas de frais pour créer ou maintenir votre compte Tradebase.",
+      answer1:
+        "Ouvrez l'application Tradebase pour commencer et suivez les étapes. Tradebase ne facture pas de frais pour créer ou maintenir votre compte Tradebase.",
       question2: "Comment ajouter un moyen de paiement via cette application ?",
-      answer2: "Pour ajouter un moyen de paiement, rendez-vous dans les paramètres de votre compte, sélectionnez 'Moyens de paiement' et suivez les instructions pour ajouter votre carte bancaire ou compte PayPal.",
+      answer2:
+        "Pour ajouter un moyen de paiement, rendez-vous dans les paramètres de votre compte, sélectionnez 'Moyens de paiement' et suivez les instructions pour ajouter votre carte bancaire ou compte PayPal.",
       question3: "Question 3",
-      answer3: "Réponse à la question 3. Vous pouvez ajouter ici toutes les informations pertinentes pour aider vos utilisateurs.",
+      answer3:
+        "Réponse à la question 3. Vous pouvez ajouter ici toutes les informations pertinentes pour aider vos utilisateurs.",
       question4: "Question 4",
-      answer4: "Réponse à la question 4. Cette section peut contenir des détails techniques ou des instructions étape par étape.",
+      answer4:
+        "Réponse à la question 4. Cette section peut contenir des détails techniques ou des instructions étape par étape.",
     },
   },
 
@@ -358,7 +398,8 @@ export default {
     inProgress: "En cours...",
     // Add Bank Account Modal
     addBankAccount: "Ajouter un compte bancaire",
-    nameMatchId: "Assurez-vous que cela correspond au nom figurant sur votre pièce d'identité gouvernementale.",
+    nameMatchId:
+      "Assurez-vous que cela correspond au nom figurant sur votre pièce d'identité gouvernementale.",
     iban: "IBAN",
     bicSwift: "Code BIC/SWIFT",
   },
@@ -368,7 +409,7 @@ export default {
     totalEarnings: "Total des gains",
     // Filters
     thisMonth: "Ce mois-ci",
-    thisQuarter: "Ce trimestre", 
+    thisQuarter: "Ce trimestre",
     custom: "Personnalisé",
     selectCustomPeriod: "Sélectionner une période personnalisée",
     selectedPeriod: "Période sélectionnée :",
@@ -383,7 +424,8 @@ export default {
     // Calendar
     calendarAlt: "Calendrier",
     // Payment History
-    noPaymentHistory: "Aucun historique de paiement disponible. Configurez votre compte de paiement pour commencer à recevoir des revenus.",
+    noPaymentHistory:
+      "Aucun historique de paiement disponible. Configurez votre compte de paiement pour commencer à recevoir des revenus.",
     errorLoadingPayments: "Erreur lors du chargement des paiements",
     noPaymentsFound: "Aucun paiement trouvé",
   },
@@ -412,8 +454,10 @@ export default {
     addOffer: "Ajouter une offre",
     createAccompaniment: "Créer un accompagnement",
     // Empty States
-    noMonthlyAccompaniment: "Aucun accompagnement mensuel configuré pour le moment.",
-    createFirstOffer: "Créez votre première offre d'accompagnement pour vos clients.",
+    noMonthlyAccompaniment:
+      "Aucun accompagnement mensuel configuré pour le moment.",
+    createFirstOffer:
+      "Créez votre première offre d'accompagnement pour vos clients.",
     // Default Names
     monthlyAccompanimentDefault: "Accompagnement mensuel",
     // Add/Edit Session Modal
@@ -461,10 +505,12 @@ export default {
     expectations: "Attentes",
     visio15min: "Visio 15mn",
     // Sample Questions
-    question1: "Je pense à créer une entreprise. Quelles sont les prochaines choses sur lesquelles je devrais me concentrer ?",
+    question1:
+      "Je pense à créer une entreprise. Quelles sont les prochaines choses sur lesquelles je devrais me concentrer ?",
     question2: "Comment savoir si mon idée d'entreprise va fonctionner ?",
     question3: "Comment aborder vous la croissance de mon entreprise ?",
-    question4: "Quels indicateurs clés devrais-je viser à différentes étapes pour être une entreprise de premier plan ?",
+    question4:
+      "Quels indicateurs clés devrais-je viser à différentes étapes pour être une entreprise de premier plan ?",
     // Expectations
     expectation1: "Posez trois questions ou plus",
     expectation2: "Conseils pour démarrer une entreprise prospère",
@@ -473,26 +519,36 @@ export default {
     // How it works
     howItWorks: "Comment ça marche ?",
     findExpert: "Trouvez un expert",
-    findExpertDesc: "Découvrez et choisissez parmi notre liste des experts les plus recherchés au monde",
+    findExpertDesc:
+      "Découvrez et choisissez parmi notre liste des experts les plus recherchés au monde",
     bookOrSubscribe: "Réservez ou abonnez-vous",
-    bookOrSubscribeDesc: "Réservez un appel vidéo unique ou choisissez un plan pour accéder à votre expert de manière continue",
+    bookOrSubscribeDesc:
+      "Réservez un appel vidéo unique ou choisissez un plan pour accéder à votre expert de manière continue",
     virtualConsultation: "Consultation virtuelle",
-    virtualConsultationDesc: "Rejoignez l'appel vidéo ou le chat, posez des questions et obtenez des conseils d'expert",
+    virtualConsultationDesc:
+      "Rejoignez l'appel vidéo ou le chat, posez des questions et obtenez des conseils d'expert",
     // Similar Experts
     similarExperts: "Experts similaires",
     seeAll: "Tout voir",
     // FAQ
     frequentQuestions: "Questions fréquentes",
     whatIsSapiow: "Qu'est-ce que Sapiow ?",
-    whatIsSapiowAnswer: "Sapiow est une plateforme en ligne qui permet de réserver des experts pour des consultations vidéo, offrant aux utilisateurs un accès direct à des professionnels qualifiés dans divers domaines.",
-    benefitsQuestion: "Quels sont les avantages d'utiliser Sapiow pour les utilisateurs ?",
-    benefitsAnswer: "Sapiow offre un accès direct à des experts qualifiés, des consultations flexibles, et une plateforme sécurisée pour obtenir des conseils professionnels dans de nombreux domaines.",
+    whatIsSapiowAnswer:
+      "Sapiow est une plateforme en ligne qui permet de réserver des experts pour des consultations vidéo, offrant aux utilisateurs un accès direct à des professionnels qualifiés dans divers domaines.",
+    benefitsQuestion:
+      "Quels sont les avantages d'utiliser Sapiow pour les utilisateurs ?",
+    benefitsAnswer:
+      "Sapiow offre un accès direct à des experts qualifiés, des consultations flexibles, et une plateforme sécurisée pour obtenir des conseils professionnels dans de nombreux domaines.",
     expertsTypesQuestion: "Quels types d'experts puis-je réserver sur Sapiow ?",
-    expertsTypesAnswer: "Vous pouvez réserver des experts dans de nombreux domaines : business, santé, technologie, développement personnel, et bien d'autres spécialités.",
-    qualityQuestion: "Comment Sapiow garantit-elle la qualité des experts disponibles ?",
-    qualityAnswer: "Tous nos experts sont vérifiés et sélectionnés selon des critères stricts d'expertise, d'expérience et de qualifications professionnelles.",
+    expertsTypesAnswer:
+      "Vous pouvez réserver des experts dans de nombreux domaines : business, santé, technologie, développement personnel, et bien d'autres spécialités.",
+    qualityQuestion:
+      "Comment Sapiow garantit-elle la qualité des experts disponibles ?",
+    qualityAnswer:
+      "Tous nos experts sont vérifiés et sélectionnés selon des critères stricts d'expertise, d'expérience et de qualifications professionnelles.",
     feesQuestion: "Quels sont les frais associés à l'utilisation de Sapiow ?",
-    feesAnswer: "Les tarifs varient selon l'expert et le type de consultation. Vous pouvez choisir entre des sessions uniques ou des abonnements mensuels.",
+    feesAnswer:
+      "Les tarifs varient selon l'expert et le type de consultation. Vous pouvez choisir entre des sessions uniques ou des abonnements mensuels.",
     // Success Page
     congratulations: "Félicitations !",
     sessionBookedSuccess: "Votre session a été réservée avec succès !",
@@ -527,13 +583,17 @@ export default {
     calendarAlt: "Calendrier",
     videoCameraAlt: "Caméra vidéo",
     // Questions section
-    dontHesitateAskQuestions: "N'hésitez pas à poser vos questions avant la session",
-    submitQuestionsAdvance: "Vous avez la possibilité de soumettre vos questions à l'avance afin que l'expert puisse mieux se préparer pour vous.",
+    dontHesitateAskQuestions:
+      "N'hésitez pas à poser vos questions avant la session",
+    submitQuestionsAdvance:
+      "Vous avez la possibilité de soumettre vos questions à l'avance afin que l'expert puisse mieux se préparer pour vous.",
     submitMyQuestions: "Soumettre mes questions",
     typeQuestionHere: "Tapez votre question ici...",
     addAnotherQuestion: "Ajoute une autre question",
     questionsOrComments: "Questions ou commentaires",
     viewDetails: "Voir détail",
+    consultationWith: "Consultation avec",
+    videoConsultation: "Consultation vidéo avec",
   },
 
   // Dark Session Card / Upcoming Video Call
@@ -583,7 +643,7 @@ export default {
     daysShort: ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"],
     // Days of week (individual)
     sunday: "Dim",
-    monday: "Lun", 
+    monday: "Lun",
     tuesday: "Mar",
     wednesday: "Mer",
     thursday: "Jeu",
@@ -591,8 +651,18 @@ export default {
     saturday: "Sam",
     // Months (array format)
     months: [
-      "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
-      "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+      "Janvier",
+      "Février",
+      "Mars",
+      "Avril",
+      "Mai",
+      "Juin",
+      "Juillet",
+      "Août",
+      "Septembre",
+      "Octobre",
+      "Novembre",
+      "Décembre",
     ],
     // Months (individual)
     january: "Janvier",
@@ -623,9 +693,10 @@ export default {
 
   // Payment
   payment: {
-    success: "Paiement réussi",
+    success: "Paiement réussi !",
     processing: "Traitement du paiement...",
     failed: "Échec du paiement",
+    redirecting: "Redirection en cours...",
   },
 
   // Home Pages
@@ -686,7 +757,6 @@ export default {
     becomeExpert: "Devenir un expert",
   },
 
-
   // Favorites Page
   favorites: {
     title: "Mes Favoris",
@@ -694,7 +764,8 @@ export default {
     error: "Erreur lors du chargement des favoris",
     unknownError: "Erreur inconnue",
     noFavorites: "Aucun professionnel en favori pour le moment",
-    noFavoritesDescription: "Ajoutez des professionnels à vos favoris en cliquant sur le cœur",
+    noFavoritesDescription:
+      "Ajoutez des professionnels à vos favoris en cliquant sur le cœur",
   },
 
   // Payment History Page
@@ -715,7 +786,8 @@ export default {
     status: "Statut",
     transactionId: "ID de transaction",
     noTransactions: "Aucune transaction trouvée",
-    noTransactionsDescription: "Vos transactions apparaîtront ici une fois effectuées",
+    noTransactionsDescription:
+      "Vos transactions apparaîtront ici une fois effectuées",
     selectTransaction: "Sélectionnez une transaction pour voir les détails",
   },
 
@@ -767,7 +839,7 @@ export default {
     questionUpdated: "Question mise à jour avec succès !",
     questionSubmitError: "Erreur lors de la soumission de la question",
     questionUpdateError: "Erreur lors de la mise à jour de la question",
-    
+
     // Appointments
     appointmentCreated: "Rendez-vous créé avec succès !",
     appointmentConfirmed: "Rendez-vous confirmé avec succès !",
@@ -775,11 +847,13 @@ export default {
     appointmentCreateError: "Erreur lors de la création du rendez-vous",
     appointmentUpdateError: "Erreur lors de la mise à jour du rendez-vous",
     appointmentCancelError: "Erreur lors de l'annulation du rendez-vous",
-    
+
     // Date Blocking
     dateBlocked: "Date bloquée avec succès !",
     dateBlockError: "Erreur lors du blocage de la date",
-    
+    dateUnblocked: "Date débloquée avec succès !",
+    dateUnblockError: "Erreur lors du déblocage de la date",
+
     // Video Call
     callConnectionError: "Erreur lors de la connexion à l'appel vidéo",
     callTokenError: "Erreur lors de la récupération du token d'appel",

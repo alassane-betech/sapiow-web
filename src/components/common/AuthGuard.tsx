@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authUtils } from "@/utils/auth";
+import { useTranslations } from "next-intl";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -15,8 +16,11 @@ interface AuthGuardProps {
  */
 export const AuthGuard: React.FC<AuthGuardProps> = ({ 
   children, 
-  fallback = <div className="flex items-center justify-center min-h-screen">Chargement...</div> 
+  fallback = null
 }) => {
+  const t = useTranslations();
+  const defaultFallback = <div className="flex items-center justify-center min-h-screen">{t("loading")}...</div>;
+  const actualFallback = fallback || defaultFallback;
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
@@ -46,7 +50,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
 
   // Afficher le fallback pendant la vérification
   if (isChecking) {
-    return <>{fallback}</>;
+    return <>{actualFallback}</>;
   }
 
   // Si authentifié, afficher le contenu
