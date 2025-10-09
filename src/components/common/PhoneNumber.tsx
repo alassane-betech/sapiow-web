@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { FC, useEffect } from "react";
 import { Country } from "../../constants/countries";
-import { usePhoneInput } from "../../hooks/usePhoneInput";
+import { usePhoneInputTranslated } from "../../hooks/usePhoneInputTranslated";
+import { useCountryName } from "../../utils/getCountryName";
 
 interface PhoneInputProps {
   value: string;
@@ -32,10 +33,12 @@ const PhoneInput: FC<PhoneInputProps> = ({
   required = false,
 }) => {
   const t = useTranslations();
-  const phoneInput = usePhoneInput({
+  const getCountryName = useCountryName();
+  const phoneInput = usePhoneInputTranslated({
     defaultCountry,
     initialValue: value,
     initialCountryCode: countryCode,
+    getCountryName, // Pass the translation function
     onChange: (rawValue: string, country: Country, formattedValue: string) => {
       onChange(rawValue, country, formattedValue);
       // Notifier le parent de l'état de validation
@@ -100,7 +103,7 @@ const PhoneInput: FC<PhoneInputProps> = ({
             >
               <Image
                 src={phoneInput.getFlagUrl(phoneInput.selectedCountry)}
-                alt={phoneInput.selectedCountry.name}
+                alt={getCountryName(phoneInput.selectedCountry.code)}
                 width={20}
                 height={12}
                 className="w-5 h-3 mr-2"
@@ -138,13 +141,13 @@ const PhoneInput: FC<PhoneInputProps> = ({
                     >
                       <Image
                         src={phoneInput.getFlagUrl(country)}
-                        alt={country.name}
+                        alt={getCountryName(country.code)}
                         width={20}
                         height={12}
                         className="w-5 h-3 mr-3"
                       />
                       <span className="flex-1 text-sm text-gray-900 font-figtree">
-                        {country.name}
+                        {getCountryName(country.code)}
                       </span>
                       <span className="text-sm text-gray-500 ml-2 font-figtree">
                         {country.dialCode}
@@ -154,7 +157,7 @@ const PhoneInput: FC<PhoneInputProps> = ({
 
                   {phoneInput.filteredCountries.length === 0 && (
                     <div className="px-3 py-2 text-sm text-gray-500 font-figtree">
-                      Aucun pays trouvé
+                      {t("phoneNumber.noCountryFound")}
                     </div>
                   )}
                 </div>

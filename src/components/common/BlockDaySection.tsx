@@ -17,29 +17,25 @@ export const BlockDaySection = ({
 }: BlockDaySectionProps) => {
   const t = useTranslations();
   const containerClasses = isMobile
-    ? "w-full flex items-center justify-between mt-6 p-4 border-t "
-    : "w-full flex items-center justify-end gap-4 fixed bottom-10";
+    ? "w-full flex items-center justify-between p-4 border-t border-gray-200"
+    : "w-full flex items-center justify-between p-4 mt-4 border-t border-gray-200";
 
-  const textContainerClasses = isMobile ? "" : "text-right";
-  
+  const textContainerClasses = isMobile ? "" : "";
+
   // Déterminer le titre et la description en fonction de l'état actuel (bloqué ou non)
-  const title = isBlocked 
-    ? t("blockDaySection.unblockTitle") 
+  const title = isBlocked
+    ? t("blockDaySection.unblockTitle")
     : t("blockDaySection.title");
-    
-  const description = isBlocked 
-    ? t("blockDaySection.unblockDescription") 
+
+  const description = isBlocked
+    ? t("blockDaySection.unblockDescription")
     : t("blockDaySection.description");
 
   return (
     <div className={containerClasses}>
       <div className={textContainerClasses}>
-        <h1 className="text-lg font-semibold text-charcoal-blue">
-          {title}
-        </h1>
-        <p className="text-sm font-normal text-gray-500">
-          {description}
-        </p>
+        <h1 className="text-lg font-semibold text-charcoal-blue">{title}</h1>
+        <p className="text-sm font-normal text-gray-500">{description}</p>
       </div>
       <div className="flex items-center gap-2">
         {isLoading && (
@@ -49,7 +45,7 @@ export const BlockDaySection = ({
           checked={isBlocked}
           onChange={onToggle}
           disabled={isLoading}
-          className="data-[state=checked]:bg-[#1E293B] disabled:opacity-50"
+          className="data-[state=checked]:bg-[#1E293B] disabled:opacity-50 cursor-pointer"
         />
       </div>
     </div>

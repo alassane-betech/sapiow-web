@@ -4,9 +4,9 @@ import { Header } from "@/components/layout/header/Header";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
 import { AppSidebar } from "@/components/layout/Sidebare";
 import { useUserStore } from "@/store/useUser";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Client from "./home/Client";
 import Expert from "./home/Expert";
 
@@ -23,10 +23,12 @@ function Home() {
     const params = new URLSearchParams(window.location.search);
     const authCode = params.get("code");
     const scope = params.get("scope");
-    
+
     // Si on a un code d'autorisation ET un scope Google Calendar, rediriger immédiatement
     if (authCode && scope?.includes("googleapis.com/auth/calendar")) {
-      console.log("🔄 Code OAuth Google Calendar détecté, redirection immédiate...");
+      console.log(
+        "🔄 Code OAuth Google Calendar détecté, redirection immédiate..."
+      );
       setIsRedirectingOAuth(true);
       // Redirection immédiate sans délai
       router.replace(`/${locale}/oauth-callback${window.location.search}`);
@@ -58,7 +60,7 @@ function Home() {
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="container flex min-h-screen bg-white">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <div className="transition-all duration-300 ease-in-out sticky top-0 z-20">

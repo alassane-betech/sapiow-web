@@ -1,5 +1,6 @@
 "use client";
 
+import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,10 +18,11 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
+import { useProExpertStore } from "@/store/useProExpert";
 import { Check, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DatePicker from "./DatePicker";
 
 interface DayAvailability {
@@ -46,6 +48,8 @@ export default function AvailabilitySheet({
   onClose,
 }: AvailabilitySheetProps) {
   const t = useTranslations();
+  const { proExpertData } = useProExpertStore();
+  const updateProExpertMutation = useUpdateProExpert();
 
   // Définir les jours de la semaine
   const weekDays: DayAvailability[] = [
@@ -138,6 +142,56 @@ export default function AvailabilitySheet({
     displayText: t("availabilitySheet.threeMonths"),
   });
 
+  // Calculer la période de disponibilité en mois ou jours
+  const calculatePeriodText = (start: Date, end: Date): string => {
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffMonths = Math.round(diffDays / 30);
+
+    // Si moins d'un mois (moins de 30 jours), afficher en jours
+    if (diffDays < 30) {
+      return `${diffDays} ${
+        diffDays > 1
+          ? t("availabilitySheet.days")
+          : t("availabilitySheet.day")
+      }`;
+    }
+
+    // Sinon, afficher en mois
+    if (diffMonths === 1) {
+      return t("availabilitySheet.oneMonth");
+    } else if (diffMonths === 3) {
+      return t("availabilitySheet.threeMonths");
+    } else if (diffMonths === 6) {
+      return t("availabilitySheet.sixMonths");
+    } else if (diffMonths === 12) {
+      return t("availabilitySheet.oneYear");
+    } else {
+      return `${diffMonths} ${
+        diffMonths > 1
+          ? t("availabilitySheet.months")
+          : t("availabilitySheet.month")
+      }`;
+    }
+  };
+
+  // Charger les dates de disponibilité depuis le store
+  useEffect(() => {
+    if (
+      proExpertData?.availability_start_date &&
+      proExpertData?.availability_end_date
+    ) {
+      const startDate = new Date(proExpertData.availability_start_date);
+      const endDate = new Date(proExpertData.availability_end_date);
+
+      setAvailabilityPeriod({
+        startDate,
+        endDate,
+        displayText: calculatePeriodText(startDate, endDate),
+      });
+    }
+  }, [proExpertData]);
+
   // Obtenir le manager pour un jour donné
   const getManagerForDay = (dayOfWeek: DayAvailability["dayOfWeek"]) => {
     return dayManagers[dayOfWeek];
@@ -198,6 +252,36 @@ export default function AvailabilitySheet({
     }
   };
 
+  // Sauvegarder la période de disponibilité
+  const handleSaveAvailabilityPeriod = async () => {
+    if (!availabilityPeriod.startDate || !availabilityPeriod.endDate) {
+      console.error("Les deux dates doivent être renseignées");
+      return;
+    }
+
+    try {
+      await updateProExpertMutation.mutateAsync({
+        availability_start_date: availabilityPeriod.startDate
+          .toISOString()
+          .split("T")[0],
+        availability_end_date: availabilityPeriod.endDate
+          .toISOString()
+          .split("T")[0],
+      });
+
+      setIsEditingPeriod(false);
+      setAvailabilityPeriod({
+        ...availabilityPeriod,
+        displayText: calculatePeriodText(
+          availabilityPeriod.startDate,
+          availabilityPeriod.endDate
+        ),
+      });
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde de la période:", error);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center bg-gray-50">
       <Sheet open={isOpen} onOpenChange={onClose}>
@@ -221,14 +305,23 @@ export default function AvailabilitySheet({
                 <CardContent className="h-fit">
                   {!isEditingPeriod ? (
                     <div className="flex items-center justify-between h-14">
-                      <div className="flex justify-between ">
-                        <div className="font-semibold text-gray-900">
-                          {t("availabilitySheet.availability")}
+                      {!availabilityPeriod.startDate ||
+                      !availabilityPeriod.endDate ? (
+                        <div className="flex flex-col gap-1">
+                          <div className="font-semibold text-gray-900">
+                            {t("availabilitySheet.noPeriodDefined")}
+                          </div>
                         </div>
-                        <div className="text-gray-500 ml-3">
-                          {availabilityPeriod.displayText}
+                      ) : (
+                        <div className="flex justify-between ">
+                          <div className="font-semibold text-gray-900">
+                            {t("availabilitySheet.availability")}
+                          </div>
+                          <div className="text-gray-500 ml-3">
+                            {availabilityPeriod.displayText}
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"
@@ -254,9 +347,14 @@ export default function AvailabilitySheet({
                           variant="ghost"
                           size="icon"
                           className="text-green-600 hover:text-green-700 border-none cursor-pointer"
-                          onClick={() => setIsEditingPeriod(false)}
+                          onClick={handleSaveAvailabilityPeriod}
+                          disabled={updateProExpertMutation.isPending}
                         >
-                          <Check className="h-5 w-5" />
+                          {updateProExpertMutation.isPending ? (
+                            <div className="h-5 w-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Check className="h-5 w-5" />
+                          )}
                         </Button>
                       </div>
 

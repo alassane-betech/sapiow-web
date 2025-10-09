@@ -19,9 +19,7 @@ import { MessagesList } from "@/components/messages/MessagesList";
 import { useConversationStore } from "@/store/useConversationStore";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useUserStore } from "@/store/useUser";
-import {
-  findActiveConversation,
-} from "@/utils/messageHelpers";
+import { findActiveConversation } from "@/utils/messageHelpers";
 
 function Messages() {
   const {
@@ -42,7 +40,9 @@ function Messages() {
     isLoading: messagesLoading,
     error: messagesError,
     unreadMessages,
-  } = user?.type === "expert" ? useProGetConversations() : usePatientGetConversations();
+  } = user?.type === "expert"
+    ? useProGetConversations()
+    : usePatientGetConversations();
 
   // Récupérer les messages de la conversation sélectionnée
   const {
@@ -71,7 +71,7 @@ function Messages() {
 
   // Responsive : afficher la liste ou le chat sur mobile
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-screen bg-white container">
       <AppSidebar hideMobileNav={!!selectedConversation} />
 
       {/* Desktop (lg+) : sidebar + chat */}

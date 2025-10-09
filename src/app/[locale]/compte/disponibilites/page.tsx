@@ -1,17 +1,11 @@
 "use client";
 import {
-  useCreateProAppointmentBlock,
-  useDeleteProAppointmentBlock,
-  useGetProAppointmentBlocks,
-} from "@/api/appointments/useAppointments";
-import {
   useGoogleCalendarDisconnect,
   useGoogleCalendarStatus,
 } from "@/api/google-calendar-sync/useGoogleCalendarSync";
 import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { AvailabilityButtons } from "@/components/common/AvailabilityButtons";
 import AvailabilitySheet from "@/components/common/AvailabilitySheet";
-import { BlockDaySection } from "@/components/common/BlockDaySection";
 import CustomCalendar from "@/components/common/CustomCalendar";
 import GoogleCalendarConnectButton from "@/components/common/GoogleCalendarConnectButton";
 import { PeriodToggle, PeriodType } from "@/components/common/PeriodToggle";
@@ -42,7 +36,8 @@ export default function Disponibilites() {
   const [showTimeSlotsManager, setShowTimeSlotsManager] = useState(false);
   const [showAvailabilitySheet, setShowAvailabilitySheet] = useState(false);
   const [showSessionDetailsSheet, setShowSessionDetailsSheet] = useState(false);
-  const [showSyncedCalendarsSheet, setShowSyncedCalendarsSheet] = useState(false);
+  const [showSyncedCalendarsSheet, setShowSyncedCalendarsSheet] =
+    useState(false);
 
   // Hooks Google Calendar
   const { data: googleStatus, isLoading: isGoogleStatusLoading } =
@@ -61,42 +56,14 @@ export default function Disponibilites() {
   // Hook pour récupérer les rendez-vous confirmés
   const { confirmedAppointments } = useVisiosAppointments();
 
-  // Hooks pour la gestion des blocs de dates
-  const { data: blockedDates, isLoading: isLoadingBlocks } =
-    useGetProAppointmentBlocks();
-  const createBlockMutation = useCreateProAppointmentBlock();
-  const deleteBlockMutation = useDeleteProAppointmentBlock();
-
-  // Vérifier si la date sélectionnée est bloquée
-  const isDateBlocked =
-    selectedDate && blockedDates && Array.isArray(blockedDates)
-      ? blockedDates.some(
-          (block: any) =>
-            new Date(block.date).toDateString() === selectedDate.toDateString()
-        )
-      : false;
-
   // Fonction réutilisable pour éviter la duplication mobile/desktop
   const renderSessionDetailsPanel = (isMobile: boolean = false) => (
-    <>
-      <SessionDetailsPanel
-        selectedDate={selectedDate}
-        showTimeSlotsManager={showTimeSlotsManager}
-        confirmedAppointments={confirmedAppointments}
-      />
-      {selectedDate && (
-        <BlockDaySection
-          isBlocked={isDateBlocked}
-          onToggle={handleBlocked}
-          isMobile={isMobile}
-          isLoading={
-            createBlockMutation.isPending ||
-            deleteBlockMutation.isPending ||
-            isLoadingBlocks
-          }
-        />
-      )}
-    </>
+    <SessionDetailsPanel
+      selectedDate={selectedDate}
+      showTimeSlotsManager={showTimeSlotsManager}
+      confirmedAppointments={confirmedAppointments}
+      isMobile={isMobile}
+    />
   );
 
   // Synchroniser les données API avec le store
@@ -109,30 +76,6 @@ export default function Disponibilites() {
 
   const handleDisconnectGoogle = () => {
     disconnectMutation.mutate();
-  };
-
-  const handleBlocked = async (checked: boolean) => {
-    if (!selectedDate) return;
-
-    // Format de date requis: "YYYY-MM-DD"
-    const dateString = selectedDate.toISOString().split("T")[0]; // Format: "2025-06-12"
-
-    try {
-      if (checked) {
-        // Bloquer la date
-        await createBlockMutation.mutateAsync({ date: dateString });
-      } else {
-        // Débloquer la date
-        await deleteBlockMutation.mutateAsync({ date: dateString });
-      }
-    } catch (error) {
-      console.error(
-        checked
-          ? "Erreur lors du blocage de la date:"
-          : "Erreur lors du déblocage de la date:",
-        error
-      );
-    }
   };
 
   const handleAddAvailability = () => {
@@ -174,7 +117,7 @@ export default function Disponibilites() {
   }
 
   return (
-    <AccountLayout>
+    <AccountLayout className="">
       <AvailabilitySheet
         isOpen={showAvailabilitySheet}
         onClose={() => setShowAvailabilitySheet(false)}
@@ -228,7 +171,10 @@ export default function Disponibilites() {
               />
             </div>
             <div className="w-full mx-auto">
-              <CustomCalendar confirmedAppointments={confirmedAppointments} />
+              <CustomCalendar
+                confirmedAppointments={confirmedAppointments}
+                schedules={proExpertData?.schedules || []}
+              />
             </div>
             {/* Section Gestion des disponibilités */}
             <div className="space-y-4 w-full lg:-ml-2 xl:ml-4 pb-6">

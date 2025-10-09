@@ -279,9 +279,10 @@ export const useDeleteProAppointmentBlock = () => {
 
   return useMutation<any, Error, DeleteBlockAppointmentData>({
     mutationFn: async (deleteData: DeleteBlockAppointmentData) => {
-      // Utilisation d'une URL avec paramètres pour la suppression
-      const dateParam = encodeURIComponent(deleteData.date);
-      return apiClient.delete(`pro-appointment-block?date=${dateParam}`);
+      // Envoi de la date dans le body de la requête
+      return apiClient.delete(`pro-appointment-block`, {
+        date: deleteData.date
+      });
     },
     onSuccess: (data, variables) => {
       // Invalider le cache des blocs de rendez-vous

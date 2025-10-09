@@ -50,17 +50,9 @@ export default function TimeSlotsManager({
   }
 
   return (
-    <div className="w-full mx-auto ">
+    <div className={`w-full mx-auto ${isLoadingAny ? "opacity-50" : ""}`}>
       <Card className="p-4 sm:p-6 border-gray-200">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            {isLoadingAny && (
-              <div className="text-sm text-blue-600">
-                {t("timeSlotsManager.saving")}
-              </div>
-            )}
-          </div>
-
           {error && (
             <div className="p-3 bg-red-100 border border-red-300 rounded-md">
               <p className="text-red-700 text-sm">{error}</p>
@@ -76,12 +68,8 @@ export default function TimeSlotsManager({
                   onValueChange={(value) =>
                     handleUpdateTimeSlot(slot.id, "startTime", value)
                   }
-                  onOpenChange={(open) => {
-                    // Ne pas sauvegarder automatiquement le startTime
-                    // L'utilisateur doit d'abord remplir endTime
-                  }}
                 >
-                  <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl ">
+                  <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
@@ -114,7 +102,6 @@ export default function TimeSlotsManager({
                   }
                   onOpenChange={(open) => {
                     if (!open && slot.startTime && slot.endTime) {
-                      // Sauvegarder seulement si les deux heures sont remplies
                       setTimeout(() => {
                         handleSaveToServer();
                       }, 100);

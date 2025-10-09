@@ -76,11 +76,11 @@
   --color-slate-600: #475569;
 }
 
-/* Container réutilisable avec largeur max 1173px */
+/* Container réutilisable avec largeur max 1440px */
 .container {
   width: 100%;
   max-width: 1440px;
-  /* background-color: #f8fafc; */
+  background-color: white;
   margin: 0 auto;
 }
 
@@ -142,8 +142,23 @@
   }
   html {
     font-family: var(--font-figtree), system-ui;
-    /* Réserve l'espace pour la scrollbar pour éviter les décalages de layout */
-    scrollbar-gutter: stable;
+    scrollbar-gutter: stable; /* Réserve l'espace pour la scrollbar */
+    background-color: #f8fafc;
+  }
+
+  /* Fix Radix UI scroll-lock : annule les compensations quand scrollbar-gutter est actif */
+  @supports (scrollbar-gutter: stable) {
+    body[data-scroll-locked] {
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: auto !important;
+    }
+
+    /* Empêche le container de bouger */
+    body[data-scroll-locked] .container {
+      margin-right: auto !important;
+      margin-left: auto !important;
+    }
   }
 
   .font-figtree {
