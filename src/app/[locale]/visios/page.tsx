@@ -13,7 +13,7 @@ function Visios() {
   const { isVideoCallOpen } = useCallStore();
   const { user } = useUserStore();
   return (
-    <div className="flex">
+    <div className="flex container">
       <AppSidebar hideMobileNav={isVideoCallOpen} />
       <div className="w-full flex-1 container pb-10">
         {user.type === "client" ? (

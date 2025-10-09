@@ -64,8 +64,16 @@ export const apiClient = {
   /**
    * Effectue une requête DELETE
    */
-  delete: async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
-    return fetchApi<T>(endpoint, { ...options, method: "DELETE" });
+  delete: async <T>(
+    endpoint: string,
+    data?: any,
+    options?: RequestInit
+  ): Promise<T> => {
+    return fetchApi<T>(endpoint, {
+      ...options,
+      method: "DELETE",
+      body: data ? JSON.stringify(data) : undefined,
+    });
   },
 
   /**

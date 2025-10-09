@@ -49,7 +49,7 @@ export default async function RootLayout({
   return (
     <html>
       <body
-        className={`container ${figtree.variable} ${geistMono.variable} antialiased`}
+        className={` ${figtree.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>

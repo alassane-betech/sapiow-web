@@ -1,4 +1,10 @@
+import {
+  useCreateProAppointmentBlock,
+  useDeleteProAppointmentBlock,
+  useGetProAppointmentBlocks,
+} from "@/api/appointments/useAppointments";
 import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
+import { BlockDaySection } from "@/components/common/BlockDaySection";
 import { EmptySessionCard } from "@/components/common/EmptySessionCard";
 import TimeSlotsManager from "@/components/common/TimeSlotsManager";
 import { useProExpertStore } from "@/store/useProExpert";
@@ -13,12 +19,14 @@ interface SessionDetailsPanelProps {
   selectedDate: Date | null;
   showTimeSlotsManager: boolean;
   confirmedAppointments?: any[];
+  isMobile?: boolean;
 }
 
 export const SessionDetailsPanel = ({
   selectedDate,
   showTimeSlotsManager,
   confirmedAppointments = [],
+  isMobile = false,
 }: SessionDetailsPanelProps) => {
   const t = useTranslations();
   const currentLocale = useLocale();
@@ -27,6 +35,21 @@ export const SessionDetailsPanel = ({
   const { proExpertData, setProExpertData } = useProExpertStore();
   const { addTimeSlotLocal } = useTimeSlotsStore();
   const updateProExpertMutation = useUpdateProExpert();
+
+  // Hooks pour la gestion des blocs de dates
+  const { data: blockedDates, isLoading: isLoadingBlocks } =
+    useGetProAppointmentBlocks();
+  const createBlockMutation = useCreateProAppointmentBlock();
+  const deleteBlockMutation = useDeleteProAppointmentBlock();
+
+  // Vérifier si la date sélectionnée est bloquée
+  const isDateBlocked =
+    selectedDate && blockedDates && Array.isArray(blockedDates)
+      ? blockedDates.some(
+          (block: any) =>
+            new Date(block.date).toDateString() === selectedDate.toDateString()
+        )
+      : false;
 
   // Vérifier s'il y a des créneaux pour la date sélectionnée
   const hasTimeSlotsForDate = (date: Date | null): boolean => {
@@ -94,6 +117,31 @@ export const SessionDetailsPanel = ({
     });
   };
 
+  // Fonction pour gérer le blocage/déblocage de dates
+  const handleBlocked = async (checked: boolean) => {
+    if (!selectedDate) return;
+
+    // Format de date requis: "YYYY-MM-DD"
+    const dateString = selectedDate.toISOString().split("T")[0];
+
+    try {
+      if (checked) {
+        // Bloquer la date
+        await createBlockMutation.mutateAsync({ date: dateString });
+      } else {
+        // Débloquer la date
+        await deleteBlockMutation.mutateAsync({ date: dateString });
+      }
+    } catch (error) {
+      console.error(
+        checked
+          ? "Erreur lors du blocage de la date: "
+          : "Erreur lors du déblocage de la date: ",
+        error
+      );
+    }
+  };
+
   return (
     <div className="w-full">
       {selectedDate ? (
@@ -156,6 +204,17 @@ export const SessionDetailsPanel = ({
               onAdd={handleAddAvailability}
             />
           )}
+
+          <BlockDaySection
+            isBlocked={isDateBlocked}
+            onToggle={handleBlocked}
+            isMobile={isMobile}
+            isLoading={
+              createBlockMutation.isPending ||
+              deleteBlockMutation.isPending ||
+              isLoadingBlocks
+            }
+          />
         </div>
       ) : (
         <div className="w-full flex flex-col items-center justify-center h-[100vh]">

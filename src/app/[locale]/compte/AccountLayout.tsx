@@ -32,7 +32,7 @@ export default function AccountLayout({
 
   return (
     <AuthGuard>
-      <div className={`flex ${className}`}>
+      <div className={`container flex ${className}`}>
         <AppSidebar />
 
         {/* Layout principal */}

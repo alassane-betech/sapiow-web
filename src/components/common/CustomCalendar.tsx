@@ -9,11 +9,13 @@ import { useTranslations } from "next-intl";
 interface CustomCalendarProps {
   className?: string;
   confirmedAppointments?: any[];
+  schedules?: any[];
 }
 
 export default function CustomCalendar({
   className,
   confirmedAppointments = [],
+  schedules = [],
 }: CustomCalendarProps) {
   const t = useTranslations();
 
@@ -49,10 +51,51 @@ export default function CustomCalendar({
     navigateMonth,
   } = useCalendarStore();
 
-  // Créer les événements à partir des rendez-vous confirmés uniquement
+  // Créer les événements à partir des rendez-vous confirmés et dates bloquées
   const getMergedEvents = () => {
     const mergedEvents: any = {};
 
+    // Extraire les jours de la semaine disponibles depuis schedules
+    const availableDaysOfWeek = schedules.map((schedule: any) => 
+      schedule.day_of_week.toLowerCase()
+    );
+
+    // Mapper les jours de la semaine (0 = dimanche, 1 = lundi, etc.)
+    const dayOfWeekMap: { [key: number]: string } = {
+      0: "sunday",
+      1: "monday",
+      2: "tuesday",
+      3: "wednesday",
+      4: "thursday",
+      5: "friday",
+      6: "saturday",
+    };
+
+    // Bloquer tous les jours du mois qui ne sont pas dans les schedules
+    const daysInMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    ).getDate();
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        day
+      );
+      const dayOfWeek = dayOfWeekMap[date.getDay()];
+
+      // Si ce jour de la semaine n'est pas dans les schedules, le bloquer avec barre oblique
+      if (!availableDaysOfWeek.includes(dayOfWeek)) {
+        mergedEvents[day] = {
+          type: "unavailable",
+          users: [],
+        };
+      }
+    }
+
+    // Ajouter les rendez-vous confirmés (ils écrasent les jours bloqués par schedules)
     confirmedAppointments.forEach((appointment) => {
       const appointmentDate = new Date(appointment.appointment_at);
       const day = appointmentDate.getDate();
