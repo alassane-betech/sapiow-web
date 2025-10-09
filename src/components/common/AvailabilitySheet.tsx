@@ -148,12 +148,10 @@ export default function AvailabilitySheet({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const diffMonths = Math.round(diffDays / 30);
 
-    // Si moins d'un mois (moins de 30 jours), afficher en jours
+    // Si moins d'un mois (moins de 30 jours),
     if (diffDays < 30) {
       return `${diffDays} ${
-        diffDays > 1
-          ? t("availabilitySheet.days")
-          : t("availabilitySheet.day")
+        diffDays > 1 ? t("availabilitySheet.days") : t("availabilitySheet.day")
       }`;
     }
 
