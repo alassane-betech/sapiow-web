@@ -79,15 +79,15 @@ export default function Support() {
               >
                 <button
                   onClick={() => toggleItem(item.id)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <span className="font-semibold text-gray-900 pr-4">
                     {item.question}
                   </span>
                   {openItems.includes(item.id) ? (
-                    <Minus className="w-5 h-5 text-red-500 flex-shrink-0" />
+                    <Minus className="w-5 h-5 text-black flex-shrink-0" />
                   ) : (
-                    <Plus className="w-5 h-5 text-red-500 flex-shrink-0" />
+                    <Plus className="w-5 h-5 text-black flex-shrink-0" />
                   )}
                 </button>
 

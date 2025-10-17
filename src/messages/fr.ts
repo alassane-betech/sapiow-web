@@ -204,6 +204,8 @@ export default {
     saving: "Sauvegarde...",
     addAvailability: "Ajouter une disponibilité",
     to: "à",
+    selectStartTime: "Heure de début",
+    selectEndTime: "Heure de fin",
   },
 
   // Block Day Section
@@ -684,6 +686,8 @@ export default {
     october: "Octobre",
     november: "Novembre",
     december: "Décembre",
+    // Status
+    blocked: "Bloqué",
     // Planning
     planYourVisio: "Planifier votre visio",
     visioDuration: "Durée de la visio",
@@ -711,7 +715,7 @@ export default {
     // Expert Dashboard
     hello: "Bonjour",
     user: "Utilisateur",
-    visiosToday: "visioà venir aujourd'hui",
+    visiosToday: "visio à venir aujourd'hui",
     visiosTodayPlural: "visios à venir aujourd'hui",
     youHave: "Vous avez",
     completedVisios: "Visios complétées",

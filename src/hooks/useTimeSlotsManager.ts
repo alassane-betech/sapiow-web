@@ -32,15 +32,16 @@ export const useTimeSlotsManager = ({
   const updateProExpertMutation = useUpdateProExpert();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Générer les options d'heures (de 8h00 à 20h00 par tranches de 30 minutes)
+  // Générer les options d'heures (de 00h00 à 23h30 par tranches de 30 minutes)
   const generateTimeOptions = () => {
     const times = [];
-    for (let hour = 8; hour <= 20; hour++) {
+    for (let hour = 0; hour <= 23; hour++) {
       times.push(`${hour}h00`);
-      if (hour < 20) {
+      if (hour < 23) {
         times.push(`${hour}h30`);
       }
     }
+    times.push("23h30"); // Ajouter le dernier créneau
     return times;
   };
 
@@ -131,6 +132,25 @@ export const useTimeSlotsManager = ({
       ...proExpertData,
       schedules: updatedSchedules,
     });
+
+    // Vérifier si le créneau est maintenant complet (les deux champs remplis)
+    const updatedTimeSlots = getTimeSlotsForDate(
+      updatedSchedules,
+      selectedDate
+    );
+    const updatedSlot = updatedTimeSlots.find((slot) => slot.id === slotId);
+    const isNowComplete =
+      updatedSlot && updatedSlot.startTime && updatedSlot.endTime;
+
+    // Vérifier que startTime < endTime (validation de cohérence)
+    const isValid = isNowComplete && 
+      timeToNumber(updatedSlot.startTime) < timeToNumber(updatedSlot.endTime);
+
+    // Sauvegarder uniquement si les deux champs sont remplis ET valides
+    // IMPORTANT: Passer les schedules mis à jour, pas ceux du store
+    if (isValid) {
+      handleSaveToServerWithSchedules(updatedSchedules);
+    }
   };
 
   // Ajouter un nouveau créneau localement
@@ -147,8 +167,8 @@ export const useTimeSlotsManager = ({
   };
 
   // Sauvegarder sur le serveur avec debouncing pour éviter les doublons
-  const handleSaveToServer = async () => {
-    if (!proExpertData?.schedules) return;
+  const handleSaveToServerWithSchedules = async (schedulesToSave: any[]) => {
+    if (!schedulesToSave) return;
 
     // Annuler le timeout précédent s'il existe
     if (saveTimeoutRef.current) {
@@ -158,19 +178,32 @@ export const useTimeSlotsManager = ({
     // Programmer la sauvegarde avec un délai
     saveTimeoutRef.current = setTimeout(async () => {
       try {
+        console.log("🚀 Début de la sauvegarde des schedules...");
+        console.log("📋 Schedules à sauvegarder:", schedulesToSave);
+        
         await saveSchedulesToServer(
-          proExpertData.schedules || [],
+          schedulesToSave,
           async (updateData: any) => {
+            console.log("📤 Envoi au backend:", updateData);
             const result = await updateProExpertMutation.mutateAsync(
               updateData
             );
+            console.log("✅ Réponse du backend:", result);
             return result.data;
           }
         );
+
+        console.log("✅ Sauvegarde terminée avec succès");
       } catch (error) {
-        console.error("Error saving to server:", error);
+        console.error("❌ Error saving to server:", error);
       }
     }, 500); // Attendre 500ms avant de sauvegarder
+  };
+
+  // Wrapper pour la compatibilité (utilise les schedules du store)
+  const handleSaveToServer = async () => {
+    if (!proExpertData?.schedules) return;
+    await handleSaveToServerWithSchedules(proExpertData.schedules);
   };
 
   // Nettoyer le timeout au démontage du composant

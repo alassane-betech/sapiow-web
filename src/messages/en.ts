@@ -201,6 +201,8 @@ export default {
     saving: "Saving...",
     addAvailability: "Add availability",
     to: "to",
+    selectStartTime: "Start time",
+    selectEndTime: "End time",
   },
 
   // Block Day Section
@@ -677,6 +679,8 @@ export default {
     october: "October",
     november: "November",
     december: "December",
+    // Status
+    blocked: "Blocked",
     // Planning
     planYourVisio: "Plan your video call",
     visioDuration: "Video call duration",

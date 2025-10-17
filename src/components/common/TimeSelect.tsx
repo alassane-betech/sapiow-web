@@ -17,32 +17,20 @@ interface TimeSelectProps {
   conflictOptions?: string[]; // Options en conflit (background rouge)
 }
 
-const timeOptions = [
-  "08h00",
-  "08h30",
-  "09h00",
-  "09h30",
-  "10h00",
-  "10h30",
-  "11h00",
-  "11h30",
-  "12h00",
-  "12h30",
-  "13h00",
-  "13h30",
-  "14h00",
-  "14h30",
-  "15h00",
-  "15h30",
-  "16h00",
-  "16h30",
-  "17h00",
-  "17h30",
-  "18h00",
-  "18h30",
-  "19h00",
-  "19h30",
-];
+// Générer les options d'heures de 00h00 à 23h30 par tranches de 30 minutes
+const generateTimeOptions = () => {
+  const times = [];
+  for (let hour = 0; hour <= 23; hour++) {
+    times.push(`${hour}h00`);
+    if (hour < 23) {
+      times.push(`${hour}h30`);
+    }
+  }
+  times.push("23h30"); // Ajouter le dernier créneau
+  return times;
+};
+
+const timeOptions = generateTimeOptions();
 
 export default function TimeSelect({
   value,
@@ -54,35 +42,37 @@ export default function TimeSelect({
 }: TimeSelectProps) {
   // Utiliser les options par défaut si aucune option personnalisée n'est fournie
   const baseOptions = options || timeOptions;
-  
+
   // Créer la liste complète sans tri pour éviter les re-renders
-  const allOptions = baseOptions.map(time => time);
-  
+  const allOptions = baseOptions.map((time) => time);
+
   const handleValueChange = (newValue: string) => {
     // Vérifier si l'option est dans les options de base (disponibles)
     const isInBaseOptions = baseOptions.includes(newValue);
     const isConflict = conflictOptions.includes(newValue);
     const isDisabled = disabledOptions.includes(newValue);
-    
+
     console.log(`TimeSelect: Tentative de sélection de ${newValue}`, {
       isInBaseOptions,
       isConflict,
       isDisabled,
       conflictOptions,
       disabledOptions,
-      baseOptions: baseOptions
+      baseOptions: baseOptions,
     });
-    
+
     // Seulement permettre la sélection si l'option est dans baseOptions ET n'est ni en conflit ni désactivée
     if (isInBaseOptions && !isConflict && !isDisabled) {
       console.log(`TimeSelect: APPELANT onValueChange avec ${newValue}`);
       onValueChange(newValue);
       console.log(`TimeSelect: onValueChange appelé avec ${newValue}`);
     } else {
-      console.log(`TimeSelect: Sélection bloquée pour ${newValue} - inBase:${isInBaseOptions}, conflit:${isConflict}, disabled:${isDisabled}`);
+      console.log(
+        `TimeSelect: Sélection bloquée pour ${newValue} - inBase:${isInBaseOptions}, conflit:${isConflict}, disabled:${isDisabled}`
+      );
     }
   };
-  
+
   return (
     <Select value={value} onValueChange={handleValueChange}>
       <SelectTrigger className={className}>
@@ -93,18 +83,18 @@ export default function TimeSelect({
           const isDisabled = disabledOptions.includes(time);
           const isConflict = conflictOptions.includes(time);
           const shouldDisable = isDisabled || isConflict;
-          
+
           return (
-            <SelectItem 
-              key={time} 
-              value={time} 
+            <SelectItem
+              key={time}
+              value={time}
               disabled={shouldDisable}
               className={`cursor-pointer ${
                 isConflict
-                  ? 'bg-red-100 text-red-600 cursor-not-allowed opacity-75 hover:bg-red-100'
+                  ? "bg-red-100 text-red-600 cursor-not-allowed opacity-75 hover:bg-red-100"
                   : isDisabled
-                    ? 'text-gray-300 cursor-not-allowed opacity-50' 
-                    : 'hover:bg-gray-50'
+                  ? "text-gray-300 cursor-not-allowed opacity-50"
+                  : "hover:bg-gray-50"
               }`}
             >
               {time}

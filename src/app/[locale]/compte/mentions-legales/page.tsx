@@ -49,6 +49,7 @@ export default function MentionsLegales() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [showContent, setShowContent] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   // Détecter si l'écran est en mode mobile
   useEffect(() => {
@@ -77,6 +78,14 @@ export default function MentionsLegales() {
 
   const handleBackClick = () => {
     setShowContent(false);
+  };
+
+  const handleExpandClick = () => {
+    setIsFullScreen(true);
+  };
+
+  const handleCloseFullScreen = () => {
+    setIsFullScreen(false);
   };
 
   return (
@@ -200,9 +209,9 @@ export default function MentionsLegales() {
               <div className="bg-white rounded-2xl p-4 md:p-8 border border-light-blue-gray max-w-2xl mx-auto relative">
                 <div className="flex items-start justify-between mb-4">
                   <h2 className="text-xl font-bold">{activeTab.label}</h2>
-                  <Link
-                    href={activeTab.href}
-                    className="bg-white p-2 rounded-[8px] border border-light-blue-gray"
+                  <button
+                    onClick={handleExpandClick}
+                    className="bg-white p-2 rounded-[8px] border border-light-blue-gray hover:bg-[#F7F9FB] transition-colors cursor-pointer"
                   >
                     <Image
                       src="/assets/icons/scale.svg"
@@ -210,10 +219,49 @@ export default function MentionsLegales() {
                       width={22}
                       height={22}
                     />
-                  </Link>
+                  </button>
                 </div>
                 <div className="text-ash-gray text-base leading-relaxed">
                   {activeTab.content}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal plein écran */}
+        {isFullScreen && (
+          <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+            <div className="container mx-auto px-4 md:px-6 py-6">
+              <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold">{activeTab.label}</h1>
+                <button
+                  onClick={handleCloseFullScreen}
+                  className="p-2 rounded-full hover:bg-[#F7F9FB] transition-colors"
+                  aria-label="Fermer"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="text-[#1E293B]"
+                  >
+                    <path
+                      d="M18 6L6 18M6 6l12 12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-2xl p-6 md:p-8 border border-light-blue-gray">
+                  <div className="text-ash-gray text-base md:text-lg leading-relaxed whitespace-pre-wrap">
+                    {activeTab.content}
+                  </div>
                 </div>
               </div>
             </div>

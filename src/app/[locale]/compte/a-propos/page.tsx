@@ -10,18 +10,11 @@ export default function APropos() {
 
   return (
     <AccountLayout>
-      <div className="flex flex-col items-center justify-center gap-4">
+      <div className="flex flex-col items-center justify-center gap-4 min-h-[calc(100vh-200px)]">
         <Image
-          src="/assets/icons/logoSapiow.svg"
+          src="/assets/iconSidebare/logo.svg"
           alt={t("about.logoAlt")}
-          width={101}
-          height={91}
-          className="p-0 mt-10"
-        />
-        <Image
-          src="/assets/icons/sapiow.svg"
-          alt={t("about.logoAlt")}
-          width={203}
+          width={74}
           height={74}
           className="p-0 m-0"
         />

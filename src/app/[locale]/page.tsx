@@ -64,7 +64,11 @@ function Home() {
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <div className="transition-all duration-300 ease-in-out sticky top-0 z-20">
-          {currentUserType === "client" ? <HeaderClient /> : <Header />}
+          {currentUserType === "client" ? (
+            <HeaderClient />
+          ) : (
+            <Header isBorder={true} />
+          )}
         </div>
         <div className="flex-1 px-5 relative overflow-hidden">
           <div

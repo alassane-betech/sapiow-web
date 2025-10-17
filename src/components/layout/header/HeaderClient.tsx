@@ -256,7 +256,14 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
                                   .includes("message") ? (
                                 <span className="text-lg">💬</span>
                               ) : (
-                                <span className="text-lg">🔔</span>
+                                <span className="text-lg">
+                                  <Image
+                                    src="/assets/icons/notif.svg"
+                                    alt="notifications"
+                                    width={24}
+                                    height={24}
+                                  />
+                                </span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -280,7 +287,14 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
                       ))
                     ) : (
                       <div className="p-6 text-center text-gray-500">
-                        <span className="text-2xl mb-2 block">🔔</span>
+                        <span className="text-2xl mb-2 flex justify-center items-center">
+                          <Image
+                            src="/assets/icons/notif.svg"
+                            alt="notifications"
+                            width={24}
+                            height={24}
+                          />
+                        </span>
                         <p className="text-sm">{t("header.noNotifications")}</p>
                       </div>
                     )}
