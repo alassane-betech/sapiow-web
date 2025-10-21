@@ -13,6 +13,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useAddToCalendar } from "@/hooks/useAddToCalendar";
 import { useConversationStore } from "@/store/useConversationStore";
 import { ChevronRight, Send, X } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -34,6 +35,7 @@ interface SessionData {
   status: string;
   price: number;
   appointment_questions?: AppointmentQuestion[];
+  appointment_at: string; // Date ISO originale
 }
 
 interface SessionDetailSheetProps {
@@ -53,6 +55,7 @@ export function SessionDetailSheet({
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const { setSelectedConversation, setSelectedProfessional } =
     useConversationStore();
+  const { handleAddToCalendar } = useAddToCalendar();
 
   const router = useRouter();
   const [question, setQuestion] = useState("");
@@ -367,6 +370,20 @@ export function SessionDetailSheet({
                   <ButtonUI
                     variant="outline"
                     className="w-full max-w-[360px] text-exford-blue font-bold border-gray-300 hover:bg-gray-50 bg-transparent font-figtree mr-2 cursor-pointer"
+                    onClick={() =>
+                      handleAddToCalendar({
+                        id: session?.id,
+                        appointment_at: session?.appointment_at || "",
+                        pro: {
+                          first_name: session?.professionalName?.split(" ")[0],
+                          last_name: session?.professionalName
+                            ?.split(" ")
+                            .slice(1)
+                            .join(" "),
+                          job: session?.professionalTitle,
+                        },
+                      })
+                    }
                   >
                     <Image
                       src="/assets/icons/calendar.svg"

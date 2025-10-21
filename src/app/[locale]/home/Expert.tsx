@@ -34,10 +34,6 @@ export default function Expert() {
   } = useUpdateProAppointment();
 
   const handleStartVideoCall = (appointmentId: string) => {
-    console.log(
-      "🎬 Expert handleStartVideoCall - appointmentId:",
-      appointmentId
-    );
     setAppointmentId(appointmentId);
     setIsVideoCallOpen(true);
   };
@@ -70,8 +66,8 @@ export default function Expert() {
     }
   };
 
-  const { data: proExpert } = useGetProExpert();
-  const { data: statistics } = useGetStatistics();
+  const { data: proExpert, isLoading: proExpertLoading } = useGetProExpert();
+  const { data: statistics, isLoading: statisticsLoading } = useGetStatistics();
   const { data: appointments } = useGetProAppointments(proExpert?.id);
 
   // Calculer le nombre de demandes en attente
@@ -81,6 +77,20 @@ export default function Expert() {
       )
     : [];
   const pendingCount = pendingAppointments.length;
+
+  // Gestion du loading
+  if (proExpertLoading || statisticsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-exford-blue"></div>
+          <p className="mt-4 text-lg text-exford-blue">
+            {t("loading")}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

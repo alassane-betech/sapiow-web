@@ -170,12 +170,15 @@ export default {
     availableDays: "Available days",
     startDate: "Start date",
     endDate: "End date",
+    selectPeriod: "Select a period",
     unavailable: "Unavailable",
     session: "session",
     sessions: "sessions",
     addSession: "Add session",
     to: "to",
     noPeriodDefined: "No period defined",
+    save: "Save",
+    saving: "Saving...",
     // Days of the week
     sunday: "Sunday",
     monday: "Monday",
@@ -201,6 +204,8 @@ export default {
     saving: "Saving...",
     addAvailability: "Add availability",
     to: "to",
+    selectStartTime: "Start time",
+    selectEndTime: "End time",
   },
 
   // Block Day Section
@@ -470,6 +475,14 @@ export default {
     pricePlaceholder: "Ex: 120",
     euroAlt: "Euro",
     includedFeatures: "Included features",
+    addFeaturePlaceholder: "Ex: Priority support, Exclusive resources...",
+    add: "Add",
+    adding: "Adding...",
+    deleteFeature: "Delete this feature",
+    loadingFeatures: "Loading features...",
+    noFeaturesYet: "No features added yet. Add one above.",
+    createSessionFirst: "Create the session first to add features.",
+    sessionCreatedAddFeatures: "✅ Session created! You can now add features below.",
     creating: "Creating...",
     editing: "Editing...",
     // Offer Selection
@@ -677,6 +690,8 @@ export default {
     october: "October",
     november: "November",
     december: "December",
+    // Status
+    blocked: "Blocked",
     // Planning
     planYourVisio: "Plan your video call",
     visioDuration: "Video call duration",

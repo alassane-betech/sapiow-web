@@ -53,6 +53,7 @@ export interface SessionData {
   status: string;
   price: number;
   appointment_questions?: AppointmentQuestion[];
+  appointment_at: string; // Date ISO originale pour le calendrier
 }
 
 /**
@@ -114,6 +115,7 @@ export function transformAppointmentToSessionData(
     status: appointment.status,
     price: appointment.session.price,
     appointment_questions: appointment.appointment_questions || [],
+    appointment_at: appointment.appointment_at, // Conserver la date ISO originale
   };
 }
 

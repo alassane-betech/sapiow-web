@@ -112,10 +112,13 @@ export default function Client() {
       <h2 className="my-2 text-lg lg:text-2xl font-normal text-exford-blue font-figtree">
         {t("home.accelerateProject")}
       </h2>
-      <CategoryFilter
-        selectedCategory={selectedCategory}
-        onCategoryChange={handleCategoryChange}
-      />
+      <div className="w-[90%] gap-6 py-4 overflow-x-auto scrollbar-hide">
+        {" "}
+        <CategoryFilter
+          selectedCategory={selectedCategory}
+          onCategoryChange={handleCategoryChange}
+        />
+      </div>
       {selectedCategory !== "top" && (
         <SubCategoryFilter
           selectedCategory={selectedCategory}

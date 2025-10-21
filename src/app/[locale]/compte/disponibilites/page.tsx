@@ -8,7 +8,7 @@ import { AvailabilityButtons } from "@/components/common/AvailabilityButtons";
 import AvailabilitySheet from "@/components/common/AvailabilitySheet";
 import CustomCalendar from "@/components/common/CustomCalendar";
 import GoogleCalendarConnectButton from "@/components/common/GoogleCalendarConnectButton";
-import { PeriodToggle, PeriodType } from "@/components/common/PeriodToggle";
+import { PeriodType } from "@/components/common/PeriodToggle";
 import { SessionDetailsPanel } from "@/components/common/SessionDetailsPanel";
 import SyncedCalendarsSheet from "@/components/common/SyncedCalendarsSheet";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +18,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useGetProAppointmentBlocks } from "@/api/appointments/useAppointments";
 import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
 import { useCalendarStore } from "@/store/useCalendar";
 import { useProExpertStore } from "@/store/useProExpert";
@@ -56,6 +57,10 @@ export default function Disponibilites() {
   // Hook pour récupérer les rendez-vous confirmés
   const { confirmedAppointments } = useVisiosAppointments();
 
+  // Hook pour récupérer les dates bloquées
+  const { data: blockedDates, isLoading: isLoadingBlocks } =
+    useGetProAppointmentBlocks();
+
   // Fonction réutilisable pour éviter la duplication mobile/desktop
   const renderSessionDetailsPanel = (isMobile: boolean = false) => (
     <SessionDetailsPanel
@@ -68,19 +73,18 @@ export default function Disponibilites() {
 
   // Synchroniser les données API avec le store
   useEffect(() => {
+    console.log("📊 Synchronisation des données API vers le store:", {
+      isLoadingApi,
+      hasData: !!proExpertData,
+      schedulesCount: proExpertData?.schedules?.length || 0
+    });
+    
     setLoading(isLoadingApi);
     if (proExpertData) {
       setProExpertData(proExpertData);
     }
   }, [proExpertData, isLoadingApi, setProExpertData, setLoading]);
 
-  const handleDisconnectGoogle = () => {
-    disconnectMutation.mutate();
-  };
-
-  const handleAddAvailability = () => {
-    setShowTimeSlotsManager(true);
-  };
   const handleManageAvailability = () => {
     setShowAvailabilitySheet(true);
   };
@@ -164,16 +168,17 @@ export default function Disponibilites() {
         <div className="w-full grid grid-cols-1 md:grid-cols-[1fr_1px_1fr] lg:grid-cols-[1fr_2px_1fr] gap-x-4 md:gap-x-6 lg:gap-x-0 gap-y-8 md:gap-y-0">
           <div className="w-full space-y-0 max-w-[414px] relative">
             <div className="w-full flex items-center justify-center">
-              <PeriodToggle
+              {/* <PeriodToggle
                 value={selectedPeriod}
                 onChange={setSelectedPeriod}
                 size="sm"
-              />
+              /> */}
             </div>
             <div className="w-full mx-auto">
               <CustomCalendar
                 confirmedAppointments={confirmedAppointments}
                 schedules={proExpertData?.schedules || []}
+                blockedDates={Array.isArray(blockedDates) ? blockedDates : []}
               />
             </div>
             {/* Section Gestion des disponibilités */}

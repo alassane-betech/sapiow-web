@@ -135,8 +135,28 @@ const generateTimeSlots = (
     }
   });
 
+  // Éliminer les doublons (créneaux avec la même heure)
+  const uniqueTimeSlots = timeSlots.reduce((acc: any[], current) => {
+    // Vérifier si ce créneau existe déjà dans l'accumulateur
+    const existingSlot = acc.find((slot) => slot.time === current.time);
+    
+    if (!existingSlot) {
+      // Nouveau créneau, l'ajouter
+      acc.push(current);
+    } else {
+      // Créneau existe déjà, garder le statut le plus restrictif
+      // Si l'un des deux est "taken", le créneau reste "taken"
+      if (current.status === "taken") {
+        existingSlot.status = "taken";
+        existingSlot.available = false;
+      }
+    }
+    
+    return acc;
+  }, []);
+
   // Trier les créneaux par heure
-  return timeSlots.sort((a, b) => a.time.localeCompare(b.time));
+  return uniqueTimeSlots.sort((a, b) => a.time.localeCompare(b.time));
 };
 
 export default function VisioPlanningCalendar({
@@ -263,14 +283,6 @@ export default function VisioPlanningCalendar({
       Array.isArray(appointments) ? appointments : []
     );
 
-    // Définir le premier créneau disponible comme sélectionné par défaut si pas encore sélectionné
-    if (!selectedTime && slots.length > 0) {
-      const firstAvailableSlot = slots.find((slot) => slot.available);
-      if (firstAvailableSlot) {
-        setSelectedTime(firstAvailableSlot.time);
-      }
-    }
-
     return slots;
   }, [
     expertData?.schedules,
@@ -391,13 +403,17 @@ export default function VisioPlanningCalendar({
         currentDate.getMonth(),
         day
       );
-      
+
       // Créer une date "today" à minuit pour comparaison correcte
-      const todayAtMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      
+      const todayAtMidnight = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
+
       // Vérifier si c'est un jour futur ou aujourd'hui
       const isFutureOrToday = dayDate >= todayAtMidnight;
-      
+
       // Le jour est cliquable s'il est aujourd'hui ou dans le futur, et non bloqué
       const isBlocked = isDateBlocked(dayDate);
       const isClickable = isFutureOrToday && !isBlocked;
@@ -573,7 +589,14 @@ export default function VisioPlanningCalendar({
             </h4>
             <p className="text-sm text-gray-600">
               Ven {selectedDate} {months[currentDate.getMonth()].toLowerCase()}{" "}
-              {currentDate.getFullYear()} à {selectedTime}
+              {currentDate.getFullYear()}{" "}
+              {selectedTime ? (
+                <>à {selectedTime}</>
+              ) : (
+                <span className="text-orange-500 font-medium">
+                  {/* - {currentLocale === "fr" ? "Sélectionnez un créneau" : "Select a time slot"} */}
+                </span>
+              )}
             </p>
           </div>
 

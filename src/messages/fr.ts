@@ -173,12 +173,15 @@ export default {
     availableDays: "Jours disponible",
     startDate: "Date début",
     endDate: "Date fin",
+    selectPeriod: "Sélectionner une période",
     unavailable: "Indisponible",
     session: "session",
     sessions: "sessions",
     addSession: "Ajouter une session",
     to: "à",
     noPeriodDefined: "Aucune période définie",
+    save: "Enregistrer",
+    saving: "Enregistrement...",
     // Days of the week
     sunday: "Dimanche",
     monday: "Lundi",
@@ -204,6 +207,8 @@ export default {
     saving: "Sauvegarde...",
     addAvailability: "Ajouter une disponibilité",
     to: "à",
+    selectStartTime: "Heure de début",
+    selectEndTime: "Heure de fin",
   },
 
   // Block Day Section
@@ -476,6 +481,14 @@ export default {
     pricePlaceholder: "Ex: 120",
     euroAlt: "Euro",
     includedFeatures: "Fonctionnalités incluses",
+    addFeaturePlaceholder: "Ex: Support prioritaire, Ressources exclusives...",
+    add: "Ajouter",
+    adding: "Ajout...",
+    deleteFeature: "Supprimer cette fonctionnalité",
+    loadingFeatures: "Chargement des fonctionnalités...",
+    noFeaturesYet: "Aucune fonctionnalité ajoutée. Ajoutez-en une ci-dessus.",
+    createSessionFirst: "Créez d'abord la session pour ajouter des fonctionnalités.",
+    sessionCreatedAddFeatures: "✅ Session créée ! Vous pouvez maintenant ajouter des fonctionnalités ci-dessous.",
     creating: "Création...",
     editing: "Modification...",
     // Offer Selection
@@ -684,6 +697,8 @@ export default {
     october: "Octobre",
     november: "Novembre",
     december: "Décembre",
+    // Status
+    blocked: "Bloqué",
     // Planning
     planYourVisio: "Planifier votre visio",
     visioDuration: "Durée de la visio",
@@ -711,7 +726,7 @@ export default {
     // Expert Dashboard
     hello: "Bonjour",
     user: "Utilisateur",
-    visiosToday: "visioà venir aujourd'hui",
+    visiosToday: "visio à venir aujourd'hui",
     visiosTodayPlural: "visios à venir aujourd'hui",
     youHave: "Vous avez",
     completedVisios: "Visios complétées",

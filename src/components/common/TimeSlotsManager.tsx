@@ -64,13 +64,15 @@ export default function TimeSlotsManager({
             <div key={slot.id} className="flex items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <Select
-                  value={slot.startTime}
+                  value={slot.startTime || undefined}
                   onValueChange={(value) =>
                     handleUpdateTimeSlot(slot.id, "startTime", value)
                   }
                 >
                   <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
-                    <SelectValue />
+                    <SelectValue
+                      placeholder={t("timeSlotsManager.selectStartTime")}
+                    />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
                     {timeOptions.map((time) => {
@@ -96,20 +98,15 @@ export default function TimeSlotsManager({
                   {t("timeSlotsManager.to")}
                 </span>
                 <Select
-                  value={slot.endTime}
+                  value={slot.endTime || undefined}
                   onValueChange={(value) =>
                     handleUpdateTimeSlot(slot.id, "endTime", value)
                   }
-                  onOpenChange={(open) => {
-                    if (!open && slot.startTime && slot.endTime) {
-                      setTimeout(() => {
-                        handleSaveToServer();
-                      }, 100);
-                    }
-                  }}
                 >
                   <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
-                    <SelectValue />
+                    <SelectValue
+                      placeholder={t("timeSlotsManager.selectEndTime")}
+                    />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
                     {getEndTimeOptions(slot.startTime).map((time) => {

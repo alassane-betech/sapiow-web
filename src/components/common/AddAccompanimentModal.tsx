@@ -11,7 +11,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useAddSessionModal } from "@/hooks/useAddSessionModal";
-import { Check, X } from "lucide-react";
+import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { FormField } from "./FormField";
@@ -20,6 +20,7 @@ interface AddAccompanimentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (data: SessionData) => void;
+  onSessionCreated?: (sessionId: string, sessionData: SessionData) => void; // Callback après création
   editData?: ProExpertSession; // Données existantes pour la modification
   isEditMode?: boolean; // Mode édition
 }
@@ -28,38 +29,43 @@ interface SessionData extends SessionCreate {
   // SessionData hérite de SessionCreate du hook API
 }
 
-// Fonction pour générer les fonctionnalités avec traductions
-const getAvailableFeatures = (t: any) => [
-  { key: "one_on_one", label: t("offers.oneOnOne") },
-  { key: "video_call", label: t("offers.videoCall") },
-  { key: "strategic_session", label: t("offers.strategicSession") },
-  { key: "exclusive_ressources", label: t("offers.exclusiveResources") },
-  { key: "support", label: t("offers.support") },
-  { key: "mentorship", label: t("offers.mentorship") },
-  { key: "webinar", label: t("offers.webinar") },
-];
-
 export default function AddAccompanimentModal({
   isOpen,
   onClose,
   onSuccess,
+  onSessionCreated,
   editData,
   isEditMode = false,
 }: AddAccompanimentModalProps) {
   const t = useTranslations();
-  const availableFeatures = getAvailableFeatures(t);
 
   const {
     formData,
-    selectedFeatures,
+    features,
+    newFeatureName,
     errors,
     isFormValid,
     isPending,
+    isLoadingFeatures,
+    editingFeatureIndex,
+    editingFeatureName,
     handleInputChange,
-    handleFeatureToggle,
+    setNewFeatureName,
+    setEditingFeatureName,
+    handleAddFeature,
+    handleStartEditFeature,
+    handleSaveEditFeature,
+    handleCancelEditFeature,
+    handleDeleteFeature,
     handleSubmit,
     handleCancel,
-  } = useAddSessionModal({ onSuccess, onClose, editData, isEditMode });
+  } = useAddSessionModal({
+    onSuccess,
+    onClose,
+    editData,
+    isEditMode,
+    onSessionCreated,
+  });
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -74,12 +80,6 @@ export default function AddAccompanimentModal({
               <SheetTitle className="text-xl font-semibold text-gray-900 font-figtree">
                 {isEditMode ? t("offers.editSession") : t("offers.addSession")}
               </SheetTitle>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
             </div>
           </SheetHeader>
 
@@ -93,7 +93,7 @@ export default function AddAccompanimentModal({
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder={t("offers.sessionNamePlaceholder")}
-                className="w-full h-[56px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                className="w-full h-[56px] p-5 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
               />
             </div>
 
@@ -114,7 +114,7 @@ export default function AddAccompanimentModal({
                     height={24}
                   />
                 }
-                className="w-full h-[56px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                className="w-full h-[56px] p-5 pr-11 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
               />
             </div>
 
@@ -131,43 +131,120 @@ export default function AddAccompanimentModal({
               </div>
             )}
 
-            {/* Fonctionnalités */}
+            {/* Fonctionnalités dynamiques */}
             <div className="space-y-4 border border-light-blue-gray rounded-[12px] p-4">
               <Label className="text-sm font-medium text-gray-700 font-figtree">
                 {t("offers.includedFeatures")}
               </Label>
-              <div className="space-y-4">
-                {availableFeatures.map((feature) => (
-                  <div
-                    key={feature.key}
-                    className="flex items-center space-x-3 font-figtree"
-                  >
-                    <Label
-                      htmlFor={feature.key}
-                      className="text-sm text-gray-700 flex-1 cursor-pointer font-figtree"
-                    >
-                      {feature.label}
-                    </Label>
+
+              {/* Input pour ajouter une nouvelle feature */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newFeatureName}
+                  onChange={(e) => setNewFeatureName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddFeature();
+                    }
+                  }}
+                  placeholder={t("offers.addFeaturePlaceholder")}
+                  className="flex-1 h-[44px] px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-figtree text-sm"
+                />
+                <Button
+                  onClick={handleAddFeature}
+                  disabled={!newFeatureName.trim()}
+                  label={t("offers.add")}
+                  icon={<Plus />}
+                />
+              </div>
+
+              {/* Liste des features existantes */}
+              {isLoadingFeatures ? (
+                <div className="text-sm text-gray-500 text-center py-4 font-figtree">
+                  {t("offers.loadingFeatures")}
+                </div>
+              ) : features.length > 0 ? (
+                <div className="space-y-2">
+                  {features.map((feature, index) => (
                     <div
-                      onClick={() =>
-                        handleFeatureToggle(
-                          feature.key,
-                          !selectedFeatures[feature.key]
-                        )
-                      }
-                      className={`w-6 h-6 border-3 border-[#94A3B8] rounded cursor-pointer flex items-center justify-center transition-all duration-200 ${
-                        selectedFeatures[feature.key]
-                          ? "bg-[#020617] border-[#020617]"
-                          : "bg-white"
-                      }`}
+                      key={feature.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 font-figtree"
                     >
-                      {selectedFeatures[feature.key] && (
-                        <Check className="w-4 h-4 text-white" />
+                      {editingFeatureIndex === index ? (
+                        // Mode édition
+                        <>
+                          <input
+                            type="text"
+                            value={editingFeatureName}
+                            onChange={(e) =>
+                              setEditingFeatureName(e.target.value)
+                            }
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleSaveEditFeature(index);
+                              } else if (e.key === "Escape") {
+                                handleCancelEditFeature();
+                              }
+                            }}
+                            className="flex-1 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            autoFocus
+                          />
+                          <div className="flex gap-2 ml-2">
+                            <button
+                              onClick={() => handleSaveEditFeature(index)}
+                              className="text-green-600 hover:text-green-700 transition-colors p-1 cursor-pointer"
+                              title="Sauvegarder"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={handleCancelEditFeature}
+                              className="text-gray-500 hover:text-gray-700 transition-colors p-1 cursor-pointer"
+                              title="Annuler"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        // Mode affichage
+                        <>
+                          <span className="flex-1 text-sm text-gray-700">
+                            {feature.name}
+                          </span>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() =>
+                                handleStartEditFeature(index, feature.name)
+                              }
+                              className="text-blue-600 hover:text-blue-700 transition-colors p-1 cursor-pointer"
+                              title="Modifier"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteFeature(index)}
+                              className="text-red-600 hover:text-red-700 transition-colors p-1 cursor-pointer"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </>
                       )}
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500 text-center py-4 font-figtree">
+                  {/* {isEditMode
+                    ? t("offers.noFeaturesYet")
+                    : t("offers.createSessionFirst")} */}
+                </div>
+              )}
             </div>
           </div>
 

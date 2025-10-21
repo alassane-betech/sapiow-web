@@ -2,6 +2,7 @@
 import { useCreatePatientAppointment } from "@/api/appointments/useAppointments";
 import { Button } from "@/components/common/Button";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import SessionFeaturesList from "@/components/common/SessionFeaturesList";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePayStore } from "@/store/usePay";
@@ -190,99 +191,10 @@ export default function OfferSelection({
                           <h4 className="text-sm font-medium text-[#6B7280] mb-2 font-figtree">
                             {t("offers.whatIsIncluded")}
                           </h4>
-                          <div className="space-y-2">
-                            {session.one_on_one && (
-                              <div className="flex items-start gap-2">
-                                <Image
-                                  src="/assets/icons/check-circle.svg"
-                                  alt="check-circle"
-                                  width={16}
-                                  height={16}
-                                />
-                                <span className="text-sm text-slate-800 font-figtree">
-                                  {t("offers.oneOnOneChat")}
-                                </span>
-                              </div>
-                            )}
-                            {session.video_call && (
-                              <div className="flex items-start gap-2">
-                                <Image
-                                  src="/assets/icons/check-circle.svg"
-                                  alt="check-circle"
-                                  width={16}
-                                  height={16}
-                                />
-                                <span className="text-sm text-slate-800 font-figtree">
-                                  {t("offers.oneOnOneVideoCalls")}
-                                </span>
-                              </div>
-                            )}
-                            {session.mentorship && (
-                              <div className="flex items-start gap-2">
-                                <Image
-                                  src="/assets/icons/check-circle.svg"
-                                  alt="check-circle"
-                                  width={16}
-                                  height={16}
-                                />
-                                <span className="text-sm text-slate-800 font-figtree">
-                                  {t("offers.personalizedSupport")}
-                                </span>
-                              </div>
-                            )}
-                            {session.strategic_session && (
-                              <div className="flex items-start gap-2">
-                                <Image
-                                  src="/assets/icons/check-circle.svg"
-                                  alt="check-circle"
-                                  width={16}
-                                  height={16}
-                                />
-                                <span className="text-sm text-slate-800 font-figtree">
-                                  {t("offers.strategySessions")}
-                                </span>
-                              </div>
-                            )}
-                            {session.exclusive_ressources && (
-                              <div className="flex items-start gap-2">
-                                <Image
-                                  src="/assets/icons/check-circle.svg"
-                                  alt="check-circle"
-                                  width={16}
-                                  height={16}
-                                />
-                                <span className="text-sm text-slate-800 font-figtree">
-                                  {t("offers.exclusiveResources")}
-                                </span>
-                              </div>
-                            )}
-                            {session.support && (
-                              <div className="flex items-start gap-2">
-                                <Image
-                                  src="/assets/icons/check-circle.svg"
-                                  alt="check-circle"
-                                  width={16}
-                                  height={16}
-                                />
-                                <span className="text-sm text-slate-800 font-figtree">
-                                  {t("offers.support")}
-                                </span>
-                              </div>
-                            )}
-                            {session.webinar && (
-                              <div className="flex items-start gap-2">
-                                <Image
-                                  src="/assets/icons/check-circle.svg"
-                                  alt="check-circle"
-                                  width={16}
-                                  height={16}
-                                />
-                                <span className="text-sm text-slate-800 font-figtree">
-                                  {t("offers.webinar")}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                          <SessionFeaturesList 
+                            sessionId={session.id} 
+                            variant="compact" 
+                          />
                         </div>
 
                         <p className="text-xl font-bold text-exford-blue font-figtree">

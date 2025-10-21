@@ -325,13 +325,15 @@ export const useUpdateProExpert = () => {
       }
     },
     onSuccess: (data) => {
-      // Invalide le cache pour forcer le rechargement des données
-      queryClient.invalidateQueries({ queryKey: ["proExpert"] });
-
-      // Met à jour directement le cache avec les nouvelles données
+      console.log("✅ Mutation réussie, mise à jour du cache avec:", data.data);
+      
+      // Met à jour directement le cache avec les nouvelles données AVANT d'invalider
       if (data.data) {
         queryClient.setQueryData(["proExpert"], data.data);
       }
+
+      // Invalide le cache pour forcer le rechargement des données (en arrière-plan)
+      queryClient.invalidateQueries({ queryKey: ["proExpert"] });
     },
     onError: (error) => {
       console.error("Failed to update pro expert:", error);

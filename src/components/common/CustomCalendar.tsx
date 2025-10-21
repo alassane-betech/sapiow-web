@@ -10,12 +10,14 @@ interface CustomCalendarProps {
   className?: string;
   confirmedAppointments?: any[];
   schedules?: any[];
+  blockedDates?: any[]; // Dates bloquées par l'expert
 }
 
 export default function CustomCalendar({
   className,
   confirmedAppointments = [],
   schedules = [],
+  blockedDates = [],
 }: CustomCalendarProps) {
   const t = useTranslations();
 
@@ -94,6 +96,22 @@ export default function CustomCalendar({
         };
       }
     }
+
+    // Ajouter les dates bloquées manuellement par l'expert (fond rouge)
+    blockedDates.forEach((block: any) => {
+      const blockDate = new Date(block.date);
+      const day = blockDate.getDate();
+      const isCurrentMonth =
+        blockDate.getMonth() === currentDate.getMonth() &&
+        blockDate.getFullYear() === currentDate.getFullYear();
+
+      if (isCurrentMonth) {
+        mergedEvents[day] = {
+          type: "blocked",
+          users: [],
+        };
+      }
+    });
 
     // Ajouter les rendez-vous confirmés (ils écrasent les jours bloqués par schedules)
     confirmedAppointments.forEach((appointment) => {
@@ -176,8 +194,12 @@ export default function CustomCalendar({
 
   const isClickable = (day: number) => {
     const event = allEvents[day as keyof typeof allEvents];
-    // Les dates indisponibles ne sont pas cliquables
-    return event?.type !== "unavailable";
+    // Les dates barrées (unavailable) ne sont pas cliquables
+    // Les dates bloquées (blocked) et avec rendez-vous (active) restent cliquables
+    if (event?.type === "unavailable") {
+      return false;
+    }
+    return true;
   };
 
   const renderCalendarDays = () => {
@@ -236,7 +258,7 @@ export default function CustomCalendar({
         <div
           key={day}
           className={`bg-gray-100 relative ${
-            clickable ? "cursor-pointer" : ""
+            clickable ? "cursor-pointer" : "cursor-not-allowed"
           }`}
           style={{ borderRadius: "2px" }}
           onClick={() => clickable && handleDateClick(day)}
@@ -305,6 +327,13 @@ export default function CustomCalendar({
             )}
 
             <div className="flex flex-col items-start">
+              {/* Badge "Bloqué" pour les dates bloquées */}
+              {event?.type === "blocked" && (
+                <span className="text-[8px] font-semibold text-red-600 bg-red-200 px-1.5 py-0.5 rounded">
+                  {t("calendar.blocked")}
+                </span>
+              )}
+
               {event?.users && event.users.length > 0 && (
                 <div className="flex -space-x-1">
                   {event.users.slice(0, 2).map((user: any, index: number) => (

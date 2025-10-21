@@ -23,7 +23,6 @@ import { Check, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import DatePicker from "./DatePicker";
 
 interface DayAvailability {
   day: string;
@@ -107,21 +106,34 @@ export default function AvailabilitySheet({
     };
   }, []);
 
-  // Hooks pour chaque jour de la semaine
-  const sundayManager = useTimeSlotsManager({ selectedDate: weekDates.sunday });
-  const mondayManager = useTimeSlotsManager({ selectedDate: weekDates.monday });
+  // Hooks pour chaque jour de la semaine (autoSave désactivé pour gérer la sauvegarde manuellement)
+  const sundayManager = useTimeSlotsManager({ 
+    selectedDate: weekDates.sunday,
+    autoSave: false 
+  });
+  const mondayManager = useTimeSlotsManager({ 
+    selectedDate: weekDates.monday,
+    autoSave: false 
+  });
   const tuesdayManager = useTimeSlotsManager({
     selectedDate: weekDates.tuesday,
+    autoSave: false,
   });
   const wednesdayManager = useTimeSlotsManager({
     selectedDate: weekDates.wednesday,
+    autoSave: false,
   });
   const thursdayManager = useTimeSlotsManager({
     selectedDate: weekDates.thursday,
+    autoSave: false,
   });
-  const fridayManager = useTimeSlotsManager({ selectedDate: weekDates.friday });
+  const fridayManager = useTimeSlotsManager({ 
+    selectedDate: weekDates.friday,
+    autoSave: false 
+  });
   const saturdayManager = useTimeSlotsManager({
     selectedDate: weekDates.saturday,
+    autoSave: false,
   });
 
   // Mapper les managers par jour
@@ -136,10 +148,39 @@ export default function AvailabilitySheet({
   };
 
   const [isEditingPeriod, setIsEditingPeriod] = useState(false);
-  const [availabilityPeriod, setAvailabilityPeriod] = useState({
-    startDate: undefined as Date | undefined,
-    endDate: undefined as Date | undefined,
-    displayText: t("availabilitySheet.threeMonths"),
+  const [selectedMonths, setSelectedMonths] = useState<string>("3");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Options de périodes disponibles
+  const periodOptions = [
+    { value: "3", label: "3 mois" },
+    { value: "6", label: "6 mois" },
+    { value: "9", label: "9 mois" },
+    { value: "12", label: "12 mois" },
+    { value: "24", label: "24 mois" },
+  ];
+
+  // Calculer les dates de début et fin basées sur la période sélectionnée
+  const calculatePeriodDates = (months: string) => {
+    const today = new Date();
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1); // 1er du mois actuel
+    const endDate = new Date(
+      today.getFullYear(),
+      today.getMonth() + parseInt(months),
+      0
+    ); // Dernier jour du mois (30 ou 31)
+
+    return { startDate, endDate };
+  };
+
+  const [availabilityPeriod, setAvailabilityPeriod] = useState(() => {
+    const { startDate, endDate } = calculatePeriodDates("3");
+    return {
+      startDate,
+      endDate,
+      displayText: "3 mois",
+    };
   });
 
   // Calculer la période de disponibilité en mois ou jours
@@ -148,12 +189,10 @@ export default function AvailabilitySheet({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     const diffMonths = Math.round(diffDays / 30);
 
-    // Si moins d'un mois (moins de 30 jours), afficher en jours
+    // Si moins d'un mois (moins de 30 jours),
     if (diffDays < 30) {
       return `${diffDays} ${
-        diffDays > 1
-          ? t("availabilitySheet.days")
-          : t("availabilitySheet.day")
+        diffDays > 1 ? t("availabilitySheet.days") : t("availabilitySheet.day")
       }`;
     }
 
@@ -216,12 +255,14 @@ export default function AvailabilitySheet({
       // Si le jour n'est pas disponible, ajouter un créneau par défaut
       manager.handleAddTimeSlot();
     }
+    setHasUnsavedChanges(true);
   };
 
   // Ajouter une session à un jour
   const addSession = (dayOfWeek: DayAvailability["dayOfWeek"]) => {
     const manager = getManagerForDay(dayOfWeek);
     manager.handleAddTimeSlot();
+    setHasUnsavedChanges(true);
   };
 
   // Supprimer une session
@@ -231,6 +272,7 @@ export default function AvailabilitySheet({
   ) => {
     const manager = getManagerForDay(dayOfWeek);
     manager.handleRemoveTimeSlot(sessionId);
+    setHasUnsavedChanges(true);
   };
 
   // Mettre à jour l'heure d'une session
@@ -242,43 +284,53 @@ export default function AvailabilitySheet({
   ) => {
     const manager = getManagerForDay(dayOfWeek);
     manager.handleUpdateTimeSlot(sessionId, field, value);
-
-    // Sauvegarder si les deux heures sont remplies
-    const slot = manager.timeSlots.find((s) => s.id === sessionId);
-    if (slot && slot.startTime && slot.endTime) {
-      setTimeout(() => {
-        manager.handleSaveToServer();
-      }, 100);
-    }
+    setHasUnsavedChanges(true);
   };
 
-  // Sauvegarder la période de disponibilité
-  const handleSaveAvailabilityPeriod = async () => {
-    if (!availabilityPeriod.startDate || !availabilityPeriod.endDate) {
-      console.error("Les deux dates doivent être renseignées");
-      return;
-    }
-
+  // Sauvegarder toutes les modifications (période + créneaux)
+  const handleSaveAll = async () => {
     try {
-      await updateProExpertMutation.mutateAsync({
-        availability_start_date: availabilityPeriod.startDate
-          .toISOString()
-          .split("T")[0],
-        availability_end_date: availabilityPeriod.endDate
-          .toISOString()
-          .split("T")[0],
-      });
+      setIsSaving(true);
+
+      // 1. Sauvegarder la période de disponibilité (seulement si les dates sont remplies)
+      if (availabilityPeriod.startDate && availabilityPeriod.endDate) {
+        await updateProExpertMutation.mutateAsync({
+          availability_start_date: availabilityPeriod.startDate
+            .toISOString()
+            .split("T")[0],
+          availability_end_date: availabilityPeriod.endDate
+            .toISOString()
+            .split("T")[0],
+        });
+
+        setAvailabilityPeriod({
+          ...availabilityPeriod,
+          displayText: calculatePeriodText(
+            availabilityPeriod.startDate,
+            availabilityPeriod.endDate
+          ),
+        });
+      }
+
+      // 2. Sauvegarder tous les créneaux horaires en UN SEUL appel
+      // Collecter tous les schedules de tous les jours depuis le store
+      if (proExpertData?.schedules) {
+        console.log("💾 Sauvegarde de tous les schedules en un seul appel");
+        
+        // Utiliser le premier manager pour accéder à handleSaveToServer
+        // qui va sauvegarder TOUS les schedules du store
+        await sundayManager.handleSaveToServer();
+      }
 
       setIsEditingPeriod(false);
-      setAvailabilityPeriod({
-        ...availabilityPeriod,
-        displayText: calculatePeriodText(
-          availabilityPeriod.startDate,
-          availabilityPeriod.endDate
-        ),
-      });
+      setHasUnsavedChanges(false);
+      
+      // Fermer le sheet après sauvegarde réussie
+      onClose();
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde de la période:", error);
+      console.error("Erreur lors de la sauvegarde:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -347,46 +399,73 @@ export default function AvailabilitySheet({
                           variant="ghost"
                           size="icon"
                           className="text-green-600 hover:text-green-700 border-none cursor-pointer"
-                          onClick={handleSaveAvailabilityPeriod}
-                          disabled={updateProExpertMutation.isPending}
+                          onClick={() => {
+                            setIsEditingPeriod(false);
+                            setHasUnsavedChanges(true);
+                          }}
                         >
-                          {updateProExpertMutation.isPending ? (
-                            <div className="h-5 w-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Check className="h-5 w-5" />
-                          )}
+                          <Check className="h-5 w-5" />
                         </Button>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 -mt-4.5">
-                        <DatePicker
-                          selectedDate={availabilityPeriod.startDate}
-                          onDateSelect={(date) =>
-                            setAvailabilityPeriod((prev) => ({
-                              ...prev,
-                              startDate: date,
-                            }))
-                          }
-                          label={t("availabilitySheet.startDate")}
-                          disabled={(date) => date < new Date()}
-                        />
+                      <div className="-mt-4.5">
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          {t("availabilitySheet.selectPeriod")}
+                        </label>
+                        <Select
+                          value={selectedMonths}
+                          onValueChange={(value) => {
+                            setSelectedMonths(value);
+                            const { startDate, endDate } =
+                              calculatePeriodDates(value);
+                            setAvailabilityPeriod({
+                              startDate,
+                              endDate,
+                              displayText: `${value} mois`,
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="w-full bg-white border-gray-300 rounded-xl">
+                            <SelectValue placeholder="Sélectionner une période" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-none">
+                            {periodOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className="hover:bg-gray-50 border-b border-[#E2E8F0]"
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
-                        <DatePicker
-                          selectedDate={availabilityPeriod.endDate}
-                          onDateSelect={(date) =>
-                            setAvailabilityPeriod((prev) => ({
-                              ...prev,
-                              endDate: date,
-                            }))
-                          }
-                          label={t("availabilitySheet.endDate")}
-                          disabled={(date) =>
-                            date < new Date() ||
-                            (availabilityPeriod.startDate
-                              ? date <= availabilityPeriod.startDate
-                              : false)
-                          }
-                        />
+                        {/* Affichage des dates calculées */}
+                        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                          <div className="text-sm text-gray-600">
+                            <div className="flex justify-between mb-1">
+                              <span className="font-medium">
+                                {t("availabilitySheet.startDate")}:
+                              </span>
+                              <span>
+                                {availabilityPeriod.startDate?.toLocaleDateString(
+                                  "fr-FR"
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="font-medium">
+                                {t("availabilitySheet.endDate")}:
+                              </span>
+                              <span>
+                                {availabilityPeriod.endDate?.toLocaleDateString(
+                                  "fr-FR"
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -594,6 +673,24 @@ export default function AvailabilitySheet({
                 })}
               </div>
             </div>
+          </div>
+
+          {/* Bouton Enregistrer fixe en bas */}
+          <div className="sticky bottom-0 left-0 right-0 p-6 bg-white border-t border-gray-200">
+            <Button
+              onClick={handleSaveAll}
+              disabled={isSaving}
+              className="w-full h-12 bg-exford-blue hover:bg-exford-blue/90 text-white font-semibold rounded-lg cursor-pointer"
+            >
+              {isSaving ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {t("availabilitySheet.saving")}
+                </div>
+              ) : (
+                t("availabilitySheet.save")
+              )}
+            </Button>
           </div>
         </SheetContent>
       </Sheet>

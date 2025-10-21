@@ -101,11 +101,11 @@ export default function BankAccountSection({
                     </div>
                   </div>
                 </div>
-                <Button
+                {/* <Button
                   label={t("bankAccount.modify")}
                   onClick={onModifyBankAccount}
                   className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 bg-transparent text-sm pb-6"
-                />
+                /> */}
               </>
             )}
           </div>

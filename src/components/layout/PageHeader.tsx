@@ -61,20 +61,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    try {
-      const unreadNotifications =
-        notifications?.filter((n) => n.read_at === null) || [];
-      await Promise.all(
-        unreadNotifications.map((notification) =>
-          markNotificationAsRead(notification.id)
-        )
-      );
-    } catch (error) {
-      console.error(t("pageHeader.notificationError"), error);
-    }
-  };
-
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -174,7 +160,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                               .includes("message") ? (
                             <span className="text-lg">💬</span>
                           ) : (
-                            <span className="text-lg">🔔</span>
+                            <span className="text-lg">
+                              <Image
+                                src="/assets/icons/notif.svg"
+                                alt="notifications"
+                                width={24}
+                                height={24}
+                              />
+                            </span>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -198,7 +191,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                   ))
                 ) : (
                   <div className="p-6 text-center text-gray-500">
-                    <span className="text-2xl mb-2 block">🔔</span>
+                    <span className="text-2xl mb-2 flex justify-center items-center">
+                      <Image
+                        src="/assets/icons/notif.svg"
+                        alt="notifications"
+                        width={24}
+                        height={24}
+                      />
+                    </span>
                     <p className="text-sm">Aucune notification</p>
                   </div>
                 )}

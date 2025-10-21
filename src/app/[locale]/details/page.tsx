@@ -26,9 +26,9 @@ import { Expert, useSearchExperts } from "@/api/listExpert/useListExpert";
 import { useGetProExpertById } from "@/api/proExpert/useProExpert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
+import { useAddToCalendar } from "@/hooks/useAddToCalendar";
 import { useDetailsLogic } from "@/hooks/useDetailsLogic";
 import { useUserStore } from "@/store/useUser";
-import { addToCalendar } from "@/utils/calendar";
 import { useLocale, useTranslations } from "next-intl";
 
 // Type definitions based on actual API response
@@ -153,6 +153,7 @@ function ProfessionalDetailContent() {
   const searchParams = useSearchParams();
   const { isPaid } = usePayStore();
   const { isPlaning } = usePlaningStore();
+  const { handleAddToCalendar } = useAddToCalendar();
 
   // Récupérer l'ID depuis les paramètres de recherche
   const expertId = searchParams.get("id");
@@ -534,60 +535,7 @@ function ProfessionalDetailContent() {
                   label={t("expertDetails.addToCalendar")}
                   className="mt-6 h-[56px] w-[90%] mx-auto text-base text-exford-blue font-bold bg-white hover:bg-white/20 border border-light-blue-gray shadow-none"
                   icon="/assets/icons/calendar.svg"
-                  onClick={() => {
-                    console.log("🗓️ Clic sur Ajouter au calendrier");
-                    console.log("📅 Appointments:", appointments);
-
-                    const appointment = appointments?.[0];
-                    console.log("📅 Premier appointment:", appointment);
-
-                    if (appointment?.appointment_at) {
-                      console.log(
-                        "📅 appointment_at:",
-                        appointment.appointment_at
-                      );
-
-                      // Créer la date de début à partir de appointment_at
-                      const startDate = new Date(appointment.appointment_at);
-                      console.log("📅 Start date:", startDate);
-
-                      // Créer la date de fin (60 minutes après)
-                      const endDate = new Date(startDate);
-                      endDate.setMinutes(endDate.getMinutes() + 60);
-                      console.log("📅 End date:", endDate);
-
-                      const professionalName =
-                        `${appointment.pro?.first_name || ""} ${
-                          appointment.pro?.last_name || ""
-                        }`.trim() || t("sessionDetail.expert");
-                      console.log("📅 Professional name:", professionalName);
-
-                      const consultationWith = t(
-                        "sessionDetail.consultationWith"
-                      );
-                      const videoConsultation = t(
-                        "sessionDetail.videoConsultation"
-                      );
-                      const expert = t("sessionDetail.expert");
-
-                      const eventData = {
-                        title: `${consultationWith} ${professionalName}`,
-                        description: `${videoConsultation} ${professionalName} - ${
-                          appointment.pro?.job || expert
-                        }`,
-                        location: "Visioconférence Sapiow",
-                        startDate,
-                        endDate,
-                        professionalName,
-                      };
-                      console.log("📅 Event data:", eventData);
-
-                      addToCalendar(eventData);
-                      console.log("✅ Fonction addToCalendar appelée");
-                    } else {
-                      console.error("❌ Pas de appointment_at trouvé");
-                    }
-                  }}
+                  onClick={() => handleAddToCalendar(appointments?.[0])}
                 />
               </aside>
             ) : (
@@ -671,60 +619,7 @@ function ProfessionalDetailContent() {
                 label={t("expertDetails.addToCalendar")}
                 className="w-full h-[48px] text-base text-exford-blue font-bold bg-white hover:bg-white/20 border border-light-blue-gray shadow-none font-figtree"
                 icon="/assets/icons/calendar.svg"
-                onClick={() => {
-                  console.log("🗓️ Clic sur Ajouter au calendrier");
-                  console.log("📅 Appointments:", appointments);
-
-                  const appointment = appointments?.[0];
-                  console.log("📅 Premier appointment:", appointment);
-
-                  if (appointment?.appointment_at) {
-                    console.log(
-                      "📅 appointment_at:",
-                      appointment.appointment_at
-                    );
-
-                    // Créer la date de début à partir de appointment_at
-                    const startDate = new Date(appointment.appointment_at);
-                    console.log("📅 Start date:", startDate);
-
-                    // Créer la date de fin (60 minutes après)
-                    const endDate = new Date(startDate);
-                    endDate.setMinutes(endDate.getMinutes() + 60);
-                    console.log("📅 End date:", endDate);
-
-                    const professionalName =
-                      `${appointment.pro?.first_name || ""} ${
-                        appointment.pro?.last_name || ""
-                      }`.trim() || t("sessionDetail.expert");
-                    console.log("📅 Professional name:", professionalName);
-
-                    const consultationWith = t(
-                      "sessionDetail.consultationWith"
-                    );
-                    const videoConsultation = t(
-                      "sessionDetail.videoConsultation"
-                    );
-                    const expert = t("sessionDetail.expert");
-
-                    const eventData = {
-                      title: `${consultationWith} ${professionalName}`,
-                      description: `${videoConsultation} ${professionalName} - ${
-                        appointment.pro?.job || expert
-                      }`,
-                      location: "Visioconférence Sapiow",
-                      startDate,
-                      endDate,
-                      professionalName,
-                    };
-                    console.log("📅 Event data:", eventData);
-
-                    addToCalendar(eventData);
-                    console.log("✅ Fonction addToCalendar appelée");
-                  } else {
-                    console.error("❌ Pas de appointment_at trouvé");
-                  }
-                }}
+                onClick={() => handleAddToCalendar(appointments?.[0])}
               />
             </div>
           </div>

@@ -1,14 +1,17 @@
 import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { useProExpertStore } from "@/store/useProExpert";
 import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
+import { getDayOfWeekFromDate } from "@/types/schedule";
 import { useEffect, useRef, useState } from "react";
 
 interface UseTimeSlotsManagerProps {
   selectedDate: Date | null;
+  autoSave?: boolean; // Par défaut true pour compatibilité avec les usages existants
 }
 
 export const useTimeSlotsManager = ({
   selectedDate,
+  autoSave = true, // Par défaut true pour ne pas casser les usages existants
 }: UseTimeSlotsManagerProps) => {
   const [timeSlots, setTimeSlots] = useState<any[]>([]);
 
@@ -32,15 +35,16 @@ export const useTimeSlotsManager = ({
   const updateProExpertMutation = useUpdateProExpert();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Générer les options d'heures (de 8h00 à 20h00 par tranches de 30 minutes)
+  // Générer les options d'heures (de 00h00 à 23h30 par tranches de 30 minutes)
   const generateTimeOptions = () => {
     const times = [];
-    for (let hour = 8; hour <= 20; hour++) {
+    for (let hour = 0; hour <= 23; hour++) {
       times.push(`${hour}h00`);
-      if (hour < 20) {
+      if (hour < 23) {
         times.push(`${hour}h30`);
       }
     }
+    times.push("23h30"); // Ajouter le dernier créneau
     return times;
   };
 
@@ -89,7 +93,36 @@ export const useTimeSlotsManager = ({
   const handleRemoveTimeSlot = async (slotId: string) => {
     if (!selectedDate || !proExpertData?.schedules) return;
 
+    // Si autoSave est désactivé, supprimer localement uniquement
+    if (!autoSave) {
+      console.log("⏸️ Suppression locale uniquement (autoSave désactivé)");
+      const dayOfWeek = getDayOfWeekFromDate(selectedDate);
+      const currentTimeSlots = getTimeSlotsForDate(proExpertData.schedules, selectedDate);
+      const updatedTimeSlots = currentTimeSlots.filter((slot) => slot.id !== slotId);
+
+      // Convertir vers le format API
+      const { convertTimeSlotsToApiSchedules } = await import("@/types/schedule");
+      const dayApiSchedules = convertTimeSlotsToApiSchedules(updatedTimeSlots, dayOfWeek);
+
+      // Récupérer les schedules existants et filtrer les autres jours
+      const otherDaysSchedules = proExpertData.schedules.filter(
+        (s: any) => s.day_of_week !== dayOfWeek
+      );
+
+      // Combiner avec les nouveaux schedules
+      const allSchedules = [...otherDaysSchedules, ...dayApiSchedules];
+
+      // Mettre à jour le store principal localement
+      setProExpertData({
+        ...proExpertData,
+        schedules: allSchedules,
+      });
+      return;
+    }
+
+    // Si autoSave est activé, supprimer et sauvegarder immédiatement
     try {
+      console.log("💾 Suppression avec sauvegarde automatique");
       const updatedSchedules = await removeTimeSlot(
         proExpertData.schedules,
         selectedDate,
@@ -118,6 +151,20 @@ export const useTimeSlotsManager = ({
   ) => {
     if (!selectedDate || !proExpertData?.schedules) return;
 
+    // Récupérer le créneau AVANT modification pour détecter les changements
+    // IMPORTANT: Utiliser timeSlots (état local) au lieu de proExpertData.schedules
+    const currentSlot = timeSlots.find((slot) => slot.id === slotId);
+    const wasComplete =
+      currentSlot && currentSlot.startTime && currentSlot.endTime;
+
+    console.log("🔄 Mise à jour du créneau:", {
+      slotId,
+      field,
+      oldValue: currentSlot?.[field],
+      newValue: value,
+      wasComplete,
+    });
+
     const updatedSchedules = updateTimeSlotLocal(
       proExpertData.schedules,
       selectedDate,
@@ -131,6 +178,36 @@ export const useTimeSlotsManager = ({
       ...proExpertData,
       schedules: updatedSchedules,
     });
+
+    // Vérifier si le créneau est maintenant complet (les deux champs remplis)
+    const updatedTimeSlots = getTimeSlotsForDate(
+      updatedSchedules,
+      selectedDate
+    );
+    const updatedSlot = updatedTimeSlots.find((slot) => slot.id === slotId);
+    const isNowComplete =
+      updatedSlot && updatedSlot.startTime && updatedSlot.endTime;
+
+    // Vérifier que startTime < endTime (validation de cohérence)
+    const isValid =
+      isNowComplete &&
+      timeToNumber(updatedSlot.startTime) < timeToNumber(updatedSlot.endTime);
+
+    console.log("✅ État après mise à jour:", {
+      isNowComplete,
+      isValid,
+      startTime: updatedSlot?.startTime,
+      endTime: updatedSlot?.endTime,
+      autoSave,
+    });
+
+    // Sauvegarder automatiquement seulement si autoSave est activé
+    if (isValid && autoSave) {
+      console.log("💾 Sauvegarde automatique activée");
+      handleSaveToServerWithSchedules(updatedSchedules);
+    } else if (isValid && !autoSave) {
+      console.log("⏸️ Sauvegarde automatique désactivée - changements en local uniquement");
+    }
   };
 
   // Ajouter un nouveau créneau localement
@@ -147,30 +224,46 @@ export const useTimeSlotsManager = ({
   };
 
   // Sauvegarder sur le serveur avec debouncing pour éviter les doublons
-  const handleSaveToServer = async () => {
-    if (!proExpertData?.schedules) return;
+  const handleSaveToServerWithSchedules = async (schedulesToSave: any[]) => {
+    if (!schedulesToSave) return;
 
     // Annuler le timeout précédent s'il existe
     if (saveTimeoutRef.current) {
+      console.log("⏱️ Annulation du timeout précédent");
       clearTimeout(saveTimeoutRef.current);
     }
 
-    // Programmer la sauvegarde avec un délai
+    console.log("⏳ Programmation de la sauvegarde dans 300ms...");
+
+    // Programmer la sauvegarde avec un délai réduit
     saveTimeoutRef.current = setTimeout(async () => {
       try {
+        console.log("🚀 Début de la sauvegarde des schedules...");
+        console.log("📋 Schedules à sauvegarder:", schedulesToSave);
+
         await saveSchedulesToServer(
-          proExpertData.schedules || [],
+          schedulesToSave,
           async (updateData: any) => {
+            console.log("📤 Envoi au backend:", updateData);
             const result = await updateProExpertMutation.mutateAsync(
               updateData
             );
+            console.log("✅ Réponse du backend:", result);
             return result.data;
           }
         );
+
+        console.log("✅ Sauvegarde terminée avec succès");
       } catch (error) {
-        console.error("Error saving to server:", error);
+        console.error("❌ Error saving to server:", error);
       }
-    }, 500); // Attendre 500ms avant de sauvegarder
+    }, 300); // Réduit à 300ms pour une meilleure réactivité
+  };
+
+  // Wrapper pour la compatibilité (utilise les schedules du store)
+  const handleSaveToServer = async () => {
+    if (!proExpertData?.schedules) return;
+    await handleSaveToServerWithSchedules(proExpertData.schedules);
   };
 
   // Nettoyer le timeout au démontage du composant

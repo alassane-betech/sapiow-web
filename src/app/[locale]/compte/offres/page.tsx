@@ -7,9 +7,10 @@ import {
 import { SessionCreate, useUpdateProSession } from "@/api/sessions/useSessions";
 import AddAccompanimentModal from "@/components/common/AddAccompanimentModal";
 import { Button } from "@/components/common/Button";
+import SessionFeaturesList from "@/components/common/SessionFeaturesList";
 import VisioSessionsConfig from "@/components/common/VisioSessionsConfig";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronRight, Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import AccountLayout from "../AccountLayout";
@@ -25,41 +26,6 @@ interface SessionData extends SessionCreate {
   // SessionData hérite de SessionCreate du hook API
 }
 
-// Mapping des fonctionnalités depuis l'API vers les labels affichés
-const getFeatureLabel = (featureKey: string, t: any): string => {
-  const featureMap: Record<string, string> = {
-    one_on_one: t("offers.oneOnOne"),
-    video_call: t("offers.videoCall"),
-    strategic_session: t("offers.strategicSession"),
-    exclusive_ressources: t("offers.exclusiveResources"),
-    support: t("offers.support"),
-    mentorship: t("offers.mentorship"),
-    webinar: t("offers.webinar"),
-  };
-  return featureMap[featureKey] || featureKey;
-};
-
-// Extraire les fonctionnalités actives d'une session
-const getSessionFeatures = (session: ProExpertSession, t: any): string[] => {
-  const features: string[] = [];
-  const featureKeys = [
-    "one_on_one",
-    "video_call",
-    "strategic_session",
-    "exclusive_ressources",
-    "support",
-    "mentorship",
-    "webinar",
-  ];
-
-  featureKeys.forEach((key) => {
-    if (session[key as keyof ProExpertSession]) {
-      features.push(getFeatureLabel(key, t));
-    }
-  });
-
-  return features;
-};
 
 export default function OffresPage() {
   const t = useTranslations();
@@ -189,6 +155,9 @@ export default function OffresPage() {
   };
 
   const handleAddOffer = () => {
+    // Réinitialiser les états pour s'assurer que le modal est vide
+    setIsEditMode(false);
+    setEditingSession(undefined);
     setIsAddModalOpen(true);
   };
 
@@ -203,6 +172,24 @@ export default function OffresPage() {
     // Invalider le cache pour forcer le rechargement des données
     queryClient.invalidateQueries({ queryKey: ["proExpert"] });
     setIsAddModalOpen(false);
+  };
+
+  const handleSessionCreated = async (sessionId: string, sessionData: SessionData) => {
+    console.log("🎉 Session créée, passage en mode édition pour ajouter des features:", sessionId);
+    
+    // Invalider le cache pour récupérer la session créée
+    await queryClient.invalidateQueries({ queryKey: ["proExpert"] });
+    
+    // Récupérer les données fraîches
+    const freshData = queryClient.getQueryData(["proExpert"]) as any;
+    const createdSession = freshData?.sessions?.find((s: any) => s.id === sessionId);
+    
+    if (createdSession) {
+      // Passer en mode édition avec la session créée
+      setEditingSession(createdSession);
+      setIsEditMode(true);
+      // Le modal reste ouvert
+    }
   };
 
   return (
@@ -288,7 +275,7 @@ export default function OffresPage() {
 
                     {/* Contenu spécifique selon l'offre sélectionnée */}
                     {selectedOffer === "accompagnement-mensuel" && (
-                      <div className="w-full space-y-6 overflow-y-auto max-h-[calc(100vh-100px)] bg-red-700">
+                      <div className="w-full space-y-6 overflow-y-auto max-h-[calc(100vh-100px)] pb-[280px]">
                         {subscriptionSessions.length > 0 ? (
                           // Affichage de toutes les sessions d'accompagnement
                           <div className="space-y-4">
@@ -310,23 +297,7 @@ export default function OffresPage() {
                                 </h6>
 
                                 {/* Liste des caractéristiques */}
-                                <div className="space-y-3 mb-8 font-figtree">
-                                  {getSessionFeatures(session, t).map(
-                                    (feature: string, featureIndex: number) => (
-                                      <div
-                                        key={`${session.id}-feature-${featureIndex}`}
-                                        className="flex items-start gap-3"
-                                      >
-                                        <div className="relative w-4 h-4 bg-[#6B7280] rounded-full mt-2 flex-shrink-0">
-                                          <Check className="w-3 h-3 text-white font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                                        </div>
-                                        <p className="text-base text-[#1E293B] leading-relaxed font-figtree">
-                                          {feature}
-                                        </p>
-                                      </div>
-                                    )
-                                  )}
-                                </div>
+                                <SessionFeaturesList sessionId={session.id} />
 
                                 {/* Prix */}
                                 <div className="text-xl xl:text-3xl font-bold text-gray-900 mb-6 font-figtree">
@@ -382,23 +353,25 @@ export default function OffresPage() {
                           </div>
                         )}
 
-                        {/* Bouton Ajouter une offre (toujours visible) */}
-                        <div className="flex justify-center border border-light-blue-gray rounded-[8px]">
-                          <button
-                            onClick={handleAddOffer}
-                            className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-figtree cursor-pointer"
-                          >
-                            <Plus className="w-4 h-4" />
-                            {t("offers.addOffer")}
-                          </button>
-                        </div>
+                        {/* Bouton Ajouter une offre (visible uniquement si au moins 1 offre existe) */}
+                        {subscriptionSessions.length >= 1 && (
+                          <div className="flex justify-center border border-light-blue-gray rounded-[8px]">
+                            <button
+                              onClick={handleAddOffer}
+                              className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-figtree cursor-pointer"
+                            >
+                              <Plus className="w-4 h-4" />
+                              {t("offers.addOffer")}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
                     {/* Configuration des Sessions visio - Toujours visible */}
                     {selectedOffer === "sessions-visio" && (
                       <div className="w-full space-y-6 overflow-y-auto max-h-[calc(100vh-150px)]">
-                        <div className="bg-white p-6">
+                        <div className="bg-white p-0 pb-[280px]">
                           <VisioSessionsConfig />
                         </div>
                       </div>
@@ -440,7 +413,7 @@ export default function OffresPage() {
 
                 {/* Panneau détails */}
                 <div
-                  className="w-full max-w-[412px] overflow-y-auto h-[calc(100vh-200px)]"
+                  className="w-full max-w-[412px] xl:max-w-[512px] overflow-y-auto h-[calc(100vh-200px)]"
                   style={{ maxHeight: "calc(100vh - 100px)" }}
                 >
                   {!selectedOffer && (
@@ -450,7 +423,7 @@ export default function OffresPage() {
                       </p>
                     </div>
                   )}
-                  <div className="justify-center gap-2 w-full max-w-[412px] font-figtree mt-4 flex ">
+                  <div className="justify-center gap-2 w-full font-figtree flex">
                     {selectedOffer === "accompagnement-mensuel" && (
                       <div className="w-full space-y-6">
                         {subscriptionSessions.length > 0 ? (
@@ -474,23 +447,7 @@ export default function OffresPage() {
                                 </h6>
 
                                 {/* Liste des caractéristiques */}
-                                <div className="space-y-3 mb-8 font-figtree">
-                                  {getSessionFeatures(session, t).map(
-                                    (feature: string, featureIndex: number) => (
-                                      <div
-                                        key={`${session.id}-feature-${featureIndex}`}
-                                        className="flex items-start gap-3"
-                                      >
-                                        <div className="relative w-4 h-4 bg-[#6B7280] rounded-full mt-2 flex-shrink-0">
-                                          <Check className="w-3 h-3 text-white font-bold absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                                        </div>
-                                        <p className="text-base text-[#1E293B] leading-relaxed font-figtree">
-                                          {feature}
-                                        </p>
-                                      </div>
-                                    )
-                                  )}
-                                </div>
+                                <SessionFeaturesList sessionId={session.id} />
 
                                 {/* Prix */}
                                 <div className="text-xl xl:text-3xl font-bold text-gray-900 mb-6 font-figtree">
@@ -546,23 +503,25 @@ export default function OffresPage() {
                           </div>
                         )}
 
-                        {/* Bouton Ajouter une offre (toujours visible) */}
-                        <div className="flex justify-center border border-light-blue-gray rounded-[8px]">
-                          <button
-                            onClick={handleAddOffer}
-                            className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-figtree cursor-pointer"
-                          >
-                            <Plus className="w-4 h-4" />
-                            {t("offers.addOffer")}
-                          </button>
-                        </div>
+                        {/* Bouton Ajouter une offre (visible uniquement si au moins 1 offre existe) */}
+                        {subscriptionSessions.length >= 1 && (
+                          <div className="flex justify-center border border-light-blue-gray rounded-[8px]">
+                            <button
+                              onClick={handleAddOffer}
+                              className="flex items-center justify-center h-[56px] gap-2 text-base text-exford-blue font-bold font-figtree cursor-pointer"
+                            >
+                              <Plus className="w-4 h-4" />
+                              {t("offers.addOffer")}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
                     {/* Configuration des Sessions visio - Toujours visible */}
                     {selectedOffer === "sessions-visio" && (
                       <div className="w-full space-y-6">
-                        <div className="bg-white p-6">
+                        <div className="bg-white p-6 pt-0 pb-[280px]">
                           <VisioSessionsConfig />
                         </div>
                       </div>
@@ -580,6 +539,7 @@ export default function OffresPage() {
         isOpen={isAddModalOpen}
         onClose={handleCloseModal}
         onSuccess={handleAddSuccess}
+        onSessionCreated={handleSessionCreated}
         editData={editingSession}
         isEditMode={isEditMode}
       />
