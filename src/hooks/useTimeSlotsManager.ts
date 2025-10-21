@@ -1,14 +1,17 @@
 import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { useProExpertStore } from "@/store/useProExpert";
 import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
+import { getDayOfWeekFromDate } from "@/types/schedule";
 import { useEffect, useRef, useState } from "react";
 
 interface UseTimeSlotsManagerProps {
   selectedDate: Date | null;
+  autoSave?: boolean; // Par défaut true pour compatibilité avec les usages existants
 }
 
 export const useTimeSlotsManager = ({
   selectedDate,
+  autoSave = true, // Par défaut true pour ne pas casser les usages existants
 }: UseTimeSlotsManagerProps) => {
   const [timeSlots, setTimeSlots] = useState<any[]>([]);
 
@@ -90,7 +93,36 @@ export const useTimeSlotsManager = ({
   const handleRemoveTimeSlot = async (slotId: string) => {
     if (!selectedDate || !proExpertData?.schedules) return;
 
+    // Si autoSave est désactivé, supprimer localement uniquement
+    if (!autoSave) {
+      console.log("⏸️ Suppression locale uniquement (autoSave désactivé)");
+      const dayOfWeek = getDayOfWeekFromDate(selectedDate);
+      const currentTimeSlots = getTimeSlotsForDate(proExpertData.schedules, selectedDate);
+      const updatedTimeSlots = currentTimeSlots.filter((slot) => slot.id !== slotId);
+
+      // Convertir vers le format API
+      const { convertTimeSlotsToApiSchedules } = await import("@/types/schedule");
+      const dayApiSchedules = convertTimeSlotsToApiSchedules(updatedTimeSlots, dayOfWeek);
+
+      // Récupérer les schedules existants et filtrer les autres jours
+      const otherDaysSchedules = proExpertData.schedules.filter(
+        (s: any) => s.day_of_week !== dayOfWeek
+      );
+
+      // Combiner avec les nouveaux schedules
+      const allSchedules = [...otherDaysSchedules, ...dayApiSchedules];
+
+      // Mettre à jour le store principal localement
+      setProExpertData({
+        ...proExpertData,
+        schedules: allSchedules,
+      });
+      return;
+    }
+
+    // Si autoSave est activé, supprimer et sauvegarder immédiatement
     try {
+      console.log("💾 Suppression avec sauvegarde automatique");
       const updatedSchedules = await removeTimeSlot(
         proExpertData.schedules,
         selectedDate,
@@ -166,10 +198,15 @@ export const useTimeSlotsManager = ({
       isValid,
       startTime: updatedSlot?.startTime,
       endTime: updatedSlot?.endTime,
+      autoSave,
     });
 
-    if (isValid) {
+    // Sauvegarder automatiquement seulement si autoSave est activé
+    if (isValid && autoSave) {
+      console.log("💾 Sauvegarde automatique activée");
       handleSaveToServerWithSchedules(updatedSchedules);
+    } else if (isValid && !autoSave) {
+      console.log("⏸️ Sauvegarde automatique désactivée - changements en local uniquement");
     }
   };
 

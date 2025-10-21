@@ -106,21 +106,34 @@ export default function AvailabilitySheet({
     };
   }, []);
 
-  // Hooks pour chaque jour de la semaine
-  const sundayManager = useTimeSlotsManager({ selectedDate: weekDates.sunday });
-  const mondayManager = useTimeSlotsManager({ selectedDate: weekDates.monday });
+  // Hooks pour chaque jour de la semaine (autoSave désactivé pour gérer la sauvegarde manuellement)
+  const sundayManager = useTimeSlotsManager({ 
+    selectedDate: weekDates.sunday,
+    autoSave: false 
+  });
+  const mondayManager = useTimeSlotsManager({ 
+    selectedDate: weekDates.monday,
+    autoSave: false 
+  });
   const tuesdayManager = useTimeSlotsManager({
     selectedDate: weekDates.tuesday,
+    autoSave: false,
   });
   const wednesdayManager = useTimeSlotsManager({
     selectedDate: weekDates.wednesday,
+    autoSave: false,
   });
   const thursdayManager = useTimeSlotsManager({
     selectedDate: weekDates.thursday,
+    autoSave: false,
   });
-  const fridayManager = useTimeSlotsManager({ selectedDate: weekDates.friday });
+  const fridayManager = useTimeSlotsManager({ 
+    selectedDate: weekDates.friday,
+    autoSave: false 
+  });
   const saturdayManager = useTimeSlotsManager({
     selectedDate: weekDates.saturday,
+    autoSave: false,
   });
 
   // Mapper les managers par jour
@@ -136,6 +149,8 @@ export default function AvailabilitySheet({
 
   const [isEditingPeriod, setIsEditingPeriod] = useState(false);
   const [selectedMonths, setSelectedMonths] = useState<string>("3");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Options de périodes disponibles
   const periodOptions = [
@@ -240,12 +255,14 @@ export default function AvailabilitySheet({
       // Si le jour n'est pas disponible, ajouter un créneau par défaut
       manager.handleAddTimeSlot();
     }
+    setHasUnsavedChanges(true);
   };
 
   // Ajouter une session à un jour
   const addSession = (dayOfWeek: DayAvailability["dayOfWeek"]) => {
     const manager = getManagerForDay(dayOfWeek);
     manager.handleAddTimeSlot();
+    setHasUnsavedChanges(true);
   };
 
   // Supprimer une session
@@ -255,6 +272,7 @@ export default function AvailabilitySheet({
   ) => {
     const manager = getManagerForDay(dayOfWeek);
     manager.handleRemoveTimeSlot(sessionId);
+    setHasUnsavedChanges(true);
   };
 
   // Mettre à jour l'heure d'une session
@@ -266,43 +284,53 @@ export default function AvailabilitySheet({
   ) => {
     const manager = getManagerForDay(dayOfWeek);
     manager.handleUpdateTimeSlot(sessionId, field, value);
-
-    // Sauvegarder si les deux heures sont remplies
-    const slot = manager.timeSlots.find((s) => s.id === sessionId);
-    if (slot && slot.startTime && slot.endTime) {
-      setTimeout(() => {
-        manager.handleSaveToServer();
-      }, 100);
-    }
+    setHasUnsavedChanges(true);
   };
 
-  // Sauvegarder la période de disponibilité
-  const handleSaveAvailabilityPeriod = async () => {
-    if (!availabilityPeriod.startDate || !availabilityPeriod.endDate) {
-      console.error("Les deux dates doivent être renseignées");
-      return;
-    }
-
+  // Sauvegarder toutes les modifications (période + créneaux)
+  const handleSaveAll = async () => {
     try {
-      await updateProExpertMutation.mutateAsync({
-        availability_start_date: availabilityPeriod.startDate
-          .toISOString()
-          .split("T")[0],
-        availability_end_date: availabilityPeriod.endDate
-          .toISOString()
-          .split("T")[0],
-      });
+      setIsSaving(true);
+
+      // 1. Sauvegarder la période de disponibilité (seulement si les dates sont remplies)
+      if (availabilityPeriod.startDate && availabilityPeriod.endDate) {
+        await updateProExpertMutation.mutateAsync({
+          availability_start_date: availabilityPeriod.startDate
+            .toISOString()
+            .split("T")[0],
+          availability_end_date: availabilityPeriod.endDate
+            .toISOString()
+            .split("T")[0],
+        });
+
+        setAvailabilityPeriod({
+          ...availabilityPeriod,
+          displayText: calculatePeriodText(
+            availabilityPeriod.startDate,
+            availabilityPeriod.endDate
+          ),
+        });
+      }
+
+      // 2. Sauvegarder tous les créneaux horaires en UN SEUL appel
+      // Collecter tous les schedules de tous les jours depuis le store
+      if (proExpertData?.schedules) {
+        console.log("💾 Sauvegarde de tous les schedules en un seul appel");
+        
+        // Utiliser le premier manager pour accéder à handleSaveToServer
+        // qui va sauvegarder TOUS les schedules du store
+        await sundayManager.handleSaveToServer();
+      }
 
       setIsEditingPeriod(false);
-      setAvailabilityPeriod({
-        ...availabilityPeriod,
-        displayText: calculatePeriodText(
-          availabilityPeriod.startDate,
-          availabilityPeriod.endDate
-        ),
-      });
+      setHasUnsavedChanges(false);
+      
+      // Fermer le sheet après sauvegarde réussie
+      onClose();
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde de la période:", error);
+      console.error("Erreur lors de la sauvegarde:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -371,14 +399,12 @@ export default function AvailabilitySheet({
                           variant="ghost"
                           size="icon"
                           className="text-green-600 hover:text-green-700 border-none cursor-pointer"
-                          onClick={handleSaveAvailabilityPeriod}
-                          disabled={updateProExpertMutation.isPending}
+                          onClick={() => {
+                            setIsEditingPeriod(false);
+                            setHasUnsavedChanges(true);
+                          }}
                         >
-                          {updateProExpertMutation.isPending ? (
-                            <div className="h-5 w-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Check className="h-5 w-5" />
-                          )}
+                          <Check className="h-5 w-5" />
                         </Button>
                       </div>
 
@@ -647,6 +673,24 @@ export default function AvailabilitySheet({
                 })}
               </div>
             </div>
+          </div>
+
+          {/* Bouton Enregistrer fixe en bas */}
+          <div className="sticky bottom-0 left-0 right-0 p-6 bg-white border-t border-gray-200">
+            <Button
+              onClick={handleSaveAll}
+              disabled={isSaving}
+              className="w-full h-12 bg-exford-blue hover:bg-exford-blue/90 text-white font-semibold rounded-lg cursor-pointer"
+            >
+              {isSaving ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {t("availabilitySheet.saving")}
+                </div>
+              ) : (
+                t("availabilitySheet.save")
+              )}
+            </Button>
           </div>
         </SheetContent>
       </Sheet>

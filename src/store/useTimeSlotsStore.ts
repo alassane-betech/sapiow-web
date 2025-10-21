@@ -98,25 +98,32 @@ export const useTimeSlotsStore = create<TimeSlotsStore>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // Filtrer les créneaux vides ou invalides avant l'envoi au serveur
-      const validSchedules = (schedules as ApiSchedule[]).filter((schedule) => {
-        const hasStartTime =
-          schedule.start_time && schedule.start_time.trim() !== "";
-        const hasEndTime = schedule.end_time && schedule.end_time.trim() !== "";
-        const isNotNaN =
-          !schedule.start_time.includes("NaN") &&
-          !schedule.end_time.includes("NaN");
+      const validSchedules = (schedules as ApiSchedule[])
+        .filter((schedule) => {
+          const hasStartTime =
+            schedule.start_time && schedule.start_time.trim() !== "";
+          const hasEndTime = schedule.end_time && schedule.end_time.trim() !== "";
+          const isNotNaN =
+            !schedule.start_time.includes("NaN") &&
+            !schedule.end_time.includes("NaN");
 
-        return hasStartTime && hasEndTime && isNotNaN;
-      });
+          return hasStartTime && hasEndTime && isNotNaN;
+        })
+        .map((schedule) => {
+          // Nettoyer les métadonnées pour éviter les conflits de clés
+          // Le backend va recréer tous les schedules avec de nouveaux IDs
+          const { id, pro_id, created_at, updated_at, ...cleanSchedule } = schedule;
+          return cleanSchedule;
+        });
 
-      console.log("📤 Schedules envoyés au backend:", validSchedules);
+      console.log("📤 Schedules nettoyés envoyés au backend:", validSchedules);
 
-      // Sauvegarder via l'API (seulement les créneaux valides)
+      // Sauvegarder via l'API (seulement les créneaux valides et nettoyés)
       const result = await updateFunction({ schedules: validSchedules });
 
       console.log("📥 Résultat du backend:", result);
 
-      // Retourner les schedules du backend (qui contiennent les IDs générés)
+      // Retourner les schedules du backend (qui contiennent les nouveaux IDs générés)
       return result?.schedules || schedules;
     } catch (error) {
       set({ error: "Erreur lors de la sauvegarde" });

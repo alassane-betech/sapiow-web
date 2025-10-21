@@ -1,4 +1,5 @@
 "use client";
+import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useState } from "react";
@@ -12,13 +13,14 @@ export const ShareLinkButton = ({
   className = "",
   linkText,
 }: ShareLinkButtonProps) => {
+  const { data: proExpert } = useGetProExpert();
   const t = useTranslations();
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
     try {
-      // Générer un lien de réservation (à adapter selon votre logique)
-      const bookingLink = `${window.location.origin}/booking/${Date.now()}`;
+      // Générer un lien de réservation vers la page de détails de l'expert
+      const bookingLink = `${window.location.origin}/details?id=${proExpert?.id}`;
 
       await navigator.clipboard.writeText(bookingLink);
       setCopied(true);

@@ -177,6 +177,8 @@ export default {
     addSession: "Add session",
     to: "to",
     noPeriodDefined: "No period defined",
+    save: "Save",
+    saving: "Saving...",
     // Days of the week
     sunday: "Sunday",
     monday: "Monday",

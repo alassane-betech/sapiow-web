@@ -180,6 +180,8 @@ export default {
     addSession: "Ajouter une session",
     to: "à",
     noPeriodDefined: "Aucune période définie",
+    save: "Enregistrer",
+    saving: "Enregistrement...",
     // Days of the week
     sunday: "Dimanche",
     monday: "Lundi",
