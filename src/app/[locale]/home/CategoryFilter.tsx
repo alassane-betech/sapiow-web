@@ -1,8 +1,8 @@
 "use client";
 import { useGetDomaines } from "@/api/domaine/useDomaine";
 import { getDomainIcon } from "@/constants/onboarding";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 
 interface CategoryFilterProps {
   selectedCategory: string;

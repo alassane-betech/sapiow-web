@@ -98,21 +98,22 @@ export const useTimeSlotsStore = create<TimeSlotsStore>((set, get) => ({
       set({ isLoading: true, error: null });
 
       // Filtrer les créneaux vides ou invalides avant l'envoi au serveur
-      const validSchedules = (schedules as ApiSchedule[]).filter(
-        (schedule) => {
-          const hasStartTime = schedule.start_time && schedule.start_time.trim() !== "";
-          const hasEndTime = schedule.end_time && schedule.end_time.trim() !== "";
-          const isNotNaN = !schedule.start_time.includes("NaN") && !schedule.end_time.includes("NaN");
-          
-          return hasStartTime && hasEndTime && isNotNaN;
-        }
-      );
+      const validSchedules = (schedules as ApiSchedule[]).filter((schedule) => {
+        const hasStartTime =
+          schedule.start_time && schedule.start_time.trim() !== "";
+        const hasEndTime = schedule.end_time && schedule.end_time.trim() !== "";
+        const isNotNaN =
+          !schedule.start_time.includes("NaN") &&
+          !schedule.end_time.includes("NaN");
+
+        return hasStartTime && hasEndTime && isNotNaN;
+      });
 
       console.log("📤 Schedules envoyés au backend:", validSchedules);
 
       // Sauvegarder via l'API (seulement les créneaux valides)
       const result = await updateFunction({ schedules: validSchedules });
-      
+
       console.log("📥 Résultat du backend:", result);
 
       // Retourner les schedules du backend (qui contiennent les IDs générés)
@@ -179,7 +180,11 @@ export const useTimeSlotsStore = create<TimeSlotsStore>((set, get) => ({
     value: string
   ): any[] => {
     const dayOfWeek = getDayOfWeekFromDate(date);
+
+    // Récupérer les timeSlots actuels pour ce jour
     const currentTimeSlots = get().getTimeSlotsForDate(schedules, date);
+
+    // Mettre à jour le timeSlot correspondant
     const updatedTimeSlots = currentTimeSlots.map((slot) =>
       slot.id === slotId ? { ...slot, [field]: value } : slot
     );
@@ -192,12 +197,30 @@ export const useTimeSlotsStore = create<TimeSlotsStore>((set, get) => ({
 
     // Récupérer les schedules existants et filtrer les autres jours
     const existingSchedules = (schedules as ApiSchedule[]) || [];
+    const currentDaySchedules = existingSchedules.filter(
+      (s) => s.day_of_week === dayOfWeek
+    );
     const otherDaysSchedules = existingSchedules.filter(
       (s) => s.day_of_week !== dayOfWeek
     );
 
-    // Combiner avec les nouveaux schedules
-    const allSchedules = [...otherDaysSchedules, ...dayApiSchedules];
+    // Préserver les IDs des schedules existants
+    const updatedDaySchedules = dayApiSchedules.map((newSchedule, index) => {
+      const existingSchedule = currentDaySchedules[index];
+      if (existingSchedule?.id) {
+        return {
+          ...newSchedule,
+          id: existingSchedule.id,
+          pro_id: existingSchedule.pro_id,
+          created_at: existingSchedule.created_at,
+          updated_at: existingSchedule.updated_at,
+        };
+      }
+      return newSchedule;
+    });
+
+    // Combiner avec les schedules des autres jours
+    const allSchedules = [...otherDaysSchedules, ...updatedDaySchedules];
 
     return allSchedules;
   },

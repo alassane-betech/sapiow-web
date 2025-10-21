@@ -23,7 +23,6 @@ import { Check, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import DatePicker from "./DatePicker";
 
 interface DayAvailability {
   day: string;
@@ -136,10 +135,37 @@ export default function AvailabilitySheet({
   };
 
   const [isEditingPeriod, setIsEditingPeriod] = useState(false);
-  const [availabilityPeriod, setAvailabilityPeriod] = useState({
-    startDate: undefined as Date | undefined,
-    endDate: undefined as Date | undefined,
-    displayText: t("availabilitySheet.threeMonths"),
+  const [selectedMonths, setSelectedMonths] = useState<string>("3");
+
+  // Options de périodes disponibles
+  const periodOptions = [
+    { value: "3", label: "3 mois" },
+    { value: "6", label: "6 mois" },
+    { value: "9", label: "9 mois" },
+    { value: "12", label: "12 mois" },
+    { value: "24", label: "24 mois" },
+  ];
+
+  // Calculer les dates de début et fin basées sur la période sélectionnée
+  const calculatePeriodDates = (months: string) => {
+    const today = new Date();
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1); // 1er du mois actuel
+    const endDate = new Date(
+      today.getFullYear(),
+      today.getMonth() + parseInt(months),
+      0
+    ); // Dernier jour du mois (30 ou 31)
+
+    return { startDate, endDate };
+  };
+
+  const [availabilityPeriod, setAvailabilityPeriod] = useState(() => {
+    const { startDate, endDate } = calculatePeriodDates("3");
+    return {
+      startDate,
+      endDate,
+      displayText: "3 mois",
+    };
   });
 
   // Calculer la période de disponibilité en mois ou jours
@@ -356,35 +382,64 @@ export default function AvailabilitySheet({
                         </Button>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 -mt-4.5">
-                        <DatePicker
-                          selectedDate={availabilityPeriod.startDate}
-                          onDateSelect={(date) =>
-                            setAvailabilityPeriod((prev) => ({
-                              ...prev,
-                              startDate: date,
-                            }))
-                          }
-                          label={t("availabilitySheet.startDate")}
-                          disabled={(date) => date < new Date()}
-                        />
+                      <div className="-mt-4.5">
+                        <label className="text-sm font-medium text-gray-700 mb-2 block">
+                          {t("availabilitySheet.selectPeriod")}
+                        </label>
+                        <Select
+                          value={selectedMonths}
+                          onValueChange={(value) => {
+                            setSelectedMonths(value);
+                            const { startDate, endDate } =
+                              calculatePeriodDates(value);
+                            setAvailabilityPeriod({
+                              startDate,
+                              endDate,
+                              displayText: `${value} mois`,
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="w-full bg-white border-gray-300 rounded-xl">
+                            <SelectValue placeholder="Sélectionner une période" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-none">
+                            {periodOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className="hover:bg-gray-50 border-b border-[#E2E8F0]"
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
-                        <DatePicker
-                          selectedDate={availabilityPeriod.endDate}
-                          onDateSelect={(date) =>
-                            setAvailabilityPeriod((prev) => ({
-                              ...prev,
-                              endDate: date,
-                            }))
-                          }
-                          label={t("availabilitySheet.endDate")}
-                          disabled={(date) =>
-                            date < new Date() ||
-                            (availabilityPeriod.startDate
-                              ? date <= availabilityPeriod.startDate
-                              : false)
-                          }
-                        />
+                        {/* Affichage des dates calculées */}
+                        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                          <div className="text-sm text-gray-600">
+                            <div className="flex justify-between mb-1">
+                              <span className="font-medium">
+                                {t("availabilitySheet.startDate")}:
+                              </span>
+                              <span>
+                                {availabilityPeriod.startDate?.toLocaleDateString(
+                                  "fr-FR"
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="font-medium">
+                                {t("availabilitySheet.endDate")}:
+                              </span>
+                              <span>
+                                {availabilityPeriod.endDate?.toLocaleDateString(
+                                  "fr-FR"
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

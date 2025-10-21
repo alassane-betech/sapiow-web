@@ -16,12 +16,27 @@ export function generateICSFile({
   endDate: Date;
   professionalName?: string;
 }) {
+  console.log("🔧 generateICSFile - Paramètres reçus:", { title, description, location, startDate, endDate, professionalName });
+  
   // Formater les dates au format iCalendar (YYYYMMDDTHHMMSSZ)
   const formatDate = (date: Date) => {
-    return date
-      .toISOString()
+    console.log("📅 formatDate - Date à formater:", date);
+    console.log("📅 formatDate - Date valide?", !isNaN(date.getTime()));
+    
+    if (isNaN(date.getTime())) {
+      console.error("❌ formatDate - Date invalide détectée!");
+      throw new Error(`Date invalide: ${date}`);
+    }
+    
+    const isoString = date.toISOString();
+    console.log("📅 formatDate - ISO string:", isoString);
+    
+    const formatted = isoString
       .replace(/[-:]/g, "")
       .replace(/\.\d{3}/, "");
+    console.log("📅 formatDate - Résultat formaté:", formatted);
+    
+    return formatted;
   };
 
   const icsContent = `BEGIN:VCALENDAR
@@ -78,9 +93,21 @@ export function openGoogleCalendar({
   startDate: Date;
   endDate: Date;
 }) {
+  console.log("🌐 openGoogleCalendar - Paramètres reçus:", { title, description, location, startDate, endDate });
+  
   // Format des dates pour Google Calendar (YYYYMMDDTHHMMSSZ)
   const formatGoogleDate = (date: Date) => {
-    return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    console.log("📅 formatGoogleDate - Date à formater:", date);
+    console.log("📅 formatGoogleDate - Date valide?", !isNaN(date.getTime()));
+    
+    if (isNaN(date.getTime())) {
+      console.error("❌ formatGoogleDate - Date invalide détectée!");
+      throw new Error(`Date invalide pour Google Calendar: ${date}`);
+    }
+    
+    const formatted = date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    console.log("📅 formatGoogleDate - Résultat formaté:", formatted);
+    return formatted;
   };
 
   const googleCalendarUrl = new URL("https://calendar.google.com/calendar/render");

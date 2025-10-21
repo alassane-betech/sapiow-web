@@ -145,7 +145,13 @@ export const useProSessionsConfig = () => {
           session_type: session.session_type,
           session_nature: "one_time",
           name: `Session ${session.duration}`,
+          one_on_one: true,
           video_call: true,
+          strategic_session: false,
+          exclusive_ressources: false,
+          support: false,
+          mentorship: false,
+          webinar: false,
           is_active: session.enabled,
         });
 

@@ -150,7 +150,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         {/* Section droite - Bouton de partage et switch mode expert */}
         <div className="gap-6 flex items-center">
           {hasExpertProfile ? (
-            <div className="flex items-center gap-3 bg-exford-blue px-3 py-2 rounded-full">
+            <div className="hidden md:flex items-center gap-3 bg-exford-blue px-3 py-2 rounded-full">
               <span className="text-white font-bold">
                 {isExpertMode
                   ? t("header.expertMode")

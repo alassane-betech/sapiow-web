@@ -119,6 +119,20 @@ export const useTimeSlotsManager = ({
   ) => {
     if (!selectedDate || !proExpertData?.schedules) return;
 
+    // Récupérer le créneau AVANT modification pour détecter les changements
+    // IMPORTANT: Utiliser timeSlots (état local) au lieu de proExpertData.schedules
+    const currentSlot = timeSlots.find((slot) => slot.id === slotId);
+    const wasComplete =
+      currentSlot && currentSlot.startTime && currentSlot.endTime;
+
+    console.log("🔄 Mise à jour du créneau:", {
+      slotId,
+      field,
+      oldValue: currentSlot?.[field],
+      newValue: value,
+      wasComplete,
+    });
+
     const updatedSchedules = updateTimeSlotLocal(
       proExpertData.schedules,
       selectedDate,
@@ -143,11 +157,17 @@ export const useTimeSlotsManager = ({
       updatedSlot && updatedSlot.startTime && updatedSlot.endTime;
 
     // Vérifier que startTime < endTime (validation de cohérence)
-    const isValid = isNowComplete && 
+    const isValid =
+      isNowComplete &&
       timeToNumber(updatedSlot.startTime) < timeToNumber(updatedSlot.endTime);
 
-    // Sauvegarder uniquement si les deux champs sont remplis ET valides
-    // IMPORTANT: Passer les schedules mis à jour, pas ceux du store
+    console.log("✅ État après mise à jour:", {
+      isNowComplete,
+      isValid,
+      startTime: updatedSlot?.startTime,
+      endTime: updatedSlot?.endTime,
+    });
+
     if (isValid) {
       handleSaveToServerWithSchedules(updatedSchedules);
     }
@@ -172,15 +192,18 @@ export const useTimeSlotsManager = ({
 
     // Annuler le timeout précédent s'il existe
     if (saveTimeoutRef.current) {
+      console.log("⏱️ Annulation du timeout précédent");
       clearTimeout(saveTimeoutRef.current);
     }
 
-    // Programmer la sauvegarde avec un délai
+    console.log("⏳ Programmation de la sauvegarde dans 300ms...");
+
+    // Programmer la sauvegarde avec un délai réduit
     saveTimeoutRef.current = setTimeout(async () => {
       try {
         console.log("🚀 Début de la sauvegarde des schedules...");
         console.log("📋 Schedules à sauvegarder:", schedulesToSave);
-        
+
         await saveSchedulesToServer(
           schedulesToSave,
           async (updateData: any) => {
@@ -197,7 +220,7 @@ export const useTimeSlotsManager = ({
       } catch (error) {
         console.error("❌ Error saving to server:", error);
       }
-    }, 500); // Attendre 500ms avant de sauvegarder
+    }, 300); // Réduit à 300ms pour une meilleure réactivité
   };
 
   // Wrapper pour la compatibilité (utilise les schedules du store)

@@ -53,7 +53,7 @@ export function useGoogleCalendarConnect() {
   >({
     mutationFn: async ({ authorizationCode, codeVerifier }) => {
       const response = await apiClient.post<GoogleCalendarConnectResponse>(
-        "/google-calendar-sync",
+        "google-calendar-sync",
         {
           authorizationCode,
           codeVerifier,
@@ -76,7 +76,7 @@ export function useGoogleCalendarStatus() {
   return useQuery<GoogleCalendarStatusResponse>({
     queryKey: ["google-calendar-sync"],
     queryFn: () =>
-      apiClient.get<GoogleCalendarStatusResponse>("/google-calendar-sync"),
+      apiClient.get<GoogleCalendarStatusResponse>("google-calendar-sync"),
   });
 }
 
@@ -87,7 +87,7 @@ export function useGoogleCalendarDisconnect() {
   return useMutation<GoogleCalendarDisconnectResponse, Error>({
     mutationFn: async () => {
       const response = await apiClient.delete<GoogleCalendarDisconnectResponse>(
-        "/google-calendar-sync"
+        "google-calendar-sync"
       );
       return response;
     },

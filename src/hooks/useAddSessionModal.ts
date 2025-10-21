@@ -1,5 +1,12 @@
 import { ProExpertSession } from "@/api/proExpert/useProExpert";
 import {
+  SessionFeatures,
+  useCreateProSessionFeatures,
+  useDeleteProSessionFeatures,
+  useGetProSessionFeatures,
+  useUpdateProSessionFeatures,
+} from "@/api/sessions/useProSessionFeatures";
+import {
   SessionCreate,
   SessionGetResponse,
   useCreateProSession,
@@ -14,6 +21,7 @@ interface UseAddSessionModalProps {
   onClose: () => void;
   editData?: ProExpertSession;
   isEditMode?: boolean;
+  onSessionCreated?: (sessionId: string, sessionData: SessionCreate) => void; // Callback après création
 }
 
 export const useAddSessionModal = ({
@@ -21,6 +29,7 @@ export const useAddSessionModal = ({
   onClose,
   editData,
   isEditMode = false,
+  onSessionCreated,
 }: UseAddSessionModalProps) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -28,19 +37,22 @@ export const useAddSessionModal = ({
     session_nature: "subscription" as const,
   });
 
-  const [selectedFeatures, setSelectedFeatures] = useState<
-    Record<string, boolean>
-  >({
-    one_on_one: false,
-    video_call: false,
-    strategic_session: false,
-    exclusive_ressources: false,
-    support: false,
-    mentorship: false,
-    webinar: false,
-  });
+  // État pour les features dynamiques (gestion locale)
+  const [localFeatures, setLocalFeatures] = useState<{ id: string; name: string }[]>([]);
+  const [newFeatureName, setNewFeatureName] = useState("");
+  const [editingFeatureIndex, setEditingFeatureIndex] = useState<number | null>(null); // Index de la feature en cours d'édition
+  const [editingFeatureName, setEditingFeatureName] = useState(""); // Nom temporaire pendant l'édition
 
   const [isLoadingSessionData, setIsLoadingSessionData] = useState(false);
+
+  // Hooks API pour les features (utilisés seulement lors de la sauvegarde finale)
+  const createFeatureMutation = useCreateProSessionFeatures();
+  const updateFeatureMutation = useUpdateProSessionFeatures();
+  const deleteFeatureMutation = useDeleteProSessionFeatures();
+
+  // Charger les features si on est en mode édition
+  const { data: existingFeatures, isLoading: isLoadingFeatures } =
+    useGetProSessionFeatures(isEditMode && editData?.id ? editData.id : "");
 
   // Fonction pour récupérer les données complètes de la session
   const fetchCompleteSessionData = async (sessionId: string) => {
@@ -65,47 +77,39 @@ export const useAddSessionModal = ({
     }
   };
 
-  // Initialiser les données en mode édition
+  // Initialiser les données en mode édition OU réinitialiser en mode création
   useEffect(() => {
-    const initializeEditData = async () => {
-      if (isEditMode && editData) {
-        // Initialiser les données de base
-        setFormData({
-          name: editData.name || "",
-          price: editData.price?.toString() || "",
-          session_nature: "subscription" as const,
-        });
-
-        // Récupérer les données complètes de la session pour les features
-        if (editData.id) {
-          console.log(
-            "🔄 Récupération des données complètes pour la session:",
-            editData.id
-          );
-          const completeData = await fetchCompleteSessionData(editData.id);
-
-          if (completeData) {
-            console.log("✅ Données complètes récupérées:", completeData);
-            const newFeatures = {
-              one_on_one: completeData.one_on_one || false,
-              video_call: completeData.video_call || false,
-              strategic_session: completeData.strategic_session || false,
-              exclusive_ressources: completeData.exclusive_ressources || false,
-              support: completeData.support || false,
-              mentorship: completeData.mentorship || false,
-              webinar: completeData.webinar || false,
-            };
-            console.log("🎯 Features à appliquer:", newFeatures);
-            setSelectedFeatures(newFeatures);
-          } else {
-            console.log("❌ Échec de récupération des données complètes");
-          }
-        }
-      }
-    };
-
-    initializeEditData();
+    if (isEditMode && editData) {
+      // Mode édition : Initialiser avec les données existantes
+      setFormData({
+        name: editData.name || "",
+        price: editData.price?.toString() || "",
+        session_nature: "subscription" as const,
+      });
+    } else if (!isEditMode) {
+      // Mode création : Réinitialiser le formulaire
+      setFormData({
+        name: "",
+        price: "",
+        session_nature: "subscription" as const,
+      });
+      setLocalFeatures([]);
+      setNewFeatureName("");
+      setErrors([]);
+    }
   }, [isEditMode, editData]);
+
+  // Charger les features existantes en mode édition
+  useEffect(() => {
+    if (existingFeatures) {
+      // L'API peut retourner un objet unique ou un tableau
+      const featuresArray = Array.isArray(existingFeatures)
+        ? existingFeatures
+        : [existingFeatures];
+      setLocalFeatures(featuresArray.map(f => ({ id: f.id, name: f.name })));
+      console.log("✅ Features chargées:", featuresArray);
+    }
+  }, [existingFeatures]);
 
   const [errors, setErrors] = useState<string[]>([]);
 
@@ -120,11 +124,53 @@ export const useAddSessionModal = ({
     }));
   };
 
-  const handleFeatureToggle = (featureKey: string, checked: boolean) => {
-    setSelectedFeatures((prev) => ({
+  // Ajouter une nouvelle feature (en local)
+  const handleAddFeature = () => {
+    if (!newFeatureName.trim()) return;
+
+    // Générer un ID temporaire unique
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+    
+    setLocalFeatures((prev) => [
       ...prev,
-      [featureKey]: checked,
-    }));
+      { id: tempId, name: newFeatureName.trim() },
+    ]);
+    
+    setNewFeatureName("");
+    console.log("✅ Feature ajoutée localement:", newFeatureName.trim());
+  };
+
+  // Commencer l'édition d'une feature
+  const handleStartEditFeature = (index: number, currentName: string) => {
+    setEditingFeatureIndex(index);
+    setEditingFeatureName(currentName);
+  };
+
+  // Annuler l'édition d'une feature
+  const handleCancelEditFeature = () => {
+    setEditingFeatureIndex(null);
+    setEditingFeatureName("");
+  };
+
+  // Sauvegarder la modification d'une feature (en local)
+  const handleSaveEditFeature = (index: number) => {
+    if (!editingFeatureName.trim()) return;
+
+    setLocalFeatures((prev) =>
+      prev.map((f, i) =>
+        i === index ? { ...f, name: editingFeatureName.trim() } : f
+      )
+    );
+
+    setEditingFeatureIndex(null);
+    setEditingFeatureName("");
+    console.log("✅ Feature modifiée localement:", editingFeatureName.trim());
+  };
+
+  // Supprimer une feature (en local)
+  const handleDeleteFeature = (index: number) => {
+    setLocalFeatures((prev) => prev.filter((_, i) => i !== index));
+    console.log("✅ Feature supprimée localement");
   };
 
   const handleSubmit = async () => {
@@ -135,8 +181,15 @@ export const useAddSessionModal = ({
       name: formData.name.trim(),
       price: parseFloat(formData.price),
       session_nature: formData.session_nature,
-      ...selectedFeatures,
       is_active: true,
+      // Champs requis par le backend (les features sont gérées séparément via l'API features)
+      one_on_one: false,
+      video_call: false,
+      strategic_session: false,
+      exclusive_ressources: false,
+      support: false,
+      mentorship: false,
+      webinar: false,
     };
 
     // Validation des données
@@ -147,16 +200,18 @@ export const useAddSessionModal = ({
     }
 
     try {
-      let result;
+      let sessionId: string;
 
       if (isEditMode && editData?.id) {
         // Mode édition - utiliser l'API de mise à jour
-        result = await updateSessionMutation.mutateAsync({
+        await updateSessionMutation.mutateAsync({
           id: editData.id,
           data: {
             name: sessionData.name,
             price: sessionData.price,
             session_nature: sessionData.session_nature,
+            is_active: sessionData.is_active,
+            // Champs requis par le backend
             one_on_one: sessionData.one_on_one,
             video_call: sessionData.video_call,
             strategic_session: sessionData.strategic_session,
@@ -164,19 +219,72 @@ export const useAddSessionModal = ({
             support: sessionData.support,
             mentorship: sessionData.mentorship,
             webinar: sessionData.webinar,
-            is_active: sessionData.is_active,
           },
         });
+        sessionId = editData.id;
+
+        // En mode édition, gérer les features existantes vs nouvelles
+        // 1. Supprimer les features qui ne sont plus dans localFeatures
+        const existingIds = existingFeatures ? 
+          (Array.isArray(existingFeatures) ? existingFeatures : [existingFeatures]).map(f => f.id) : [];
+        const localIds = localFeatures.filter(f => !f.id.startsWith('temp-')).map(f => f.id);
+        
+        for (const existingId of existingIds) {
+          if (!localIds.includes(existingId)) {
+            await deleteFeatureMutation.mutateAsync(existingId);
+            console.log("✅ Feature supprimée:", existingId);
+          }
+        }
+
+        // 2. Mettre à jour les features existantes qui ont changé
+        for (const feature of localFeatures) {
+          if (!feature.id.startsWith('temp-')) {
+            const existingFeature = existingIds.includes(feature.id);
+            if (existingFeature) {
+              await updateFeatureMutation.mutateAsync({
+                id: feature.id,
+                data: { name: feature.name },
+              });
+              console.log("✅ Feature mise à jour:", feature.name);
+            }
+          }
+        }
+
+        // 3. Créer les nouvelles features (celles avec ID temporaire)
+        for (const feature of localFeatures) {
+          if (feature.id.startsWith('temp-')) {
+            await createFeatureMutation.mutateAsync({
+              id: sessionId,
+              data: { name: feature.name },
+            });
+            console.log("✅ Nouvelle feature créée:", feature.name);
+          }
+        }
       } else {
         // Mode création
-        result = await createSessionMutation.mutateAsync(sessionData);
+        const result = await createSessionMutation.mutateAsync(sessionData);
+        
+        if (!result.data?.id) {
+          throw new Error("Erreur: ID de session non retourné");
+        }
+        
+        sessionId = result.data.id;
+        console.log("✅ Session créée avec succès:", sessionId);
+
+        // Créer toutes les features locales
+        for (const feature of localFeatures) {
+          await createFeatureMutation.mutateAsync({
+            id: sessionId,
+            data: { name: feature.name },
+          });
+          console.log("✅ Feature créée:", feature.name);
+        }
       }
 
       console.log(
         isEditMode
-          ? "Session modifiée avec succès:"
-          : "Session créée avec succès:",
-        result
+          ? "Session et features modifiées avec succès"
+          : "Session et features créées avec succès"
       );
 
       if (onSuccess) {
@@ -207,16 +315,11 @@ export const useAddSessionModal = ({
       price: "",
       session_nature: "subscription" as const,
     });
-    setSelectedFeatures({
-      one_on_one: false,
-      video_call: false,
-      strategic_session: false,
-      exclusive_ressources: false,
-      support: false,
-      mentorship: false,
-      webinar: false,
-    });
+    setLocalFeatures([]);
+    setNewFeatureName("");
     setErrors([]);
+    setEditingFeatureIndex(null);
+    setEditingFeatureName("");
     onClose();
   };
 
@@ -231,20 +334,37 @@ export const useAddSessionModal = ({
       await updateSessionMutation.mutateAsync({
         id: editData.id,
         data: {
+          name: formData.name,
+          price: parseFloat(formData.price),
+          session_nature: formData.session_nature,
           is_active: false,
+          // Champs requis par le backend
+          one_on_one: false,
+          video_call: false,
+          strategic_session: false,
+          exclusive_ressources: false,
+          support: false,
+          mentorship: false,
+          webinar: false,
         },
       });
 
       console.log("Session désactivée avec succès");
-      
+
       if (onSuccess) {
         // Notifier le parent que la session a été "supprimée"
         onSuccess({
           name: formData.name,
           price: parseFloat(formData.price),
           session_nature: formData.session_nature,
-          ...selectedFeatures,
           is_active: false,
+          one_on_one: false,
+          video_call: false,
+          strategic_session: false,
+          exclusive_ressources: false,
+          support: false,
+          mentorship: false,
+          webinar: false,
         });
       }
 
@@ -268,19 +388,29 @@ export const useAddSessionModal = ({
   return {
     // États
     formData,
-    selectedFeatures,
+    features: localFeatures, // Renommé pour compatibilité avec le composant
+    newFeatureName,
     errors,
     isFormValid,
+    editingFeatureIndex,
+    editingFeatureName,
 
-    // États de mutation
+    // États de chargement
     isPending:
       createSessionMutation.isPending ||
       updateSessionMutation.isPending ||
       isLoadingSessionData,
+    isLoadingFeatures,
 
     // Handlers
     handleInputChange,
-    handleFeatureToggle,
+    setNewFeatureName,
+    setEditingFeatureName,
+    handleAddFeature,
+    handleStartEditFeature,
+    handleSaveEditFeature,
+    handleCancelEditFeature,
+    handleDeleteFeature,
     handleSubmit,
     handleCancel,
     handleDelete,

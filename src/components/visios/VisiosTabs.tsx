@@ -43,7 +43,9 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
             className="relative px-4 py-4 text-lg font-bold text-slate-400 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none hover:text-slate-900 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
           >
             {t("visios.pending")}
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            {pendingAppointments.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            )}
           </TabsTrigger>
           <TabsTrigger
             value="historique"

@@ -70,7 +70,9 @@ export default function TimeSlotsManager({
                   }
                 >
                   <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
-                    <SelectValue placeholder={t("timeSlotsManager.selectStartTime")} />
+                    <SelectValue
+                      placeholder={t("timeSlotsManager.selectStartTime")}
+                    />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
                     {timeOptions.map((time) => {
@@ -102,7 +104,9 @@ export default function TimeSlotsManager({
                   }
                 >
                   <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
-                    <SelectValue placeholder={t("timeSlotsManager.selectEndTime")} />
+                    <SelectValue
+                      placeholder={t("timeSlotsManager.selectEndTime")}
+                    />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
                     {getEndTimeOptions(slot.startTime).map((time) => {

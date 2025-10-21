@@ -89,17 +89,17 @@ export default function ClientProfile() {
         />
       </div>
 
-      <div className="mt-16 mb-6 flex flex-col-reverse md:flex-row justify-between items-end gap-y-4 gap-x-6 px-10">
-        <Button
-          label={t("profile.deleteAccount")}
-          className="bg-white text-red-500 rounded-[8px] shadow-none h-[56px] max-w-[331px] w-full font-bold text-base hover:bg-white"
-          onClick={handleDeleteAccount}
-        />
+      <div className="mt-16 mb-6 flex flex-col justify-between items-center gap-y-4 gap-x-6 px-10">
         <Button
           label={isUpdating ? t("profile.saving") : t("profile.saveChanges")}
           className="h-[56px] max-w-[331px] w-full font-bold text-base font-figtree"
           disabled={!isEditing || isUpdating}
           onClick={handleSave}
+        />
+        <Button
+          label={t("profile.deleteAccount")}
+          className="bg-white text-red-500 rounded-[8px] shadow-none h-[56px] max-w-[331px] w-full font-bold text-base hover:bg-white"
+          onClick={handleDeleteAccount}
         />
       </div>
     </div>
