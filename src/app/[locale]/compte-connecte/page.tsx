@@ -4,12 +4,11 @@ import { Button } from "@/components/common/Button";
 import { withAuth } from "@/components/common/withAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLocale } from "next-intl";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 function CompteConnecte() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const locale = useLocale();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"

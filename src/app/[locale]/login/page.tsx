@@ -36,7 +36,7 @@ export default function Login() {
         </div>
         <div className="flex flex-col ">
           <div className="mt-14 ml-[42px]">
-            <Image src="/assets/logo.png" alt="Logo" width={175} height={38} />
+            <Image src="/assets/logo.svg" alt="Logo" width={175} height={175} />
           </div>
 
           {/* Contenu principal - centré verticalement */}

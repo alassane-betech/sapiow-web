@@ -5,8 +5,10 @@ const defaultMessages = {
   // Questions
   questionSubmitted: "Question soumise avec succès !",
   questionUpdated: "Question mise à jour avec succès !",
+  questionDeleted: "Question supprimée avec succès !",
   questionSubmitError: "Erreur lors de la soumission de la question",
   questionUpdateError: "Erreur lors de la mise à jour de la question",
+  questionDeleteError: "Erreur lors de la suppression de la question",
   
   // Appointments
   appointmentCreated: "Rendez-vous créé avec succès !",

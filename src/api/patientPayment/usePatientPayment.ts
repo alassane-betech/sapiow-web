@@ -41,7 +41,7 @@ export interface TransactionDisplay {
   amount: string;
   expert: string;
   dateHeure: string;
-  statut: "Effectué" | "En attente" | "Annulé";
+  statut: "completed" | "pending" | "cancelled";
   transactionId: string;
   session: string;
   receiptUrl?: string;
@@ -106,11 +106,11 @@ export const transformTransactionForDisplay = (
   // Nom complet de l'expert
   const expertName = `${transaction.appointment.pro.first_name} ${transaction.appointment.pro.last_name}`.trim();
 
-  // Mapping du statut
-  const statusMapping: Record<string, "Effectué" | "En attente" | "Annulé"> = {
-    succeeded: "Effectué",
-    pending: "En attente",
-    failed: "Annulé",
+  // Mapping du statut - utilise les clés anglaises pour la compatibilité TypeScript
+  const statusMapping: Record<string, "completed" | "pending" | "cancelled"> = {
+    succeeded: "completed",
+    pending: "pending",
+    failed: "cancelled",
   };
 
   // Titre de la transaction
@@ -126,7 +126,7 @@ export const transformTransactionForDisplay = (
     amount: formattedAmount,
     expert: expertName,
     dateHeure: formattedDateTime,
-    statut: statusMapping[transaction.status] || "En attente",
+    statut: statusMapping[transaction.status] || "pending",
     transactionId: transaction.id,
     session,
     receiptUrl: transaction.receipt_url,

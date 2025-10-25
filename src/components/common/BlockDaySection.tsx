@@ -1,4 +1,4 @@
-import { Switch } from "@/components/common/Switch";
+import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -20,33 +20,35 @@ export const BlockDaySection = ({
     ? "w-full flex items-center justify-between p-4 border-t border-gray-200"
     : "w-full flex items-center justify-between p-4 mt-4 border-t border-gray-200";
 
-  const textContainerClasses = isMobile ? "" : "";
-
-  // Déterminer le titre et la description en fonction de l'état actuel (bloqué ou non)
-  const title = isBlocked
-    ? t("blockDaySection.unblockTitle")
-    : t("blockDaySection.title");
-
-  const description = isBlocked
-    ? t("blockDaySection.unblockDescription")
-    : t("blockDaySection.description");
-
   return (
     <div className={containerClasses}>
-      <div className={textContainerClasses}>
-        <h1 className="text-lg font-semibold text-charcoal-blue">{title}</h1>
-        <p className="text-sm font-normal text-gray-500">{description}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        {isLoading && (
-          <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-        )}
-        <Switch
-          checked={isBlocked}
-          onChange={onToggle}
-          disabled={isLoading}
-          className="data-[state=checked]:bg-[#1E293B] disabled:opacity-50 cursor-pointer"
-        />
+      <div className="flex flex-col gap-3 max-w-full mx-auto">
+        <h1 className="text-base font-medium text-charcoal-blue">
+          {t("blockDaySection.question")}
+        </h1>
+        <div className="flex items-center gap-3 border border-[#E2E8F0] rounded-[8px] p-2">
+          {/* Label Bloqué */}
+          <span className="text-sm text-charcoal-blue font-bold">
+            {t("blockDaySection.blocked")}
+          </span>
+
+          {/* Switch */}
+          <Switch
+            checked={!isBlocked}
+            onCheckedChange={(checked) => !isLoading && onToggle(!checked)}
+            disabled={isLoading}
+          />
+
+          {/* Label Débloqué */}
+          <span className="text-sm text-exford-blue font-bold">
+            {t("blockDaySection.unblocked")}
+          </span>
+
+          {/* Loader */}
+          {isLoading && (
+            <Loader2 className="h-4 w-4 animate-spin text-gray-500 ml-2" />
+          )}
+        </div>
       </div>
     </div>
   );

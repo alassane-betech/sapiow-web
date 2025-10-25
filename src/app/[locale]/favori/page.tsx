@@ -104,7 +104,7 @@ function Favori() {
 
   if (isLoading) {
     return (
-      <div className="flex">
+      <div className="flex container">
         <AppSidebar />
         <div className="w-full flex-1">
           <HeaderClient
@@ -125,7 +125,7 @@ function Favori() {
 
   if (error) {
     return (
-      <div className="flex">
+      <div className="flex container">
         <AppSidebar />
         <div className="w-full flex-1">
           <HeaderClient
@@ -149,7 +149,7 @@ function Favori() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex container">
       <AppSidebar />
       <div className="w-full flex-1">
         <HeaderClient

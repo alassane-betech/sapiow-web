@@ -3,32 +3,38 @@ import {
   useMarkNotificationAsRead,
   useProNotifications,
 } from "@/api/notifications/useNotification";
+import { HamburgerButton } from "@/components/common/HamburgerButton";
 import { ProfileAvatar } from "@/components/common/ProfileAvatar";
 import { ShareLinkButton } from "@/components/common/ShareLinkButton";
 import { Button } from "@/components/ui/button";
+import { useMobileMenu } from "@/hooks/useMobileMenu";
 import { useModeSwitch } from "@/hooks/useModeSwitch";
 import { useTodayVisios } from "@/hooks/useTodayVisios";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import { Switch } from "../../ui/switch";
+import { AccountSidebar } from "../AccountSidebar";
 
 interface HeaderProps {
   text?: string;
   hideProfile?: boolean;
   isBorder?: boolean;
+  showHamburger?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   text,
   hideProfile,
   isBorder,
+  showHamburger = false,
 }) => {
   const t = useTranslations();
   const { isExpertMode, handleModeSwitch } = useModeSwitch();
   const { user } = useTodayVisios();
   const { data: notifications } = useProNotifications();
   const { mutateAsync: markNotificationAsRead } = useMarkNotificationAsRead();
+  const { isMobileMenuOpen, toggleMobileMenu } = useMobileMenu();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -86,19 +92,28 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header
-      className={`container pt-8 ${
-        isBorder ? "lg:border-b-2" : ""
-      } lg:border-snow-blue bg-white px-6 py-1 sticky top-0 z-20`}
-    >
-      <div className="flex items-center justify-between">
-        {/* Section gauche - Photo de profil et message */}
-        <div className="flex flex-col items-start gap-4">
-          {text && (
-            <h2 className="text-base font-bold text-cobalt-blue-500 whitespace-nowrap py-5">
-              {text}
-            </h2>
-          )}
+    <>
+      <header
+        className={`container pt-8 ${
+          isBorder ? "lg:border-b-2" : ""
+        } lg:border-snow-blue bg-white px-6 py-1 sticky top-0 z-20`}
+      >
+        <div className="flex items-center justify-between">
+          {/* Section gauche - Photo de profil et message */}
+          <div className="flex flex-col items-start gap-4">
+            {text && (
+              <div className="flex items-center gap-2 py-5">
+                {/* Bouton hamburger mobile pour les pages de compte */}
+                {showHamburger && (
+                  <div className="lg:hidden">
+                    <HamburgerButton onClick={toggleMobileMenu} />
+                  </div>
+                )}
+                <h2 className="text-base font-bold text-cobalt-blue-500 whitespace-nowrap">
+                  {text}
+                </h2>
+              </div>
+            )}
           {!hideProfile && (
             <ProfileAvatar
               src={user?.avatar || "/assets/memoji.jpg"}
@@ -109,12 +124,13 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Section droite - Bouton de partage et switch mode expert */}
-        <div className="gap-6 hidden lg:flex items-center">
+        <div className="gap-6 flex items-center">
           {/* Bouton de partage */}
-          <ShareLinkButton />
-
+          <div className="hidden lg:flex">
+            <ShareLinkButton />
+          </div>
           {/* Mode expert switch */}
-          <div className="flex items-center gap-3 bg-exford-blue px-3 py-2 rounded-full">
+          <div className="hidden lg:flex items-center gap-3 bg-exford-blue px-3 py-2 rounded-full">
             <span className="text-white font-bold">
               {t("header.expertMode")}
             </span>
@@ -245,5 +261,48 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
     </header>
+
+      {/* Menu mobile overlay */}
+      {showHamburger && isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={toggleMobileMenu}
+        >
+          <div
+            className="fixed left-0 top-0 h-full w-80 bg-white shadow-lg z-50"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-light-blue-gray">
+              <h2 className="text-lg font-bold text-cobalt-blue-500">
+                Menu
+              </h2>
+              <button
+                onClick={toggleMobileMenu}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <AccountSidebar isMobile={true} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

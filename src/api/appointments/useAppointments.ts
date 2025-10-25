@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
+import { ApiAppointment } from "@/utils/appointmentUtils";
 import { showToast } from "@/utils/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ApiAppointment } from "@/utils/appointmentUtils";
 
 export const useGetProAppointments = (professionalId: string | undefined) => {
   return useQuery({
@@ -80,7 +80,7 @@ export const useSubmitAppointmentQuestion = () => {
     onSuccess: (data, variables) => {
       // Invalider le cache pour recharger les données de l'appointment
       queryClient.invalidateQueries({
-        queryKey: ["appointment", variables.appointmentId],
+        queryKey: ["questions", variables.appointmentId],
       });
       showToast.success("questionSubmitted");
     },
@@ -96,20 +96,41 @@ export const useUpdateAppointmentQuestion = () => {
 
   return useMutation({
     mutationFn: async (data: UpdateQuestionData) => {
-      return apiClient.put(`appointment-question/${data.questionId}`, {
+      return apiClient.put(`patient-appointment/${data.questionId}`, {
         question: data.question,
       });
     },
     onSuccess: (_, variables) => {
       // Invalider le cache pour recharger les données
       queryClient.invalidateQueries({
-        queryKey: ["appointment", variables.questionId],
+        queryKey: ["questions", variables.questionId],
       });
       showToast.success("questionUpdated");
     },
     onError: (error: any) => {
       console.error("Failed to update question:", error);
       showToast.error("questionUpdateError", error?.message);
+    },
+  });
+};
+
+export const useDeleteAppointmentQuestion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (questionId: number) => {
+      return apiClient.delete(`patient-appointment/${questionId}`);
+    },
+    onSuccess: (_, questionId) => {
+      // Invalider le cache pour recharger les données
+      queryClient.invalidateQueries({
+        queryKey: ["questions", questionId],
+      });
+      showToast.success("questionDeleted");
+    },
+    onError: (error: any) => {
+      console.error("Failed to delete question:", error);
+      showToast.error("questionDeleteError", error?.message);
     },
   });
 };
@@ -190,9 +211,9 @@ export const useCancelPatientAppointment = () => {
         const currentData = queryClient.getQueryData<ApiAppointment[]>(key);
         if (currentData) {
           // 2. Mettre à jour le statut du rendez-vous annulé
-          const updatedData = currentData.map(appointment => 
-            appointment.id === appointmentId 
-              ? { ...appointment, status: "cancelled" } 
+          const updatedData = currentData.map((appointment) =>
+            appointment.id === appointmentId
+              ? { ...appointment, status: "cancelled" }
               : appointment
           );
           // 3. Mettre à jour le cache avec les nouvelles données
@@ -202,7 +223,7 @@ export const useCancelPatientAppointment = () => {
 
       // Mettre à jour les données dans tous les caches pertinents
       updatePatientAppointments(["patient-appointments"]);
-      
+
       // Invalider également les requêtes pour forcer un rechargement si nécessaire
       queryClient.invalidateQueries({
         queryKey: ["appointment", appointmentId],
@@ -281,7 +302,7 @@ export const useDeleteProAppointmentBlock = () => {
     mutationFn: async (deleteData: DeleteBlockAppointmentData) => {
       // Envoi de la date dans le body de la requête
       return apiClient.delete(`pro-appointment-block`, {
-        date: deleteData.date
+        date: deleteData.date,
       });
     },
     onSuccess: (data, variables) => {

@@ -1,5 +1,6 @@
 import { Button } from "@/components/common/Button";
-import { ChevronLeftIcon, Send } from "lucide-react";
+import { ChevronLeftIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import React from "react";
 
 interface TransactionDetailsProps {
@@ -7,7 +8,7 @@ interface TransactionDetailsProps {
   session: string;
   expert: string;
   dateHeure: string;
-  statut: "Effectué" | "En attente" | "Annulé";
+  statut: "completed" | "pending" | "cancelled";
   id: string;
   onBack?: () => void;
   isMobile?: boolean;
@@ -23,16 +24,31 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
   onBack,
   isMobile = false,
 }) => {
+  const t = useTranslations();
+
   const getStatutColor = (statut: string) => {
     switch (statut) {
-      case "Effectué":
+      case "completed":
         return "text-green-600";
-      case "En attente":
+      case "pending":
         return "text-orange-500";
-      case "Annulé":
+      case "cancelled":
         return "text-red-500";
       default:
         return "text-slate-600";
+    }
+  };
+
+  const getStatutLabel = (statut: string) => {
+    switch (statut) {
+      case "completed":
+        return t("paymentHistory.completed");
+      case "pending":
+        return t("paymentHistory.pending");
+      case "cancelled":
+        return t("paymentHistory.cancelled");
+      default:
+        return statut;
     }
   };
 
@@ -48,7 +64,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
             icon={<ChevronLeftIcon />}
           />
           <h1 className="text-lg font-medium text-exford-blue">
-            Détail de la transaction
+            {t("paymentHistory.transactionDetails")}
           </h1>
           <div className="w-6"></div> {/* Spacer pour centrer le titre */}
         </div>
@@ -58,7 +74,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
           {/* Montant */}
           <div className="flex justify-between items-center py-4 border-b border-light-blue-gray">
             <span className="text-base font-semibold text-exford-blue">
-              Montant
+              {t("paymentHistory.amount")}
             </span>
             <span className="text-base font-bold text-exford-blue">
               {montant}
@@ -68,7 +84,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
           {/* Session */}
           <div className="flex justify-between items-center py-4 border-b border-light-blue-gray">
             <span className="text-base font-semibold text-exford-blue">
-              Session
+              {t("paymentHistory.session")}
             </span>
             <span className="text-base font-medium text-exford-blue text-right max-w-[200px]">
               {session}
@@ -78,7 +94,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
           {/* Expert */}
           <div className="flex justify-between items-center py-4 border-b border-light-blue-gray">
             <span className="text-base font-semibold text-exford-blue">
-              Expert
+              {t("paymentHistory.expert")}
             </span>
             <span className="text-base font-medium text-exford-blue text-right max-w-[200px]">
               {expert}
@@ -88,7 +104,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
           {/* Date et heure */}
           <div className="flex justify-between items-center py-4 border-b border-light-blue-gray">
             <span className="text-base font-semibold text-exford-blue">
-              Date et heure
+              {t("paymentHistory.dateTime")}
             </span>
             <span className="text-base font-medium text-exford-blue text-right max-w-[200px]">
               {dateHeure}
@@ -98,29 +114,22 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
           {/* Statut */}
           <div className="flex justify-between items-center py-4 border-b border-light-blue-gray">
             <span className="text-base font-semibold text-exford-blue">
-              Statut
+              {t("paymentHistory.status")}
             </span>
             <span className={`text-base font-normal ${getStatutColor(statut)}`}>
-              {statut}
+              {getStatutLabel(statut)}
             </span>
           </div>
 
           {/* ID */}
           <div className="flex justify-between items-center py-4">
-            <span className="text-base font-semibold text-exford-blue">ID</span>
+            <span className="text-base font-semibold text-exford-blue">
+              {t("paymentHistory.transactionId")}
+            </span>
             <span className="text-base font-normal text-slate-600 font-mono text-right max-w-[200px] break-all">
               {id}
             </span>
           </div>
-        </div>
-
-        {/* Bouton Envoyer la facture */}
-        <div className="p-6 border-t border-light-blue-gray">
-          <Button
-            label="Envoyer la facture"
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-[12px] font-medium hover:bg-blue-700 transition-colors"
-            icon={<Send />}
-          />
         </div>
       </div>
     );
@@ -133,7 +142,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
         {/* Montant */}
         <div className="flex justify-between items-center pb-4 border-b border-light-blue-gray">
           <span className="text-base font-semibold text-exford-blue">
-            Montant
+            {t("paymentHistory.amount")}
           </span>
           <span className="text-base font-bold text-exford-blue">
             {montant}
@@ -143,7 +152,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
         {/* Session */}
         <div className="flex justify-between items-center pb-4 border-b border-light-blue-gray">
           <span className="text-base font-semibold text-exford-blue">
-            Session
+            {t("paymentHistory.session")}
           </span>
           <span className="text-base font-normal text-exford-blue text-right max-w-[200px]">
             {session}
@@ -153,7 +162,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
         {/* Expert */}
         <div className="flex justify-between items-center pb-4 border-b border-light-blue-gray">
           <span className="text-base font-semibold text-exford-blue">
-            Expert
+            {t("paymentHistory.expert")}
           </span>
           <span className="text-base font-normal text-exford-blue text-right max-w-[200px]">
             {expert}
@@ -163,7 +172,7 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
         {/* Date et heure */}
         <div className="flex justify-between items-center pb-4 border-b border-light-blue-gray">
           <span className="text-base font-semibold text-exford-blue">
-            Date et heure
+            {t("paymentHistory.dateTime")}
           </span>
           <span className="text-base font-normal text-exford-blue text-right max-w-[200px]">
             {dateHeure}
@@ -173,16 +182,18 @@ const TransactionDetails: React.FC<TransactionDetailsProps> = ({
         {/* Statut */}
         <div className="flex justify-between items-center pb-4 border-b border-light-blue-gray">
           <span className="text-base font-semibold text-exford-blue">
-            Statut
+            {t("paymentHistory.status")}
           </span>
           <span className={`text-base font-normal ${getStatutColor(statut)}`}>
-            {statut}
+            {getStatutLabel(statut)}
           </span>
         </div>
 
         {/* ID */}
         <div className="flex justify-between items-center">
-          <span className="text-base font-semibold text-exford-blue">ID</span>
+          <span className="text-base font-semibold text-exford-blue">
+            {t("paymentHistory.transactionId")}
+          </span>
           <span className="text-base font-normal text-slate-600 font-mono text-right max-w-[200px] break-all">
             {id}
           </span>

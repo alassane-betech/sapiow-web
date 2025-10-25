@@ -17,6 +17,7 @@ export default function HistoriquePaiements() {
   const [isTablet, setIsTablet] = useState(false); // 1024px-1140px
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Récupération des données de paiement via l'API
   const {
@@ -24,6 +25,20 @@ export default function HistoriquePaiements() {
     isLoading,
     error,
   } = usePatientPaymentHistoryDisplay();
+
+  // Filtrage des transactions basé sur la recherche
+  const filteredHistory = history.filter((transaction) => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      transaction.title.toLowerCase().includes(query) ||
+      transaction.expert.toLowerCase().includes(query) ||
+      transaction.session.toLowerCase().includes(query) ||
+      transaction.amount.toLowerCase().includes(query) ||
+      transaction.date.toLowerCase().includes(query)
+    );
+  });
 
   // Détection des breakpoints
   useEffect(() => {
@@ -91,17 +106,19 @@ export default function HistoriquePaiements() {
         {!isTablet ? (
           /* Layout 3 colonnes - Mobile et Desktop (>1140px) */
           <>
-            <div className="flex-1 min-w-0 w-full lg:max-w-[375px]">
-              <div className="w-full flex gap-2 pt-4 px-4 lg:px-4">
+            <div className="flex-1 min-w-0 w-full lg:max-w-full">
+              <div className="w-full flex gap-2 pt-4 px-4 lg:px-0">
                 <FormField
                   label={t("search.placeholder")}
                   name="search"
                   type="text"
                   placeholder={t("paymentHistory.searchPlaceholder")}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   leftIcon={
                     <Search className="w-6 h-6 text-slate-gray cursor-pointer" />
                   }
-                  className="h-[48px] flex-1 lg:w-[282px] bg-snow-blue border-none shadow-none placeholder:text-slate-gray text-base"
+                  className="h-[48px] flex-1 lg:w-full bg-snow-blue border-none shadow-none placeholder:text-slate-gray text-base"
                 />
                 <div className="flex-shrink-0">
                   <Image
@@ -113,18 +130,18 @@ export default function HistoriquePaiements() {
                   />
                 </div>
               </div>
-              <div className="space-y-3 mt-4 px-4 lg:px-0 lg:max-w-[343px] lg:mx-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
-                {history.length === 0 ? (
+              <div className="space-y-3 mt-4 px-4 lg:px-0 lg:max-w-full lg:mx-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
+                {filteredHistory.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500">
-                      {t("paymentHistory.noTransactions")}
+                      {searchQuery.trim() ? t("search.noResults") : t("paymentHistory.noTransactions")}
                     </p>
                     <p className="text-gray-400 text-sm mt-2">
-                      {t("paymentHistory.noTransactionsDescription")}
+                      {searchQuery.trim() ? "" : t("paymentHistory.noTransactionsDescription")}
                     </p>
                   </div>
                 ) : (
-                  history.map((transaction) => (
+                  filteredHistory.map((transaction) => (
                     <div
                       key={transaction.id}
                       onClick={() => handleTransactionClick(transaction.id)}
@@ -192,7 +209,7 @@ export default function HistoriquePaiements() {
                   }
                   statut={
                     history.find((t) => t.id === selectedTransaction)?.statut ||
-                    "Effectué"
+                    "completed"
                   }
                   id={
                     history.find((t) => t.id === selectedTransaction)
@@ -239,17 +256,17 @@ export default function HistoriquePaiements() {
               {!showDetails ? (
                 /* Liste des transactions */
                 <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
-                  {history.length === 0 ? (
+                  {filteredHistory.length === 0 ? (
                     <div className="text-center py-8">
                       <p className="text-gray-500">
-                        {t("paymentHistory.noTransactions")}
+                        {searchQuery.trim() ? t("search.noResults") : t("paymentHistory.noTransactions")}
                       </p>
                       <p className="text-gray-400 text-sm mt-2">
-                        {t("paymentHistory.noTransactionsDescription")}
+                        {searchQuery.trim() ? "" : t("paymentHistory.noTransactionsDescription")}
                       </p>
                     </div>
                   ) : (
-                    history.map((transaction) => (
+                    filteredHistory.map((transaction) => (
                       <div
                         key={transaction.id}
                         onClick={() => handleTransactionClick(transaction.id)}
@@ -310,7 +327,7 @@ export default function HistoriquePaiements() {
                       }
                       statut={
                         history.find((t) => t.id === selectedTransaction)
-                          ?.statut || ("Effectué" as const)
+                          ?.statut || "completed"
                       }
                       id={
                         history.find((t) => t.id === selectedTransaction)
@@ -341,7 +358,7 @@ export default function HistoriquePaiements() {
             }
             statut={
               history.find((t) => t.id === selectedTransaction)?.statut ||
-              ("Effectué" as const)
+              "completed"
             }
             id={
               history.find((t) => t.id === selectedTransaction)

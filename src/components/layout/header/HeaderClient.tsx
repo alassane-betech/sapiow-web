@@ -5,32 +5,38 @@ import {
 } from "@/api/notifications/useNotification";
 import { Button } from "@/components/common/Button";
 import { FormField } from "@/components/common/FormField";
+import { HamburgerButton } from "@/components/common/HamburgerButton";
 import { Button as ButtonUI } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useMobileMenu } from "@/hooks/useMobileMenu";
 import { usePayStore } from "@/store/usePay";
 import { ChevronLeft, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+import { AccountSidebar } from "../AccountSidebar";
 
 interface HeaderClientProps {
   isBack?: boolean;
   text?: string;
   classNameIsBack?: string;
+  showHamburger?: boolean;
 }
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({
   isBack,
   text,
   classNameIsBack = "py-4",
+  showHamburger = false,
 }) => {
   const t = useTranslations();
   const router = useRouter();
   const { isFavoriActive, handleFavoriToggle } = useFavorites();
   const { setIsPaid } = usePayStore();
+  const { isMobileMenuOpen, toggleMobileMenu } = useMobileMenu();
 
   // Hooks pour les notifications patient
   const { data: notifications } = usePatientNotifications();
@@ -105,12 +111,19 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   };
 
   return (
-    <header className="container pt-9 lg:border-b-2 lg:border-snow-blue py-2 sticky top-0 z-20 bg-white">
-      <div className="flex items-center justify-between px-4">
+    <>
+      <header className="container pt-9 lg:border-b-2 lg:border-snow-blue py-2 sticky top-0 z-20 bg-white">
+        <div className="flex items-center justify-between px-4">
         {/* Section gauche - Photo de profil et message */}
         <div className="w-full max-w-[320px] flex flex-col items-start gap-4">
           {isBack || text ? (
             <div className={`flex items-center gap-2 ${classNameIsBack}`}>
+              {/* Bouton hamburger mobile pour les pages de compte */}
+              {showHamburger && (
+                <div className="lg:hidden">
+                  <HamburgerButton onClick={toggleMobileMenu} />
+                </div>
+              )}
               {isBack && (
                 <ButtonUI
                   onClick={handleHome}
@@ -314,5 +327,48 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         </div>
       </div>
     </header>
+
+      {/* Menu mobile overlay */}
+      {showHamburger && isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={toggleMobileMenu}
+        >
+          <div
+            className="fixed left-0 top-0 h-full w-80 bg-white shadow-lg z-50"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-light-blue-gray">
+              <h2 className="text-lg font-bold text-cobalt-blue-500">
+                Menu
+              </h2>
+              <button
+                onClick={toggleMobileMenu}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6L6 18M6 6L18 18"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <AccountSidebar isMobile={true} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

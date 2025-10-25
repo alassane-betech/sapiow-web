@@ -241,7 +241,7 @@ function ProfessionalDetailContent() {
   const imageHeight = 378;
   const maxWidth = isMobile ? "max-w-[358px]" : "max-w-[303px]";
   return (
-    <div className="flex">
+    <div className="flex container">
       <AppSidebar />
       <div className="w-full flex-1">
         <HeaderClient isBack classNameIsBack="py-1" />

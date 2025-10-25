@@ -48,6 +48,11 @@ interface UpdateBankResponse {
   external_account?: any;
   account?: StripeAccount;
   message?: string;
+  onboarding_url?: string;
+}
+
+interface AccountLinkResponse {
+  account_link_url: string;
 }
 
 export const useGetInfoStripeAccount = () => {
@@ -75,6 +80,16 @@ export const useUpdateBank = () => {
   const mutation = useMutation<UpdateBankResponse, Error, UpdateBankRequest>({
     mutationFn: async (data: UpdateBankRequest) => {
       return await apiClient.put<UpdateBankResponse>("pro-bank-account", data);
+    },
+  });
+  return mutation;
+};
+
+// Generate Stripe Account Link for modification
+export const useGenerateAccountLink = () => {
+  const mutation = useMutation<AccountLinkResponse, Error, void>({
+    mutationFn: async () => {
+      return await apiClient.post<AccountLinkResponse>("pro-bank-account");
     },
   });
   return mutation;

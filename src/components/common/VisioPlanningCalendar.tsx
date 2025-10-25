@@ -75,6 +75,15 @@ const generateTimeSlots = (
       return; // Ignorer ce schedule
     }
 
+    // Limiter endTime à 00h30 maximum du lendemain
+    // Créer une date pour 00h30 du lendemain (par rapport à 1970-01-01)
+    const maxEndTime = new Date('1970-01-02T00:30:00Z'); // 00h30 du lendemain
+    
+    // Si endTime dépasse 00h30 du lendemain, le limiter à 00h30
+    if (endTime > maxEndTime) {
+      endTime = maxEndTime;
+    }
+
     // Générer les créneaux selon la durée sélectionnée
     let currentTime = new Date(startTime);
 
@@ -92,7 +101,47 @@ const generateTimeSlots = (
         // Créer une date complète pour ce créneau
         const slotDateTime = new Date(selectedDate);
         const [hours, minutes] = timeString.split(":");
-        slotDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        const slotHour = parseInt(hours);
+        const slotMinute = parseInt(minutes);
+        slotDateTime.setHours(slotHour, slotMinute, 0, 0);
+
+        // Bloquer tous les créneaux qui commencent après 00h30 ou qui se terminent après 00h30
+        
+        // Cas 1: Créneaux qui commencent entre 00h31 et 23h59 du lendemain (après minuit)
+        if (slotHour === 0 && slotMinute > 30) {
+          // Créneau commence après 00h30 (ex: 00h45, 00h50, etc.)
+          currentTime = nextTime;
+          continue;
+        }
+        
+        // Cas 2: Créneaux qui commencent à partir de 01h00
+        if (slotHour >= 1 && slotHour < 12) {
+          // Créneau commence après 01h00 du matin (ex: 01h00, 02h00, etc.)
+          currentTime = nextTime;
+          continue;
+        }
+        
+        // Cas 3: Créneaux qui commencent entre 00h00 et 00h30 mais se terminent après 00h30
+        if (slotHour === 0 && slotMinute <= 30) {
+          const slotEndMinutes = slotMinute + duration;
+          if (slotEndMinutes > 30) {
+            currentTime = nextTime;
+            continue;
+          }
+        }
+        
+        // Cas 4: Créneaux qui commencent avant minuit mais se terminent après 00h30
+        if (slotHour >= 12) {
+          const slotEndTime = new Date(slotDateTime.getTime() + duration * 60 * 1000);
+          const maxTime = new Date(selectedDate);
+          maxTime.setHours(0, 30, 0, 0); // 00h30
+          maxTime.setDate(maxTime.getDate() + 1); // Le lendemain à 00h30
+
+          if (slotEndTime > maxTime) {
+            currentTime = nextTime;
+            continue;
+          }
+        }
 
         // Obtenir l'heure actuelle
         const now = new Date();
@@ -139,7 +188,7 @@ const generateTimeSlots = (
   const uniqueTimeSlots = timeSlots.reduce((acc: any[], current) => {
     // Vérifier si ce créneau existe déjà dans l'accumulateur
     const existingSlot = acc.find((slot) => slot.time === current.time);
-    
+
     if (!existingSlot) {
       // Nouveau créneau, l'ajouter
       acc.push(current);
@@ -151,7 +200,7 @@ const generateTimeSlots = (
         existingSlot.available = false;
       }
     }
-    
+
     return acc;
   }, []);
 
