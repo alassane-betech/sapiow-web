@@ -1,6 +1,7 @@
 import {
   useCreateAccountStripe,
   useGetInfoStripeAccount,
+  useUpdateBank,
 } from "@/api/proBank/useBank";
 import { Button } from "@/components/common/Button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,7 @@ export default function BankAccountSection({
 }: BankAccountSectionProps) {
   const t = useTranslations();
   const { mutate: initializeStripeAccount } = useCreateAccountStripe();
+  const { mutate: updateBank } = useUpdateBank();
   const { data: bankAccount } = useGetInfoStripeAccount();
 
   // Déterminer si un compte Stripe existe et récupérer les infos bancaires
@@ -30,6 +32,8 @@ export default function BankAccountSection({
   const last4 = externalAccount?.last4;
   const country = externalAccount?.country || stripeAccount?.country;
   const [initiateBankAccount, setInitiateBankAccount] = useState(false);
+  const [isModifying, setIsModifying] = useState(false);
+
   const handleAddBankAccount = () => {
     setInitiateBankAccount(true);
     initializeStripeAccount(undefined, {
@@ -43,6 +47,37 @@ export default function BankAccountSection({
         console.log(error);
       },
     });
+  };
+
+  const handleModifyBankAccount = () => {
+    // Récupérer l'ID du bank_account depuis external_accounts
+    const bankAccountId = externalAccount?.id;
+    
+    if (!bankAccountId) {
+      console.error("Aucun compte bancaire trouvé");
+      return;
+    }
+
+    setIsModifying(true);
+    updateBank(
+      {
+        external_account_token: bankAccountId,
+      },
+      {
+        onSuccess(data) {
+          if (data?.onboarding_url) {
+            window.location.href = data.onboarding_url;
+          }
+        },
+        onError(error) {
+          setIsModifying(false);
+          console.error(
+            "Erreur lors de la modification du compte bancaire:",
+            error
+          );
+        },
+      }
+    );
   };
   return (
     <div className="space-y-6 ml-0 lg:ml-5">
@@ -101,11 +136,16 @@ export default function BankAccountSection({
                     </div>
                   </div>
                 </div>
-                {/* <Button
-                  label={t("bankAccount.modify")}
-                  onClick={onModifyBankAccount}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 bg-transparent text-sm pb-6"
-                /> */}
+                <Button
+                  label={
+                    isModifying
+                      ? t("bankAccount.inProgress")
+                      : t("bankAccount.modify")
+                  }
+                  onClick={handleModifyBankAccount}
+                  disabled={isModifying}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 bg-transparent text-sm mb-6"
+                />
               </>
             )}
           </div>

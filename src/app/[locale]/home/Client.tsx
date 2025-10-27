@@ -77,93 +77,91 @@ export default function Client() {
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Section visios confirmées à venir */}
-      {upcomingAppointments.length > 0 && (
-        <div className="mb-6 mt-4">
-          <h2 className="mb-3 text-lg font-bold text-exford-blue font-figtree">
-            {t("home.yourNextVisio")}
-          </h2>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-            {upcomingAppointments
-              .slice(0, 2)
-              .map((appointment: ApiAppointment) => {
-                const sessionData =
-                  transformAppointmentToSessionData(appointment);
-                return (
-                  <UpcomingVideoCall
-                    key={appointment.id}
-                    date={sessionData.date}
-                    appointmentAt={appointment.appointment_at}
-                    profileImage={sessionData.profileImage}
-                    name={sessionData.professionalName}
-                    title={sessionData.professionalTitle}
-                    variant="dark"
-                    showButton={false}
-                    sessionTime={sessionData.time}
-                    className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
-                  />
-                );
-              })}
+    <>
+      <div className=" w-full">
+        {/* Section visios confirmées à venir */}
+        {upcomingAppointments.length > 0 && (
+          <div className="mb-6 mt-4">
+            <h2 className="mb-3 text-lg font-bold text-exford-blue font-figtree">
+              {t("home.yourNextVisio")}
+            </h2>
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide">
+              {upcomingAppointments
+                .slice(0, 2)
+                .map((appointment: ApiAppointment) => {
+                  const sessionData =
+                    transformAppointmentToSessionData(appointment);
+                  return (
+                    <UpcomingVideoCall
+                      key={appointment.id}
+                      date={sessionData.date}
+                      appointmentAt={appointment.appointment_at}
+                      profileImage={sessionData.profileImage}
+                      name={sessionData.professionalName}
+                      title={sessionData.professionalTitle}
+                      variant="dark"
+                      showButton={false}
+                      sessionTime={sessionData.time}
+                      className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
+                    />
+                  );
+                })}
+            </div>
           </div>
-        </div>
-      )}
-
-      <h2 className="my-2 text-lg lg:text-2xl font-normal text-exford-blue font-figtree">
-        {t("home.accelerateProject")}
-      </h2>
-      <div className="w-[90%] gap-6 py-4 overflow-x-auto scrollbar-hide">
-        {" "}
+        )}
+        <h2 className="my-2 text-lg lg:text-2xl font-normal text-exford-blue font-figtree">
+          {t("home.accelerateProject")}
+        </h2>{" "}
         <CategoryFilter
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
         />
-      </div>
-      {selectedCategory !== "top" && (
-        <SubCategoryFilter
-          selectedCategory={selectedCategory}
-          selectedSubCategory={selectedSubCategory}
-          onSubCategoryChange={handleSubCategoryChange}
-          onSortChange={handleSortChange}
-        />
-      )}
+        {/* </div> */}
+        {selectedCategory !== "top" && (
+          <SubCategoryFilter
+            selectedCategory={selectedCategory}
+            selectedSubCategory={selectedSubCategory}
+            onSubCategoryChange={handleSubCategoryChange}
+            onSortChange={handleSortChange}
+          />
+        )}
+        {selectedCategory === "top" ? (
+          // Affichage par sections pour "Top"
+          <div className="py-6 ">
+            {Object.entries(groupedProfessionals).map(
+              ([category, categoryProfessionals]) => (
+                <CategorySection
+                  key={category}
+                  category={category}
+                  professionals={categoryProfessionals as Professional[]}
+                  likedProfs={likedProfs}
+                  onToggleLike={handleToggleLike}
+                  onProfessionalClick={handleProfessionalClick}
+                />
+              )
+            )}
+          </div>
+        ) : (
+          // Affichage normal pour les autres catégories
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-4">
+            {filteredProfessionals.map((professional: Professional) => (
+              <ProfessionalCard
+                key={professional.id}
+                professional={professional}
+                isLiked={(() => {
+                  const profIdString = professional.id.toString();
+                  const isLiked = likedProfs[profIdString] || false;
 
-      {selectedCategory === "top" ? (
-        // Affichage par sections pour "Top"
-        <div className="py-6 ">
-          {Object.entries(groupedProfessionals).map(
-            ([category, categoryProfessionals]) => (
-              <CategorySection
-                key={category}
-                category={category}
-                professionals={categoryProfessionals as Professional[]}
-                likedProfs={likedProfs}
+                  return isLiked;
+                })()}
                 onToggleLike={handleToggleLike}
                 onProfessionalClick={handleProfessionalClick}
+                lineClamp={3}
               />
-            )
-          )}
-        </div>
-      ) : (
-        // Affichage normal pour les autres catégories
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-4">
-          {filteredProfessionals.map((professional: Professional) => (
-            <ProfessionalCard
-              key={professional.id}
-              professional={professional}
-              isLiked={(() => {
-                const profIdString = professional.id.toString();
-                const isLiked = likedProfs[profIdString] || false;
-
-                return isLiked;
-              })()}
-              onToggleLike={handleToggleLike}
-              onProfessionalClick={handleProfessionalClick}
-              lineClamp={3}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

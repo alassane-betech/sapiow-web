@@ -210,6 +210,9 @@ export default {
 
   // Block Day Section
   blockDaySection: {
+    question: "Availability for this day?",
+    blocked: "Blocked",
+    unblocked: "Unblocked",
     title: "Block this day?",
     description: "It is not possible to have a session on this date.",
     unblockTitle: "Unblock this day?",
@@ -482,7 +485,8 @@ export default {
     loadingFeatures: "Loading features...",
     noFeaturesYet: "No features added yet. Add one above.",
     createSessionFirst: "Create the session first to add features.",
-    sessionCreatedAddFeatures: "✅ Session created! You can now add features below.",
+    sessionCreatedAddFeatures:
+      "✅ Session created! You can now add features below.",
     creating: "Creating...",
     editing: "Editing...",
     // Offer Selection
@@ -607,6 +611,13 @@ export default {
     viewDetails: "View details",
     consultationWith: "Consultation with",
     videoConsultation: "Video consultation with",
+    // Edit/Delete questions
+    edit: "Edit",
+    delete: "Delete",
+    save: "Save",
+    confirmDeleteQuestion: "Are you sure you want to delete this question?",
+    questionUpdateError: "Error updating question",
+    questionDeleteError: "Error deleting question",
   },
 
   // Dark Session Card / Upcoming Video Call
@@ -804,6 +815,8 @@ export default {
     noTransactionsDescription:
       "Your transactions will appear here once completed",
     selectTransaction: "Select a transaction to view details",
+    sendInvoice: "Send invoice",
+    cancelled: "Cancelled",
   },
 
   // Phone Number Component

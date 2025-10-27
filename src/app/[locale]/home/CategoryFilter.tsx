@@ -35,7 +35,7 @@ export default function CategoryFilter({
   }
 
   return (
-    <div className="flex items-center gap-6 py-4 overflow-x-auto scrollbar-hide">
+    <div className="flex items-center overflow-x-auto scrollbar-hide gap-6 py-4">
       {categories.map((category) => (
         <button
           key={category.id}

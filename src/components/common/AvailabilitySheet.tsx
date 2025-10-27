@@ -47,7 +47,7 @@ export default function AvailabilitySheet({
   onClose,
 }: AvailabilitySheetProps) {
   const t = useTranslations();
-  const { proExpertData } = useProExpertStore();
+  const { proExpertData, setProExpertData } = useProExpertStore();
   const updateProExpertMutation = useUpdateProExpert();
 
   // Définir les jours de la semaine
@@ -107,13 +107,13 @@ export default function AvailabilitySheet({
   }, []);
 
   // Hooks pour chaque jour de la semaine (autoSave désactivé pour gérer la sauvegarde manuellement)
-  const sundayManager = useTimeSlotsManager({ 
+  const sundayManager = useTimeSlotsManager({
     selectedDate: weekDates.sunday,
-    autoSave: false 
+    autoSave: false,
   });
-  const mondayManager = useTimeSlotsManager({ 
+  const mondayManager = useTimeSlotsManager({
     selectedDate: weekDates.monday,
-    autoSave: false 
+    autoSave: false,
   });
   const tuesdayManager = useTimeSlotsManager({
     selectedDate: weekDates.tuesday,
@@ -127,9 +127,9 @@ export default function AvailabilitySheet({
     selectedDate: weekDates.thursday,
     autoSave: false,
   });
-  const fridayManager = useTimeSlotsManager({ 
+  const fridayManager = useTimeSlotsManager({
     selectedDate: weekDates.friday,
-    autoSave: false 
+    autoSave: false,
   });
   const saturdayManager = useTimeSlotsManager({
     selectedDate: weekDates.saturday,
@@ -243,18 +243,40 @@ export default function AvailabilitySheet({
   };
 
   // Basculer la disponibilité d'un jour
-  const toggleDayAvailability = (dayOfWeek: DayAvailability["dayOfWeek"]) => {
+  const toggleDayAvailability = (
+    dayOfWeek: DayAvailability["dayOfWeek"],
+    newValue?: boolean
+  ) => {
     const manager = getManagerForDay(dayOfWeek);
+    const currentlyAvailable = isDayAvailable(dayOfWeek);
 
-    if (isDayAvailable(dayOfWeek)) {
-      // Si le jour est disponible, supprimer tous les créneaux
-      manager.timeSlots.forEach((slot) => {
-        manager.handleRemoveTimeSlot(slot.id);
+    // Si une nouvelle valeur est fournie, l'utiliser, sinon inverser l'état actuel
+    const shouldBeAvailable = newValue !== undefined ? newValue : !currentlyAvailable;
+
+    if (!shouldBeAvailable && currentlyAvailable) {
+      // Désactivation : supprimer TOUS les créneaux du jour EN UNE SEULE FOIS
+      console.log(`🗑️ Suppression de tous les créneaux pour ${dayOfWeek}`, manager.timeSlots.length);
+      
+      if (!proExpertData?.schedules) return;
+      
+      // Filtrer tous les schedules de ce jour en une seule opération
+      const updatedSchedules = proExpertData.schedules.filter(
+        (schedule: any) => schedule.day_of_week !== dayOfWeek
+      );
+      
+      // Mettre à jour le store directement avec les schedules filtrés
+      setProExpertData({
+        ...proExpertData,
+        schedules: updatedSchedules,
       });
-    } else {
-      // Si le jour n'est pas disponible, ajouter un créneau par défaut
+      
+      console.log(`✅ Tous les créneaux de ${dayOfWeek} ont été supprimés`);
+    } else if (shouldBeAvailable && !currentlyAvailable) {
+      // Activation : ajouter un créneau par défaut
+      console.log(`➕ Ajout d'un créneau par défaut pour ${dayOfWeek}`);
       manager.handleAddTimeSlot();
     }
+    
     setHasUnsavedChanges(true);
   };
 
@@ -316,7 +338,7 @@ export default function AvailabilitySheet({
       // Collecter tous les schedules de tous les jours depuis le store
       if (proExpertData?.schedules) {
         console.log("💾 Sauvegarde de tous les schedules en un seul appel");
-        
+
         // Utiliser le premier manager pour accéder à handleSaveToServer
         // qui va sauvegarder TOUS les schedules du store
         await sundayManager.handleSaveToServer();
@@ -324,7 +346,7 @@ export default function AvailabilitySheet({
 
       setIsEditingPeriod(false);
       setHasUnsavedChanges(false);
-      
+
       // Fermer le sheet après sauvegarde réussie
       onClose();
     } catch (error) {
@@ -510,8 +532,8 @@ export default function AvailabilitySheet({
                           <div className="flex items-center justify-center">
                             <Switch
                               checked={isAvailable}
-                              onCheckedChange={() =>
-                                toggleDayAvailability(dayData.dayOfWeek)
+                              onCheckedChange={(checked) =>
+                                toggleDayAvailability(dayData.dayOfWeek, checked)
                               }
                               className="data-[state=checked]:bg-gray-900 p-0"
                             />

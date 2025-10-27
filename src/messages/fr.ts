@@ -213,6 +213,9 @@ export default {
 
   // Block Day Section
   blockDaySection: {
+    question: "Disponibilité pour ce jour ?",
+    blocked: "Bloqué",
+    unblocked: "Débloqué",
     title: "Bloquer cette journée ?",
     description: "Il n'est pas possible d'avoir une session à cette date.",
     unblockTitle: "Débloquer cette journée ?",
@@ -487,8 +490,10 @@ export default {
     deleteFeature: "Supprimer cette fonctionnalité",
     loadingFeatures: "Chargement des fonctionnalités...",
     noFeaturesYet: "Aucune fonctionnalité ajoutée. Ajoutez-en une ci-dessus.",
-    createSessionFirst: "Créez d'abord la session pour ajouter des fonctionnalités.",
-    sessionCreatedAddFeatures: "✅ Session créée ! Vous pouvez maintenant ajouter des fonctionnalités ci-dessous.",
+    createSessionFirst:
+      "Créez d'abord la session pour ajouter des fonctionnalités.",
+    sessionCreatedAddFeatures:
+      "✅ Session créée ! Vous pouvez maintenant ajouter des fonctionnalités ci-dessous.",
     creating: "Création...",
     editing: "Modification...",
     // Offer Selection
@@ -614,6 +619,13 @@ export default {
     viewDetails: "Voir détail",
     consultationWith: "Consultation avec",
     videoConsultation: "Consultation vidéo avec",
+    // Edit/Delete questions
+    edit: "Modifier",
+    delete: "Supprimer",
+    save: "Sauvegarder",
+    confirmDeleteQuestion: "Êtes-vous sûr de vouloir supprimer cette question ?",
+    questionUpdateError: "Erreur lors de la modification de la question",
+    questionDeleteError: "Erreur lors de la suppression de la question",
   },
 
   // Dark Session Card / Upcoming Video Call
@@ -811,6 +823,8 @@ export default {
     noTransactionsDescription:
       "Vos transactions apparaîtront ici une fois effectuées",
     selectTransaction: "Sélectionnez une transaction pour voir les détails",
+    sendInvoice: "Envoyer la facture",
+    cancelled: "Annulé",
   },
 
   // Phone Number Component

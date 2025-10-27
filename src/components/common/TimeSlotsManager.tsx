@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
-import { Link, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface TimeSlotsManagerProps {
@@ -69,7 +69,7 @@ export default function TimeSlotsManager({
                     handleUpdateTimeSlot(slot.id, "startTime", value)
                   }
                 >
-                  <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
+                  <SelectTrigger className="w-32 sm:w-32 bg-white border-gray-300 rounded-xl">
                     <SelectValue
                       placeholder={t("timeSlotsManager.selectStartTime")}
                     />
@@ -103,7 +103,7 @@ export default function TimeSlotsManager({
                     handleUpdateTimeSlot(slot.id, "endTime", value)
                   }
                 >
-                  <SelectTrigger className="w-20 sm:w-32 bg-white border-gray-300 rounded-xl">
+                  <SelectTrigger className="w-32 sm:w-32 bg-white border-gray-300 rounded-xl">
                     <SelectValue
                       placeholder={t("timeSlotsManager.selectEndTime")}
                     />
@@ -130,14 +130,14 @@ export default function TimeSlotsManager({
                 </Select>
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
-                <Button
+                {/* <Button
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex-shrink-0"
                   onClick={() => copyTimeSlot(slot)}
                 >
                   <Link className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 cursor-pointer" />
-                </Button>
+                </Button> */}
                 <Button
                   variant="ghost"
                   size="icon"

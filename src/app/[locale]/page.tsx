@@ -60,7 +60,7 @@ function Home() {
   }
 
   return (
-    <div className="container flex min-h-screen bg-white">
+    <div className="container lg:flex min-h-screen bg-white">
       <AppSidebar />
       <div className="flex-1 flex flex-col">
         <div className="transition-all duration-300 ease-in-out sticky top-0 z-20">

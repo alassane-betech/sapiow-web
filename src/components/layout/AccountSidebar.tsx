@@ -136,7 +136,7 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto z-50 -mt-4">
         <ul className="space-y-0">
-          <ShareLinkButton className="mb-5 mt-5" />
+          {user.type === "expert" && <ShareLinkButton className="mb-5 mt-5" />}
           {filteredNavItems.map((item) => {
             // Extraire le chemin sans la locale (fr/en) pour la comparaison
             const pathWithoutLocale = pathname.replace(/^\/(fr|en)/, "") || "/";
