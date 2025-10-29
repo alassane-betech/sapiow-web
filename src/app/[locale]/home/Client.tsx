@@ -1,6 +1,7 @@
 "use client";
 import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointments";
 import { useGetCustomer } from "@/api/customer/useCustomer";
+import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { UpcomingVideoCall } from "@/components/common/DarkSessionCard";
 import { useClientHome } from "@/hooks/useClientHome";
 import { Professional } from "@/types/professional";
@@ -18,6 +19,12 @@ import SubCategoryFilter from "./SubCategoryFilter";
 
 export default function Client() {
   const t = useTranslations();
+  
+  // Récupération du profil expert de l'utilisateur (s'il existe)
+  // On désactive les erreurs car l'utilisateur peut ne pas avoir de profil expert
+  const { data: proExpert } = useGetProExpert(true);
+  
+  // Passer l'ID du profil expert au hook pour l'exclure de la liste
   const {
     selectedCategory,
     selectedSubCategory,
@@ -31,14 +38,13 @@ export default function Client() {
     handleProfessionalClick,
     isLoading,
     error,
-  } = useClientHome();
+  } = useClientHome(proExpert?.id);
 
   // Récupération des appointments du patient
   const { data: customer } = useGetCustomer();
   const { data: appointments } = useGetPatientAppointmentsById(
     customer?.id || ""
   );
-
   // Filtrage des visios confirmées (on garde les données originales)
   const upcomingAppointments = useMemo(() => {
     if (!appointments) return [];

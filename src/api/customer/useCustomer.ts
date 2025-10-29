@@ -2,7 +2,7 @@
 
 import { SessionType } from "@/api/sessions/useSessions";
 import { apiClient } from "@/lib/api-client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Types pour les énumérations
 export type ProExpertStatus = "active" | "inactive" | "pending";
@@ -211,6 +211,39 @@ export const useUpdateCustomer = () => {
           "Une erreur est survenue lors de la mise à jour du profil"
         );
       }
+    },
+  });
+};
+
+/**
+ * Hook pour supprimer un compte client
+ */
+export const useDeleteCustomer = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, ProExpertError>({
+    mutationFn: async () => {
+      try {
+        await apiClient.delete(`patient`);
+      } catch (error: any) {
+        if (error.response?.data?.message) {
+          throw new Error(error.response.data.message);
+        }
+
+        throw new Error(
+          error.message ||
+            "Une erreur est survenue lors de la suppression du compte"
+        );
+      }
+    },
+    onSuccess: () => {
+      console.log("✅ Compte client supprimé avec succès");
+
+      // Invalide le cache pour forcer le rechargement
+      queryClient.invalidateQueries({ queryKey: ["customer"] });
+    },
+    onError: (error) => {
+      console.error("Failed to delete customer:", error);
     },
   });
 };

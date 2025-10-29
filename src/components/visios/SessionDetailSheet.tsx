@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import { useAddToCalendar } from "@/hooks/useAddToCalendar";
 import { useConversationStore } from "@/store/useConversationStore";
-import { Check, ChevronRight, Send, X } from "lucide-react";
+import { Check, ChevronRight, Pencil, Send, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -385,7 +385,7 @@ export function SessionDetailSheet({
                                   {question.question}
                                 </p>
                                 <div className="flex items-center gap-1 flex-shrink-0">
-                                  {/* <button
+                                  <button
                                     onClick={() =>
                                       handleStartEditQuestion(
                                         question.id,
@@ -396,8 +396,8 @@ export function SessionDetailSheet({
                                     title={t("sessionDetail.edit")}
                                   >
                                     <Pencil className="h-4 w-4" />
-                                  </button> */}
-                                  {/* <button
+                                  </button>
+                                  <button
                                     onClick={() =>
                                       handleDeleteQuestion(question.id)
                                     }
@@ -406,7 +406,7 @@ export function SessionDetailSheet({
                                     title={t("sessionDetail.delete")}
                                   >
                                     <Trash2 className="h-4 w-4" />
-                                  </button> */}
+                                  </button>
                                 </div>
                               </div>
                             )}

@@ -7,6 +7,7 @@ import { FormField } from "@/components/common/FormField";
 import { ProfilePhotoUpload } from "@/components/onboarding/ProfilePhotoUpload";
 import { useClientProfileUpdate } from "@/hooks/useClientProfileUpdate";
 import { useTranslations } from "next-intl";
+import { DeleteAccountModal } from "@/components/common/DeleteAccountModal";
 
 export default function ClientProfile() {
   const t = useTranslations();
@@ -20,12 +21,16 @@ export default function ClientProfile() {
     isUpdating,
     isUploadingAvatar,
     updateError,
+    isDeleteModalOpen,
+    isDeleting,
     handleFieldChange,
     handleDomainToggle,
     handleAvatarChange,
     handleAvatarDelete,
     handleSave,
     handleDeleteAccount,
+    handleConfirmDelete,
+    handleCloseDeleteModal,
   } = useClientProfileUpdate({ customer });
 
   if (isLoading) {
@@ -102,6 +107,14 @@ export default function ClientProfile() {
           onClick={handleDeleteAccount}
         />
       </div>
+
+      {/* Modal de confirmation de suppression */}
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

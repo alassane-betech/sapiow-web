@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useExpertProfileUpdate } from "@/hooks/useExpertProfileUpdate";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { DeleteAccountModal } from "@/components/common/DeleteAccountModal";
 
 export default function ExpertProfile() {
   const t = useTranslations();
@@ -20,11 +21,15 @@ export default function ExpertProfile() {
     isUpdating,
     isUploadingAvatar,
     updateError,
+    isDeleteModalOpen,
+    isDeleting,
     handleFieldChange,
     handleAvatarChange,
     handleAvatarDelete,
     handleSave,
     handleDeleteAccount,
+    handleConfirmDelete,
+    handleCloseDeleteModal,
   } = useExpertProfileUpdate({ user });
 
   if (isLoading) {
@@ -162,6 +167,14 @@ export default function ExpertProfile() {
           onClick={handleDeleteAccount}
         />
       </div>
+
+      {/* Modal de confirmation de suppression */}
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

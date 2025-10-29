@@ -26,7 +26,8 @@ export interface Expert {
   message_notification_sms: boolean;
   promotions_notification_email: boolean;
   promotions_notification_sms: boolean;
-  expertises: any[];
+  expertises?: any[]; // Peut être undefined
+  pro_expertises?: any[]; // Nom alternatif utilisé par l'API
   schedules: any[];
   sessions: any[];
   created_at: string;

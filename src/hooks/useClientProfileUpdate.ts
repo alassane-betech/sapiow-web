@@ -1,7 +1,9 @@
 import {
   UpdateCustomerData,
+  useDeleteCustomer,
   useUpdateCustomer,
 } from "@/api/customer/useCustomer";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 export interface ClientFormData {
@@ -18,6 +20,8 @@ export interface UseClientProfileUpdateProps {
 export const useClientProfileUpdate = ({
   customer,
 }: UseClientProfileUpdateProps) => {
+  const router = useRouter();
+
   // États pour les champs du formulaire
   const [formData, setFormData] = useState<ClientFormData>({
     firstName: "",
@@ -30,13 +34,17 @@ export const useClientProfileUpdate = ({
   const [isEditing, setIsEditing] = useState(false);
   const [avatar, setAvatar] = useState<File | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Hook pour la mutation
+  // Hooks pour les mutations
   const {
     mutate: updateCustomer,
     isPending: isUpdating,
     error: updateError,
   } = useUpdateCustomer();
+
+  const { mutateAsync: deleteCustomer, isPending: isDeleting } =
+    useDeleteCustomer();
 
   // Mise à jour des données du formulaire quand les données du client sont chargées
   useEffect(() => {
@@ -187,9 +195,29 @@ export const useClientProfileUpdate = ({
 
   // Gestion de la suppression du compte
   const handleDeleteAccount = useCallback(() => {
-    // TODO: Implémenter la suppression du compte
-    console.log("Suppression du compte client demandée");
+    setIsDeleteModalOpen(true);
   }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    try {
+      console.log("Suppression du compte client en cours...");
+      await deleteCustomer();
+      console.log("✅ Compte client supprimé avec succès");
+
+      // Redirection vers la page de connexion après suppression
+      localStorage.removeItem("access_token");
+      router.push("/login");
+    } catch (error) {
+      console.error("❌ Erreur lors de la suppression du compte:", error);
+      setIsDeleteModalOpen(false);
+    }
+  }, [deleteCustomer, router]);
+
+  const handleCloseDeleteModal = useCallback(() => {
+    if (!isDeleting) {
+      setIsDeleteModalOpen(false);
+    }
+  }, [isDeleting]);
 
   // Réinitialiser le formulaire
   const resetForm = useCallback(() => {
@@ -213,6 +241,8 @@ export const useClientProfileUpdate = ({
     isUpdating,
     isUploadingAvatar,
     updateError,
+    isDeleteModalOpen,
+    isDeleting,
 
     // Actions
     handleFieldChange,
@@ -221,6 +251,8 @@ export const useClientProfileUpdate = ({
     handleAvatarDelete,
     handleSave,
     handleDeleteAccount,
+    handleConfirmDelete,
+    handleCloseDeleteModal,
     resetForm,
   };
 };

@@ -59,8 +59,9 @@ const mapExpertToProfessional = (expert: Expert): Professional => {
  * - Conversion des données API experts → format Professional
  * - Navigation entre pages
  * - Délégation de la logique favoris au hook useFavoritesLogic
+ * - Exclusion de l'utilisateur connecté de la liste des experts
  */
-export const useClientHome = () => {
+export const useClientHome = (currentUserExpertId?: string) => {
   const router = useRouter();
 
   // États UI pour les filtres et catégories
@@ -84,8 +85,12 @@ export const useClientHome = () => {
   } = useFavoritesLogic();
 
   // Conversion des données API en format Professional pour l'UI
+  // Exclure l'utilisateur connecté s'il a un profil expert
   const expertsArray = expertList || [];
-  const allProfessionals = expertsArray.map(mapExpertToProfessional);
+  const filteredExpertsArray = currentUserExpertId
+    ? expertsArray.filter((expert) => expert.id !== currentUserExpertId)
+    : expertsArray;
+  const allProfessionals = filteredExpertsArray.map(mapExpertToProfessional);
 
   // États de chargement combinés
   const isLoading = isLoadingExperts || isLoadingFavorites;
@@ -117,6 +122,7 @@ export const useClientHome = () => {
   /**
    * Grouper les professionnels par catégorie pour l'affichage "Top"
    * Chaque catégorie devient une section horizontale
+   * Note: allProfessionals est déjà filtré pour exclure l'utilisateur connecté
    */
   const groupedProfessionals = allProfessionals.reduce(
     (acc: Record<string, Professional[]>, prof: Professional) => {
@@ -152,7 +158,7 @@ export const useClientHome = () => {
       // Filtrer d'abord par domaine
       const professionalsInDomain = allProfessionals.filter(
         (prof: Professional) => {
-          const expertWithDomain = expertsArray.find(
+          const expertWithDomain = filteredExpertsArray.find(
             (expert: any) => expert.id === prof.id
           );
           return expertWithDomain?.domain_id.toString() === selectedCategory;
@@ -163,12 +169,14 @@ export const useClientHome = () => {
       if (selectedSubCategory && selectedSubCategory !== "") {
         const expertiseId = Number(selectedSubCategory);
         return professionalsInDomain.filter((prof: Professional) => {
-          const expert = expertsArray.find(
+          const expert = filteredExpertsArray.find(
             (expert: any) => expert.id === prof.id
           );
 
           // Vérifier si l'expert a cette expertise dans ses expertises
-          const hasExpertise = expert?.expertises?.some((expertise: any) => {
+          // L'API peut retourner soit 'expertises' soit 'pro_expertises'
+          const expertisesArray = (expert as any)?.expertises || (expert as any)?.pro_expertises || [];
+          const hasExpertise = expertisesArray.some((expertise: any) => {
             return expertise.expertise_id === expertiseId;
           });
 
@@ -183,7 +191,7 @@ export const useClientHome = () => {
     return allProfessionals.filter((prof: Professional) => {
       return prof.category === selectedCategory;
     });
-  }, [allProfessionals, expertsArray, selectedCategory, selectedSubCategory]);
+  }, [allProfessionals, filteredExpertsArray, selectedCategory, selectedSubCategory]);
 
   return {
     // États UI

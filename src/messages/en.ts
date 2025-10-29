@@ -333,6 +333,13 @@ export default {
     profilePhotoAlt: "Profile photo",
     userIconAlt: "User icon",
     uploadIconAlt: "Upload icon",
+    // Delete Account Modal
+    deleteAccountConfirmation: "Are you sure you want to delete your account?",
+    deleteAccountWarning:
+      "This action is irreversible. All your data will be permanently deleted.",
+    cancelDelete: "Cancel",
+    confirmDelete: "Delete",
+    deleting: "Deleting...",
   },
 
   // Notification Settings

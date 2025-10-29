@@ -1,6 +1,6 @@
 "use client";
-import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export const useFavorites = () => {
@@ -8,7 +8,7 @@ export const useFavorites = () => {
   const pathname = usePathname();
   const locale = useLocale(); // Utiliser le hook de next-intl
   const [isFavoriActive, setIsFavoriActive] = useState(false);
-  const [previousPath, setPreviousPath] = useState(`/${locale}/home`);
+  const [previousPath, setPreviousPath] = useState(`/${locale}/`);
 
   // Fonction pour vérifier si on est sur la page favori (avec support des locales)
   const isFavoriPage = (path: string) => {
@@ -19,13 +19,13 @@ export const useFavorites = () => {
   useEffect(() => {
     if (pathname) {
       const isOnFavoriPage = isFavoriPage(pathname);
-      
+
       if (!isOnFavoriPage) {
         // Construire le chemin complet avec la locale
         const fullPath = `/${locale}${pathname}`;
         setPreviousPath(fullPath);
       }
-      
+
       setIsFavoriActive(isOnFavoriPage);
     }
   }, [pathname, locale]);

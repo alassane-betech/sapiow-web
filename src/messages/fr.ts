@@ -336,6 +336,14 @@ export default {
     profilePhotoAlt: "Photo de profil",
     userIconAlt: "Icône utilisateur",
     uploadIconAlt: "Icône d'upload",
+    // Delete Account Modal
+    deleteAccountConfirmation:
+      "Êtes-vous sûr de vouloir supprimer votre compte ?",
+    deleteAccountWarning:
+      "Cette action est irréversible. Toutes vos données seront définitivement supprimées.",
+    cancelDelete: "Annuler",
+    confirmDelete: "Supprimer",
+    deleting: "Suppression...",
   },
 
   // Notification Settings

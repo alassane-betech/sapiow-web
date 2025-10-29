@@ -1,7 +1,9 @@
 import {
   UpdateProExpertData,
+  useDeleteProExpert,
   useUpdateProExpert,
 } from "@/api/proExpert/useProExpert";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 export interface ExpertFormData {
@@ -23,6 +25,8 @@ export interface UseExpertProfileUpdateProps {
 export const useExpertProfileUpdate = ({
   user,
 }: UseExpertProfileUpdateProps) => {
+  const router = useRouter();
+
   // États pour les champs du formulaire
   const [formData, setFormData] = useState<ExpertFormData>({
     firstName: "",
@@ -40,13 +44,17 @@ export const useExpertProfileUpdate = ({
   const [isEditing, setIsEditing] = useState(false);
   const [avatar, setAvatar] = useState<File | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Hook pour la mutation
+  // Hooks pour les mutations
   const {
     mutate: updateProExpert,
     isPending: isUpdating,
     error: updateError,
   } = useUpdateProExpert();
+
+  const { mutateAsync: deleteProExpert, isPending: isDeleting } =
+    useDeleteProExpert();
 
   // Fonction utilitaire pour obtenir le nom du domaine à partir de son ID
   const getDomainNameById = useCallback((domainId: number): string => {
@@ -230,9 +238,29 @@ export const useExpertProfileUpdate = ({
 
   // Gestion de la suppression du compte
   const handleDeleteAccount = useCallback(() => {
-    // TODO: Implémenter la suppression du compte
-    console.log("Suppression du compte expert demandée");
+    setIsDeleteModalOpen(true);
   }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    try {
+      console.log("Suppression du compte expert en cours...");
+      await deleteProExpert();
+      console.log("✅ Compte expert supprimé avec succès");
+
+      // Redirection vers la page de connexion après suppression
+      localStorage.removeItem("access_token");
+      router.push("/login");
+    } catch (error) {
+      console.error("❌ Erreur lors de la suppression du compte:", error);
+      setIsDeleteModalOpen(false);
+    }
+  }, [deleteProExpert, router]);
+
+  const handleCloseDeleteModal = useCallback(() => {
+    if (!isDeleting) {
+      setIsDeleteModalOpen(false);
+    }
+  }, [isDeleting]);
 
   // Réinitialiser le formulaire
   const resetForm = useCallback(() => {
@@ -261,6 +289,8 @@ export const useExpertProfileUpdate = ({
     isUpdating,
     isUploadingAvatar,
     updateError,
+    isDeleteModalOpen,
+    isDeleting,
 
     // Actions
     handleFieldChange,
@@ -268,6 +298,8 @@ export const useExpertProfileUpdate = ({
     handleAvatarDelete,
     handleSave,
     handleDeleteAccount,
+    handleConfirmDelete,
+    handleCloseDeleteModal,
     resetForm,
   };
 };
