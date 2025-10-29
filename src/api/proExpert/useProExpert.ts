@@ -250,8 +250,9 @@ export const validateUpdateProExpertData = (
 
 /**
  * Hook pour récupérer un expert pro par ID
+ * @param enabled - Permet de désactiver la requête (utile pour les clients sans profil expert)
  */
-export const useGetProExpert = () => {
+export const useGetProExpert = (enabled: boolean = true) => {
   return useQuery<ProExpert, ProExpertError>({
     queryKey: ["proExpert"],
     queryFn: async () => {
@@ -271,6 +272,8 @@ export const useGetProExpert = () => {
         );
       }
     },
+    enabled, // Permet de désactiver la requête
+    retry: false, // Ne pas réessayer si l'utilisateur n'a pas de profil expert
   });
 };
 
@@ -326,7 +329,7 @@ export const useUpdateProExpert = () => {
     },
     onSuccess: (data) => {
       console.log("✅ Mutation réussie, mise à jour du cache avec:", data.data);
-      
+
       // Met à jour directement le cache avec les nouvelles données AVANT d'invalider
       if (data.data) {
         queryClient.setQueryData(["proExpert"], data.data);
@@ -337,6 +340,39 @@ export const useUpdateProExpert = () => {
     },
     onError: (error) => {
       console.error("Failed to update pro expert:", error);
+    },
+  });
+};
+
+/**
+ * Hook pour supprimer un expert pro
+ */
+export const useDeleteProExpert = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, ProExpertError>({
+    mutationFn: async () => {
+      try {
+        await apiClient.delete(`pro`);
+      } catch (error: any) {
+        if (error.response?.data?.message) {
+          throw new Error(error.response.data.message);
+        }
+
+        throw new Error(
+          error.message ||
+            "Une erreur est survenue lors de la suppression de l'expert"
+        );
+      }
+    },
+    onSuccess: () => {
+      console.log("✅ Expert supprimé avec succès");
+
+      // Invalide le cache pour forcer le rechargement
+      queryClient.invalidateQueries({ queryKey: ["proExpert"] });
+    },
+    onError: (error) => {
+      console.error("Failed to delete pro expert:", error);
     },
   });
 };
