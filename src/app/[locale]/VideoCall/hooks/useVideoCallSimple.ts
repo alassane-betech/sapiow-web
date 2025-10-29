@@ -9,7 +9,8 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMediaCleanup } from "./useMediaCleanup";
 
-const API_KEY = process.env.NEXT_SECRET_STREAM_API_KEY;
+const API_KEY = "5y5va6wjvxgf";
+console.log("API_KEY", API_KEY);
 
 interface UseVideoCallReturn {
   client: StreamVideoClient | null;
