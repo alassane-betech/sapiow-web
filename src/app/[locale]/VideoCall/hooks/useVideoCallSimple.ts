@@ -36,7 +36,7 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
   const hasInitializedRef = useRef(false);
 
   const callConfig = useMemo(() => {
-    // Utiliser proStreamUser ou patientStreamUser selon ce qui est disponible
+    // Utiliser proStreamUser ou patientStreamUser selon ce qui  disponible
     const streamUser = callData?.proStreamUser || callData?.patientStreamUser;
 
     // Utiliser uniquement les données du store (API) ou les variables d'environnement
