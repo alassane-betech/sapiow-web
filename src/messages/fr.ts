@@ -106,10 +106,10 @@ export default {
     // Session Modal
     sessionDetail: "Détail de la visio",
     pendingRequest: "Demande en attente",
-    requestedBy: "Requested by :",
-    sessionName: "Session name :",
+    requestedBy: "Demandé par :",
+    sessionName: "Nom de la session :",
     questionsComments: "Questions ou commentaires",
-    close: "Close",
+    close: "Fermer",
     refuse: "Refuser",
     confirming: "Confirmation...",
     cancelling: "Annulation...",
@@ -287,6 +287,14 @@ export default {
     pay: "Payer",
     loading: "Encours...",
     paymentError: "Erreur de paiement",
+    orderSummary: "Récapitulatif de la commande",
+    sessionWith: "Session avec",
+    quantity: "Qté",
+    subtotal: "Sous-total",
+    tax: "Taxe",
+    totalAmount: "Montant total",
+    addPromoCode: "Ajouter un code promotionnel",
+    payWithoutLink: "Payer sans Link",
   },
 
   // Account Pages
@@ -511,9 +519,10 @@ export default {
     perfectForSpecificQuestions: "Parfait pour des questions spécifiques",
     startingFrom: "À partir de",
     viewTimeSlots: "Voir les créneaux",
+    noSlotsAvailable: "Aucun créneau disponible",
     monthlySubscriptions: "Abonnements mensuels",
     chooseAndPay: "Choisir et payer",
-    creatingAppointment: "Création de l'appointment...",
+    creatingAppointment: "En cours...",
     // Features
     oneOnOneChat: "Chat 1:1",
     oneOnOneVideoCalls: "Appels vidéo 1:1",
@@ -631,7 +640,8 @@ export default {
     edit: "Modifier",
     delete: "Supprimer",
     save: "Sauvegarder",
-    confirmDeleteQuestion: "Êtes-vous sûr de vouloir supprimer cette question ?",
+    confirmDeleteQuestion:
+      "Êtes-vous sûr de vouloir supprimer cette question ?",
     questionUpdateError: "Erreur lors de la modification de la question",
     questionDeleteError: "Erreur lors de la suppression de la question",
   },
@@ -833,6 +843,7 @@ export default {
     selectTransaction: "Sélectionnez une transaction pour voir les détails",
     sendInvoice: "Envoyer la facture",
     cancelled: "Annulé",
+    paymentConsultationWith: "Paiement consultation avec",
   },
 
   // Phone Number Component

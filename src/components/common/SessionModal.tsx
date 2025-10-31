@@ -143,7 +143,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               // Modal pour "A venir" - Bouton Commencer la visio + Annuler
               <>
                 <ButtonUI
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full bg-cobalt-blue hover:bg-cobalt-blue/80 h-14 text-white flex items-center justify-center gap-2 cursor-pointer"
                   onClick={() => {
                     onAccept?.();
                     onOpenChange(false);
@@ -157,13 +157,25 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                   />
                   {t("visios.startVideo")}
                 </ButtonUI>
-                <ButtonUI
+                {/* <Button
                   variant="outline"
-                  className="w-full text-gray-700 border-gray-300 hover:bg-gray-50 bg-transparent"
-                  onClick={() => onOpenChange(false)}
-                >
-                  {t("cancel")}
-                </ButtonUI>
+                  className="flex-1 text-charcoal-blue font-figtree font-bold text-xs md:text-base border-none shadow-none hover:bg-gray-50 bg-transparent h-14 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => {
+                    onCancel?.();
+                    onOpenChange(false);
+                  }}
+                  disabled={loadingState === "cancelling"}
+                  label={
+                    loadingState === "cancelling" ? (
+                      <div className="flex items-center gap-2">
+                        <LoadingSpinner size="sm" />
+                        {t("visios.cancelling")}
+                      </div>
+                    ) : (
+                      t("visios.refuse")
+                    )
+                  }
+                /> */}
               </>
             ) : (
               // Modal pour "En attente" - Refuser + Accepter côte à côte

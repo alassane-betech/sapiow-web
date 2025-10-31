@@ -19,11 +19,9 @@ import SubCategoryFilter from "./SubCategoryFilter";
 
 export default function Client() {
   const t = useTranslations();
-  
-  // Récupération du profil expert de l'utilisateur (s'il existe)
-  // On désactive les erreurs car l'utilisateur peut ne pas avoir de profil expert
+
   const { data: proExpert } = useGetProExpert(true);
-  
+
   // Passer l'ID du profil expert au hook pour l'exclure de la liste
   const {
     selectedCategory,

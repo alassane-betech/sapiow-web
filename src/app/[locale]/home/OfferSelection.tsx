@@ -1,5 +1,8 @@
 "use client";
-import { useCreatePatientAppointment } from "@/api/appointments/useAppointments";
+import {
+  useCreatePatientAppointment,
+  useGetProAppointments,
+} from "@/api/appointments/useAppointments";
 import { Button } from "@/components/common/Button";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import SessionFeaturesList from "@/components/common/SessionFeaturesList";
@@ -8,14 +11,60 @@ import { useAppointmentStore } from "@/store/useAppointmentStore";
 import { usePayStore } from "@/store/usePay";
 import { usePlaningStore } from "@/store/usePlaning";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 interface OfferSelectionProps {
   price: string;
   expertData?: any; // Données de l'expert avec ses sessions
 }
+
+// Mapping des jours de la semaine
+const dayOfWeekMapping = {
+  0: "sunday",
+  1: "monday",
+  2: "tuesday",
+  3: "wednesday",
+  4: "thursday",
+  5: "friday",
+  6: "saturday",
+};
+
+// Fonction pour vérifier s'il y a des créneaux disponibles
+const hasAnyAvailableSlots = (
+  schedules: any[],
+  existingAppointments: any[] = []
+) => {
+  if (!schedules || schedules.length === 0) return false;
+
+  const today = new Date();
+  const todayAtMidnight = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+
+  // Vérifier les 30 prochains jours
+  for (let i = 0; i < 30; i++) {
+    const checkDate = new Date(todayAtMidnight);
+    checkDate.setDate(checkDate.getDate() + i);
+
+    const dayOfWeek =
+      dayOfWeekMapping[checkDate.getDay() as keyof typeof dayOfWeekMapping];
+
+    // Trouver les schedules pour ce jour
+    const daySchedules = schedules.filter(
+      (schedule) => schedule.day_of_week === dayOfWeek
+    );
+
+    if (daySchedules.length > 0) {
+      // Si on trouve au moins un jour avec des schedules, il y a des créneaux
+      return true;
+    }
+  }
+
+  return false;
+};
 
 export default function OfferSelection({
   price,
@@ -32,6 +81,19 @@ export default function OfferSelection({
   const { setAppointmentData } = useAppointmentStore();
   const router = useRouter();
   const createAppointmentMutation = useCreatePatientAppointment();
+
+  // Récupérer les rendez-vous existants pour vérifier les créneaux
+  const { data: appointments } = useGetProAppointments(
+    expertData?.id?.toString()
+  );
+
+  // Vérifier s'il y a des créneaux disponibles
+  const hasSlotsAvailable = useMemo(() => {
+    return hasAnyAvailableSlots(
+      expertData?.schedules || [],
+      Array.isArray(appointments) ? appointments : []
+    );
+  }, [expertData?.schedules, appointments]);
 
   // Récupérer toutes les sessions d'abonnement actives (session_type null et session_nature "subscription")
   const subscriptionSessions =
@@ -53,13 +115,7 @@ export default function OfferSelection({
     }
 
     setIsPaymentLoading(true);
-    //   const appointmentDate = new Date();
-    //   appointmentDate.setDate(appointmentDate.getDate() + 30);
 
-    //   const appointmentData = {
-    //     pro_id: expertData.id, // ID de l'expert
-    //     session_id: selectedSession.id, // ID de la session d'abonnement
-    // appointment_at: appointmentDate.toISOString(),
     try {
       // Créer la date d'aujourd'hui pour l'abonnement
       const today = new Date();
@@ -70,34 +126,33 @@ export default function OfferSelection({
         appointment_at: today.toISOString(), // Date d'aujourd'hui ISO
       };
 
-      console.log(
-        "Création de l'appointment pour l'abonnement:",
-        appointmentData
-      );
-
-      const result = await createAppointmentMutation.mutateAsync(
-        appointmentData,
-        {
-          onSuccess: (data: any) => {
-            console.log("Appointment créé avec succès:", data);
-            if (data?.appointment && data?.payment) {
-              setAppointmentData(data.appointment, data.payment);
-              // Construire l'URL de retour avec l'ID de l'expert
-              const returnUrl = `/details?id=${data.appointment.pro_id}`;
-              router.push(
-                `/payment?returnUrl=${encodeURIComponent(returnUrl)}`
-              );
-            }
-          },
-          onError: (error) => {
-            console.error(
-              "Erreur lors de la création de l'appointment:",
-              error
-            );
-            setIsPaymentLoading(false);
-          },
-        }
-      );
+      const result: any = await createAppointmentMutation.mutateAsync(appointmentData);
+      
+      console.log("Appointment créé avec succès:", result);
+      
+      // Pour les abonnements, l'API renvoie seulement { payment: {...} }
+      if (result?.payment) {
+        // Créer un objet appointment minimal avec les données qu'on a
+        const appointmentForStore = {
+          id: result.id || "",
+          pro_id: expertData.id,
+          session_id: selectedSession.id,
+          appointment_at: today.toISOString(),
+          status: "pending",
+          patient_id: "",
+          created_at: today.toISOString(),
+          updated_at: today.toISOString(),
+        };
+        
+        setAppointmentData(appointmentForStore as any, result.payment);
+        
+        // Construire l'URL de retour avec l'ID de l'expert
+        const returnUrl = `/details?id=${expertData.id}`;
+        router.push(`/payment?returnUrl=${encodeURIComponent(returnUrl)}`);
+      } else {
+        console.error("Pas de données de paiement dans la réponse");
+        setIsPaymentLoading(false);
+      }
     } catch (error) {
       console.error("Erreur lors de la création de l'appointment:", error);
       setIsPaymentLoading(false);
@@ -153,9 +208,18 @@ export default function OfferSelection({
 
               {selectedOption === "session" && (
                 <Button
-                  label={t("offers.viewTimeSlots")}
-                  className="w-full h-[56px] rounded-[8px] bg-cobalt-blue hover:bg-cobalt-blue/80 text-white"
-                  onClick={() => setIsPlaning(true)}
+                  label={
+                    hasSlotsAvailable
+                      ? t("offers.viewTimeSlots")
+                      : t("offers.noSlotsAvailable")
+                  }
+                  className={`w-full h-[56px] rounded-[8px] ${
+                    hasSlotsAvailable
+                      ? "bg-cobalt-blue hover:bg-cobalt-blue/80 text-white"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                  onClick={() => hasSlotsAvailable && setIsPlaning(true)}
+                  disabled={!hasSlotsAvailable}
                 />
               )}
             </CardContent>
@@ -191,9 +255,9 @@ export default function OfferSelection({
                           <h4 className="text-sm font-medium text-[#6B7280] mb-2 font-figtree">
                             {t("offers.whatIsIncluded")}
                           </h4>
-                          <SessionFeaturesList 
-                            sessionId={session.id} 
-                            variant="compact" 
+                          <SessionFeaturesList
+                            sessionId={session.id}
+                            variant="compact"
                           />
                         </div>
 
