@@ -284,6 +284,14 @@ export default {
     pay: "Pay",
     loading: "Loading...",
     paymentError: "Payment error",
+    orderSummary: "Order Summary",
+    sessionWith: "Session with",
+    quantity: "Qty",
+    subtotal: "Subtotal",
+    tax: "Tax",
+    totalAmount: "Total Amount",
+    addPromoCode: "Add promo code",
+    payWithoutLink: "Pay without Link",
   },
 
   // Account Pages
@@ -503,9 +511,10 @@ export default {
     perfectForSpecificQuestions: "Perfect for specific questions",
     startingFrom: "Starting from",
     viewTimeSlots: "View time slots",
+    noSlotsAvailable: "No slots available",
     monthlySubscriptions: "Monthly subscriptions",
     chooseAndPay: "Choose and pay",
-    creatingAppointment: "Creating appointment...",
+    creatingAppointment: "In progress...",
     // Features
     oneOnOneChat: "1:1 Chat",
     oneOnOneVideoCalls: "1:1 Video calls",
@@ -824,6 +833,7 @@ export default {
     selectTransaction: "Select a transaction to view details",
     sendInvoice: "Send invoice",
     cancelled: "Cancelled",
+    paymentConsultationWith: "Payment consultation with",
   },
 
   // Phone Number Component

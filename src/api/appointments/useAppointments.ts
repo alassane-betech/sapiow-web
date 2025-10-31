@@ -40,7 +40,7 @@ export interface AppointmentQuestion {
 export interface AppointmentCreate {
   pro_id: string;
   session_id: string;
-  appointment_at: string; // ISO date-time string
+  appointment_at?: string; // ISO date-time string
 }
 
 export interface AppointmentCreateResponse {

@@ -427,7 +427,7 @@ export function SessionDetailSheet({
                   <Button
                     label={t("sessionDetail.startVideo")}
                     onClick={() => onStartVideoCall?.(session.id)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                    className="flex-1 bg-cobalt-blue hover:bg-cobalt-blue/80 text-white"
                   >
                     <Image
                       src="/assets/icons/video-camera.svg"
@@ -488,8 +488,8 @@ export function SessionDetailSheet({
                     )}
                   </>
                 )}
-                <div className="w-full max-w-[90%] mx-auto flex items-center justify-center">
-                  <ButtonUI
+                <div className="w-full mx-auto flex items-center justify-end">
+                  {/* <ButtonUI
                     variant="outline"
                     className="w-full max-w-[360px] text-exford-blue font-bold border-gray-300 hover:bg-gray-50 bg-transparent font-figtree mr-2 cursor-pointer"
                     onClick={() =>
@@ -514,10 +514,10 @@ export function SessionDetailSheet({
                       alt={t("sessionDetail.calendarAlt")}
                     />
                     {t("expertDetails.addToCalendar")}
-                  </ButtonUI>
+                  </ButtonUI> */}
                   <ButtonUI
                     variant="outline"
-                    className="w-full max-w-[56px] text-exford-blue font-bold border-gray-300 hover:bg-gray-50 bg-transparent font-figtree cursor-pointer"
+                    className="w-full text-exford-blue font-bold border-gray-300 hover:bg-gray-50 bg-transparent font-figtree cursor-pointer"
                     onClick={handleOpenChat}
                   >
                     <Image

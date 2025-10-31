@@ -62,8 +62,6 @@ export default function SubCategoryFilter({
           </div>
         </div>
 
-        <div className="w-[2px] h-10 bg-light-blue-gray"></div>
-
         <button className="w-[98px] h-[40px] rounded-[8px] border border-light-blue-gray flex items-center justify-center gap-1 px-3 py-2 text-sm text-gray-500 cursor-pointer flex-shrink-0 opacity-50">
           <Image
             src="/assets/icons/sort.svg"
@@ -98,8 +96,6 @@ export default function SubCategoryFilter({
           </button>
         ))}
       </div>
-
-      <div className="w-[2px] h-10 bg-light-blue-gray"></div>
 
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>

@@ -15,7 +15,7 @@ import { usePayStore } from "@/store/usePay";
 import { ChevronLeft, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { AccountSidebar } from "../AccountSidebar";
 
@@ -81,9 +81,30 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
     setShowNotifications(!showNotifications);
   };
 
-  const handleMarkAsRead = async (notificationId: string) => {
+  const handleNotificationRedirect = (notification: any) => {
+    const title = notification.title.toLowerCase();
+    const body = notification.body?.toLowerCase() || "";
+    
+    // Déterminer le type de notification et rediriger
+    if (title.includes("message") || body.includes("message")) {
+      router.push("/messages");
+    } else if (
+      title.includes("rendez-vous") || 
+      title.includes("appointment") ||
+      title.includes("visio") ||
+      body.includes("rendez-vous") ||
+      body.includes("appointment")
+    ) {
+      router.push("/visios");
+    }
+    
+    setShowNotifications(false);
+  };
+
+  const handleMarkAsRead = async (notificationId: string, notification: any) => {
     try {
       await markNotificationAsRead(notificationId);
+      handleNotificationRedirect(notification);
     } catch (error) {
       console.error(t("header.markAsReadError"), error);
     }
@@ -253,7 +274,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
                       notifications.map((notification) => (
                         <div
                           key={notification.id}
-                          onClick={() => handleMarkAsRead(notification.id)}
+                          onClick={() => handleMarkAsRead(notification.id, notification)}
                           className={`p-3 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer ${
                             !notification.read_at ? "bg-blue-50" : ""
                           }`}

@@ -13,9 +13,11 @@ export const useModeSwitch = () => {
   // Fonction pour vérifier si les données client sont vides
   const checkIfCustomerEmpty = (data: any): boolean => {
     if (!data) return true;
-    if (data.error === "Cannot coerce the result to a single JSON object") return true;
+    if (data.error === "Cannot coerce the result to a single JSON object")
+      return true;
     if (Array.isArray(data) && data.length === 0) return true;
-    if (data.data && Array.isArray(data.data) && data.data.length === 0) return true;
+    if (data.data && Array.isArray(data.data) && data.data.length === 0)
+      return true;
     if (data.success === false) return true;
     return false;
   };
@@ -29,7 +31,7 @@ export const useModeSwitch = () => {
     } else {
       // Mode expert désactivé -> passer en mode client
       const isCustomerEmpty = checkIfCustomerEmpty(customer);
-      
+
       if (isCustomerEmpty) {
         // Pas de profil client -> rediriger vers onboarding
         sessionStorage.setItem("fromModeSwitch", "true");
