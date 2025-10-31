@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase/client";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 // Types pour les transactions de paiement
 export interface PaymentTransaction {
@@ -86,7 +87,8 @@ export const usePatientPaymentHistory = () => {
 
 // Fonction utilitaire pour transformer les données API en format d'affichage
 export const transformTransactionForDisplay = (
-  transaction: PaymentTransaction
+  transaction: PaymentTransaction,
+  t: (key: string) => string
 ): TransactionDisplay => {
   // Formatage du montant (conversion des centimes en euros)
   const amountInEuros = transaction.amount / 100;
@@ -114,7 +116,7 @@ export const transformTransactionForDisplay = (
   };
 
   // Titre de la transaction
-  const title = `Paiement consultation avec ${expertName}`;
+  const title = `${t("paymentHistory.paymentConsultationWith")} ${expertName}`;
 
   // Type de session basé sur la description ou le job de l'expert
   const session = transaction.appointment.pro.job || "Consultation";
@@ -136,8 +138,11 @@ export const transformTransactionForDisplay = (
 // Hook pour récupérer et transformer les données pour l'affichage
 export const usePatientPaymentHistoryDisplay = () => {
   const { data: transactions, ...queryResult } = usePatientPaymentHistory();
+  const t = useTranslations();
 
-  const transformedData = transactions?.map(transformTransactionForDisplay) || [];
+  const transformedData = transactions?.map((transaction) => 
+    transformTransactionForDisplay(transaction, t)
+  ) || [];
 
   return {
     ...queryResult,

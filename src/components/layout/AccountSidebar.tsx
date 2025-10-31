@@ -1,4 +1,5 @@
 import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
+import { useModeSwitch } from "@/hooks/useModeSwitch";
 import { supabase } from "@/lib/supabase/client";
 import { useUserStore } from "@/store/useUser";
 import { useTranslations } from "next-intl";
@@ -8,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
+import { Switch } from "../ui/switch";
 
 const getNavItems = (t: any) => [
   {
@@ -130,27 +132,63 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
   };
 
   const filteredNavItems = getFilteredNavItems();
-
+  const { isExpertMode, handleModeSwitch } = useModeSwitch();
   return (
     <aside className={`${sidebarClasses}`}>
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto z-50 -mt-4">
         <ul className="space-y-0">
           {user.type === "expert" && <ShareLinkButton className="mb-5 mt-5" />}
-          {filteredNavItems.map((item) => {
+
+          {/* Switch mode expert/client */}
+          {user.type === "expert" ? (
+            // Pour les experts : afficher "Mode expert"
+            <div className="flex lg:hidden items-center gap-3 bg-exford-blue px-3 py-2 rounded-full w-fit mb-4">
+              <span className="text-white font-bold">
+                {t("header.expertMode")}
+              </span>
+              <Switch
+                checked={isExpertMode}
+                onCheckedChange={handleModeSwitch}
+                className="data-[state=checked]:bg-[#1E293B] transition-all duration-500"
+              />
+            </div>
+          ) : (
+            // Pour les clients : afficher "Mode expert" ou "Mode client" selon l'état
+            hasExpertProfile && (
+              <div className="flex lg:hidden items-center gap-3 bg-exford-blue px-3 py-2 rounded-full w-fit mb-4">
+                <span className="text-white font-bold">
+                  {isExpertMode
+                    ? t("header.expertMode")
+                    : t("headerClient.clientMode")}
+                </span>
+                <Switch
+                  checked={isExpertMode}
+                  onCheckedChange={handleModeSwitch}
+                  className="data-[state=checked]:bg-[#1E293B] transition-all duration-500"
+                />
+              </div>
+            )
+          )}
+          {filteredNavItems.map((item, index) => {
             // Extraire le chemin sans la locale (fr/en) pour la comparaison
             const pathWithoutLocale = pathname.replace(/^\/(fr|en)/, "") || "/";
             const isActive = pathWithoutLocale === item.href;
+            // Ajouter mt-[10px] au premier élément si c'est un client
+            const marginTop =
+              user.type === "client" && index === 0 ? "mt-[30px]" : "mt-[3px]";
             return (
               <li key={item.label}>
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 px-2 py-0 mt-[3px] h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue font-figtree ${
+                  className={`flex items-center gap-3 px-2 py-0 ${marginTop} h-[56px] rounded-xl hover:bg-[#F7F9FB] transition group font-medium text-base text-exford-blue font-figtree ${
                     isActive ? "bg-[#F7F9FB]" : ""
                   }`}
                 >
                   <Image src={item.icon} alt="" width={22} height={22} />
-                  <span className="flex-1 text-[12px] lg:text-[15px] font-medium font-figtree">
+                  <span
+                    className={`flex-1 text-[12px] lg:text-[15px] font-medium font-figtree`}
+                  >
                     {item.label}
                   </span>
                   <svg

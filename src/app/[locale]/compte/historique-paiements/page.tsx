@@ -29,7 +29,7 @@ export default function HistoriquePaiements() {
   // Filtrage des transactions basé sur la recherche
   const filteredHistory = history.filter((transaction) => {
     if (!searchQuery.trim()) return true;
-    
+
     const query = searchQuery.toLowerCase();
     return (
       transaction.title.toLowerCase().includes(query) ||
@@ -120,7 +120,7 @@ export default function HistoriquePaiements() {
                   }
                   className="h-[48px] flex-1 lg:w-full bg-snow-blue border-none shadow-none placeholder:text-slate-gray text-base"
                 />
-                <div className="flex-shrink-0">
+                {/* <div className="flex-shrink-0">
                   <Image
                     src="/assets/icons/card_icon.svg"
                     alt={t("paymentHistory.transactionDetails")}
@@ -128,16 +128,20 @@ export default function HistoriquePaiements() {
                     height={48}
                     className="w-[48px] h-[48px] text-slate-gray cursor-pointer"
                   />
-                </div>
+                </div> */}
               </div>
               <div className="space-y-3 mt-4 px-4 lg:px-0 lg:max-w-full lg:mx-auto overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-none">
                 {filteredHistory.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500">
-                      {searchQuery.trim() ? t("search.noResults") : t("paymentHistory.noTransactions")}
+                      {searchQuery.trim()
+                        ? t("search.noResults")
+                        : t("paymentHistory.noTransactions")}
                     </p>
                     <p className="text-gray-400 text-sm mt-2">
-                      {searchQuery.trim() ? "" : t("paymentHistory.noTransactionsDescription")}
+                      {searchQuery.trim()
+                        ? ""
+                        : t("paymentHistory.noTransactionsDescription")}
                     </p>
                   </div>
                 ) : (
@@ -241,7 +245,7 @@ export default function HistoriquePaiements() {
                 }
                 className="h-[48px] flex-1 bg-snow-blue border-none shadow-none placeholder:text-slate-gray text-base"
               />
-              <div className="flex-shrink-0">
+              {/* <div className="flex-shrink-0">
                 <Image
                   src="/assets/icons/card_icon.svg"
                   alt="card"
@@ -249,7 +253,7 @@ export default function HistoriquePaiements() {
                   height={48}
                   className="w-[48px] h-[48px] text-slate-gray cursor-pointer"
                 />
-              </div>
+              </div> */}
             </div>
             {/* Contenu fusionné - Liste ou Détails */}
             <div className="mt-6 px-4 lg:px-6 max-w-[800px] mx-auto">
@@ -259,10 +263,14 @@ export default function HistoriquePaiements() {
                   {filteredHistory.length === 0 ? (
                     <div className="text-center py-8">
                       <p className="text-gray-500">
-                        {searchQuery.trim() ? t("search.noResults") : t("paymentHistory.noTransactions")}
+                        {searchQuery.trim()
+                          ? t("search.noResults")
+                          : t("paymentHistory.noTransactions")}
                       </p>
                       <p className="text-gray-400 text-sm mt-2">
-                        {searchQuery.trim() ? "" : t("paymentHistory.noTransactionsDescription")}
+                        {searchQuery.trim()
+                          ? ""
+                          : t("paymentHistory.noTransactionsDescription")}
                       </p>
                     </div>
                   ) : (

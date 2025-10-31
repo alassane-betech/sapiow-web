@@ -16,26 +16,31 @@ export function generateICSFile({
   endDate: Date;
   professionalName?: string;
 }) {
-  console.log("🔧 generateICSFile - Paramètres reçus:", { title, description, location, startDate, endDate, professionalName });
-  
+  console.log("🔧 generateICSFile - Paramètres reçus:", {
+    title,
+    description,
+    location,
+    startDate,
+    endDate,
+    professionalName,
+  });
+
   // Formater les dates au format iCalendar (YYYYMMDDTHHMMSSZ)
   const formatDate = (date: Date) => {
     console.log("📅 formatDate - Date à formater:", date);
     console.log("📅 formatDate - Date valide?", !isNaN(date.getTime()));
-    
+
     if (isNaN(date.getTime())) {
       console.error("❌ formatDate - Date invalide détectée!");
       throw new Error(`Date invalide: ${date}`);
     }
-    
+
     const isoString = date.toISOString();
     console.log("📅 formatDate - ISO string:", isoString);
-    
-    const formatted = isoString
-      .replace(/[-:]/g, "")
-      .replace(/\.\d{3}/, "");
+
+    const formatted = isoString.replace(/[-:]/g, "").replace(/\.\d{3}/, "");
     console.log("📅 formatDate - Résultat formaté:", formatted);
-    
+
     return formatted;
   };
 
@@ -66,7 +71,10 @@ END:VCALENDAR`;
 /**
  * Télécharge un fichier .ics
  */
-export function downloadICSFile(icsContent: string, filename: string = "consultation.ics") {
+export function downloadICSFile(
+  icsContent: string,
+  filename: string = "consultation.ics"
+) {
   const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -93,32 +101,46 @@ export function openGoogleCalendar({
   startDate: Date;
   endDate: Date;
 }) {
-  console.log("🌐 openGoogleCalendar - Paramètres reçus:", { title, description, location, startDate, endDate });
-  
+  console.log("🌐 openGoogleCalendar - Paramètres reçus:", {
+    title,
+    description,
+    location,
+    startDate,
+    endDate,
+  });
+
   // Format des dates pour Google Calendar (YYYYMMDDTHHMMSSZ)
   const formatGoogleDate = (date: Date) => {
     console.log("📅 formatGoogleDate - Date à formater:", date);
     console.log("📅 formatGoogleDate - Date valide?", !isNaN(date.getTime()));
-    
+
     if (isNaN(date.getTime())) {
       console.error("❌ formatGoogleDate - Date invalide détectée!");
       throw new Error(`Date invalide pour Google Calendar: ${date}`);
     }
-    
-    const formatted = date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+
+    const formatted = date
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d{3}/, "");
     console.log("📅 formatGoogleDate - Résultat formaté:", formatted);
     return formatted;
   };
 
-  const googleCalendarUrl = new URL("https://calendar.google.com/calendar/render");
+  const googleCalendarUrl = new URL(
+    "https://calendar.google.com/calendar/render"
+  );
   googleCalendarUrl.searchParams.append("action", "TEMPLATE");
   googleCalendarUrl.searchParams.append("text", title);
-  googleCalendarUrl.searchParams.append("dates", `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`);
-  
+  googleCalendarUrl.searchParams.append(
+    "dates",
+    `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`
+  );
+
   if (description) {
     googleCalendarUrl.searchParams.append("details", description);
   }
-  
+
   if (location) {
     googleCalendarUrl.searchParams.append("location", location);
   }
@@ -145,15 +167,6 @@ export function addToCalendar({
   endDate: Date;
   professionalName?: string;
 }) {
-  console.log("📅 addToCalendar appelée avec:", {
-    title,
-    description,
-    location,
-    startDate,
-    endDate,
-    professionalName,
-  });
-
   // Ouvrir Google Calendar directement
   openGoogleCalendar({
     title,

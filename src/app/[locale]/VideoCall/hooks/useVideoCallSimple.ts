@@ -9,8 +9,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMediaCleanup } from "./useMediaCleanup";
 
-const API_KEY = "5y5va6wjvxgf";
-console.log("API_KEY", API_KEY);
+const API_KEY = process.env.NEXT_PUBLIC_STREAM_API_KEY;
 
 interface UseVideoCallReturn {
   client: StreamVideoClient | null;
@@ -37,7 +36,7 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
   const hasInitializedRef = useRef(false);
 
   const callConfig = useMemo(() => {
-    // Utiliser proStreamUser ou patientStreamUser selon ce qui est disponible
+    // Utiliser proStreamUser ou patientStreamUser selon ce qui  disponible
     const streamUser = callData?.proStreamUser || callData?.patientStreamUser;
 
     // Utiliser uniquement les données du store (API) ou les variables d'environnement
@@ -106,8 +105,6 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
 
       setClient(videoClient);
       setCall(videoCall);
-
-      console.log("✅ Connexion réussie à l'appel");
     } catch (err: any) {
       console.error("❌ Erreur de connexion:", err);
       setError(err.message || "Erreur de connexion à l'appel vidéo");

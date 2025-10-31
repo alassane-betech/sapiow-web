@@ -4,7 +4,7 @@ import { useLanguageSettings } from "@/hooks/useLanguageSettings";
 import { Check, Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useState } from "react";
 import AccountLayout from "../AccountLayout";
 
@@ -28,10 +28,16 @@ const getAvailableLanguages = (t: any): Language[] => [
   },
 ];
 
+// Fonction pour définir le cookie de locale côté client
+const setLocaleCookie = (locale: string) => {
+  document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+};
+
 export default function LanguePage() {
   const t = useTranslations();
   const currentLocale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
   const { currentLanguage, isLoading, error, handleLanguageChange } =
     useLanguageSettings();
 
@@ -50,27 +56,22 @@ export default function LanguePage() {
 
     setUpdatingLanguage(localeId);
     try {
-      // 1. Sauvegarder dans la base de données (API)
+      // 1. Définir le cookie de locale pour la persistance
+      setLocaleCookie(localeId);
+      
+      // 2. Sauvegarder dans la base de données (API)
       const languageName =
         localeToLanguageMap[localeId as keyof typeof localeToLanguageMap];
       if (languageName) {
         await handleLanguageChange(languageName);
       }
 
-      // 2. Changer la locale de l'interface (next-intl)
-      // Rediriger vers la nouvelle locale
-      const currentPath = window.location.pathname;
-      // Extraire le chemin sans la locale actuelle
-      const segments = currentPath.split('/').filter(Boolean);
-      // Le premier segment est la locale actuelle, on la remplace
-      if (segments.length > 0 && (segments[0] === 'fr' || segments[0] === 'en')) {
-        segments[0] = localeId;
-      } else {
-        // Si pas de locale dans l'URL, on l'ajoute au début
-        segments.unshift(localeId);
-      }
-      const newPath = '/' + segments.join('/');
-      router.push(newPath);
+      // 3. Utiliser le router de next-intl pour changer la locale
+      // Cela garantit que la locale est correctement gérée dans toute l'application
+      router.replace(pathname, { locale: localeId as 'fr' | 'en' });
+      
+      // 4. Forcer un refresh pour s'assurer que tous les composants utilisent la nouvelle locale
+      router.refresh();
     } catch (error) {
       console.error(t("languagePage.errorChangingLanguage"), error);
     } finally {

@@ -246,7 +246,7 @@ function ProfessionalDetailContent() {
       <div className="w-full flex-1">
         <HeaderClient isBack classNameIsBack="py-1" />
         {/* <Expert /> */}
-        <div className="w-full grid grid-cols-1 lg:grid-cols-[2fr_1fr] xl:grid-cols-[1fr_386px] gap-6 pl-5 container pb-20 lg:pb-0">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-[2fr_1fr] xl:grid-cols-[1fr_386px] gap-6 pl-5 container pb-20 lg:pb-0 pr-5 md:pr-0">
           <div className="w-full max-w-[753px]">
             <div className="flex justify-center flex-col md:flex-row gap-6 mt-3">
               <div className="relative">
@@ -531,12 +531,12 @@ function ProfessionalDetailContent() {
                     }
                   />
                 </div>
-                <Button
+                {/* <Button
                   label={t("expertDetails.addToCalendar")}
                   className="mt-6 h-[56px] w-[90%] mx-auto text-base text-exford-blue font-bold bg-white hover:bg-white/20 border border-light-blue-gray shadow-none"
                   icon="/assets/icons/calendar.svg"
                   onClick={() => handleAddToCalendar(appointments?.[0])}
-                />
+                /> */}
               </aside>
             ) : (
               <>
@@ -615,12 +615,12 @@ function ProfessionalDetailContent() {
                   profileImage={professional?.image || "/assets/icons/pro2.png"}
                 />
               </div>
-              <Button
+              {/* <Button
                 label={t("expertDetails.addToCalendar")}
                 className="w-full h-[48px] text-base text-exford-blue font-bold bg-white hover:bg-white/20 border border-light-blue-gray shadow-none font-figtree"
                 icon="/assets/icons/calendar.svg"
                 onClick={() => handleAddToCalendar(appointments?.[0])}
-              />
+              /> */}
             </div>
           </div>
         </div>
