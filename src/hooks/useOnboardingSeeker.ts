@@ -24,8 +24,6 @@ export const useOnboardingSeeker = () => {
     error: domainsError,
   } = useGetDomaines();
 
-  console.log(domains);
-
   // Hook API pour l'envoi des données
   const {
     mutate: submitOnboarding,
@@ -89,17 +87,14 @@ export const useOnboardingSeeker = () => {
           setUser({
             type: "client",
           });
-          console.log("Onboarding seeker completed successfully");
         },
         onError: (error: any) => {
-          console.error("Error completing onboarding:", error);
           setError(
             error?.message || "Une erreur est survenue lors de l'inscription"
           );
         },
       });
     } catch (err) {
-      console.error("Error in completeOnboarding:", err);
       setError("Une erreur inattendue est survenue");
     }
   };

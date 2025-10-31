@@ -1,4 +1,5 @@
 "use client";
+import { useGetProAppointmentBlocks } from "@/api/appointments/useAppointments";
 import {
   useGoogleCalendarDisconnect,
   useGoogleCalendarStatus,
@@ -7,24 +8,20 @@ import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { AvailabilityButtons } from "@/components/common/AvailabilityButtons";
 import AvailabilitySheet from "@/components/common/AvailabilitySheet";
 import CustomCalendar from "@/components/common/CustomCalendar";
-import GoogleCalendarConnectButton from "@/components/common/GoogleCalendarConnectButton";
 import { PeriodType } from "@/components/common/PeriodToggle";
 import { SessionDetailsPanel } from "@/components/common/SessionDetailsPanel";
 import SyncedCalendarsSheet from "@/components/common/SyncedCalendarsSheet";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useGetProAppointmentBlocks } from "@/api/appointments/useAppointments";
 import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
 import { useCalendarStore } from "@/store/useCalendar";
 import { useProExpertStore } from "@/store/useProExpert";
 import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
@@ -76,9 +73,9 @@ export default function Disponibilites() {
     console.log("📊 Synchronisation des données API vers le store:", {
       isLoadingApi,
       hasData: !!proExpertData,
-      schedulesCount: proExpertData?.schedules?.length || 0
+      schedulesCount: proExpertData?.schedules?.length || 0,
     });
-    
+
     setLoading(isLoadingApi);
     if (proExpertData) {
       setProExpertData(proExpertData);
@@ -189,7 +186,7 @@ export default function Disponibilites() {
               />
 
               {/* Afficher la card de connexion seulement si Google Calendar n'est pas connecté */}
-              {!isGoogleConnected && (
+              {/* {!isGoogleConnected && (
                 <Card className="w-full fixed bottom-16 lg:bottom-0 max-w-[380px] bg-white border-none shadow-none h-[183px] mt-4">
                   <CardContent className="p-4 space-y-3">
                     <div>
@@ -226,7 +223,7 @@ export default function Disponibilites() {
                     </div>
                   </CardContent>
                 </Card>
-              )}
+              )} */}
             </div>
           </div>
 
