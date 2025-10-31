@@ -44,11 +44,11 @@ export const AvailabilityButtons = ({
         label={t("availabilityButtons.manageAvailability")}
         onClick={onManageAvailability}
       />
-      <AvailabilityButton
+      {/* <AvailabilityButton
         icon="/assets/icons/calendar.svg"
         label={t("availabilityButtons.syncCalendars")}
         onClick={onSyncCalendars}
-      />
+      /> */}
     </div>
   );
 };

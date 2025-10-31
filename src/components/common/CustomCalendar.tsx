@@ -176,6 +176,20 @@ export default function CustomCalendar({
     );
   };
 
+  const isPastDate = (day: number) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    
+    const checkDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
+    checkDate.setHours(0, 0, 0, 0);
+    
+    return checkDate < today;
+  };
+
   const handleDateClick = (day: number) => {
     const clickedDate = new Date(
       currentDate.getFullYear(),
@@ -195,8 +209,11 @@ export default function CustomCalendar({
   const isClickable = (day: number) => {
     const event = allEvents[day as keyof typeof allEvents];
     // Les dates barrées (unavailable) ne sont pas cliquables
-    // Les dates bloquées (blocked) et avec rendez-vous (active) restent cliquables
     if (event?.type === "unavailable") {
+      return false;
+    }
+    // Les dates passées ne sont pas cliquables
+    if (isPastDate(day)) {
       return false;
     }
     return true;
@@ -246,6 +263,7 @@ export default function CustomCalendar({
     for (let day = 1; day <= daysInMonth; day++) {
       const event = allEvents[day as keyof typeof allEvents];
       const todayIndicator = isToday(day);
+      const isPast = isPastDate(day);
       const clickedDate = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth(),
@@ -271,7 +289,8 @@ export default function CustomCalendar({
             ${event?.type === "active" ? "bg-blue-600 text-white" : ""}
             ${event?.type === "complete" ? " text-gray-700" : ""}
             ${event?.type === "unavailable" ? "bg-white" : ""}
-            ${!event && !todayIndicator ? "text-gray-900" : ""}
+            ${isPast && !event ? "opacity-40" : ""}
+            ${!event && !todayIndicator && !isPast ? "text-gray-900" : ""}
             ${isSelected ? "ring-2 ring-blue-500 ring-offset-2" : ""}
             ${clickable ? "hover:bg-opacity-80" : ""}
           `}
@@ -282,6 +301,10 @@ export default function CustomCalendar({
                 border: "1px solid #F8FAFC",
                 borderRadius: "2px",
                 position: "relative",
+              }),
+              ...(isPast && !event && {
+                backgroundColor: "#F8FAFC",
+                opacity: 0.5,
               }),
               ...(isSelected && {
                 boxShadow: "0 0 0 2px #3B82F6",
@@ -298,7 +321,7 @@ export default function CustomCalendar({
                 color:
                   todayIndicator || event?.type === "active"
                     ? "white"
-                    : event?.type === "unavailable"
+                    : event?.type === "unavailable" || isPast
                     ? "#CBD5E1"
                     : "#020617",
                 fontFamily: "Figtree",

@@ -38,16 +38,12 @@ function Onboarding() {
   return (
     <div className="container min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
       {/* Section image - cachée sur mobile et tablette, visible sur desktop */}
-      <div className="hidden lg:block relative">
-        <Image
-          src="/assets/on_boarding.png"
-          alt="Background"
-          fill
-          className="object-contain"
-          priority
-          quality={100}
-        />
-      </div>
+      <div
+        className="hidden lg:block relative bg-contain bg-center bg-no-repeat my-8"
+        style={{
+          backgroundImage: "url('/assets/on_boarding.png')",
+        }}
+      />
       <div className="flex flex-col">
         {/* Logo - visible seulement à l'étape 0 */}
         {step === 0 && (

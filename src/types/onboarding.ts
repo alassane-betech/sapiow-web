@@ -183,7 +183,7 @@ export interface OnboardingExpertData {
 export interface OnboardingExpertFormData {
   first_name: string;
   last_name: string;
-  // email: string;
+  email?: string;
   avatar?: File;
   domain_id: number;
   description?: string;
@@ -236,7 +236,9 @@ export const transformOnboardingExpertToFormData = (
 
   formData.append("first_name", data.first_name.trim());
   formData.append("last_name", data.last_name.trim());
-  // formData.append("email", data.email.trim());
+  if (data.email) {
+    formData.append("email", data.email.trim());
+  }
   formData.append("domain_id", data.domain_id.toString());
 
   if (data.avatar instanceof File) {
