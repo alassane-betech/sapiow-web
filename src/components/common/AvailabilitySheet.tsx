@@ -251,32 +251,36 @@ export default function AvailabilitySheet({
     const currentlyAvailable = isDayAvailable(dayOfWeek);
 
     // Si une nouvelle valeur est fournie, l'utiliser, sinon inverser l'état actuel
-    const shouldBeAvailable = newValue !== undefined ? newValue : !currentlyAvailable;
+    const shouldBeAvailable =
+      newValue !== undefined ? newValue : !currentlyAvailable;
 
     if (!shouldBeAvailable && currentlyAvailable) {
       // Désactivation : supprimer TOUS les créneaux du jour EN UNE SEULE FOIS
-      console.log(`🗑️ Suppression de tous les créneaux pour ${dayOfWeek}`, manager.timeSlots.length);
-      
+      console.log(
+        `🗑️ Suppression de tous les créneaux pour ${dayOfWeek}`,
+        manager.timeSlots.length
+      );
+
       if (!proExpertData?.schedules) return;
-      
+
       // Filtrer tous les schedules de ce jour en une seule opération
       const updatedSchedules = proExpertData.schedules.filter(
         (schedule: any) => schedule.day_of_week !== dayOfWeek
       );
-      
+
       // Mettre à jour le store directement avec les schedules filtrés
       setProExpertData({
         ...proExpertData,
         schedules: updatedSchedules,
       });
-      
+
       console.log(`✅ Tous les créneaux de ${dayOfWeek} ont été supprimés`);
     } else if (shouldBeAvailable && !currentlyAvailable) {
       // Activation : ajouter un créneau par défaut
       console.log(`➕ Ajout d'un créneau par défaut pour ${dayOfWeek}`);
       manager.handleAddTimeSlot();
     }
-    
+
     setHasUnsavedChanges(true);
   };
 
@@ -533,7 +537,10 @@ export default function AvailabilitySheet({
                             <Switch
                               checked={isAvailable}
                               onCheckedChange={(checked) =>
-                                toggleDayAvailability(dayData.dayOfWeek, checked)
+                                toggleDayAvailability(
+                                  dayData.dayOfWeek,
+                                  checked
+                                )
                               }
                               className="data-[state=checked]:bg-gray-900 p-0"
                             />
@@ -566,10 +573,6 @@ export default function AvailabilitySheet({
                                         value
                                       )
                                     }
-                                    onOpenChange={(open) => {
-                                      // Ne pas sauvegarder automatiquement le startTime
-                                      // L'utilisateur doit d'abord remplir endTime
-                                    }}
                                   >
                                     <SelectTrigger className="w-20 sm:w-24 bg-white border-[#E2E8F0] rounded-xl">
                                       <SelectValue />
@@ -610,18 +613,6 @@ export default function AvailabilitySheet({
                                         value
                                       )
                                     }
-                                    onOpenChange={(open) => {
-                                      if (
-                                        !open &&
-                                        session.startTime &&
-                                        session.endTime
-                                      ) {
-                                        // Sauvegarder seulement si les deux heures sont remplies
-                                        setTimeout(() => {
-                                          manager.handleSaveToServer();
-                                        }, 100);
-                                      }
-                                    }}
                                   >
                                     <SelectTrigger className="w-20 sm:w-24 bg-white border-[#E2E8F0] rounded-xl">
                                       <SelectValue />

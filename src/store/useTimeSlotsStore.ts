@@ -65,8 +65,8 @@ export const useTimeSlotsStore = create<TimeSlotsStore>((set, get) => ({
       id: `${dayOfWeek}-${Date.now()}-${Math.random()
         .toString(36)
         .substr(2, 9)}`,
-      startTime: "", // Champ vide par défaut - l'utilisateur choisit l'heure
-      endTime: "", // Champ vide par défaut
+      startTime: "9h00", // Heure de début par défaut (9h00)
+      endTime: "17h00", // Heure de fin par défaut (17h00)
     };
 
     const updatedTimeSlots = [...currentTimeSlots, newSlot];

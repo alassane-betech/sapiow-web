@@ -91,20 +91,12 @@ export const useOnboardingExpert = () => {
   };
 
   const handleAvatarChange = (file: File | null) => {
-    console.log("🖼️ Avatar sélectionné:", file);
-    console.log("🖼️ Détails du fichier:", {
-      name: file?.name,
-      size: file?.size,
-      type: file?.type,
-    });
     setAvatar(file);
   };
 
   // Fonction pour créer seulement l'expert (sans sessions) - utilisée pour "Plus tard"
   const completeOnboardingWithoutSessions = async () => {
     try {
-      console.log("Création de l'expert pro sans sessions...");
-
       // Mapper les spécialités vers le format API attendu
       const expertises = selectedSpecialties.map((expertiseId) => ({
         expertise_id: expertiseId,
@@ -114,7 +106,7 @@ export const useOnboardingExpert = () => {
       const onboardingData: OnboardingExpertData = {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
-        // email: email.trim(),
+        email: email.trim(),
         domain_id: selectedDomain
           ? mapDomainIdToNumeric(selectedDomain) || 0
           : 0,
@@ -126,23 +118,19 @@ export const useOnboardingExpert = () => {
         ...(avatar && { avatar }),
       };
 
-      // Soumettre l'expert à l'API
       await onboardingMutation.mutateAsync(onboardingData);
 
       // Rediriger vers la page d'accueil après succès
       setUser({ type: "expert" });
       router.push("/");
     } catch (error) {
-      console.error("Erreur lors de l'onboarding expert:", error);
+      console.error("❌ Erreur lors de l'onboarding expert:", error);
     }
   };
 
   // Fonction pour créer l'expert avec les sessions - utilisée pour "Terminer"
   const completeOnboarding = async () => {
     try {
-      // ÉTAPE 1: Créer l'expert pro d'abord
-      console.log("Étape 1: Création de l'expert pro...");
-
       // Mapper les spécialités vers le format API attendu
       const expertises = selectedSpecialties.map((expertiseId) => ({
         expertise_id: expertiseId,
@@ -152,7 +140,7 @@ export const useOnboardingExpert = () => {
       const onboardingData: OnboardingExpertData = {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
-        // email: email.trim(),
+        email: email.trim(),
         domain_id: selectedDomain
           ? mapDomainIdToNumeric(selectedDomain) || 0
           : 0,
@@ -168,17 +156,11 @@ export const useOnboardingExpert = () => {
       const expertResult = await onboardingMutation.mutateAsync(onboardingData);
 
       // ÉTAPE 2: Créer les sessions si des options sont configurées
-      if (
-        (expertResult as any)?.id &&
-        visioOptions.some((v) => v.enabled && v.price && Number(v.price) > 0)
-      ) {
-        console.log("✅ Étape 2: Création des sessions...");
+      const enabledOptions = visioOptions.filter(
+        (option) => option.enabled && option.price && Number(option.price) > 0
+      );
 
-        // Créer une session pour chaque option de visio activée
-        const enabledOptions = visioOptions.filter(
-          (option) => option.enabled && option.price && Number(option.price) > 0
-        );
-
+      if ((expertResult as any)?.id && enabledOptions.length > 0) {
         for (const option of enabledOptions) {
           const sessionData = {
             price: Number(option.price),
@@ -191,10 +173,6 @@ export const useOnboardingExpert = () => {
             is_active: true,
           };
 
-          console.log(
-            `Création session ${option.duration}m pour ${option.price}€`
-          );
-
           try {
             await new Promise((resolve) => {
               updateProExpert(sessionData, {
@@ -202,30 +180,29 @@ export const useOnboardingExpert = () => {
                   resolve(result);
                 },
                 onError: (error) => {
-                  console.error(`Erreur session ${option.duration}m:`, error);
+                  console.error(
+                    `❌ Erreur session ${option.duration}m:`,
+                    error
+                  );
                   resolve(null);
                 },
               });
             });
           } catch (sessionError) {
             console.error(
-              `Erreur lors de la création de la session ${option.duration}m:`,
+              `❌ Erreur lors de la création de la session ${option.duration}m:`,
               sessionError
             );
           }
         }
-
-        console.log("Toutes les sessions ont été traitées");
-      } else {
-        console.log("Aucune session à créer (pas d'options configurées)");
+      } else if (enabledOptions.length === 0) {
       }
 
       // Rediriger vers la page d'accueil après succès complet
-      console.log("Onboarding expert terminé avec succès");
       setUser({ type: "expert" });
       router.push("/");
     } catch (error) {
-      console.error("Erreur lors de l'onboarding expert:", error);
+      console.error("❌ Erreur lors de l'onboarding expert:", error);
     }
   };
 
