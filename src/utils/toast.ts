@@ -24,6 +24,14 @@ const defaultMessages = {
   dateUnblocked: "Date débloquée avec succès !",
   dateUnblockError: "Erreur lors du déblocage de la date",
   
+  // Allow Days (Périodes de disponibilité)
+  allowDayCreated: "Période de disponibilité créée avec succès !",
+  allowDayUpdated: "Période de disponibilité mise à jour avec succès !",
+  allowDayDeleted: "Période de disponibilité supprimée avec succès !",
+  allowDayCreateError: "Erreur lors de la création de la période",
+  allowDayUpdateError: "Erreur lors de la mise à jour de la période",
+  allowDayDeleteError: "Erreur lors de la suppression de la période",
+  
   // Video Call
   callConnectionError: "Erreur lors de la connexion à l'appel vidéo",
   callTokenError: "Erreur lors de la récupération du token d'appel",

@@ -12,6 +12,7 @@ import {
 import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
 import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
 interface TimeSlotsManagerProps {
   selectedDate: Date | null;
@@ -21,6 +22,7 @@ export default function TimeSlotsManager({
   selectedDate,
 }: TimeSlotsManagerProps) {
   const t = useTranslations();
+  const [useSpecificSlots, setUseSpecificSlots] = useState(false);
 
   const {
     timeSlots,
@@ -49,6 +51,15 @@ export default function TimeSlotsManager({
     );
   }
 
+  // Déterminer automatiquement le type de créneaux affichés
+  const hasSpecificSlots = timeSlots.some((slot) => slot.type === "specific");
+  const hasRecurringSlots = timeSlots.some((slot) => slot.type === "recurring");
+  const hasNewSlots = timeSlots.some((slot) => slot.id.startsWith("temp-"));
+
+  // Si on a des nouveaux créneaux ou des spécifiques, afficher "spécifique"
+  const displayedSlotType =
+    hasSpecificSlots || hasNewSlots ? "specific" : "recurring";
+
   return (
     <div className={`w-full mx-auto ${isLoadingAny ? "opacity-50" : ""}`}>
       <Card className="p-4 sm:p-6 border-gray-200">
@@ -58,6 +69,37 @@ export default function TimeSlotsManager({
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
+
+          {/* Indicateur du type de créneaux */}
+          {/* {timeSlots.length > 0 && (
+            <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              {displayedSlotType === "specific" ? (
+                <>
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm text-blue-700 font-medium">
+                    📅 Créneaux spécifiques pour cette date uniquement (
+                    {selectedDate.toLocaleDateString("fr-FR", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                    })}
+                    )
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Repeat className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-700 font-medium">
+                    🔄 Créneaux récurrents (tous les{" "}
+                    {selectedDate.toLocaleDateString("fr-FR", {
+                      weekday: "long",
+                    })}
+                    s)
+                  </span>
+                </>
+              )}
+            </div>
+          )} */}
 
           {/* Afficher les créneaux existants */}
           {timeSlots.map((slot) => (

@@ -102,7 +102,8 @@ export const useTimeSlotsStore = create<TimeSlotsStore>((set, get) => ({
         .filter((schedule) => {
           const hasStartTime =
             schedule.start_time && schedule.start_time.trim() !== "";
-          const hasEndTime = schedule.end_time && schedule.end_time.trim() !== "";
+          const hasEndTime =
+            schedule.end_time && schedule.end_time.trim() !== "";
           const isNotNaN =
             !schedule.start_time.includes("NaN") &&
             !schedule.end_time.includes("NaN");
@@ -112,7 +113,8 @@ export const useTimeSlotsStore = create<TimeSlotsStore>((set, get) => ({
         .map((schedule) => {
           // Nettoyer les métadonnées pour éviter les conflits de clés
           // Le backend va recréer tous les schedules avec de nouveaux IDs
-          const { id, pro_id, created_at, updated_at, ...cleanSchedule } = schedule;
+          const { id, pro_id, created_at, updated_at, ...cleanSchedule } =
+            schedule;
           return cleanSchedule;
         });
 

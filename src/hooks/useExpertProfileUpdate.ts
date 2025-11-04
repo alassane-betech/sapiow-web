@@ -15,6 +15,7 @@ export interface ExpertFormData {
   linkedin: string;
   website: string;
   domainName: string;
+  domainId: number | null;
   expertises: string[];
 }
 
@@ -37,6 +38,7 @@ export const useExpertProfileUpdate = ({
     linkedin: "",
     website: "",
     domainName: "",
+    domainId: null,
     expertises: [],
   });
 
@@ -96,6 +98,7 @@ export const useExpertProfileUpdate = ({
         linkedin: user.linkedin || "",
         website: user.website || "",
         domainName: getDomainNameById(user.domain_id) || "",
+        domainId: user.domain_id || null,
         expertises: user.pro_expertises || [],
       });
     }
@@ -103,10 +106,23 @@ export const useExpertProfileUpdate = ({
   console.log(user);
   // Gestion des changements de champs
   const handleFieldChange = useCallback(
-    (field: keyof ExpertFormData, value: string) => {
+    (field: keyof ExpertFormData, value: string | number | null) => {
       setFormData((prev) => ({
         ...prev,
         [field]: value,
+      }));
+      setIsEditing(true);
+    },
+    []
+  );
+
+  // Gestion du changement de domaine
+  const handleDomainChange = useCallback(
+    (domainId: number, domainName: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        domainId,
+        domainName,
       }));
       setIsEditing(true);
     },
@@ -204,9 +220,7 @@ export const useExpertProfileUpdate = ({
         email: formData.email,
         linkedin: formData.linkedin,
         website: formData.website,
-        domain_id: formData.domainName
-          ? getDomainIdByName(formData.domainName)
-          : undefined,
+        domain_id: formData.domainId || undefined,
         expertises: user?.pro_expertises || [], // Inclure les expertises existantes
         ...(avatar && { avatar }),
       };
@@ -274,6 +288,7 @@ export const useExpertProfileUpdate = ({
         linkedin: user.linkedin || "",
         website: user.website || "",
         domainName: getDomainNameById(user.domain_id) || "",
+        domainId: user.domain_id || null,
         expertises: user.pro_expertises || [],
       });
     }
@@ -294,6 +309,7 @@ export const useExpertProfileUpdate = ({
 
     // Actions
     handleFieldChange,
+    handleDomainChange,
     handleAvatarChange,
     handleAvatarDelete,
     handleSave,

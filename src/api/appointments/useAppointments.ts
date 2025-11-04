@@ -255,7 +255,16 @@ export const useCancelPatientAppointment = () => {
 export const useGetProAppointmentBlocks = () => {
   return useQuery({
     queryKey: ["pro-appointment-blocks"],
-    queryFn: () => apiClient.get(`pro-appointment-block`),
+    queryFn: async () => {
+      console.log("📥 [API] useGetProAppointmentBlocks - Récupération des blocs");
+      const response = await apiClient.get(`pro-appointment-block`);
+      console.log("✅ [API] Blocs récupérés:", response);
+      console.log("📊 [API] Nombre de blocs:", Array.isArray(response) ? response.length : 0);
+      if (Array.isArray(response) && response.length > 0) {
+        console.log("📅 [API] Dates bloquées:", response.map((b: any) => b.date));
+      }
+      return response;
+    },
   });
 };
 
@@ -263,10 +272,18 @@ export const useCreateProAppointmentBlock = () => {
   const queryClient = useQueryClient();
 
   return useMutation<BlockAppointmentResponse, Error, BlockAppointmentData>({
-    mutationFn: async (blockData: BlockAppointmentData) => {
-      return apiClient.post("pro-appointment-block", blockData);
+    mutationFn: async (blockData: BlockAppointmentData): Promise<BlockAppointmentResponse> => {
+      console.log("🔒 [API] useCreateProAppointmentBlock - Début");
+      console.log("📝 [API] blockData:", blockData);
+      const response = await apiClient.post("pro-appointment-block", blockData);
+      console.log("✅ [API] Réponse de création de bloc:", response);
+      return response as BlockAppointmentResponse;
     },
     onSuccess: (data, variables) => {
+      console.log("✅ [API] useCreateProAppointmentBlock - Succès");
+      console.log("📊 [API] data:", data);
+      console.log("📝 [API] variables:", variables);
+      
       // Invalider le cache des blocs de rendez-vous
       queryClient.invalidateQueries({
         queryKey: ["pro-appointment-blocks"],
@@ -300,12 +317,20 @@ export const useDeleteProAppointmentBlock = () => {
 
   return useMutation<any, Error, DeleteBlockAppointmentData>({
     mutationFn: async (deleteData: DeleteBlockAppointmentData) => {
+      console.log("🔓 [API] useDeleteProAppointmentBlock - Début");
+      console.log("📝 [API] deleteData:", deleteData);
       // Envoi de la date dans le body de la requête
-      return apiClient.delete(`pro-appointment-block`, {
+      const response = await apiClient.delete(`pro-appointment-block`, {
         date: deleteData.date,
       });
+      console.log("✅ [API] Réponse de suppression de bloc:", response);
+      return response;
     },
     onSuccess: (data, variables) => {
+      console.log("✅ [API] useDeleteProAppointmentBlock - Succès");
+      console.log("📊 [API] data:", data);
+      console.log("📝 [API] variables:", variables);
+      
       // Invalider le cache des blocs de rendez-vous
       queryClient.invalidateQueries({
         queryKey: ["pro-appointment-blocks"],
@@ -319,7 +344,7 @@ export const useDeleteProAppointmentBlock = () => {
       showToast.success("dateUnblocked");
     },
     onError: (error: any) => {
-      console.error("Failed to delete appointment block:", error);
+      console.error("❌ [API] Failed to delete appointment block:", error);
       showToast.error("dateUnblockError", error?.message);
     },
   });

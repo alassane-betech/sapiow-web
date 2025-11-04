@@ -7,12 +7,14 @@ import { ProfilePhotoUpload } from "@/components/onboarding/ProfilePhotoUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { useExpertProfileUpdate } from "@/hooks/useExpertProfileUpdate";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import { DeleteAccountModal } from "@/components/common/DeleteAccountModal";
+import { DomainDropdown } from "@/components/profile/DomainDropdown";
+import { useGetDomaines } from "@/api/domaine/useDomaine";
 
 export default function ExpertProfile() {
   const t = useTranslations();
   const { data: user, isLoading, error } = useGetProExpert();
+  const { data: domains = [], isLoading: isLoadingDomains } = useGetDomaines();
 
   // Hook personnalisé pour gérer la mise à jour du profil
   const {
@@ -24,6 +26,7 @@ export default function ExpertProfile() {
     isDeleteModalOpen,
     isDeleting,
     handleFieldChange,
+    handleDomainChange,
     handleAvatarChange,
     handleAvatarDelete,
     handleSave,
@@ -128,22 +131,13 @@ export default function ExpertProfile() {
       </div>
 
       <div className="mt-6">
-        <FormField
-          type="text"
-          placeholder={t("profile.expertiseDomain")}
+        <DomainDropdown
+          domains={domains}
+          selectedDomainId={formData.domainId}
+          onDomainSelect={handleDomainChange}
           label={t("profile.expertiseDomain")}
-          value={formData.domainName}
-          onChange={(e) => handleFieldChange("domainName", e.target.value)}
-          rightIcon={
-            <Image
-              src="/assets/icons/pensquare.svg"
-              alt="search"
-              width={24}
-              height={24}
-              className="cursor-pointer"
-            />
-          }
-          className="h-[56px]"
+          placeholder={t("profile.expertiseDomain")}
+          isLoading={isLoadingDomains}
         />
         <Textarea
           placeholder={t("profile.aboutYouPlaceholder")}
