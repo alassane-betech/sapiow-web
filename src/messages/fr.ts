@@ -331,6 +331,7 @@ export default {
     linkedinLink: "Lien LinkedIn",
     website: "Site web",
     expertiseDomain: "Domaine d'expertise",
+    noDomains: "Aucun domaine disponible",
     aboutYouPlaceholder: "À propos de vous",
     // Actions
     deleteAccount: "Supprimer mon compte",
@@ -909,6 +910,14 @@ export default {
     dateBlockError: "Erreur lors du blocage de la date",
     dateUnblocked: "Date débloquée avec succès !",
     dateUnblockError: "Erreur lors du déblocage de la date",
+
+    // Allow Days (Périodes de disponibilité)
+    allowDayCreated: "Période de disponibilité créée avec succès !",
+    allowDayUpdated: "Période de disponibilité mise à jour avec succès !",
+    allowDayDeleted: "Période de disponibilité supprimée avec succès !",
+    allowDayCreateError: "Erreur lors de la création de la période",
+    allowDayUpdateError: "Erreur lors de la mise à jour de la période",
+    allowDayDeleteError: "Erreur lors de la suppression de la période",
 
     // Video Call
     callConnectionError: "Erreur lors de la connexion à l'appel vidéo",

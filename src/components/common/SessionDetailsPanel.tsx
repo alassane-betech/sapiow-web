@@ -3,7 +3,6 @@ import {
   useDeleteProAppointmentBlock,
   useGetProAppointmentBlocks,
 } from "@/api/appointments/useAppointments";
-import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
 import { BlockDaySection } from "@/components/common/BlockDaySection";
 import { EmptySessionCard } from "@/components/common/EmptySessionCard";
 import TimeSlotsManager from "@/components/common/TimeSlotsManager";
@@ -34,7 +33,6 @@ export const SessionDetailsPanel = ({
   // Stores et API
   const { proExpertData, setProExpertData } = useProExpertStore();
   const { addTimeSlotLocal } = useTimeSlotsStore();
-  const updateProExpertMutation = useUpdateProExpert();
 
   // Hooks pour la gestion des blocs de dates
   const { data: blockedDates, isLoading: isLoadingBlocks } =
@@ -45,11 +43,28 @@ export const SessionDetailsPanel = ({
   // Vérifier si la date sélectionnée est bloquée
   const isDateBlocked =
     selectedDate && blockedDates && Array.isArray(blockedDates)
-      ? blockedDates.some(
-          (block: any) =>
-            new Date(block.date).toDateString() === selectedDate.toDateString()
-        )
+      ? blockedDates.some((block: any) => {
+          // Comparer les dates au format ISO (YYYY-MM-DD) pour éviter les problèmes de timezone
+          const blockDateString = block.date.split("T")[0]; // Au cas où la date contient l'heure
+          const selectedDateString = selectedDate.toISOString().split("T")[0];
+          
+          console.log("🔍 [SessionDetailsPanel] Comparaison de dates:", {
+            blockDate: blockDateString,
+            selectedDate: selectedDateString,
+            match: blockDateString === selectedDateString,
+          });
+          
+          return blockDateString === selectedDateString;
+        })
       : false;
+
+  // Debug: Log de l'état isDateBlocked
+  console.log("🔍 [SessionDetailsPanel] Calcul isDateBlocked:", {
+    selectedDate: selectedDate?.toISOString().split("T")[0],
+    blockedDatesCount: Array.isArray(blockedDates) ? blockedDates.length : 0,
+    blockedDates: Array.isArray(blockedDates) ? blockedDates.map((b: any) => b.date) : [],
+    isDateBlocked,
+  });
 
   // Vérifier s'il y a des créneaux pour la date sélectionnée
   const hasTimeSlotsForDate = (date: Date | null): boolean => {
@@ -119,21 +134,59 @@ export const SessionDetailsPanel = ({
 
   // Fonction pour gérer le blocage/déblocage de dates
   const handleBlocked = async (checked: boolean) => {
-    if (!selectedDate) return;
+    console.log("🎯 [SessionDetailsPanel] handleBlocked appelé");
+    console.log("📅 [SessionDetailsPanel] selectedDate (objet Date):", selectedDate);
+    console.log("🔄 [SessionDetailsPanel] checked (doit bloquer?):", checked);
+    console.log("📊 [SessionDetailsPanel] isDateBlocked actuel:", isDateBlocked);
+    
+    if (!selectedDate) {
+      console.log("⛔ [SessionDetailsPanel] Pas de date sélectionnée, abandon");
+      return;
+    }
 
-    // Format de date requis: "YYYY-MM-DD"
+    // Validation de la date
+    if (!(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
+      console.error("❌ [SessionDetailsPanel] Date invalide:", selectedDate);
+      return;
+    }
+
+    // Format de date requis: "YYYY-MM-DD" (ISO 8601)
+    // Utilisation de toISOString() pour garantir le format UTC correct
     const dateString = selectedDate.toISOString().split("T")[0];
+    
+    // Logs détaillés pour vérification
+    console.log("📝 [SessionDetailsPanel] Date formatée pour l'API:", dateString);
+    console.log("🗓️ [SessionDetailsPanel] Détails de la date:", {
+      année: selectedDate.getFullYear(),
+      mois: selectedDate.getMonth() + 1, // +1 car getMonth() retourne 0-11
+      jour: selectedDate.getDate(),
+      formatISO: dateString,
+    });
+
+    // Validation du format de la date (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) {
+      console.error("❌ [SessionDetailsPanel] Format de date invalide:", dateString);
+      return;
+    }
 
     try {
       if (checked) {
         // Bloquer la date
+        console.log("🔒 [SessionDetailsPanel] Appel API pour BLOQUER la date");
+        console.log("📤 [SessionDetailsPanel] Payload envoyé:", { date: dateString });
         await createBlockMutation.mutateAsync({ date: dateString });
+        console.log("✅ [SessionDetailsPanel] Date bloquée avec succès");
       } else {
         // Débloquer la date
+        console.log("🔓 [SessionDetailsPanel] Appel API pour DÉBLOQUER la date");
+        console.log("📤 [SessionDetailsPanel] Payload envoyé:", { date: dateString });
         await deleteBlockMutation.mutateAsync({ date: dateString });
+        console.log("✅ [SessionDetailsPanel] Date débloquée avec succès");
       }
     } catch (error) {
       console.error(
+        "❌ [SessionDetailsPanel]",
         checked
           ? "Erreur lors du blocage de la date: "
           : "Erreur lors du déblocage de la date: ",

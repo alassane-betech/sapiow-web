@@ -50,30 +50,30 @@ export const convertUITimeToApiTime = (uiTime: string): string => {
   if (!uiTime || uiTime.trim() === "") {
     return "";
   }
-  
+
   // Vérifier si la valeur contient déjà "NaN"
   if (uiTime.includes("NaN")) {
     console.error(`❌ Invalid time format (contains NaN): ${uiTime}`);
     return "";
   }
-  
+
   // Convertir "9h00" en "09:00:00+00"
   const [hours, minutes] = uiTime.replace("h", ":").split(":");
-  
+
   // Valider que hours et minutes sont des nombres valides
   const hourNum = parseInt(hours, 10);
   const minNum = parseInt(minutes || "0", 10);
-  
+
   if (isNaN(hourNum) || isNaN(minNum)) {
     console.error(`❌ Invalid time format (failed to parse): ${uiTime}`, {
       hours,
       minutes,
       hourNum,
-      minNum
+      minNum,
     });
     return "";
   }
-  
+
   const formattedHours = hourNum.toString().padStart(2, "0");
   const formattedMinutes = minNum.toString().padStart(2, "0");
   return `${formattedHours}:${formattedMinutes}:00+00`;
@@ -85,7 +85,7 @@ export const convertApiTimeToUITime = (apiTime: string): string => {
   if (!apiTime || apiTime.trim() === "") {
     return "";
   }
-  
+
   // Convertir "09:00:00+00" en "9h00"
   const [hours, minutes] = apiTime.split(":");
   const hourNum = parseInt(hours, 10);
@@ -127,7 +127,7 @@ export const convertApiSchedulesToTimeSlots = (
     .map((schedule, index) => {
       const startTime = convertApiTimeToUITime(schedule.start_time);
       const endTime = convertApiTimeToUITime(schedule.end_time);
-      
+
       return {
         id: `${dayOfWeek}-${schedule.id || `temp-${index}`}`,
         startTime,

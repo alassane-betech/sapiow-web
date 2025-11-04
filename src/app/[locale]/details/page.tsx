@@ -164,7 +164,7 @@ function ProfessionalDetailContent() {
     isLoading,
     error,
   } = useGetProExpertById(expertId || "");
-
+  console.log({ expertData });
   const {
     data: expertsimilar,
     isLoading: isLoadingExpertSimilar,

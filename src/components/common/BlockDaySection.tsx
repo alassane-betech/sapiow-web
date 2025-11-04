@@ -1,4 +1,3 @@
-import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -20,6 +19,29 @@ export const BlockDaySection = ({
     ? "w-full flex items-center justify-between p-4 border-t border-gray-200"
     : "w-full flex items-center justify-between p-4 mt-4 border-t border-gray-200";
 
+  // Debug: Log des props reçues
+  console.log("🔍 [BlockDaySection] Props reçues:", {
+    isBlocked,
+    isLoading,
+    isMobile,
+  });
+
+  const handleToggleClick = () => {
+    console.log("🔘 [BlockDaySection] Click sur le switch");
+    console.log("📊 [BlockDaySection] État actuel isBlocked:", isBlocked);
+    console.log("⏳ [BlockDaySection] isLoading:", isLoading);
+    
+    if (!isLoading) {
+      // On inverse l'état : si isBlocked=false, on veut bloquer (true), et vice-versa
+      const newBlockedState = !isBlocked;
+      console.log("✅ [BlockDaySection] Appel de onToggle avec:", newBlockedState);
+      console.log("🔄 [BlockDaySection] Transition:", isBlocked ? "Débloqué → Bloqué" : "Bloqué → Débloqué");
+      onToggle(newBlockedState);
+    } else {
+      console.log("⛔ [BlockDaySection] Toggle bloqué car isLoading = true");
+    }
+  };
+
   return (
     <div className={containerClasses}>
       <div className="flex flex-col gap-3 max-w-full mx-auto">
@@ -32,12 +54,27 @@ export const BlockDaySection = ({
             {t("blockDaySection.blocked")}
           </span>
 
-          {/* Switch */}
-          <Switch
-            checked={!isBlocked}
-            onCheckedChange={(checked) => !isLoading && onToggle(!checked)}
+          {/* Switch personnalisé */}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!isBlocked}
             disabled={isLoading}
-          />
+            onClick={handleToggleClick}
+            className={`
+              relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out
+              ${!isBlocked ? "bg-exford-blue" : "bg-gray-300"}
+              ${isLoading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+              focus:outline-none focus:ring-2 focus:ring-exford-blue focus:ring-offset-2
+            `}
+          >
+            <span
+              className={`
+                inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out
+                ${!isBlocked ? "translate-x-6" : "translate-x-1"}
+              `}
+            />
+          </button>
 
           {/* Label Débloqué */}
           <span className="text-sm text-exford-blue font-bold">

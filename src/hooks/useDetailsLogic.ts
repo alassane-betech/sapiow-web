@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
 import { useGetExpertises } from "@/api/domaine/useDomaine";
 import { Professional } from "@/types/professional";
+import { useMemo, useState } from "react";
 import { useFavoritesLogic } from "./useFavoritesLogic";
 
 /**
  * Hook pour isoler la logique métier de la page details
- * 
+ *
  * RESPONSABILITÉS :
  * - Transformation des données expert → Professional
  * - Mapping des expertises
@@ -16,9 +16,10 @@ export const useDetailsLogic = (expertData: any) => {
   // États UI locaux
   const [isOfferSheetOpen, setIsOfferSheetOpen] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  
+
   // Hook logique favoris (partagé avec la page d'accueil)
-  const { likedProfs, handleToggleLike, isLoadingFavorites } = useFavoritesLogic();
+  const { likedProfs, handleToggleLike, isLoadingFavorites } =
+    useFavoritesLogic();
 
   // Récupérer les expertises pour le mapping
   const { data: expertises } = useGetExpertises(
@@ -88,15 +89,15 @@ export const useDetailsLogic = (expertData: any) => {
     // Données transformées
     professional,
     expertiseNames,
-    
+
     // États UI
     isOfferSheetOpen,
     likedProfs,
     isDescriptionExpanded,
-    
+
     // États API
     isLoadingFavorites,
-    
+
     // Actions
     toggleLike: handleToggleLike, // Délégation au hook favoris
     isLiked,
