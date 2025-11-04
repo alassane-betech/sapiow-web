@@ -11,6 +11,7 @@ import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
 import { SessionDetailsData } from "@/types/availability";
 import { ApiSchedule, getDayOfWeekFromDate } from "@/types/schedule";
 import { formatDateForSession } from "@/utils/dateFormat";
+import { formatDateToLocalISO } from "@/utils/dateUtils";
 import { useLocale, useTranslations } from "next-intl";
 import { SessionPreviewCard } from "./SessionPreviewCard";
 
@@ -44,9 +45,9 @@ export const SessionDetailsPanel = ({
   const isDateBlocked =
     selectedDate && blockedDates && Array.isArray(blockedDates)
       ? blockedDates.some((block: any) => {
-          // Comparer les dates au format ISO (YYYY-MM-DD) pour éviter les problèmes de timezone
+          // Comparer les dates au format ISO (YYYY-MM-DD) en utilisant l'heure locale
           const blockDateString = block.date.split("T")[0]; // Au cas où la date contient l'heure
-          const selectedDateString = selectedDate.toISOString().split("T")[0];
+          const selectedDateString = formatDateToLocalISO(selectedDate); // ⚠️ Utiliser la date locale
           
           console.log("🔍 [SessionDetailsPanel] Comparaison de dates:", {
             blockDate: blockDateString,
@@ -151,8 +152,8 @@ export const SessionDetailsPanel = ({
     }
 
     // Format de date requis: "YYYY-MM-DD" (ISO 8601)
-    // Utilisation de toISOString() pour garantir le format UTC correct
-    const dateString = selectedDate.toISOString().split("T")[0];
+    // ⚠️ IMPORTANT: Utiliser la date LOCALE, pas UTC, pour éviter les décalages de timezone
+    const dateString = formatDateToLocalISO(selectedDate);
     
     // Logs détaillés pour vérification
     console.log("📝 [SessionDetailsPanel] Date formatée pour l'API:", dateString);
@@ -161,6 +162,8 @@ export const SessionDetailsPanel = ({
       mois: selectedDate.getMonth() + 1, // +1 car getMonth() retourne 0-11
       jour: selectedDate.getDate(),
       formatISO: dateString,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      offsetMinutes: selectedDate.getTimezoneOffset(),
     });
 
     // Validation du format de la date (YYYY-MM-DD)
