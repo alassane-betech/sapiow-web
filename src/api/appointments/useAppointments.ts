@@ -256,12 +256,20 @@ export const useGetProAppointmentBlocks = () => {
   return useQuery({
     queryKey: ["pro-appointment-blocks"],
     queryFn: async () => {
-      console.log("📥 [API] useGetProAppointmentBlocks - Récupération des blocs");
+      console.log(
+        "📥 [API] useGetProAppointmentBlocks - Récupération des blocs"
+      );
       const response = await apiClient.get(`pro-appointment-block`);
       console.log("✅ [API] Blocs récupérés:", response);
-      console.log("📊 [API] Nombre de blocs:", Array.isArray(response) ? response.length : 0);
+      console.log(
+        "📊 [API] Nombre de blocs:",
+        Array.isArray(response) ? response.length : 0
+      );
       if (Array.isArray(response) && response.length > 0) {
-        console.log("📅 [API] Dates bloquées:", response.map((b: any) => b.date));
+        console.log(
+          "📅 [API] Dates bloquées:",
+          response.map((b: any) => b.date)
+        );
       }
       return response;
     },
@@ -272,18 +280,13 @@ export const useCreateProAppointmentBlock = () => {
   const queryClient = useQueryClient();
 
   return useMutation<BlockAppointmentResponse, Error, BlockAppointmentData>({
-    mutationFn: async (blockData: BlockAppointmentData): Promise<BlockAppointmentResponse> => {
-      console.log("🔒 [API] useCreateProAppointmentBlock - Début");
-      console.log("📝 [API] blockData:", blockData);
+    mutationFn: async (
+      blockData: BlockAppointmentData
+    ): Promise<BlockAppointmentResponse> => {
       const response = await apiClient.post("pro-appointment-block", blockData);
-      console.log("✅ [API] Réponse de création de bloc:", response);
       return response as BlockAppointmentResponse;
     },
     onSuccess: (data, variables) => {
-      console.log("✅ [API] useCreateProAppointmentBlock - Succès");
-      console.log("📊 [API] data:", data);
-      console.log("📝 [API] variables:", variables);
-      
       // Invalider le cache des blocs de rendez-vous
       queryClient.invalidateQueries({
         queryKey: ["pro-appointment-blocks"],
@@ -330,7 +333,7 @@ export const useDeleteProAppointmentBlock = () => {
       console.log("✅ [API] useDeleteProAppointmentBlock - Succès");
       console.log("📊 [API] data:", data);
       console.log("📝 [API] variables:", variables);
-      
+
       // Invalider le cache des blocs de rendez-vous
       queryClient.invalidateQueries({
         queryKey: ["pro-appointment-blocks"],
