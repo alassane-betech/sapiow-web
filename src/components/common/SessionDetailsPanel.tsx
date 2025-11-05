@@ -61,7 +61,7 @@ export const SessionDetailsPanel = ({
 
   // Debug: Log de l'état isDateBlocked
   console.log("🔍 [SessionDetailsPanel] Calcul isDateBlocked:", {
-    selectedDate: selectedDate?.toISOString().split("T")[0],
+    selectedDate: selectedDate ? formatDateToLocalISO(selectedDate) : null,
     blockedDatesCount: Array.isArray(blockedDates) ? blockedDates.length : 0,
     blockedDates: Array.isArray(blockedDates) ? blockedDates.map((b: any) => b.date) : [],
     isDateBlocked,
