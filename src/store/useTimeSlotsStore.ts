@@ -61,12 +61,47 @@ export const useTimeSlotsStore = create<TimeSlotsStore>((set, get) => ({
     const dayOfWeek = getDayOfWeekFromDate(date);
     const currentTimeSlots = get().getTimeSlotsForDate(schedules, date);
 
+    // Fonction pour convertir "Xh30" en nombre (ex: "9h30" -> 9.5)
+    const timeToNumber = (time: string): number => {
+      const [hours, minutes] = time.replace("h", ":").split(":");
+      return parseInt(hours) + (parseInt(minutes || "0") / 60);
+    };
+
+    // Fonction pour convertir un nombre en format "Xh30"
+    const formatTime = (num: number): string => {
+      const hours = Math.floor(num);
+      const minutes = (num % 1) * 60;
+      return `${hours}h${minutes === 0 ? "00" : minutes.toString().padStart(2, "0")}`;
+    };
+
+    // Calculer le prochain créneau disponible
+    let startTime = "8h30"; // Par défaut
+    let endTime = "9h00";   // Par défaut (30 minutes après)
+
+    if (currentTimeSlots.length > 0) {
+      // Trouver le dernier créneau
+      const lastSlot = currentTimeSlots[currentTimeSlots.length - 1];
+      
+      if (lastSlot.endTime) {
+        // Calculer le prochain créneau après le dernier
+        const lastEndTimeNum = timeToNumber(lastSlot.endTime);
+        const nextStartTimeNum = lastEndTimeNum + 0.5; // +30 minutes
+
+        // Si on dépasse 23h30, revenir au début
+        if (nextStartTimeNum < 24) {
+          const nextEndTimeNum = nextStartTimeNum + 0.5; // +30 minutes
+          startTime = formatTime(nextStartTimeNum);
+          endTime = formatTime(nextEndTimeNum);
+        }
+      }
+    }
+
     const newSlot: UITimeSlot = {
       id: `${dayOfWeek}-${Date.now()}-${Math.random()
         .toString(36)
         .substr(2, 9)}`,
-      startTime: "9h00", // Heure de début par défaut (9h00)
-      endTime: "17h00", // Heure de fin par défaut (17h00)
+      startTime, // Calculé intelligemment
+      endTime,   // Calculé intelligemment (30 minutes après)
     };
 
     const updatedTimeSlots = [...currentTimeSlots, newSlot];

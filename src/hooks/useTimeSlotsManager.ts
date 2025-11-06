@@ -1,10 +1,4 @@
 import { useUpdateProExpert } from "@/api/proExpert/useProExpert";
-import {
-  useCreateProAppointmentAllowDay,
-  useGetProAppointmentAllowDays,
-  useUpdateProAppointmentAllowDay,
-  useDeleteProAppointmentAllowDay,
-} from "@/api/appointments/useProAppointmentAllowDay";
 import { useProExpertStore } from "@/store/useProExpert";
 import { useTimeSlotsStore } from "@/store/useTimeSlotsStore";
 import { getDayOfWeekFromDate } from "@/types/schedule";
@@ -40,13 +34,6 @@ export const useTimeSlotsManager = ({
 
   const updateProExpertMutation = useUpdateProExpert();
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Hooks pour les créneaux spécifiques (Allow Days)
-  const { data: allowDays, isLoading: isLoadingAllowDays } =
-    useGetProAppointmentAllowDays();
-  const createAllowDayMutation = useCreateProAppointmentAllowDay();
-  const updateAllowDayMutation = useUpdateProAppointmentAllowDay();
-  const deleteAllowDayMutation = useDeleteProAppointmentAllowDay();
 
   // Générer les options d'heures (de 00h00 à 23h30 par tranches de 30 minutes)
   const generateTimeOptions = () => {
@@ -96,84 +83,18 @@ export const useTimeSlotsManager = ({
   // Charger les créneaux depuis le store quand les données ou la date changent
   useEffect(() => {
     if (selectedDate && proExpertData?.schedules) {
-      // 1. Chercher d'abord les créneaux spécifiques (Allow Days) pour cette date
-      const dateString = selectedDate.toISOString().split("T")[0];
-      const specificSlots = allowDays?.filter((slot) => {
-        const slotDate = new Date(slot.start_date).toISOString().split("T")[0];
-        return slotDate === dateString;
-      });
-
-      // 2. Si créneaux spécifiques trouvés, les utiliser
-      if (specificSlots && specificSlots.length > 0) {
-        const formattedSlots = specificSlots.map((slot) => {
-          // Extraire l'heure de la date ISO
-          const startDate = new Date(slot.start_date);
-          const endDate = new Date(slot.end_date);
-          
-          // Formater en "Xh00" ou "XhYY"
-          const startHour = startDate.getUTCHours();
-          const startMinute = startDate.getUTCMinutes();
-          const endHour = endDate.getUTCHours();
-          const endMinute = endDate.getUTCMinutes();
-          
-          const startTime = `${startHour}h${startMinute.toString().padStart(2, '0')}`;
-          const endTime = `${endHour}h${endMinute.toString().padStart(2, '0')}`;
-          
-          return {
-            id: `allow-${slot.id}`,
-            startTime,
-            endTime,
-            type: "specific",
-            allowDayId: slot.id, // Déjà un string
-          };
-        });
-        setTimeSlots(formattedSlots);
-        console.log("📅 Créneaux spécifiques chargés:", formattedSlots);
-      } else {
-        // 3. Sinon, utiliser les schedules récurrents
-        const slots = getTimeSlotsForDate(proExpertData.schedules, selectedDate);
-        setTimeSlots(slots.map((slot) => ({ ...slot, type: "recurring" })));
-        console.log("🔄 Créneaux récurrents chargés:", slots);
-      }
+      const slots = getTimeSlotsForDate(proExpertData.schedules, selectedDate);
+      setTimeSlots(slots);
     } else {
       setTimeSlots([]);
     }
-  }, [selectedDate, proExpertData?.schedules, allowDays, getTimeSlotsForDate]);
+  }, [selectedDate, proExpertData?.schedules, getTimeSlotsForDate]);
 
   const handleRemoveTimeSlot = async (slotId: string) => {
     if (!selectedDate || !proExpertData?.schedules) return;
 
-    // Vérifier si c'est un créneau temporaire (pas encore sauvegardé)
-    const isTempSlot = slotId.startsWith("temp-");
-    
-    if (isTempSlot) {
-      // Supprimer localement uniquement (pas encore dans la BDD)
-      console.log("🗑️ Suppression d'un créneau temporaire:", slotId);
-      setTimeSlots(timeSlots.filter((slot) => slot.id !== slotId));
-      return;
-    }
-
-    // Vérifier si c'est un créneau spécifique (Allow Day)
-    const isSpecificSlot = slotId.startsWith("allow-");
-
-    if (isSpecificSlot) {
-      // Supprimer un créneau spécifique via l'API Allow Days
-      const allowDayId = slotId.replace("allow-", "");
-      console.log("🗑️ Suppression d'un créneau spécifique:", allowDayId);
-      
-      try {
-        await deleteAllowDayMutation.mutateAsync(allowDayId);
-        console.log("✅ Créneau spécifique supprimé");
-      } catch (error) {
-        console.error("❌ Erreur lors de la suppression du créneau spécifique:", error);
-      }
-      return;
-    }
-
-    // Si c'est un créneau récurrent (Schedule)
     // Si autoSave est désactivé, supprimer localement uniquement
     if (!autoSave) {
-      console.log("⏸️ Suppression locale uniquement (autoSave désactivé)");
       const dayOfWeek = getDayOfWeekFromDate(selectedDate);
       const currentTimeSlots = getTimeSlotsForDate(
         proExpertData.schedules,
@@ -210,7 +131,6 @@ export const useTimeSlotsManager = ({
 
     // Si autoSave est activé, supprimer et sauvegarder immédiatement
     try {
-      console.log("💾 Suppression avec sauvegarde automatique");
       const updatedSchedules = await removeTimeSlot(
         proExpertData.schedules,
         selectedDate,
@@ -237,164 +157,86 @@ export const useTimeSlotsManager = ({
     field: "startTime" | "endTime",
     value: string
   ) => {
-    if (!selectedDate) return;
+    if (!selectedDate || !proExpertData?.schedules) return;
 
-    // Récupérer le créneau AVANT modification
-    const currentSlot = timeSlots.find((slot) => slot.id === slotId);
-    const wasComplete =
-      currentSlot && currentSlot.startTime && currentSlot.endTime;
-
-    console.log("🔄 Mise à jour du créneau:", {
+    const updatedSchedules = updateTimeSlotLocal(
+      proExpertData.schedules,
+      selectedDate,
       slotId,
       field,
-      oldValue: currentSlot?.[field],
-      newValue: value,
-      wasComplete,
-      slotType: currentSlot?.type,
+      value
+    );
+
+    // Mettre à jour le store principal localement
+    setProExpertData({
+      ...proExpertData,
+      schedules: updatedSchedules,
     });
 
-    // Mettre à jour localement dans l'état
-    const updatedSlots = timeSlots.map((slot) =>
-      slot.id === slotId ? { ...slot, [field]: value } : slot
+    // Vérifier si le créneau est maintenant complet (les deux champs remplis)
+    const updatedTimeSlots = getTimeSlotsForDate(
+      updatedSchedules,
+      selectedDate
     );
-    setTimeSlots(updatedSlots);
-
-    // Vérifier si le créneau est maintenant complet
-    const updatedSlot = updatedSlots.find((slot) => slot.id === slotId);
+    const updatedSlot = updatedTimeSlots.find((slot) => slot.id === slotId);
     const isNowComplete =
       updatedSlot && updatedSlot.startTime && updatedSlot.endTime;
 
-    // Vérifier que startTime < endTime
+    // Vérifier que startTime < endTime (validation de cohérence)
     const isValid =
       isNowComplete &&
       timeToNumber(updatedSlot.startTime) < timeToNumber(updatedSlot.endTime);
 
-    console.log("✅ État après mise à jour:", {
-      isNowComplete,
-      isValid,
-      startTime: updatedSlot?.startTime,
-      endTime: updatedSlot?.endTime,
-      autoSave,
-    });
-
-    // Sauvegarder automatiquement si le créneau est complet et valide
+    // Sauvegarder automatiquement seulement si autoSave est activé
     if (isValid && autoSave) {
-      console.log("💾 Création d'un créneau spécifique (Allow Day)");
-      handleSaveSpecificSlot(updatedSlot);
-    } else if (isValid && !autoSave) {
-      console.log(
-        "⏸️ Sauvegarde automatique désactivée - changements en local uniquement"
-      );
-    }
-  };
-
-  // Sauvegarder un créneau spécifique (Allow Day)
-  const handleSaveSpecificSlot = async (slot: any) => {
-    if (!selectedDate || !slot.startTime || !slot.endTime) return;
-
-    try {
-      // Convertir les heures en format ISO
-      const dateString = selectedDate.toISOString().split("T")[0];
-      const startTime = slot.startTime.replace("h", ":");
-      const endTime = slot.endTime.replace("h", ":");
-      
-      const startDate = `${dateString}T${startTime}:00Z`;
-      const endDate = `${dateString}T${endTime}:00Z`;
-
-      // Vérifier si c'est une mise à jour (allowDayId existe) ou une création
-      if (slot.allowDayId) {
-        // UPDATE - Le créneau existe déjà
-        console.log("🔄 Mise à jour créneau spécifique:", { 
-          id: slot.allowDayId, // Déjà un string
-          startDate, 
-          endDate 
-        });
-        
-        const result = await updateAllowDayMutation.mutateAsync({
-          id: slot.allowDayId, // Déjà un string
-          start_date: startDate,
-          end_date: endDate,
-        });
-        
-        console.log("✅ Créneau spécifique mis à jour:", result);
-      } else {
-        // CREATE - Nouveau créneau
-        console.log("📅 Création créneau spécifique:", { startDate, endDate });
-        
-        const result = await createAllowDayMutation.mutateAsync({
-          start_date: startDate,
-          end_date: endDate,
-        });
-        
-        console.log("✅ Créneau spécifique créé:", result);
-        
-        // Mettre à jour le slot local avec l'ID retourné par l'API
-        // La réponse peut être result.id ou result.data.id selon apiClient
-        const newId = (result as any)?.id || (result as any)?.data?.id;
-        
-        if (newId) {
-          const updatedSlots = timeSlots.map((s) =>
-            s.id === slot.id
-              ? {
-                  ...s,
-                  id: `allow-${newId}`,
-                  allowDayId: newId,
-                }
-              : s
-          );
-          setTimeSlots(updatedSlots);
-          console.log("🔄 Slot mis à jour avec l'ID:", newId);
-        } else {
-          console.warn("⚠️ Impossible de récupérer l'ID du créneau créé:", result);
-        }
-      }
-    } catch (error) {
-      console.error("❌ Erreur lors de la sauvegarde du créneau spécifique:", error);
+      handleSaveToServerWithSchedules(updatedSchedules);
     }
   };
 
   // Ajouter un nouveau créneau localement
   const handleAddTimeSlot = () => {
-    if (!selectedDate) return;
+    if (!selectedDate || !proExpertData?.schedules) return;
 
-    // Trouver le dernier créneau pour suggérer une heure de début
-    let suggestedStartTime = "9h00"; // Valeur par défaut
-    let suggestedEndTime = "10h00";
+    const result = addTimeSlotLocal(proExpertData.schedules, selectedDate);
 
-    if (timeSlots.length > 0) {
-      // Prendre l'heure de fin du dernier créneau comme heure de début suggérée
-      const lastSlot = timeSlots[timeSlots.length - 1];
-      if (lastSlot.endTime) {
-        suggestedStartTime = lastSlot.endTime;
-        
-        // Calculer l'heure de fin suggérée (+1 heure)
-        const endTimeNum = timeToNumber(suggestedStartTime) + 1;
-        const endHour = Math.floor(endTimeNum);
-        const endMinute = (endTimeNum % 1) * 60;
-        suggestedEndTime = `${endHour}h${endMinute.toString().padStart(2, '0')}`;
-      }
-    }
-
-    // Créer un nouveau créneau avec des valeurs par défaut
-    const newSlot = {
-      id: `temp-${Date.now()}`,
-      startTime: suggestedStartTime,
-      endTime: suggestedEndTime,
-      type: "specific", // Toujours créer comme spécifique dans TimeSlotsManager
-    };
-
-    setTimeSlots([...timeSlots, newSlot]);
-    console.log("➕ Nouveau créneau ajouté (type: specific):", {
-      startTime: suggestedStartTime,
-      endTime: suggestedEndTime,
+    // Mettre à jour le store principal
+    setProExpertData({
+      ...proExpertData,
+      schedules: result.schedules,
     });
-    
-    // Note : La sauvegarde se fera automatiquement quand l'utilisateur modifie les heures via handleUpdateTimeSlot
   };
 
-  // Wrapper pour la compatibilité (pas utilisé dans TimeSlotsManager mais gardé pour autres usages)
+  // Sauvegarder sur le serveur avec debouncing pour éviter les doublons
+  const handleSaveToServerWithSchedules = async (schedulesToSave: any[]) => {
+    if (!schedulesToSave) return;
+
+    // Annuler le timeout précédent s'il existe
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Programmer la sauvegarde avec un délai réduit
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        await saveSchedulesToServer(
+          schedulesToSave,
+          async (updateData: any) => {
+            const result = await updateProExpertMutation.mutateAsync(
+              updateData
+            );
+            return result.data;
+          }
+        );
+      } catch (error) {
+        console.error("❌ Error saving to server:", error);
+      }
+    }, 300); // Réduit à 300ms pour une meilleure réactivité
+  };
+
+  // Wrapper pour la compatibilité (utilise les schedules du store)
   const handleSaveToServer = async () => {
-    console.log("⚠️ handleSaveToServer appelé - Non utilisé dans TimeSlotsManager");
+    if (!proExpertData?.schedules) return;
+    await handleSaveToServerWithSchedules(proExpertData.schedules);
   };
 
   // Nettoyer le timeout au démontage du composant

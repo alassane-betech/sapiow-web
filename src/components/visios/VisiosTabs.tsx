@@ -56,7 +56,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
         </TabsList>
 
         <TabsContent value="a-venir" className="mt-6">
-          <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4 items-start">
             {confirmedAppointments.length > 0 ? (
               confirmedAppointments.map((appointment: any) => {
                 const appointmentDate = new Date(appointment.appointment_at);
@@ -101,6 +101,11 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     icon="/assets/icons/videocamera.svg"
                     isUpcoming={true}
                     questions={appointment.appointment_questions || []}
+                    buttonStates={{
+                      acceptDisabled:
+                        new Date(appointment.appointment_at) > new Date(),
+                    }}
+                    appointmentAt={appointment.appointment_at}
                   />
                 );
               })
@@ -113,7 +118,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
         </TabsContent>
 
         <TabsContent value="en-attente" className="mt-6">
-          <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4 items-start">
             {pendingAppointments.length > 0 ? (
               pendingAppointments.map((appointment: any) => {
                 const appointmentDate = new Date(appointment.appointment_at);
@@ -167,7 +172,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
         </TabsContent>
 
         <TabsContent value="historique" className="mt-6">
-          <div className="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 gap-4 items-start">
             {historicAppointments.length > 0 ? (
               historicAppointments.map((appointment: any) => {
                 const appointmentDate = new Date(appointment.appointment_at);
@@ -202,7 +207,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                         ? t("visios.cancelled")
                         : t("visios.completed")
                     }
-                    buttonStates={{ acceptDisabled: true, viewDisabled: false }}
+                    buttonStates={{ acceptDisabled: true, viewDisabled: true }}
                     isUpcoming={true}
                     questions={appointment.appointment_questions || []}
                   />

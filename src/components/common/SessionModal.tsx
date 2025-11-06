@@ -36,6 +36,7 @@ interface SessionModalProps {
   onCancel?: () => void;
   questions?: AppointmentQuestion[];
   loadingState?: "confirming" | "cancelling" | null;
+  appointmentAt?: string;
 }
 
 export const SessionModal: React.FC<SessionModalProps> = ({
@@ -50,6 +51,7 @@ export const SessionModal: React.FC<SessionModalProps> = ({
   onCancel,
   questions = [],
   loadingState = null,
+  appointmentAt,
 }) => {
   const t = useTranslations();
 
@@ -97,9 +99,6 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                 <p className="font-bold text-gunmetal-gray text-sm font-figtree">
                   {name}
                 </p>
-                {/* <p className="text-xs font-medium text-bluish-gray font-figtree mt-1">
-                  Student, ESOC
-                </p> */}
               </div>
             </div>
           </div>
@@ -143,11 +142,14 @@ export const SessionModal: React.FC<SessionModalProps> = ({
               // Modal pour "A venir" - Bouton Commencer la visio + Annuler
               <>
                 <ButtonUI
-                  className="w-full bg-cobalt-blue hover:bg-cobalt-blue/80 h-14 text-white flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full bg-cobalt-blue hover:bg-cobalt-blue/80 h-14 text-white flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => {
                     onAccept?.();
                     onOpenChange(false);
                   }}
+                  disabled={
+                    appointmentAt ? new Date(appointmentAt) > new Date() : false
+                  }
                 >
                   <Image
                     src="/assets/icons/videocamera.svg"
@@ -157,25 +159,6 @@ export const SessionModal: React.FC<SessionModalProps> = ({
                   />
                   {t("visios.startVideo")}
                 </ButtonUI>
-                {/* <Button
-                  variant="outline"
-                  className="flex-1 text-charcoal-blue font-figtree font-bold text-xs md:text-base border-none shadow-none hover:bg-gray-50 bg-transparent h-14 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  onClick={() => {
-                    onCancel?.();
-                    onOpenChange(false);
-                  }}
-                  disabled={loadingState === "cancelling"}
-                  label={
-                    loadingState === "cancelling" ? (
-                      <div className="flex items-center gap-2">
-                        <LoadingSpinner size="sm" />
-                        {t("visios.cancelling")}
-                      </div>
-                    ) : (
-                      t("visios.refuse")
-                    )
-                  }
-                /> */}
               </>
             ) : (
               // Modal pour "En attente" - Refuser + Accepter côte à côte

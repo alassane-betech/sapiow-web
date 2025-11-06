@@ -1,5 +1,5 @@
 "use client";
-import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointments";
+import { useGetPatientAppointments } from "@/api/appointments/useAppointments";
 import { useGetCustomer } from "@/api/customer/useCustomer";
 import { UpcomingVideoCall } from "@/components/common/DarkSessionCard";
 import { HeaderClient } from "@/components/layout/header/HeaderClient";
@@ -40,8 +40,18 @@ export default function Client() {
 
   const { data: customer } = useGetCustomer();
 
+  // Filtrer les rendez-vous futurs (>= aujourd'hui à minuit)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayISO = today.toISOString();
+
   const { data: appointments, isLoading: isLoadingAppointments, refetch } =
-    useGetPatientAppointmentsById(customer?.id || "");
+    useGetPatientAppointments(customer?.id, {
+      gteField: "appointment_at",
+      gte: todayISO,
+      orderBy: "appointment_at",
+      orderDirection: "asc",
+    });
 
   // Écouteur d'événement pour l'annulation de rendez-vous
   useEffect(() => {
@@ -57,10 +67,33 @@ export default function Client() {
     };
   }, [refetch]);
 
-  // Transformation et filtrage des données
+  // Transformation et filtrage des données avec filtre de fin de session
   const { upcomingConfirmed, otherUpcoming } = useMemo(() => {
     if (!appointments) return { upcomingConfirmed: [], otherUpcoming: [] };
-    return filterAndSortAppointments(appointments as ApiAppointment[]);
+    
+    // Filtrer les rendez-vous dont l'heure de fin n'est pas encore passée
+    const filteredAppointments = (appointments as ApiAppointment[]).filter((apt) => {
+      // Calculer l'heure de fin du rendez-vous (date + durée)
+      const appointmentDate = new Date(apt.appointment_at);
+      const sessionDuration = apt.session?.session_type || "30mn";
+      
+      // Extraire les minutes de la durée
+      let durationMinutes = 30;
+      if (sessionDuration.includes("mn")) {
+        durationMinutes = parseInt(sessionDuration);
+      } else if (sessionDuration.includes("h")) {
+        durationMinutes = parseInt(sessionDuration) * 60;
+      }
+      
+      // Calculer l'heure de fin
+      const endTime = new Date(appointmentDate.getTime() + durationMinutes * 60000);
+      const now = new Date();
+      
+      // Garder seulement si l'heure de fin n'est pas encore passée
+      return endTime > now;
+    });
+    
+    return filterAndSortAppointments(filteredAppointments);
   }, [appointments]);
 
   const otherSessionsData = useMemo(

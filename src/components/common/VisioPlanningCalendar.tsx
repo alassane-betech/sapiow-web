@@ -479,10 +479,11 @@ export default function VisioPlanningCalendar({
 
       // Le jour est cliquable s'il est aujourd'hui ou dans le futur, et non bloqué
       const isBlocked = isDateBlocked(dayDate);
-      
+
       // Vérifier si la date a des créneaux disponibles
-      const hasSlotsAvailable = isFutureOrToday && !isBlocked && hasAvailableSlots(dayDate);
-      
+      const hasSlotsAvailable =
+        isFutureOrToday && !isBlocked && hasAvailableSlots(dayDate);
+
       const isClickable = isFutureOrToday && !isBlocked && hasSlotsAvailable;
 
       days.push(

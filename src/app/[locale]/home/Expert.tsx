@@ -68,7 +68,18 @@ export default function Expert() {
 
   const { data: proExpert, isLoading: proExpertLoading } = useGetProExpert();
   const { data: statistics, isLoading: statisticsLoading } = useGetStatistics();
-  const { data: appointments } = useGetProAppointments(proExpert?.id);
+
+  // Filtrer uniquement les rendez-vous futurs (>= aujourd'hui à 00:00:00)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayISO = today.toISOString();
+
+  const { data: appointments } = useGetProAppointments(proExpert?.id, {
+    gteField: "appointment_at",
+    gte: todayISO,
+    orderBy: "appointment_at",
+    orderDirection: "asc",
+  });
 
   // Calculer le nombre de demandes en attente
   const pendingAppointments = Array.isArray(appointments)
@@ -223,12 +234,37 @@ export default function Expert() {
             <h1 className="text-lg font-bold font-figtree text-cobalt-blue-500 mb-[11px] mt-[19px]">
               {t("home.nextVisio")}
             </h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 mb-20">
               {Array.isArray(appointments) && appointments.length > 0 ? (
                 appointments
                   .filter(
                     (appointment: any) => appointment.status === "confirmed"
                   )
+                  .filter((appointment: any) => {
+                    // Calculer l'heure de fin du rendez-vous (date + durée)
+                    const appointmentDate = new Date(
+                      appointment.appointment_at
+                    );
+                    const sessionDuration =
+                      appointment.session?.session_type || "30mn";
+
+                    // Extraire les minutes de la durée (ex: "30mn" -> 30, "1h" -> 60)
+                    let durationMinutes = 30; // Valeur par défaut
+                    if (sessionDuration.includes("mn")) {
+                      durationMinutes = parseInt(sessionDuration);
+                    } else if (sessionDuration.includes("h")) {
+                      durationMinutes = parseInt(sessionDuration) * 60;
+                    }
+
+                    // Calculer l'heure de fin
+                    const endTime = new Date(
+                      appointmentDate.getTime() + durationMinutes * 60000
+                    );
+                    const now = new Date();
+
+                    // Garder seulement si l'heure de fin n'est pas encore passée
+                    return endTime > now;
+                  })
                   .map((appointment: any) => {
                     const appointmentDate = new Date(
                       appointment.appointment_at
@@ -276,6 +312,11 @@ export default function Expert() {
                         textButton={t("visios.startVideo")}
                         icon="/assets/icons/videocamera.svg"
                         questions={appointment.appointment_questions || []}
+                        buttonStates={{
+                          acceptDisabled:
+                            new Date(appointment.appointment_at) > new Date(),
+                        }}
+                        appointmentAt={appointment.appointment_at}
                       />
                     );
                   })

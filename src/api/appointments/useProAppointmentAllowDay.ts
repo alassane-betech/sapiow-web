@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Types
 export interface ProAppointmentAllowDay {
-  id: string;
+  id: string | number; // L'API peut retourner un number
   created_at: string;
   pro_id: string;
   start_date: string;
@@ -61,7 +61,11 @@ export const useUpdateProAppointmentAllowDay = () => {
   return useMutation({
     mutationFn: async (updateData: UpdateAllowDayData) => {
       // L'ID est dans le body, pas dans l'URL
-      return apiClient.put("pro-appointment-allow-day", updateData);
+      // Convertir l'ID en string pour s'assurer que l'API reçoit le bon type
+      return apiClient.put("pro-appointment-allow-day", {
+        ...updateData,
+        id: String(updateData.id),
+      });
     },
     onSuccess: () => {
       // Invalider le cache pour recharger les données
@@ -82,10 +86,11 @@ export const useDeleteProAppointmentAllowDay = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (allowDayId: string) => {
+    mutationFn: async (allowDayId: string | number) => {
       // L'ID est dans le body, pas dans l'URL
+      // Convertir en string pour s'assurer que l'API reçoit le bon type
       return apiClient.delete("pro-appointment-allow-day", {
-        id: allowDayId,
+        id: String(allowDayId),
       });
     },
     onSuccess: () => {

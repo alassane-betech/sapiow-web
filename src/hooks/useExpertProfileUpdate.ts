@@ -16,7 +16,7 @@ export interface ExpertFormData {
   website: string;
   domainName: string;
   domainId: number | null;
-  expertises: string[];
+  expertises: number[]; // IDs des expertises
 }
 
 export interface UseExpertProfileUpdateProps {
@@ -89,6 +89,25 @@ export const useExpertProfileUpdate = ({
   // Mise à jour des données du formulaire quand les données de l'expert sont chargées
   useEffect(() => {
     if (user) {
+      // Convertir les expertises en IDs si nécessaire
+      let expertiseIds: number[] = [];
+      if (user.pro_expertises && user.pro_expertises.length > 0) {
+        // Si c'est un tableau d'objets avec expertise_id
+        if (
+          typeof user.pro_expertises[0] === "object" &&
+          user.pro_expertises[0]?.expertise_id !== undefined
+        ) {
+          expertiseIds = user.pro_expertises.map((exp: any) => exp.expertise_id);
+          console.log("📋 Expertises chargées depuis le profil:", expertiseIds);
+        }
+        // Si c'est déjà un tableau de nombres
+        else if (typeof user.pro_expertises[0] === "number") {
+          expertiseIds = user.pro_expertises;
+        }
+        // Si c'est un tableau de strings (noms), on ne peut pas les convertir directement
+        // Dans ce cas, on laisse vide et l'utilisateur devra resélectionner
+      }
+
       setFormData({
         firstName: user.first_name || "",
         lastName: user.last_name || "",
@@ -99,7 +118,7 @@ export const useExpertProfileUpdate = ({
         website: user.website || "",
         domainName: getDomainNameById(user.domain_id) || "",
         domainId: user.domain_id || null,
-        expertises: user.pro_expertises || [],
+        expertises: expertiseIds,
       });
     }
   }, [user, getDomainNameById]);
@@ -123,11 +142,21 @@ export const useExpertProfileUpdate = ({
         ...prev,
         domainId,
         domainName,
+        expertises: [], // Réinitialiser les expertises quand on change de domaine
       }));
       setIsEditing(true);
     },
     []
   );
+
+  // Gestion du changement des expertises
+  const handleExpertisesChange = useCallback((expertises: number[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      expertises,
+    }));
+    setIsEditing(true);
+  }, []);
 
   // Gestion du changement d'avatar avec upload automatique
   const handleAvatarChange = useCallback(
@@ -212,6 +241,11 @@ export const useExpertProfileUpdate = ({
   // Gestion de la sauvegarde
   const handleSave = useCallback(async () => {
     try {
+      // Convertir les IDs d'expertises au format attendu par l'API
+      const expertisesFormatted = formData.expertises.map((id) => ({
+        expertise_id: String(id),
+      }));
+
       const updateData: UpdateProExpertData = {
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -221,9 +255,11 @@ export const useExpertProfileUpdate = ({
         linkedin: formData.linkedin,
         website: formData.website,
         domain_id: formData.domainId || undefined,
-        expertises: user?.pro_expertises || [], // Inclure les expertises existantes
+        expertises: expertisesFormatted,
         ...(avatar && { avatar }),
       };
+
+      console.log("📤 Expertises envoyées:", expertisesFormatted);
 
       // Filtrer les champs vides pour ne pas les envoyer (sauf email qui doit toujours être envoyé)
       Object.keys(updateData).forEach((key) => {
@@ -239,10 +275,15 @@ export const useExpertProfileUpdate = ({
         onSuccess: () => {
           setIsEditing(false);
           setAvatar(null);
-          console.log("Profil expert mis à jour avec succès");
+          console.log("✅ Profil expert mis à jour avec succès");
         },
-        onError: (error) => {
-          console.error("Erreur lors de la sauvegarde:", error);
+        onError: (error: any) => {
+          console.error("❌ Erreur lors de la sauvegarde:", error);
+          console.error("❌ Message d'erreur:", error?.message);
+          console.error(
+            "❌ Détails de l'erreur:",
+            JSON.stringify(error, null, 2)
+          );
         },
       });
     } catch (error) {
@@ -310,6 +351,7 @@ export const useExpertProfileUpdate = ({
     // Actions
     handleFieldChange,
     handleDomainChange,
+    handleExpertisesChange,
     handleAvatarChange,
     handleAvatarDelete,
     handleSave,

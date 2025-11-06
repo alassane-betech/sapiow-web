@@ -126,10 +126,12 @@ export default function OfferSelection({
         appointment_at: today.toISOString(), // Date d'aujourd'hui ISO
       };
 
-      const result: any = await createAppointmentMutation.mutateAsync(appointmentData);
-      
+      const result: any = await createAppointmentMutation.mutateAsync(
+        appointmentData
+      );
+
       console.log("Appointment créé avec succès:", result);
-      
+
       // Pour les abonnements, l'API renvoie seulement { payment: {...} }
       if (result?.payment) {
         // Créer un objet appointment minimal avec les données qu'on a
@@ -143,9 +145,9 @@ export default function OfferSelection({
           created_at: today.toISOString(),
           updated_at: today.toISOString(),
         };
-        
+
         setAppointmentData(appointmentForStore as any, result.payment);
-        
+
         // Construire l'URL de retour avec l'ID de l'expert
         const returnUrl = `/details?id=${expertData.id}`;
         router.push(`/payment?returnUrl=${encodeURIComponent(returnUrl)}`);

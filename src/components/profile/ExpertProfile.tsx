@@ -1,15 +1,16 @@
 "use client";
 
+import { useGetDomaines, useGetExpertises } from "@/api/domaine/useDomaine";
 import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { Button } from "@/components/common/Button";
+import { DeleteAccountModal } from "@/components/common/DeleteAccountModal";
 import { FormField } from "@/components/common/FormField";
 import { ProfilePhotoUpload } from "@/components/onboarding/ProfilePhotoUpload";
+import { DomainDropdown } from "@/components/profile/DomainDropdown";
+import { ExpertiseSelector } from "@/components/profile/ExpertiseSelector";
 import { Textarea } from "@/components/ui/textarea";
 import { useExpertProfileUpdate } from "@/hooks/useExpertProfileUpdate";
 import { useTranslations } from "next-intl";
-import { DeleteAccountModal } from "@/components/common/DeleteAccountModal";
-import { DomainDropdown } from "@/components/profile/DomainDropdown";
-import { useGetDomaines } from "@/api/domaine/useDomaine";
 
 export default function ExpertProfile() {
   const t = useTranslations();
@@ -27,6 +28,7 @@ export default function ExpertProfile() {
     isDeleting,
     handleFieldChange,
     handleDomainChange,
+    handleExpertisesChange,
     handleAvatarChange,
     handleAvatarDelete,
     handleSave,
@@ -35,6 +37,18 @@ export default function ExpertProfile() {
     handleCloseDeleteModal,
   } = useExpertProfileUpdate({ user });
 
+  // Charger les expertises pour le domaine sélectionné
+  const { data: expertises = [], isLoading: isLoadingExpertises } =
+    useGetExpertises(formData.domainId || 0);
+
+  // Gérer le toggle des expertises
+  const handleExpertiseToggle = (expertiseId: number) => {
+    const newExpertises = formData.expertises.includes(expertiseId)
+      ? formData.expertises.filter((e) => e !== expertiseId)
+      : [...formData.expertises, expertiseId];
+    handleExpertisesChange(newExpertises);
+  };
+  console.log({ expertises });
   if (isLoading) {
     return (
       <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
@@ -139,6 +153,19 @@ export default function ExpertProfile() {
           placeholder={t("profile.expertiseDomain")}
           isLoading={isLoadingDomains}
         />
+
+        {/* Sélecteur d'expertises */}
+        {formData.domainId && (
+          <div className="mt-4">
+            <ExpertiseSelector
+              selectedExpertises={formData.expertises}
+              expertises={expertises}
+              isLoadingExpertises={isLoadingExpertises}
+              onExpertiseToggle={handleExpertiseToggle}
+            />
+          </div>
+        )}
+
         <Textarea
           placeholder={t("profile.aboutYouPlaceholder")}
           value={formData.description}

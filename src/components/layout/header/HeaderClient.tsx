@@ -12,6 +12,7 @@ import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useMobileMenu } from "@/hooks/useMobileMenu";
 import { usePayStore } from "@/store/usePay";
+import { useSearchStore } from "@/store/useSearchStore";
 import { ChevronLeft, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -37,6 +38,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   const { isFavoriActive, handleFavoriToggle } = useFavorites();
   const { setIsPaid } = usePayStore();
   const { isMobileMenuOpen, toggleMobileMenu } = useMobileMenu();
+  const { searchQuery, setSearchQuery } = useSearchStore();
 
   // Hooks pour les notifications patient
   const { data: notifications } = usePatientNotifications();
@@ -164,6 +166,8 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
                 name="search"
                 type="text"
                 placeholder={t("headerClient.searchPlaceholder")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 leftIcon={
                   <Search className="w-6 h-6 text-slate-gray cursor-pointer hidden lg:block" />
                 }

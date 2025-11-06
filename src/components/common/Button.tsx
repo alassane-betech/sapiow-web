@@ -27,7 +27,7 @@ export const Button = ({
   return (
     <ButtonUI
       className={cn(baseStyles, defaultStyles, className)}
-      // disabled={disabled}
+      disabled={disabled}
       {...props}
     >
       {icon &&

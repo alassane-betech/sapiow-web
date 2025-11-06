@@ -330,6 +330,11 @@ export default {
     expertiseDomain: "Expertise domain",
     noDomains: "No domains available",
     aboutYouPlaceholder: "About you",
+    // Expertises
+    specialties: "Specialties",
+    loadingExpertises: "Loading specialties...",
+    noExpertisesAvailable: "No specialties available for this domain",
+    specialtiesSelected: "specialty(ies) selected",
     // Actions
     deleteAccount: "Delete my account",
     saving: "Saving...",

@@ -9,10 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
+import { useDateTimeSlotsManager } from "@/hooks/useDateTimeSlotsManager";
 import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 interface TimeSlotsManagerProps {
   selectedDate: Date | null;
@@ -22,7 +21,6 @@ export default function TimeSlotsManager({
   selectedDate,
 }: TimeSlotsManagerProps) {
   const t = useTranslations();
-  const [useSpecificSlots, setUseSpecificSlots] = useState(false);
 
   const {
     timeSlots,
@@ -31,12 +29,10 @@ export default function TimeSlotsManager({
     error,
     isTimeSlotTaken,
     getEndTimeOptions,
-    copyTimeSlot,
     handleAddTimeSlot,
     handleUpdateTimeSlot,
     handleRemoveTimeSlot,
-    handleSaveToServer,
-  } = useTimeSlotsManager({ selectedDate });
+  } = useDateTimeSlotsManager({ selectedDate });
 
   // Affichage de chargement si pas de date sélectionnée
   if (!selectedDate) {
@@ -51,15 +47,6 @@ export default function TimeSlotsManager({
     );
   }
 
-  // Déterminer automatiquement le type de créneaux affichés
-  const hasSpecificSlots = timeSlots.some((slot) => slot.type === "specific");
-  const hasRecurringSlots = timeSlots.some((slot) => slot.type === "recurring");
-  const hasNewSlots = timeSlots.some((slot) => slot.id.startsWith("temp-"));
-
-  // Si on a des nouveaux créneaux ou des spécifiques, afficher "spécifique"
-  const displayedSlotType =
-    hasSpecificSlots || hasNewSlots ? "specific" : "recurring";
-
   return (
     <div className={`w-full mx-auto ${isLoadingAny ? "opacity-50" : ""}`}>
       <Card className="p-4 sm:p-6 border-gray-200">
@@ -69,37 +56,6 @@ export default function TimeSlotsManager({
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
-
-          {/* Indicateur du type de créneaux */}
-          {/* {timeSlots.length > 0 && (
-            <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              {displayedSlotType === "specific" ? (
-                <>
-                  <Calendar className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm text-blue-700 font-medium">
-                    📅 Créneaux spécifiques pour cette date uniquement (
-                    {selectedDate.toLocaleDateString("fr-FR", {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                    })}
-                    )
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Repeat className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-green-700 font-medium">
-                    🔄 Créneaux récurrents (tous les{" "}
-                    {selectedDate.toLocaleDateString("fr-FR", {
-                      weekday: "long",
-                    })}
-                    s)
-                  </span>
-                </>
-              )}
-            </div>
-          )} */}
 
           {/* Afficher les créneaux existants */}
           {timeSlots.map((slot) => (
@@ -117,7 +73,7 @@ export default function TimeSlotsManager({
                     />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
-                    {timeOptions.map((time) => {
+                    {timeOptions.map((time: string) => {
                       const isTaken = isTimeSlotTaken(time, slot.id);
                       return (
                         <SelectItem
@@ -151,7 +107,7 @@ export default function TimeSlotsManager({
                     />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
-                    {getEndTimeOptions(slot.startTime).map((time) => {
+                    {getEndTimeOptions(slot.startTime).map((time: string) => {
                       const isTaken = isTimeSlotTaken(time, slot.id);
                       return (
                         <SelectItem
@@ -172,14 +128,6 @@ export default function TimeSlotsManager({
                 </Select>
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
-                {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex-shrink-0"
-                  onClick={() => copyTimeSlot(slot)}
-                >
-                  <Link className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 cursor-pointer" />
-                </Button> */}
                 <Button
                   variant="ghost"
                   size="icon"

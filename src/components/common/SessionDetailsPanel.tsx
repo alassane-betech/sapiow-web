@@ -48,13 +48,13 @@ export const SessionDetailsPanel = ({
           // Comparer les dates au format ISO (YYYY-MM-DD) en utilisant l'heure locale
           const blockDateString = block.date.split("T")[0]; // Au cas où la date contient l'heure
           const selectedDateString = formatDateToLocalISO(selectedDate); // ⚠️ Utiliser la date locale
-          
+
           console.log("🔍 [SessionDetailsPanel] Comparaison de dates:", {
             blockDate: blockDateString,
             selectedDate: selectedDateString,
             match: blockDateString === selectedDateString,
           });
-          
+
           return blockDateString === selectedDateString;
         })
       : false;
@@ -63,7 +63,9 @@ export const SessionDetailsPanel = ({
   console.log("🔍 [SessionDetailsPanel] Calcul isDateBlocked:", {
     selectedDate: selectedDate ? formatDateToLocalISO(selectedDate) : null,
     blockedDatesCount: Array.isArray(blockedDates) ? blockedDates.length : 0,
-    blockedDates: Array.isArray(blockedDates) ? blockedDates.map((b: any) => b.date) : [],
+    blockedDates: Array.isArray(blockedDates)
+      ? blockedDates.map((b: any) => b.date)
+      : [],
     isDateBlocked,
   });
 
@@ -136,10 +138,16 @@ export const SessionDetailsPanel = ({
   // Fonction pour gérer le blocage/déblocage de dates
   const handleBlocked = async (checked: boolean) => {
     console.log("🎯 [SessionDetailsPanel] handleBlocked appelé");
-    console.log("📅 [SessionDetailsPanel] selectedDate (objet Date):", selectedDate);
+    console.log(
+      "📅 [SessionDetailsPanel] selectedDate (objet Date):",
+      selectedDate
+    );
     console.log("🔄 [SessionDetailsPanel] checked (doit bloquer?):", checked);
-    console.log("📊 [SessionDetailsPanel] isDateBlocked actuel:", isDateBlocked);
-    
+    console.log(
+      "📊 [SessionDetailsPanel] isDateBlocked actuel:",
+      isDateBlocked
+    );
+
     if (!selectedDate) {
       console.log("⛔ [SessionDetailsPanel] Pas de date sélectionnée, abandon");
       return;
@@ -154,9 +162,12 @@ export const SessionDetailsPanel = ({
     // Format de date requis: "YYYY-MM-DD" (ISO 8601)
     // ⚠️ IMPORTANT: Utiliser la date LOCALE, pas UTC, pour éviter les décalages de timezone
     const dateString = formatDateToLocalISO(selectedDate);
-    
+
     // Logs détaillés pour vérification
-    console.log("📝 [SessionDetailsPanel] Date formatée pour l'API:", dateString);
+    console.log(
+      "📝 [SessionDetailsPanel] Date formatée pour l'API:",
+      dateString
+    );
     console.log("🗓️ [SessionDetailsPanel] Détails de la date:", {
       année: selectedDate.getFullYear(),
       mois: selectedDate.getMonth() + 1, // +1 car getMonth() retourne 0-11
@@ -169,7 +180,10 @@ export const SessionDetailsPanel = ({
     // Validation du format de la date (YYYY-MM-DD)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateString)) {
-      console.error("❌ [SessionDetailsPanel] Format de date invalide:", dateString);
+      console.error(
+        "❌ [SessionDetailsPanel] Format de date invalide:",
+        dateString
+      );
       return;
     }
 
@@ -177,13 +191,19 @@ export const SessionDetailsPanel = ({
       if (checked) {
         // Bloquer la date
         console.log("🔒 [SessionDetailsPanel] Appel API pour BLOQUER la date");
-        console.log("📤 [SessionDetailsPanel] Payload envoyé:", { date: dateString });
+        console.log("📤 [SessionDetailsPanel] Payload envoyé:", {
+          date: dateString,
+        });
         await createBlockMutation.mutateAsync({ date: dateString });
         console.log("✅ [SessionDetailsPanel] Date bloquée avec succès");
       } else {
         // Débloquer la date
-        console.log("🔓 [SessionDetailsPanel] Appel API pour DÉBLOQUER la date");
-        console.log("📤 [SessionDetailsPanel] Payload envoyé:", { date: dateString });
+        console.log(
+          "🔓 [SessionDetailsPanel] Appel API pour DÉBLOQUER la date"
+        );
+        console.log("📤 [SessionDetailsPanel] Payload envoyé:", {
+          date: dateString,
+        });
         await deleteBlockMutation.mutateAsync({ date: dateString });
         console.log("✅ [SessionDetailsPanel] Date débloquée avec succès");
       }
