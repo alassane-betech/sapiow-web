@@ -261,6 +261,11 @@ export function MessageInput({ receiverId }: MessageInputProps) {
     adjustHeight();
   }, []);
 
+  // Ne rien afficher si aucune conversation n'est sélectionnée
+  if (!receiverId) {
+    return null;
+  }
+
   return (
     <div className="border-t border-gray-200 py-4 sticky bottom-0 z-10 bg-white">
       <div className="flex items-center space-x-0">
@@ -289,15 +294,7 @@ export function MessageInput({ receiverId }: MessageInputProps) {
             className="border-none bg-transparent shadow-none resize-none min-h-[24px] leading-6 py-2 scrollbar-hide"
             rows={1}
           />
-          {/* <button className="cursor-pointer flex-shrink-0" type="button"> */}
-          {/* <Image
-              src="/assets/icons/files.svg"
-              alt="clip"
-              width={24}
-              height={24}
-              className="w-6 h-6 opacity-60"
-            /> */}
-          {/* </button> */}
+
           <Button
             variant="ghost"
             size="icon"
