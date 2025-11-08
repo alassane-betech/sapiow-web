@@ -24,12 +24,12 @@ export default function VerifyCode() {
     <RedirectIfAuthenticated>
       <div className="container min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
         {/* Section image - cachée sur mobile et tablette, visible sur desktop */}
-        <div className="hidden lg:block relative">
+        <div className="hidden lg:block relative min-h-[600px] xl:min-h-[700px] w-full">
           <Image
             src="/assets/on_boarding.png"
             alt="Background"
             fill
-            className="object-scale-down"
+            className="object-contain"
             priority
           />
         </div>

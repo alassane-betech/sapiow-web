@@ -25,12 +25,15 @@ export default function Login() {
     <RedirectIfAuthenticated>
       <div className="container min-h-screen flex flex-col lg:grid lg:grid-cols-[630px_1fr] xl:grid-cols-[700px_1fr]">
         {/* Section image - cachée sur mobile et tablette, visible sur desktop */}
-        <div
-          className="hidden lg:block relative bg-contain bg-center bg-no-repeat my-8"
-          style={{
-            backgroundImage: "url('/assets/on_boarding.png')",
-          }}
-        />
+        <div className="hidden lg:block relative my-8 min-h-[600px] xl:min-h-[700px] w-full">
+          <Image
+            src="/assets/on_boarding.png"
+            alt="Onboarding"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
         <div className="flex flex-col ">
           <div className="mt-14 ml-[42px]">
             <Image src="/assets/logo.svg" alt="Logo" width={175} height={175} />

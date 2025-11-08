@@ -99,8 +99,6 @@ export function useVerifyOtp(): UseVerifyOtpReturn {
       }
 
       if (data.user && data.session) {
-        console.log("Utilisateur authentifié:", data.user);
-
         // Stocker les tokens d'authentification dans localStorage
         localStorage.setItem("access_token", data.session.access_token);
         localStorage.setItem("refresh_token", data.session.refresh_token);

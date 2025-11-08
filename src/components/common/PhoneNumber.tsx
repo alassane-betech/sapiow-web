@@ -56,22 +56,6 @@ const PhoneInput: FC<PhoneInputProps> = ({
     phoneInput,
   ]);
 
-  // Effet pour déboguer et forcer la mise à jour si nécessaire
-  useEffect(() => {
-    console.log("PhoneNumber props changed:", { value, countryCode });
-    console.log("Hook internal state:", {
-      phoneValue: phoneInput.phoneValue,
-      formattedValue: phoneInput.formattedValue,
-      selectedCountry: phoneInput.selectedCountry.code,
-    });
-  }, [
-    value,
-    countryCode,
-    phoneInput.phoneValue,
-    phoneInput.formattedValue,
-    phoneInput.selectedCountry,
-  ]);
-
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
