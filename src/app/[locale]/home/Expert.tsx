@@ -312,10 +312,10 @@ export default function Expert() {
                         textButton={t("visios.startVideo")}
                         icon="/assets/icons/videocamera.svg"
                         questions={appointment.appointment_questions || []}
-                        buttonStates={{
-                          acceptDisabled:
-                            new Date(appointment.appointment_at) > new Date(),
-                        }}
+                        // buttonStates={{
+                        //   acceptDisabled:
+                        //     new Date(appointment.appointment_at) > new Date(),
+                        // }}
                         appointmentAt={appointment.appointment_at}
                       />
                     );
