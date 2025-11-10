@@ -12,6 +12,7 @@ import { useCurrentUser } from "@/store/useCurrentUser";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
 import { Switch } from "../ui/switch";
+import { cleanupAllStreamConnections } from "@/utils/streamCleanup";
 
 const getNavItems = (t: any) => [
   {
@@ -89,6 +90,9 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
+
+      // 0. Nettoyer TOUTES les connexions Stream avant la déconnexion
+      await cleanupAllStreamConnections();
 
       // Déconnexion via Supabase
       const { error } = await supabase.auth.signOut();

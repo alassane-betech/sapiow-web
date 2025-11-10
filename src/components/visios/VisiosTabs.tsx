@@ -101,10 +101,10 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     icon="/assets/icons/videocamera.svg"
                     isUpcoming={true}
                     questions={appointment.appointment_questions || []}
-                    buttonStates={{
-                      acceptDisabled:
-                        new Date(appointment.appointment_at) > new Date(),
-                    }}
+                    // buttonStates={{
+                    //   acceptDisabled:
+                    //     new Date(appointment.appointment_at) > new Date(),
+                    // }}
                     appointmentAt={appointment.appointment_at}
                   />
                 );

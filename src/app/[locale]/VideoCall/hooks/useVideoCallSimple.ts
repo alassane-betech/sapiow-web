@@ -8,8 +8,82 @@ import {
 } from "@stream-io/video-react-sdk";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMediaCleanup } from "./useMediaCleanup";
+import { registerStreamCleanup } from "@/utils/streamCleanup";
 
 const API_KEY = process.env.NEXT_PUBLIC_STREAM_API_KEY;
+
+// Singleton pattern pour éviter les connexions multiples
+const clientInstances = new Map<string, StreamVideoClient>();
+
+const getOrCreateClient = async (
+  apiKey: string,
+  user: User,
+  token: string
+): Promise<StreamVideoClient> => {
+  if (!user.id) {
+    throw new Error("User ID est requis pour créer un client");
+  }
+
+  const clientKey = user.id;
+
+  // Vérifier si un client existe déjà pour cet utilisateur
+  const existingClient = clientInstances.get(clientKey);
+  if (existingClient) {
+    console.log("♻️ Réutilisation du client existant pour:", user.id);
+    return existingClient;
+  }
+
+  // Créer un nouveau client seulement si nécessaire
+  console.log("🆕 Création d'un nouveau client pour:", user.id);
+  console.log("📊 Nombre de connexions avant création:", clientInstances.size);
+  
+  const newClient = new StreamVideoClient({
+    apiKey,
+    user,
+    token,
+  });
+
+  clientInstances.set(clientKey, newClient);
+  console.log("📊 Nombre de connexions après création:", clientInstances.size);
+  console.log("📋 IDs des clients actifs:", Array.from(clientInstances.keys()));
+  
+  return newClient;
+};
+
+const cleanupClient = async (userId: string) => {
+  const client = clientInstances.get(userId);
+  if (client) {
+    console.log("🧹 Nettoyage du client pour:", userId);
+    try {
+      await client.disconnectUser();
+      clientInstances.delete(userId);
+      console.log("✅ Client nettoyé pour:", userId);
+    } catch (err) {
+      console.warn("⚠️ Erreur lors du nettoyage du client:", err);
+      // Supprimer quand même de la Map
+      clientInstances.delete(userId);
+    }
+  }
+};
+
+// Fonction pour nettoyer TOUTES les instances (à appeler lors de la déconnexion)
+const cleanupAllClients = async () => {
+  console.log("🧹 Nettoyage de toutes les connexions Stream...");
+  const cleanupPromises = Array.from(clientInstances.entries()).map(
+    async ([userId, client]) => {
+      try {
+        await client.disconnectUser();
+        clientInstances.delete(userId);
+        console.log("✅ Client nettoyé pour:", userId);
+      } catch (err) {
+        console.warn("⚠️ Erreur lors du nettoyage du client:", userId, err);
+        clientInstances.delete(userId);
+      }
+    }
+  );
+  await Promise.all(cleanupPromises);
+  console.log("✅ Toutes les connexions Stream nettoyées");
+};
 
 interface UseVideoCallReturn {
   client: StreamVideoClient | null;
@@ -62,12 +136,30 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
       return;
     }
 
+    // Vérifier si un client existe déjà pour cet utilisateur
+    const { user } = callConfig;
+    if (user?.id && clientInstances.has(user.id)) {
+      console.log("♻️ Client déjà existant, réutilisation");
+      const existingClient = clientInstances.get(user.id)!;
+      setClient(existingClient);
+      hasInitializedRef.current = true;
+      
+      // Créer ou rejoindre l'appel avec le client existant
+      const { callId } = callConfig;
+      if (callId) {
+        const existingCall = existingClient.call("default", callId);
+        await existingCall.join({ create: true });
+        setCall(existingCall);
+      }
+      return;
+    }
+
     try {
       setIsConnecting(true);
       setError(null);
       hasInitializedRef.current = true;
 
-      const { token, callId, user } = callConfig;
+      const { token, callId } = callConfig;
 
       if (!token || !callId) {
         throw new Error("Token ou ID d'appel manquant");
@@ -93,11 +185,8 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
         throw new Error("Clé API Stream manquante");
       }
 
-      const videoClient = new StreamVideoClient({
-        apiKey,
-        user,
-        token,
-      });
+      // Utiliser le singleton pattern pour éviter les connexions multiples
+      const videoClient = await getOrCreateClient(apiKey, user, token);
 
       const videoCall = videoClient.call("default", callId);
 
@@ -144,9 +233,10 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
         } as StreamUserResponse);
       }
 
-      if (client) {
+      if (client && callConfig.userId) {
         try {
-          await client.disconnectUser();
+          // Utiliser la fonction de nettoyage singleton
+          await cleanupClient(callConfig.userId);
         } catch (clientErr) {
           // Ignore les erreurs de déconnexion au démontage
         }
@@ -186,6 +276,14 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
     }, 100);
   }, [initializeCall]);
 
+  // Enregistrer la fonction de nettoyage global au montage
+  useEffect(() => {
+    const getConnectionCount = () => clientInstances.size;
+    registerStreamCleanup(cleanupAllClients, getConnectionCount);
+    
+    console.log("📊 Hook monté - Connexions actives:", clientInstances.size);
+  }, []);
+
   // Effet d'initialisation simple
   useEffect(() => {
     if (callConfig.token && callConfig.callId && !hasInitializedRef.current) {
@@ -209,8 +307,8 @@ export const useVideoCallSimple = (): UseVideoCallReturn => {
           });
         }
 
-        if (client) {
-          client.disconnectUser().catch(() => {
+        if (client && callConfig.userId) {
+          cleanupClient(callConfig.userId).catch(() => {
             // Ignore les erreurs de déconnexion au démontage
           });
         }
