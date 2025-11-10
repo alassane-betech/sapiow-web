@@ -53,6 +53,7 @@ export function SessionDetailSheet({
   onClose,
   onStartVideoCall,
 }: SessionDetailSheetProps) {
+  console.log({ session });
   const t = useTranslations();
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const { setSelectedConversation, setSelectedProfessional } =
@@ -428,6 +429,7 @@ export function SessionDetailSheet({
                     label={t("sessionDetail.startVideo")}
                     onClick={() => onStartVideoCall?.(session.id)}
                     className="flex-1 bg-cobalt-blue hover:bg-cobalt-blue/80 text-white"
+                    disabled={new Date(session.appointment_at) > new Date()}
                   >
                     <Image
                       src="/assets/icons/video-camera.svg"

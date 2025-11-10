@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTimeSlotsManager } from "@/hooks/useTimeSlotsManager";
+import { useDateTimeSlotsManager } from "@/hooks/useDateTimeSlotsManager";
 import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -29,12 +29,10 @@ export default function TimeSlotsManager({
     error,
     isTimeSlotTaken,
     getEndTimeOptions,
-    copyTimeSlot,
     handleAddTimeSlot,
     handleUpdateTimeSlot,
     handleRemoveTimeSlot,
-    handleSaveToServer,
-  } = useTimeSlotsManager({ selectedDate });
+  } = useDateTimeSlotsManager({ selectedDate });
 
   // Affichage de chargement si pas de date sélectionnée
   if (!selectedDate) {
@@ -75,7 +73,7 @@ export default function TimeSlotsManager({
                     />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
-                    {timeOptions.map((time) => {
+                    {timeOptions.map((time: string) => {
                       const isTaken = isTimeSlotTaken(time, slot.id);
                       return (
                         <SelectItem
@@ -109,7 +107,7 @@ export default function TimeSlotsManager({
                     />
                   </SelectTrigger>
                   <SelectContent className="bg-white max-h-60 overflow-y-auto border-none">
-                    {getEndTimeOptions(slot.startTime).map((time) => {
+                    {getEndTimeOptions(slot.startTime).map((time: string) => {
                       const isTaken = isTimeSlotTaken(time, slot.id);
                       return (
                         <SelectItem
@@ -130,14 +128,6 @@ export default function TimeSlotsManager({
                 </Select>
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
-                {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border border-gray-300 hover:bg-gray-50 flex-shrink-0"
-                  onClick={() => copyTimeSlot(slot)}
-                >
-                  <Link className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 cursor-pointer" />
-                </Button> */}
                 <Button
                   variant="ghost"
                   size="icon"

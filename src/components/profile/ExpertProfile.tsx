@@ -1,18 +1,21 @@
 "use client";
 
+import { useGetDomaines, useGetExpertises } from "@/api/domaine/useDomaine";
 import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { Button } from "@/components/common/Button";
+import { DeleteAccountModal } from "@/components/common/DeleteAccountModal";
 import { FormField } from "@/components/common/FormField";
 import { ProfilePhotoUpload } from "@/components/onboarding/ProfilePhotoUpload";
+import { DomainDropdown } from "@/components/profile/DomainDropdown";
+import { ExpertiseSelector } from "@/components/profile/ExpertiseSelector";
 import { Textarea } from "@/components/ui/textarea";
 import { useExpertProfileUpdate } from "@/hooks/useExpertProfileUpdate";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
-import { DeleteAccountModal } from "@/components/common/DeleteAccountModal";
 
 export default function ExpertProfile() {
   const t = useTranslations();
   const { data: user, isLoading, error } = useGetProExpert();
+  const { data: domains = [], isLoading: isLoadingDomains } = useGetDomaines();
 
   // Hook personnalisé pour gérer la mise à jour du profil
   const {
@@ -24,6 +27,8 @@ export default function ExpertProfile() {
     isDeleteModalOpen,
     isDeleting,
     handleFieldChange,
+    handleDomainChange,
+    handleExpertisesChange,
     handleAvatarChange,
     handleAvatarDelete,
     handleSave,
@@ -32,6 +37,18 @@ export default function ExpertProfile() {
     handleCloseDeleteModal,
   } = useExpertProfileUpdate({ user });
 
+  // Charger les expertises pour le domaine sélectionné
+  const { data: expertises = [], isLoading: isLoadingExpertises } =
+    useGetExpertises(formData.domainId || 0);
+
+  // Gérer le toggle des expertises
+  const handleExpertiseToggle = (expertiseId: number) => {
+    const newExpertises = formData.expertises.includes(expertiseId)
+      ? formData.expertises.filter((e) => e !== expertiseId)
+      : [...formData.expertises, expertiseId];
+    handleExpertisesChange(newExpertises);
+  };
+  console.log({ expertises });
   if (isLoading) {
     return (
       <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
@@ -128,23 +145,27 @@ export default function ExpertProfile() {
       </div>
 
       <div className="mt-6">
-        <FormField
-          type="text"
-          placeholder={t("profile.expertiseDomain")}
+        <DomainDropdown
+          domains={domains}
+          selectedDomainId={formData.domainId}
+          onDomainSelect={handleDomainChange}
           label={t("profile.expertiseDomain")}
-          value={formData.domainName}
-          onChange={(e) => handleFieldChange("domainName", e.target.value)}
-          rightIcon={
-            <Image
-              src="/assets/icons/pensquare.svg"
-              alt="search"
-              width={24}
-              height={24}
-              className="cursor-pointer"
-            />
-          }
-          className="h-[56px]"
+          placeholder={t("profile.expertiseDomain")}
+          isLoading={isLoadingDomains}
         />
+
+        {/* Sélecteur d'expertises */}
+        {formData.domainId && (
+          <div className="mt-4">
+            <ExpertiseSelector
+              selectedExpertises={formData.expertises}
+              expertises={expertises}
+              isLoadingExpertises={isLoadingExpertises}
+              onExpertiseToggle={handleExpertiseToggle}
+            />
+          </div>
+        )}
+
         <Textarea
           placeholder={t("profile.aboutYouPlaceholder")}
           value={formData.description}

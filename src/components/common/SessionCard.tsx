@@ -44,6 +44,7 @@ interface SessionCardProps {
   isFlex1?: boolean;
   questions?: AppointmentQuestion[];
   loadingState?: "confirming" | "cancelling" | null;
+  appointmentAt?: string;
 }
 
 export const SessionCard: React.FC<SessionCardProps> = ({
@@ -66,6 +67,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   isFlex1 = false,
   questions = [],
   loadingState = null,
+  appointmentAt,
 }) => {
   const t = useTranslations();
   const [isOpen, setIsOpen] = useState(false);
@@ -164,26 +166,28 @@ export const SessionCard: React.FC<SessionCardProps> = ({
             }
           />
 
-          <SessionModal
-            isOpen={isOpen}
-            onOpenChange={setIsOpen}
-            profileImage={profileImage}
-            name={name}
-            sessionDescription={sessionDescription}
-            isUpcoming={isUpcoming}
-            onAccept={onAccept}
-            onCancel={onCancel}
-            questions={questions}
-            loadingState={loadingState}
-            trigger={
-              <Button
-                onClick={handleViewRequest}
-                label={viewButtonText}
-                className="text-exford-blue h-[40px] font-bold font-figtree px-6 rounded-[8px] border border-light-blue-gray bg-white text-base lg:text-[13px] xl:text-base hover:bg-gray-200 flex-1"
-                disabled={buttonStates.viewDisabled}
-              />
-            }
-          />
+          {!buttonStates.viewDisabled && (
+            <SessionModal
+              isOpen={isOpen}
+              onOpenChange={setIsOpen}
+              profileImage={profileImage}
+              name={name}
+              sessionDescription={sessionDescription}
+              isUpcoming={isUpcoming}
+              onAccept={onAccept}
+              onCancel={onCancel}
+              questions={questions}
+              loadingState={loadingState}
+              appointmentAt={appointmentAt}
+              trigger={
+                <Button
+                  onClick={handleViewRequest}
+                  label={viewButtonText}
+                  className="text-exford-blue h-[40px] font-bold font-figtree px-6 rounded-[8px] border border-light-blue-gray bg-white text-base lg:text-[13px] xl:text-base hover:bg-gray-200 flex-1"
+                />
+              }
+            />
+          )}
         </div>
       </CardFooter>
     </Card>

@@ -95,14 +95,23 @@ export const useTimeSlotsManager = ({
 
     // Si autoSave est désactivé, supprimer localement uniquement
     if (!autoSave) {
-      console.log("⏸️ Suppression locale uniquement (autoSave désactivé)");
       const dayOfWeek = getDayOfWeekFromDate(selectedDate);
-      const currentTimeSlots = getTimeSlotsForDate(proExpertData.schedules, selectedDate);
-      const updatedTimeSlots = currentTimeSlots.filter((slot) => slot.id !== slotId);
+      const currentTimeSlots = getTimeSlotsForDate(
+        proExpertData.schedules,
+        selectedDate
+      );
+      const updatedTimeSlots = currentTimeSlots.filter(
+        (slot) => slot.id !== slotId
+      );
 
       // Convertir vers le format API
-      const { convertTimeSlotsToApiSchedules } = await import("@/types/schedule");
-      const dayApiSchedules = convertTimeSlotsToApiSchedules(updatedTimeSlots, dayOfWeek);
+      const { convertTimeSlotsToApiSchedules } = await import(
+        "@/types/schedule"
+      );
+      const dayApiSchedules = convertTimeSlotsToApiSchedules(
+        updatedTimeSlots,
+        dayOfWeek
+      );
 
       // Récupérer les schedules existants et filtrer les autres jours
       const otherDaysSchedules = proExpertData.schedules.filter(
@@ -122,7 +131,6 @@ export const useTimeSlotsManager = ({
 
     // Si autoSave est activé, supprimer et sauvegarder immédiatement
     try {
-      console.log("💾 Suppression avec sauvegarde automatique");
       const updatedSchedules = await removeTimeSlot(
         proExpertData.schedules,
         selectedDate,
@@ -150,20 +158,6 @@ export const useTimeSlotsManager = ({
     value: string
   ) => {
     if (!selectedDate || !proExpertData?.schedules) return;
-
-    // Récupérer le créneau AVANT modification pour détecter les changements
-    // IMPORTANT: Utiliser timeSlots (état local) au lieu de proExpertData.schedules
-    const currentSlot = timeSlots.find((slot) => slot.id === slotId);
-    const wasComplete =
-      currentSlot && currentSlot.startTime && currentSlot.endTime;
-
-    console.log("🔄 Mise à jour du créneau:", {
-      slotId,
-      field,
-      oldValue: currentSlot?.[field],
-      newValue: value,
-      wasComplete,
-    });
 
     const updatedSchedules = updateTimeSlotLocal(
       proExpertData.schedules,
@@ -193,20 +187,9 @@ export const useTimeSlotsManager = ({
       isNowComplete &&
       timeToNumber(updatedSlot.startTime) < timeToNumber(updatedSlot.endTime);
 
-    console.log("✅ État après mise à jour:", {
-      isNowComplete,
-      isValid,
-      startTime: updatedSlot?.startTime,
-      endTime: updatedSlot?.endTime,
-      autoSave,
-    });
-
     // Sauvegarder automatiquement seulement si autoSave est activé
     if (isValid && autoSave) {
-      console.log("💾 Sauvegarde automatique activée");
       handleSaveToServerWithSchedules(updatedSchedules);
-    } else if (isValid && !autoSave) {
-      console.log("⏸️ Sauvegarde automatique désactivée - changements en local uniquement");
     }
   };
 
@@ -229,31 +212,21 @@ export const useTimeSlotsManager = ({
 
     // Annuler le timeout précédent s'il existe
     if (saveTimeoutRef.current) {
-      console.log("⏱️ Annulation du timeout précédent");
       clearTimeout(saveTimeoutRef.current);
     }
-
-    console.log("⏳ Programmation de la sauvegarde dans 300ms...");
 
     // Programmer la sauvegarde avec un délai réduit
     saveTimeoutRef.current = setTimeout(async () => {
       try {
-        console.log("🚀 Début de la sauvegarde des schedules...");
-        console.log("📋 Schedules à sauvegarder:", schedulesToSave);
-
         await saveSchedulesToServer(
           schedulesToSave,
           async (updateData: any) => {
-            console.log("📤 Envoi au backend:", updateData);
             const result = await updateProExpertMutation.mutateAsync(
               updateData
             );
-            console.log("✅ Réponse du backend:", result);
             return result.data;
           }
         );
-
-        console.log("✅ Sauvegarde terminée avec succès");
       } catch (error) {
         console.error("❌ Error saving to server:", error);
       }

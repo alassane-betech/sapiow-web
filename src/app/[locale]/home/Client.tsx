@@ -1,17 +1,14 @@
 "use client";
-import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointments";
-import { useGetCustomer } from "@/api/customer/useCustomer";
 import { useGetProExpert } from "@/api/proExpert/useProExpert";
 import { UpcomingVideoCall } from "@/components/common/DarkSessionCard";
 import { useClientHome } from "@/hooks/useClientHome";
+import { usePatientAppointments } from "@/hooks/usePatientAppointments";
 import { Professional } from "@/types/professional";
 import {
-  filterAndSortAppointments,
   transformAppointmentToSessionData,
   type ApiAppointment,
 } from "@/utils/appointmentUtils";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
 import CategoryFilter from "./CategoryFilter";
 import CategorySection from "./CategorySection";
 import ProfessionalCard from "./ProfessionalCard";
@@ -38,19 +35,8 @@ export default function Client() {
     error,
   } = useClientHome(proExpert?.id);
 
-  // Récupération des appointments du patient
-  const { data: customer } = useGetCustomer();
-  const { data: appointments } = useGetPatientAppointmentsById(
-    customer?.id || ""
-  );
-  // Filtrage des visios confirmées (on garde les données originales)
-  const upcomingAppointments = useMemo(() => {
-    if (!appointments) return [];
-    const { upcomingConfirmed } = filterAndSortAppointments(
-      appointments as ApiAppointment[]
-    );
-    return upcomingConfirmed;
-  }, [appointments]);
+  // Récupération des appointments du patient avec filtre de date et recherche
+  const { confirmedAppointments: upcomingAppointments } = usePatientAppointments();
 
   if (isLoading) {
     return (

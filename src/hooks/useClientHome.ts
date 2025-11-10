@@ -1,4 +1,5 @@
 import { Expert, useListExperts } from "@/api/listExpert/useListExpert";
+import { useSearchStore } from "@/store/useSearchStore";
 import { Professional } from "@/types/professional";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -63,18 +64,22 @@ const mapExpertToProfessional = (expert: Expert): Professional => {
  */
 export const useClientHome = (currentUserExpertId?: string) => {
   const router = useRouter();
+  const { searchQuery } = useSearchStore();
 
   // États UI pour les filtres et catégories
   const [selectedCategory, setSelectedCategory] = useState("top");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [sortOption, setSortOption] = useState("recommended");
 
-  // Hook API pour récupérer la liste des experts
+  // Hook API pour récupérer la liste des experts avec recherche
   const {
     data: expertList,
     isLoading: isLoadingExperts,
     error,
-  } = useListExperts();
+  } = useListExperts({
+    search: searchQuery,
+    searchFields: "first_name,last_name,job,domains.name",
+  });
 
   // Hook logique favoris (séparé pour réutilisabilité)
   const {
@@ -175,7 +180,10 @@ export const useClientHome = (currentUserExpertId?: string) => {
 
           // Vérifier si l'expert a cette expertise dans ses expertises
           // L'API peut retourner soit 'expertises' soit 'pro_expertises'
-          const expertisesArray = (expert as any)?.expertises || (expert as any)?.pro_expertises || [];
+          const expertisesArray =
+            (expert as any)?.expertises ||
+            (expert as any)?.pro_expertises ||
+            [];
           const hasExpertise = expertisesArray.some((expertise: any) => {
             return expertise.expertise_id === expertiseId;
           });
@@ -191,7 +199,12 @@ export const useClientHome = (currentUserExpertId?: string) => {
     return allProfessionals.filter((prof: Professional) => {
       return prof.category === selectedCategory;
     });
-  }, [allProfessionals, filteredExpertsArray, selectedCategory, selectedSubCategory]);
+  }, [
+    allProfessionals,
+    filteredExpertsArray,
+    selectedCategory,
+    selectedSubCategory,
+  ]);
 
   return {
     // États UI

@@ -3,19 +3,90 @@ import { ApiAppointment } from "@/utils/appointmentUtils";
 import { showToast } from "@/utils/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-export const useGetProAppointments = (professionalId: string | undefined) => {
+export interface GetProAppointmentsParams {
+  search?: string;
+  searchFields?: string;
+  gte?: string; // ISO date-time or number (Greater-than-or-equal)
+  gteField?: string;
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  limit?: number;
+  offset?: number;
+}
+
+export const useGetProAppointments = (
+  professionalId: string | undefined,
+  params?: GetProAppointmentsParams
+) => {
   return useQuery({
-    queryKey: ["appointments", professionalId],
-    queryFn: () => apiClient.get(`pro-appointment/${professionalId}`),
+    queryKey: ["appointments", professionalId, params],
+    queryFn: () => {
+      // Construire les query params
+      const queryParams = new URLSearchParams();
+
+      if (params?.search) queryParams.append("search", params.search);
+      if (params?.searchFields)
+        queryParams.append("searchFields", params.searchFields);
+      if (params?.gte) queryParams.append("gte", params.gte);
+      if (params?.gteField) queryParams.append("gteField", params.gteField);
+      if (params?.orderBy) queryParams.append("orderBy", params.orderBy);
+      if (params?.orderDirection)
+        queryParams.append("orderDirection", params.orderDirection);
+      if (params?.limit !== undefined)
+        queryParams.append("limit", params.limit.toString());
+      if (params?.offset !== undefined)
+        queryParams.append("offset", params.offset.toString());
+
+      const queryString = queryParams.toString();
+      const url = `pro-appointment/${professionalId}${
+        queryString ? `?${queryString}` : ""
+      }`;
+
+      return apiClient.get(url);
+    },
     enabled: !!professionalId, // Only run query when professionalId is available
   });
 };
 
-export const useGetPatientAppointmentsById = (appointmentId: string) => {
+export interface GetPatientAppointmentsParams {
+  gte?: string;
+  gteField?: string;
+  lte?: string;
+  lteField?: string;
+  orderBy?: string;
+  orderDirection?: "asc" | "desc";
+  limit?: number;
+  offset?: number;
+}
+
+export const useGetPatientAppointments = (
+  patientId: string | undefined,
+  params?: GetPatientAppointmentsParams
+) => {
   return useQuery({
-    queryKey: ["appointment", appointmentId],
-    queryFn: () => apiClient.get(`patient-appointment/${appointmentId}`),
-    enabled: !!appointmentId,
+    queryKey: ["patient-appointments", patientId, params],
+    queryFn: () => {
+      // Construire les query params
+      const queryParams = new URLSearchParams();
+
+      if (params?.gte) queryParams.append("gte", params.gte);
+      if (params?.gteField) queryParams.append("gteField", params.gteField);
+      if (params?.lte) queryParams.append("lte", params.lte);
+      if (params?.lteField) queryParams.append("lteField", params.lteField);
+      if (params?.orderBy) queryParams.append("orderBy", params.orderBy);
+      if (params?.orderDirection)
+        queryParams.append("orderDirection", params.orderDirection);
+      if (params?.limit !== undefined)
+        queryParams.append("limit", params.limit.toString());
+      if (params?.offset !== undefined)
+        queryParams.append("offset", params.offset.toString());
+
+      const queryString = queryParams.toString();
+      const url = `patient-appointment${queryString ? `?${queryString}` : ""}`;
+
+      return apiClient.get(url);
+    },
+    enabled: !!patientId,
   });
 };
 
@@ -255,7 +326,24 @@ export const useCancelPatientAppointment = () => {
 export const useGetProAppointmentBlocks = () => {
   return useQuery({
     queryKey: ["pro-appointment-blocks"],
-    queryFn: () => apiClient.get(`pro-appointment-block`),
+    queryFn: async () => {
+      console.log(
+        "📥 [API] useGetProAppointmentBlocks - Récupération des blocs"
+      );
+      const response = await apiClient.get(`pro-appointment-block`);
+      console.log("✅ [API] Blocs récupérés:", response);
+      console.log(
+        "📊 [API] Nombre de blocs:",
+        Array.isArray(response) ? response.length : 0
+      );
+      if (Array.isArray(response) && response.length > 0) {
+        console.log(
+          "📅 [API] Dates bloquées:",
+          response.map((b: any) => b.date)
+        );
+      }
+      return response;
+    },
   });
 };
 
@@ -263,8 +351,11 @@ export const useCreateProAppointmentBlock = () => {
   const queryClient = useQueryClient();
 
   return useMutation<BlockAppointmentResponse, Error, BlockAppointmentData>({
-    mutationFn: async (blockData: BlockAppointmentData) => {
-      return apiClient.post("pro-appointment-block", blockData);
+    mutationFn: async (
+      blockData: BlockAppointmentData
+    ): Promise<BlockAppointmentResponse> => {
+      const response = await apiClient.post("pro-appointment-block", blockData);
+      return response as BlockAppointmentResponse;
     },
     onSuccess: (data, variables) => {
       // Invalider le cache des blocs de rendez-vous
@@ -300,12 +391,20 @@ export const useDeleteProAppointmentBlock = () => {
 
   return useMutation<any, Error, DeleteBlockAppointmentData>({
     mutationFn: async (deleteData: DeleteBlockAppointmentData) => {
+      console.log("🔓 [API] useDeleteProAppointmentBlock - Début");
+      console.log("📝 [API] deleteData:", deleteData);
       // Envoi de la date dans le body de la requête
-      return apiClient.delete(`pro-appointment-block`, {
+      const response = await apiClient.delete(`pro-appointment-block`, {
         date: deleteData.date,
       });
+      console.log("✅ [API] Réponse de suppression de bloc:", response);
+      return response;
     },
     onSuccess: (data, variables) => {
+      console.log("✅ [API] useDeleteProAppointmentBlock - Succès");
+      console.log("📊 [API] data:", data);
+      console.log("📝 [API] variables:", variables);
+
       // Invalider le cache des blocs de rendez-vous
       queryClient.invalidateQueries({
         queryKey: ["pro-appointment-blocks"],
@@ -319,7 +418,7 @@ export const useDeleteProAppointmentBlock = () => {
       showToast.success("dateUnblocked");
     },
     onError: (error: any) => {
-      console.error("Failed to delete appointment block:", error);
+      console.error("❌ [API] Failed to delete appointment block:", error);
       showToast.error("dateUnblockError", error?.message);
     },
   });

@@ -56,9 +56,9 @@ export const useOnboardingExpert = () => {
   const isFormValid =
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
-    profession.trim().length > 0;
-  // && email.trim().length > 0 &&
-  // /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    profession.trim().length > 0 &&
+    email.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const isDomainValid = !!selectedDomain;
   const isSpecialtyValid = selectedSpecialties.length > 0;

@@ -96,8 +96,6 @@ export const useListExperts = ({
   search = "",
   orderBy = "created_at",
   orderDirection = "desc",
-  //   limit = 20,
-  //   offset = 0,
   searchFields,
 }: Partial<SearchExpertsParams> = {}) => {
   return useSearchExperts({
@@ -105,7 +103,5 @@ export const useListExperts = ({
     searchFields,
     orderBy,
     orderDirection,
-    // limit,
-    // offset,
   });
 };

@@ -20,7 +20,7 @@ import { Suspense, useEffect } from "react";
 import OfferSelection from "../home/OfferSelection";
 import ProfessionalCard from "../home/ProfessionalCard";
 
-import { useGetPatientAppointmentsById } from "@/api/appointments/useAppointments";
+import { useGetPatientAppointments } from "@/api/appointments/useAppointments";
 import { useGetCustomer } from "@/api/customer/useCustomer";
 import { Expert, useSearchExperts } from "@/api/listExpert/useListExpert";
 import { useGetProExpertById } from "@/api/proExpert/useProExpert";
@@ -143,9 +143,9 @@ function ProfessionalDetailContent() {
   const t = useTranslations();
   const locale = useLocale();
   const { data: customer } = useGetCustomer();
-  const { data: appointments } = useGetPatientAppointmentsById(
-    customer?.id || ""
-  ) as { data: Appointment[] };
+  const { data: appointments } = useGetPatientAppointments(customer?.id) as {
+    data: Appointment[];
+  };
   const { user: userClient } = useUserStore();
   const isMobile = useIsMobile();
   const isMobileOrTablet = useIsMobileOrTablet();
@@ -164,7 +164,7 @@ function ProfessionalDetailContent() {
     isLoading,
     error,
   } = useGetProExpertById(expertId || "");
-
+  console.log({ expertData });
   const {
     data: expertsimilar,
     isLoading: isLoadingExpertSimilar,

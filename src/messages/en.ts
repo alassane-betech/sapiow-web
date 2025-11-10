@@ -328,7 +328,13 @@ export default {
     linkedinLink: "LinkedIn link",
     website: "Website",
     expertiseDomain: "Expertise domain",
+    noDomains: "No domains available",
     aboutYouPlaceholder: "About you",
+    // Expertises
+    specialties: "Specialties",
+    loadingExpertises: "Loading specialties...",
+    noExpertisesAvailable: "No specialties available for this domain",
+    specialtiesSelected: "specialty(ies) selected",
     // Actions
     deleteAccount: "Delete my account",
     saving: "Saving...",
@@ -899,6 +905,14 @@ export default {
     dateBlockError: "Error blocking date",
     dateUnblocked: "Date unblocked successfully!",
     dateUnblockError: "Error unblocking date",
+
+    // Allow Days (Availability Periods)
+    allowDayCreated: "Availability period created successfully!",
+    allowDayUpdated: "Availability period updated successfully!",
+    allowDayDeleted: "Availability period deleted successfully!",
+    allowDayCreateError: "Error creating availability period",
+    allowDayUpdateError: "Error updating availability period",
+    allowDayDeleteError: "Error deleting availability period",
 
     // Video Call
     callConnectionError: "Error connecting to video call",

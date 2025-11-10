@@ -7,9 +7,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCurrentUser } from "@/store/useCurrentUser";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
 import { Switch } from "../ui/switch";
+import { cleanupAllStreamConnections } from "@/utils/streamCleanup";
 
 const getNavItems = (t: any) => [
   {
@@ -73,6 +76,9 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const queryClient = useQueryClient();
+  const { setUser } = useUserStore();
+  const { setCurrentUser } = useCurrentUser();
   const { user } = useUserStore();
   const { handleExpertModeSwitch, hasExpertProfile } = useExpertModeSwitch();
   const navItems = getNavItems(t);
@@ -85,6 +91,9 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
     try {
       setIsLoggingOut(true);
 
+      // 0. Nettoyer TOUTES les connexions Stream avant la déconnexion
+      await cleanupAllStreamConnections();
+
       // Déconnexion via Supabase
       const { error } = await supabase.auth.signOut();
 
@@ -93,14 +102,24 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
         return;
       }
 
-      // Nettoyer le localStorage si nécessaire
+      // 1. Nettoyer le localStorage
       localStorage.removeItem("phoneNumber");
       localStorage.removeItem("selectedCountry");
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user_id");
+      
+      // 2. Nettoyer le localStorage persisté de Zustand
+      localStorage.removeItem("user-storage");
 
-      // Rediriger vers la page de connexion
+      // 3. Réinitialiser les stores Zustand
+      setUser({ type: "client" });
+      setCurrentUser(null);
+
+      // 4. Invalider TOUT le cache React Query
+      queryClient.clear();
+
+      // 5. Rediriger vers la page de connexion
       router.push("/login");
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);

@@ -60,11 +60,6 @@ export function MessagesList({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Date Separator */}
-      <div className="flex justify-center">
-        {/* <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
-          {t("messages.today")}
-        </span> */}
-      </div>
 
       {/* Messages de la conversation */}
       {conversationMessages
