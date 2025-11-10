@@ -49,25 +49,9 @@ export const SessionDetailsPanel = ({
           const blockDateString = block.date.split("T")[0]; // Au cas où la date contient l'heure
           const selectedDateString = formatDateToLocalISO(selectedDate); // ⚠️ Utiliser la date locale
 
-          console.log("🔍 [SessionDetailsPanel] Comparaison de dates:", {
-            blockDate: blockDateString,
-            selectedDate: selectedDateString,
-            match: blockDateString === selectedDateString,
-          });
-
           return blockDateString === selectedDateString;
         })
       : false;
-
-  // Debug: Log de l'état isDateBlocked
-  console.log("🔍 [SessionDetailsPanel] Calcul isDateBlocked:", {
-    selectedDate: selectedDate ? formatDateToLocalISO(selectedDate) : null,
-    blockedDatesCount: Array.isArray(blockedDates) ? blockedDates.length : 0,
-    blockedDates: Array.isArray(blockedDates)
-      ? blockedDates.map((b: any) => b.date)
-      : [],
-    isDateBlocked,
-  });
 
   // Vérifier s'il y a des créneaux pour la date sélectionnée
   const hasTimeSlotsForDate = (date: Date | null): boolean => {
@@ -162,20 +146,6 @@ export const SessionDetailsPanel = ({
     // Format de date requis: "YYYY-MM-DD" (ISO 8601)
     // ⚠️ IMPORTANT: Utiliser la date LOCALE, pas UTC, pour éviter les décalages de timezone
     const dateString = formatDateToLocalISO(selectedDate);
-
-    // Logs détaillés pour vérification
-    console.log(
-      "📝 [SessionDetailsPanel] Date formatée pour l'API:",
-      dateString
-    );
-    console.log("🗓️ [SessionDetailsPanel] Détails de la date:", {
-      année: selectedDate.getFullYear(),
-      mois: selectedDate.getMonth() + 1, // +1 car getMonth() retourne 0-11
-      jour: selectedDate.getDate(),
-      formatISO: dateString,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      offsetMinutes: selectedDate.getTimezoneOffset(),
-    });
 
     // Validation du format de la date (YYYY-MM-DD)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;

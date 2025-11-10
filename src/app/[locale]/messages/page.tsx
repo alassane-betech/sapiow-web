@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   usePatientGetConversation,
   usePatientGetConversations,
@@ -30,31 +31,46 @@ function Messages() {
 
   // ID du professionnel actuel (à récupérer depuis le contexte d'auth plus tard)
   const { currentUser } = useCurrentUserData();
-  const currentProId = currentUser?.id;
-  const currentPatientId = currentUser?.id;
+  const currentUserId = currentUser?.id || "";
   const { user } = useUserStore();
+  const isExpert = user?.type === "expert";
 
-  // Récupérer toutes les conversations avec profils
+  // ✅ Appeler TOUS les hooks inconditionnellement (Rules of Hooks)
+  const proConversations = useProGetConversations();
+  const patientConversations = usePatientGetConversations();
+  
+  const proConversation = useProGetConversation(
+    selectedConversation || "",
+    currentUserId
+  );
+  const patientConversation = usePatientGetConversation(
+    selectedConversation || "",
+    currentUserId
+  );
+
+  // Utiliser les données appropriées selon le type d'utilisateur
   const {
     data: messagesData,
     isLoading: messagesLoading,
     error: messagesError,
     unreadMessages,
-  } = user?.type === "expert"
-    ? useProGetConversations()
-    : usePatientGetConversations();
+    refetch: refetchConversations,
+  } = isExpert ? proConversations : patientConversations;
 
-  // Récupérer les messages de la conversation sélectionnée
   const {
     data: conversationMessages,
     isLoading: conversationLoading,
     error: conversationError,
-  } = user?.type === "expert"
-    ? useProGetConversation(selectedConversation || "", currentProId || "")
-    : usePatientGetConversation(
-        selectedConversation || "",
-        currentPatientId || ""
-      );
+  } = isExpert ? proConversation : patientConversation;
+
+  // 🔄 Rafraîchir automatiquement lors du changement de type d'utilisateur
+  useEffect(() => {
+    if (user?.type) {
+      refetchConversations();
+      // Réinitialiser la conversation sélectionnée lors du changement de type
+      setSelectedConversation(null);
+    }
+  }, [user?.type, refetchConversations, setSelectedConversation]);
 
   // Les données sont déjà des conversations, pas besoin d'extraction
   const conversationsData = messagesData || [];
@@ -102,7 +118,7 @@ function Messages() {
                 conversationMessages={conversationMessages || null}
                 conversationLoading={conversationLoading}
                 conversationError={conversationError}
-                currentUserId={currentProId}
+                currentUserId={currentUserId}
                 activeConversation={activeConversation}
                 selectedConversation={selectedConversation}
               />
@@ -147,7 +163,7 @@ function Messages() {
                 conversationMessages={conversationMessages || null}
                 conversationLoading={conversationLoading}
                 conversationError={conversationError}
-                currentUserId={currentProId}
+                currentUserId={currentUserId}
                 activeConversation={activeConversation}
                 selectedConversation={selectedConversation}
               />

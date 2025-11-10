@@ -9,6 +9,7 @@ import AddAccompanimentModal from "@/components/common/AddAccompanimentModal";
 import { Button } from "@/components/common/Button";
 import SessionFeaturesList from "@/components/common/SessionFeaturesList";
 import VisioSessionsConfig from "@/components/common/VisioSessionsConfig";
+import { useProtectedPage } from "@/hooks/useProtectedPage";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -26,8 +27,9 @@ interface SessionData extends SessionCreate {
   // SessionData hérite de SessionCreate du hook API
 }
 
-
 export default function OffresPage() {
+  // Protéger la page : seuls les experts peuvent y accéder
+  useProtectedPage({ allowedUserTypes: ["expert"] });
   const t = useTranslations();
   const [selectedOffer, setSelectedOffer] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -174,16 +176,24 @@ export default function OffresPage() {
     setIsAddModalOpen(false);
   };
 
-  const handleSessionCreated = async (sessionId: string, sessionData: SessionData) => {
-    console.log("🎉 Session créée, passage en mode édition pour ajouter des features:", sessionId);
-    
+  const handleSessionCreated = async (
+    sessionId: string,
+    sessionData: SessionData
+  ) => {
+    console.log(
+      "🎉 Session créée, passage en mode édition pour ajouter des features:",
+      sessionId
+    );
+
     // Invalider le cache pour récupérer la session créée
     await queryClient.invalidateQueries({ queryKey: ["proExpert"] });
-    
+
     // Récupérer les données fraîches
     const freshData = queryClient.getQueryData(["proExpert"]) as any;
-    const createdSession = freshData?.sessions?.find((s: any) => s.id === sessionId);
-    
+    const createdSession = freshData?.sessions?.find(
+      (s: any) => s.id === sessionId
+    );
+
     if (createdSession) {
       // Passer en mode édition avec la session créée
       setEditingSession(createdSession);

@@ -18,6 +18,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
+import { useProtectedPage } from "@/hooks/useProtectedPage";
 import { useCalendarStore } from "@/store/useCalendar";
 import { useProExpertStore } from "@/store/useProExpert";
 import { Loader2 } from "lucide-react";
@@ -26,6 +27,8 @@ import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
 export default function Disponibilites() {
+  // Protéger la page : seuls les experts peuvent y accéder
+  useProtectedPage({ allowedUserTypes: ["expert"] });
   const t = useTranslations();
   const currentLocale = useLocale();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("semaine");
@@ -70,12 +73,6 @@ export default function Disponibilites() {
 
   // Synchroniser les données API avec le store
   useEffect(() => {
-    console.log("📊 Synchronisation des données API vers le store:", {
-      isLoadingApi,
-      hasData: !!proExpertData,
-      schedulesCount: proExpertData?.schedules?.length || 0,
-    });
-
     setLoading(isLoadingApi);
     if (proExpertData) {
       setProExpertData(proExpertData);
@@ -98,7 +95,6 @@ export default function Disponibilites() {
       typeof window !== "undefined" &&
       window.innerWidth < 768
     ) {
-      console.log("Date sélectionnée sur mobile:", selectedDate);
       setShowSessionDetailsSheet(true);
     }
   }, [selectedDate]);

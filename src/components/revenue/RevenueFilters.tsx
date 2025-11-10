@@ -1,30 +1,35 @@
 "use client";
 
 import { Button } from "@/components/common/Button";
-import { Calendar } from "@/components/ui/calendar";
-import { getFilterOptions } from "@/data/mockRevenue";
+import DateRangePicker from "@/components/common/DateRangePicker";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
 interface RevenueFiltersProps {
   activeFilter: string;
   onFilterChange: (filter: string) => void;
+  onCustomDateRangeChange?: (range: DateRange | undefined) => void;
 }
 
 export default function RevenueFilters({
   activeFilter,
   onFilterChange,
+  onCustomDateRangeChange,
 }: RevenueFiltersProps) {
   const t = useTranslations();
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState<
     DateRange | undefined
   >();
-  const calendarRef = useRef<HTMLDivElement>(null);
 
-  const filterOptions = getFilterOptions(t);
+  // Options de filtre avec traductions
+  const filterOptions = [
+    { label: t("revenue.thisMonth"), value: "Ce mois-ci" },
+    { label: t("revenue.thisQuarter"), value: "Ce trimestre" },
+    { label: t("revenue.custom"), value: "Personnalisé" },
+  ];
 
   const handleFilterChange = (filter: string) => {
     onFilterChange(filter);
@@ -35,28 +40,22 @@ export default function RevenueFilters({
     }
   };
 
-  // Fermer le calendrier quand on clique dehors
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        calendarRef.current &&
-        !calendarRef.current.contains(event.target as Node)
-      ) {
-        setShowCalendar(false);
-        if (activeFilter === "Personnalisé") {
-          onFilterChange("Ce mois-ci");
-        }
-      }
-    };
-
-    if (showCalendar) {
-      document.addEventListener("mousedown", handleClickOutside);
+  // Gérer la sélection d'une plage de dates
+  const handleRangeSelect = (range: DateRange) => {
+    setSelectedDateRange(range);
+    if (onCustomDateRangeChange) {
+      onCustomDateRangeChange(range);
     }
+  };
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showCalendar, activeFilter, onFilterChange]);
+  // Gérer la fermeture du calendrier
+  const handleClosePicker = () => {
+    setShowCalendar(false);
+    // Revenir au filtre par défaut si aucune plage n'est sélectionnée
+    if (activeFilter === "Personnalisé" && !selectedDateRange?.to) {
+      onFilterChange("Ce mois-ci");
+    }
+  };
 
   return (
     <div className="flex flex-wrap gap-3 relative">
@@ -86,34 +85,14 @@ export default function RevenueFilters({
         />
       ))}
 
-      {/* Calendar for custom date selection */}
-      {showCalendar && (
-        <div
-          ref={calendarRef}
-          className="absolute top-full left-0 mt-2 p-4 bg-white rounded-lg border border-gray-200 shadow-lg w-fit z-50"
-        >
-          <h3 className="text-sm font-medium text-charcoal-blue mb-3">
-            {t("revenue.selectCustomPeriod")}
-          </h3>
-          <Calendar
-            mode="range"
-            selected={selectedDateRange}
-            onSelect={setSelectedDateRange}
-            className="rounded-md border w-fit"
-            numberOfMonths={2}
-          />
-          {selectedDateRange?.from && selectedDateRange?.to && (
-            <div className="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
-              <strong>{t("revenue.selectedPeriod")}</strong>
-              <br />
-              {t("revenue.from")}{" "}
-              {selectedDateRange.from.toLocaleDateString("fr-FR")}{" "}
-              {t("revenue.to")}{" "}
-              {selectedDateRange.to.toLocaleDateString("fr-FR")}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Date Range Picker */}
+      <DateRangePicker
+        isOpen={showCalendar}
+        onClose={handleClosePicker}
+        onRangeSelect={handleRangeSelect}
+        selectedRange={selectedDateRange}
+        position="bottom"
+      />
     </div>
   );
 }

@@ -6,16 +6,23 @@ import BankAccountSection from "@/components/revenue/BankAccountSection";
 import PaymentHistory from "@/components/revenue/PaymentHistory";
 import RevenueDisplay from "@/components/revenue/RevenueDisplay";
 import RevenueFilters from "@/components/revenue/RevenueFilters";
+import { useProtectedPage } from "@/hooks/useProtectedPage";
 import { getDateRangeByFilter } from "@/utils/dateFilters";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import type { DateRange } from "react-day-picker";
 import AccountLayout from "../AccountLayout";
 
 export default function Revenus() {
+  // Protéger la page : seuls les experts peuvent y accéder
+  useProtectedPage({ allowedUserTypes: ["expert"] });
   const t = useTranslations();
   const [isAddBankModalOpen, setIsAddBankModalOpen] = useState(false);
   const [hasBankAccount, setHasBankAccount] = useState(false);
   const [activeFilter, setActiveFilter] = useState("Ce mois-ci");
+  const [customDateRange, setCustomDateRange] = useState<
+    DateRange | undefined
+  >();
 
   const handleAddBankAccount = () => {
     setIsAddBankModalOpen(true);
@@ -38,10 +45,23 @@ export default function Revenus() {
     setActiveFilter(filter);
   };
 
+  const handleCustomDateRangeChange = (range: DateRange | undefined) => {
+    setCustomDateRange(range);
+  };
+
   // Calcul de la plage de dates selon le filtre actif
   const dateRange = useMemo(() => {
-    return getDateRangeByFilter(activeFilter);
-  }, [activeFilter]);
+    // Convertir customDateRange en format attendu par getDateRangeByFilter
+    const customRange =
+      customDateRange?.from && customDateRange?.to
+        ? {
+            start: customDateRange.from.toISOString().split("T")[0],
+            end: customDateRange.to.toISOString().split("T")[0],
+          }
+        : undefined;
+
+    return getDateRangeByFilter(activeFilter, customRange);
+  }, [activeFilter, customDateRange]);
 
   const { data: statistics } = useGetStatistics(
     dateRange
@@ -66,6 +86,7 @@ export default function Revenus() {
               <RevenueFilters
                 activeFilter={activeFilter}
                 onFilterChange={handleFilterChange}
+                onCustomDateRangeChange={handleCustomDateRangeChange}
               />
               <RevenueDisplay
                 amount={statistics?.totalPrice?.toString() || "0"}

@@ -49,7 +49,7 @@ export default function ExpertProfile() {
       : [...formData.expertises, expertiseId];
     handleExpertisesChange(newExpertises);
   };
-  console.log({ expertises });
+
   if (isLoading) {
     return (
       <div className="w-full max-w-[702px] mx-auto mt-10 px-5">
