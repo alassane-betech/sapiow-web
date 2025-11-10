@@ -2,6 +2,7 @@
 import { usePatientPaymentHistoryDisplay } from "@/api/patientPayment/usePatientPayment";
 import { FormField } from "@/components/common/FormField";
 import TransactionDetails from "@/components/common/TransactionDetails";
+import { useProtectedPage } from "@/hooks/useProtectedPage";
 import { ChevronRightIcon, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -9,6 +10,8 @@ import { useEffect, useState } from "react";
 import AccountLayout from "../AccountLayout";
 
 export default function HistoriquePaiements() {
+  // Protéger la page : seuls les clients peuvent y accéder
+  useProtectedPage({ allowedUserTypes: ["client"] });
   const t = useTranslations();
   const [selectedTransaction, setSelectedTransaction] = useState<string | null>(
     null

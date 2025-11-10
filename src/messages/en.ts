@@ -462,6 +462,8 @@ export default {
       "No payment history available. Set up your payment account to start receiving revenue.",
     errorLoadingPayments: "Error loading payments",
     noPaymentsFound: "No payments found",
+    unknownSession: "Unknown session",
+    locale: "en",
   },
 
   // Offers Page

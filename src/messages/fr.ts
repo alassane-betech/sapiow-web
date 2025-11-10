@@ -467,6 +467,8 @@ export default {
       "Aucun historique de paiement disponible. Configurez votre compte de paiement pour commencer à recevoir des revenus.",
     errorLoadingPayments: "Erreur lors du chargement des paiements",
     noPaymentsFound: "Aucun paiement trouvé",
+    unknownSession: "Session inconnue",
+    locale: "fr",
   },
 
   // Offers Page
