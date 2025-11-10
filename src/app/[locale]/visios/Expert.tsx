@@ -10,19 +10,25 @@ interface ExpertProps {
 }
 
 export default function Expert({ handleNotificationClick }: ExpertProps) {
-  const { isVideoCallOpen, setIsVideoCallOpen } = useCallStore();
+  const { isVideoCallOpen, setIsVideoCallOpen, appointmentId, callCreatorName, setCallCreatorName } = useCallStore();
 
   const handleStartVideoCall = () => {
     setIsVideoCallOpen(true);
   };
 
+  const handleCloseVideoCall = () => {
+    setIsVideoCallOpen(false);
+    // Nettoyer le nom du patient quand l'appel est terminé
+    setCallCreatorName(null);
+  };
+  console.log(appointmentId);
   return (
     <div>
       {/* Header Visio */}
       {isVideoCallOpen ? (
         <HeaderVisio
           handleNotificationClick={handleNotificationClick}
-          title="Session avec Moussa Diagne"
+          title={callCreatorName ? `Session avec ${callCreatorName}` : "Session en cours"}
         />
       ) : (
         <Header isBorder />
@@ -32,7 +38,7 @@ export default function Expert({ handleNotificationClick }: ExpertProps) {
       {isVideoCallOpen ? (
         <VideoConsultation
           isOpen={isVideoCallOpen}
-          onClose={() => setIsVideoCallOpen(false)}
+          onClose={handleCloseVideoCall}
         />
       ) : (
         <VisiosTabs onStartVideoCall={handleStartVideoCall} />

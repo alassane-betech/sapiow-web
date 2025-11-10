@@ -16,6 +16,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useAddToCalendar } from "@/hooks/useAddToCalendar";
+import { useCallStore } from "@/store/useCall";
 import { useConversationStore } from "@/store/useConversationStore";
 import { Check, ChevronRight, Pencil, Send, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -55,6 +56,7 @@ export function SessionDetailSheet({
 }: SessionDetailSheetProps) {
   console.log({ session });
   const t = useTranslations();
+  const { setCallCreatorName } = useCallStore();
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const { setSelectedConversation, setSelectedProfessional } =
     useConversationStore();
@@ -427,7 +429,13 @@ export function SessionDetailSheet({
                 {session?.status === "confirmed" && onStartVideoCall && (
                   <Button
                     label={t("sessionDetail.startVideo")}
-                    onClick={() => onStartVideoCall?.(session.id)}
+                    onClick={() => {
+                      // Stocker le nom du professionnel avant de démarrer l'appel
+                      if (session.professionalName) {
+                        setCallCreatorName(session.professionalName);
+                      }
+                      onStartVideoCall?.(session.id);
+                    }}
                     className="flex-1 bg-cobalt-blue hover:bg-cobalt-blue/80 text-white"
                     disabled={new Date(session.appointment_at) > new Date()}
                   >

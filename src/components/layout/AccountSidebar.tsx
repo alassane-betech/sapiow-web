@@ -1,18 +1,18 @@
 import { useExpertModeSwitch } from "@/hooks/useExpertModeSwitch";
 import { useModeSwitch } from "@/hooks/useModeSwitch";
 import { supabase } from "@/lib/supabase/client";
+import { useCurrentUser } from "@/store/useCurrentUser";
 import { useUserStore } from "@/store/useUser";
+import { cleanupAllStreamConnections } from "@/utils/streamCleanup";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCurrentUser } from "@/store/useCurrentUser";
 import { Button } from "../common/Button";
 import { ShareLinkButton } from "../common/ShareLinkButton";
 import { Switch } from "../ui/switch";
-import { cleanupAllStreamConnections } from "@/utils/streamCleanup";
 
 const getNavItems = (t: any) => [
   {
@@ -90,7 +90,7 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-
+      localStorage.removeItem("access_token");
       // 0. Nettoyer TOUTES les connexions Stream avant la déconnexion
       await cleanupAllStreamConnections();
 
@@ -105,10 +105,9 @@ export function AccountSidebar({ isMobile = false }: AccountSidebarProps) {
       // 1. Nettoyer le localStorage
       localStorage.removeItem("phoneNumber");
       localStorage.removeItem("selectedCountry");
-      localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("user_id");
-      
+
       // 2. Nettoyer le localStorage persisté de Zustand
       localStorage.removeItem("user-storage");
 

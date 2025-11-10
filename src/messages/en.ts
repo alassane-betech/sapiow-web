@@ -354,6 +354,8 @@ export default {
     cancelDelete: "Cancel",
     confirmDelete: "Delete",
     deleting: "Deleting...",
+    cannotDeleteWithAppointments:
+      "Cannot delete your account. You have pending or confirmed appointments. Please cancel or complete all your appointments first.",
   },
 
   // Notification Settings
