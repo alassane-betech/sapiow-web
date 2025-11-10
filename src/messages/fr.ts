@@ -358,6 +358,8 @@ export default {
     cancelDelete: "Annuler",
     confirmDelete: "Supprimer",
     deleting: "Suppression...",
+    cannotDeleteWithAppointments:
+      "Impossible de supprimer votre compte. Vous avez des rendez-vous en attente ou confirmés. Veuillez d'abord annuler ou terminer tous vos rendez-vous.",
   },
 
   // Notification Settings

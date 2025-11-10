@@ -35,6 +35,9 @@ const defaultMessages = {
   // Video Call
   callConnectionError: "Erreur lors de la connexion à l'appel vidéo",
   callTokenError: "Erreur lors de la récupération du token d'appel",
+  
+  // Account Deletion
+  accountDeleteError: "Impossible de supprimer votre compte. Vous avez des rendez-vous en attente ou confirmés.",
 };
 
 export const showToast = {

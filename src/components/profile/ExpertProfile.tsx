@@ -15,6 +15,7 @@ import { useTranslations } from "next-intl";
 export default function ExpertProfile() {
   const t = useTranslations();
   const { data: user, isLoading, error } = useGetProExpert();
+  console.log({ user });
   const { data: domains = [], isLoading: isLoadingDomains } = useGetDomaines();
 
   // Hook personnalisé pour gérer la mise à jour du profil

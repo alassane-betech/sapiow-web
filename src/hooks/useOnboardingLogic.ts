@@ -27,17 +27,20 @@ export function useOnboardingLogic(): UseOnboardingLogicReturn {
   // Fonction pour vérifier si les données sont vides
   const checkIfEmpty = (data: any): boolean => {
     if (!data) return true;
-    if (data.error === "Cannot coerce the result to a single JSON object") return true;
+    if (data.error === "Cannot coerce the result to a single JSON object")
+      return true;
     if (Array.isArray(data) && data.length === 0) return true;
-    if (data.data && Array.isArray(data.data) && data.data.length === 0) return true;
+    if (data.data && Array.isArray(data.data) && data.data.length === 0)
+      return true;
     if (data.success === false) return true;
     return false;
   };
 
   useEffect(() => {
     // Vérifier si l'utilisateur vient du switch mode
-    const isFromModeSwitch = sessionStorage.getItem("fromModeSwitch") === "true";
-    
+    const isFromModeSwitch =
+      sessionStorage.getItem("fromModeSwitch") === "true";
+
     // Attendre que les requêtes se terminent
     const timer = setTimeout(() => {
       const isProEmpty = checkIfEmpty(proExpert);
@@ -54,7 +57,8 @@ export function useOnboardingLogic(): UseOnboardingLogicReturn {
       }
 
       // Si l'utilisateur veut devenir expert, aller directement à l'onboarding expert
-      const isSwitchToExpert = sessionStorage.getItem("switchToExpert") === "true";
+      const isSwitchToExpert =
+        sessionStorage.getItem("switchToExpert") === "true";
       if (isSwitchToExpert) {
         sessionStorage.removeItem("switchToExpert");
         setStep(1); // Aller directement à l'étape 1

@@ -1,6 +1,7 @@
 "use client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useVisiosAppointments } from "@/hooks/useVisiosAppointments";
+import { useCallStore } from "@/store/useCall";
 import { useTranslations } from "next-intl";
 import CustomCalendar from "../common/CustomCalendar";
 import { SessionCard } from "../common/SessionCard";
@@ -11,6 +12,7 @@ interface VisiosTabsProps {
 
 export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
   const t = useTranslations();
+  const { setCallCreatorName } = useCallStore();
   const {
     confirmedAppointments,
     pendingAppointments,
@@ -21,7 +23,14 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
     handleStartVideoCall,
   } = useVisiosAppointments();
 
-  const handleStartVideoCallCombined = (appointmentId: string) => {
+  const handleStartVideoCallCombined = (
+    appointmentId: string,
+    patientName?: string
+  ) => {
+    // Stocker le nom du patient si disponible
+    if (patientName) {
+      setCallCreatorName(patientName);
+    }
     // Exécuter la logique interne du hook
     handleStartVideoCall(appointmentId);
     // Puis déclencher l'ouverture de VideoConsultation dans Expert
@@ -31,25 +40,25 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
   return (
     <div className="w-full grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-4 mt-3 px-4 pb-20">
       <Tabs defaultValue="a-venir" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 bg-transparent border-b-2 border-light-blue-gray h-auto p-0 rounded-none relative">
+        <TabsList className="grid w-full grid-cols-3 bg-transparent border-b-2 border-light-blue-gray h-auto p-0 rounded-none relative border-t-0 border-l-0 border-r-0">
           <TabsTrigger
             value="a-venir"
-            className="relative px-4 py-4 text-lg font-bold text-slate-400 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none hover:text-slate-900 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
+            className="relative px-4 py-4 text-lg font-bold text-slate-400 bg-transparent border-0 outline-none ring-0 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none data-[state=active]:border-0 data-[state=active]:outline-none hover:text-slate-900 hover:border-0 focus:border-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
           >
             {t("visios.upcoming")}
           </TabsTrigger>
           <TabsTrigger
             value="en-attente"
-            className="relative px-4 py-4 text-lg font-bold text-slate-400 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none hover:text-slate-900 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
+            className="relative px-4 py-4 text-lg font-bold text-slate-400 bg-transparent border-0 outline-none ring-0 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none data-[state=active]:border-0 data-[state=active]:outline-none hover:text-slate-900 hover:border-0 focus:border-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
           >
             {t("visios.pending")}
             {pendingAppointments.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-0"></span>
             )}
           </TabsTrigger>
           <TabsTrigger
             value="historique"
-            className="relative px-4 py-4 text-lg font-bold text-slate-400 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none hover:text-slate-900 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
+            className="relative px-4 py-4 text-lg font-bold text-slate-400 bg-transparent border-0 outline-none ring-0 data-[state=active]:bg-transparent data-[state=active]:text-slate-900 data-[state=active]:shadow-none data-[state=active]:rounded-none data-[state=active]:border-0 data-[state=active]:outline-none hover:text-slate-900 hover:border-0 focus:border-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-colors data-[state=active]:after:content-[''] data-[state=active]:after:absolute data-[state=active]:after:bottom-[-3px] data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-slate-900 cursor-pointer font-figtree"
           >
             {t("visios.history")}
           </TabsTrigger>
@@ -74,6 +83,11 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                   }
                 );
 
+                const patientName =
+                  `${appointment.patient?.first_name || ""} ${
+                    appointment.patient?.last_name || ""
+                  }`.trim() || t("patient");
+
                 return (
                   <SessionCard
                     key={appointment.id}
@@ -82,16 +96,12 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     profileImage={
                       appointment.patient?.avatar || "/assets/prof.jpg"
                     }
-                    name={
-                      `${appointment.patient?.first_name || ""} ${
-                        appointment.patient?.last_name || ""
-                      }`.trim() || t("patient")
-                    }
+                    name={patientName}
                     sessionDescription={
                       appointment.session?.name || t("session")
                     }
                     onAccept={() =>
-                      handleStartVideoCallCombined(appointment.id)
+                      handleStartVideoCallCombined(appointment.id, patientName)
                     }
                     onViewRequest={() => {}}
                     isComming={true}
@@ -101,10 +111,10 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     icon="/assets/icons/videocamera.svg"
                     isUpcoming={true}
                     questions={appointment.appointment_questions || []}
-                    // buttonStates={{
-                    //   acceptDisabled:
-                    //     new Date(appointment.appointment_at) > new Date(),
-                    // }}
+                    buttonStates={{
+                      acceptDisabled:
+                        new Date(appointment.appointment_at) > new Date(),
+                    }}
                     appointmentAt={appointment.appointment_at}
                   />
                 );

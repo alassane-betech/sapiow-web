@@ -3,8 +3,11 @@ import {
   useDeleteProExpert,
   useUpdateProExpert,
 } from "@/api/proExpert/useProExpert";
+import { useGetProAppointments } from "@/api/appointments/useAppointments";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { showToast } from "@/utils/toast";
 
 export interface ExpertFormData {
   firstName: string;
@@ -27,6 +30,7 @@ export const useExpertProfileUpdate = ({
   user,
 }: UseExpertProfileUpdateProps) => {
   const router = useRouter();
+  const t = useTranslations();
 
   // États pour les champs du formulaire
   const [formData, setFormData] = useState<ExpertFormData>({
@@ -57,6 +61,12 @@ export const useExpertProfileUpdate = ({
 
   const { mutateAsync: deleteProExpert, isPending: isDeleting } =
     useDeleteProExpert();
+
+  // Récupérer les rendez-vous de l'expert
+  const { data: appointmentsData } = useGetProAppointments(user?.id?.toString(), {
+    orderBy: "appointment_date",
+    orderDirection: "asc",
+  });
 
   // Fonction utilitaire pour obtenir le nom du domaine à partir de son ID
   const getDomainNameById = useCallback((domainId: number): string => {
@@ -293,8 +303,19 @@ export const useExpertProfileUpdate = ({
 
   // Gestion de la suppression du compte
   const handleDeleteAccount = useCallback(() => {
+    // Vérifier s'il y a des rendez-vous en attente ou confirmés
+    const hasActiveAppointments = Array.isArray(appointmentsData) && appointmentsData.some(
+      (appointment: any) =>
+        appointment.status === "pending" || appointment.status === "confirmed"
+    );
+
+    if (hasActiveAppointments) {
+      showToast.errorDirect(t("profile.cannotDeleteWithAppointments"));
+      return;
+    }
+
     setIsDeleteModalOpen(true);
-  }, []);
+  }, [appointmentsData, t]);
 
   const handleConfirmDelete = useCallback(async () => {
     try {

@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api-client";
-import { useQuery } from "@tanstack/react-query";
 import { showToast } from "@/utils/toast";
+import { useQuery } from "@tanstack/react-query";
 
 export interface StreamUser {
   id: string;
