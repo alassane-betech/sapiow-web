@@ -83,8 +83,8 @@ export default function Client() {
   }, [refetch]);
 
   // Transformation et filtrage des données avec filtre de fin de session
-  const { upcomingConfirmed, otherUpcoming } = useMemo(() => {
-    if (!appointments) return { upcomingConfirmed: [], otherUpcoming: [] };
+  const { nextAppointment, upcomingConfirmed, otherUpcoming } = useMemo(() => {
+    if (!appointments) return { nextAppointment: null, upcomingConfirmed: [], otherUpcoming: [] };
 
     // Filtrer les rendez-vous dont l'heure de fin n'est pas encore passée
     const filteredAppointments = (appointments as ApiAppointment[]).filter(
@@ -112,13 +112,21 @@ export default function Client() {
       }
     );
 
-    return filterAndSortAppointments(filteredAppointments);
+    const { upcomingConfirmed: allConfirmed, otherUpcoming: pending } = filterAndSortAppointments(filteredAppointments);
+    
+    // Extraire le rendez-vous le plus imminent (le premier de la liste triée)
+    const nextAppointment = allConfirmed.length > 0 ? allConfirmed[0] : null;
+    
+    // Les autres rendez-vous confirmés (tous sauf le premier)
+    const remainingConfirmed = allConfirmed.slice(1);
+
+    return {
+      nextAppointment,
+      upcomingConfirmed: remainingConfirmed,
+      otherUpcoming: pending,
+    };
   }, [appointments]);
 
-  const otherSessionsData = useMemo(
-    () => otherUpcoming.map((apt) => transformAppointmentToSessionData(apt)),
-    [otherUpcoming]
-  );
 
   if (isLoadingAppointments) {
     return (
@@ -154,41 +162,39 @@ export default function Client() {
         />
       ) : (
         <div className="w-full my-4 px-5 pb-10">
-          {/* Section Visio à venir */}
-          <h2 className="mb-3">{t("visios.upcomingVideo")}</h2>
-          {upcomingConfirmed.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide">
-              {upcomingConfirmed.map((appointment: ApiAppointment) => {
-                const sessionData =
-                  transformAppointmentToSessionData(appointment);
-                return (
-                  <UpcomingVideoCall
-                    key={appointment.id}
-                    date={sessionData.date}
-                    appointmentAt={appointment.appointment_at}
-                    profileImage={sessionData.profileImage}
-                    name={sessionData.professionalName}
-                    title={sessionData.professionalTitle}
-                    onViewDetails={() => handleViewDetails(sessionData)}
-                    variant="dark"
-                    className="w-full min-w-full md:min-w-[calc(50%-0.5rem)] md:w-[calc(50%-0.5rem)] lg:max-w-[324px] lg:min-w-[324px] h-[184px] border-none shadow-none"
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg">
-              <p className="text-gray-500">{t("visios.noConfirmedUpcoming")}</p>
+          {/* Section Rendez-vous imminent */}
+          {nextAppointment && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-gray-900">
+                {t("visios.imminentAppointment")}
+              </h2>
+              <div className="flex gap-4">
+                {(() => {
+                  const sessionData = transformAppointmentToSessionData(nextAppointment);
+                  return (
+                    <UpcomingVideoCall
+                      key={nextAppointment.id}
+                      date={sessionData.date}
+                      appointmentAt={nextAppointment.appointment_at}
+                      profileImage={sessionData.profileImage}
+                      name={sessionData.professionalName}
+                      title={sessionData.professionalTitle}
+                      onViewDetails={() => handleViewDetails(sessionData)}
+                      variant="dark"
+                      className="w-full md:max-w-[324px] h-[184px] border-none shadow-none"
+                    />
+                  );
+                })()}
+              </div>
             </div>
           )}
 
-          {/* Section Prochaines visios */}
-          <h2 className="mb-3 mt-6">{t("visios.nextVideos")}</h2>
-          {otherSessionsData.length > 0 ? (
+          {/* Section Visio à venir */}
+          <h2 className="mb-3">{t("visios.upcomingVideo")}</h2>
+          {upcomingConfirmed.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-              {otherUpcoming.map((appointment: ApiAppointment) => {
-                const sessionData =
-                  transformAppointmentToSessionData(appointment);
+              {upcomingConfirmed.map((appointment: ApiAppointment) => {
+                const sessionData = transformAppointmentToSessionData(appointment);
                 return (
                   <UpcomingVideoCall
                     key={appointment.id}
@@ -204,10 +210,39 @@ export default function Client() {
                 );
               })}
             </div>
+          ) : !nextAppointment ? (
+            <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-10">
+              <p className="text-gray-500">{t("visios.noConfirmedUpcoming")}</p>
+            </div>
           ) : (
             <div className="flex items-center justify-center h-32 bg-gray-50 rounded-lg mb-10">
               <p className="text-gray-500">{t("visios.noOtherScheduled")}</p>
             </div>
+          )}
+
+          {/* Section Demandes en attente */}
+          {otherUpcoming.length > 0 && (
+            <>
+              <h2 className="mb-3 mt-6">{t("visios.pending")}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+                {otherUpcoming.map((appointment: ApiAppointment) => {
+                  const sessionData = transformAppointmentToSessionData(appointment);
+                  return (
+                    <UpcomingVideoCall
+                      key={appointment.id}
+                      date={sessionData.date}
+                      appointmentAt={appointment.appointment_at}
+                      profileImage={sessionData.profileImage}
+                      name={sessionData.professionalName}
+                      title={sessionData.professionalTitle}
+                      onViewDetails={() => handleViewDetails(sessionData)}
+                      variant="light"
+                      className="w-full h-[184px]"
+                    />
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       )}

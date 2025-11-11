@@ -117,6 +117,7 @@ export default {
     myVideoConferences: "Mes visioconférences",
     sessionInProgress: "Session en cours",
     loadingVideoConferences: "Chargement de vos visioconférences...",
+    imminentAppointment: "Rendez-vous imminent",
     upcomingVideo: "Visio à venir",
     nextVideos: "Prochaines visios",
     noConfirmedUpcoming: "Aucune visioconférence confirmée à venir",
