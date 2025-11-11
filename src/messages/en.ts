@@ -115,6 +115,7 @@ export default {
     myVideoConferences: "My video conferences",
     sessionInProgress: "Session in progress",
     loadingVideoConferences: "Loading your video conferences...",
+    imminentAppointment: "Imminent appointment",
     upcomingVideo: "Upcoming video",
     nextVideos: "Next videos",
     noConfirmedUpcoming: "No confirmed upcoming video conferences",
