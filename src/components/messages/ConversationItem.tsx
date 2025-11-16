@@ -1,4 +1,8 @@
+import { usePatientMarkAsRead } from "@/api/patientMessages/usePatientMessage";
+import { useProMarkAsRead } from "@/api/porMessages/useProMessage";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useCurrentUserData } from "@/store/useCurrentUser";
+import { useUserStore } from "@/store/useUser";
 
 // Types pour les données API
 interface ApiConversation {
@@ -43,9 +47,15 @@ export function ConversationItem({
   isSelected = false,
   onClick,
 }: ConversationItemProps) {
-  // Transformer les données API
   const displayName = `${conversation.profile.first_name} ${conversation.profile.last_name}`;
-  console.log({ conversation });
+
+  const { user } = useUserStore();
+  const { currentUser } = useCurrentUserData();
+  const currentUserId = currentUser?.id;
+  const isExpert = user?.type === "expert";
+
+  const proMarkAsRead = useProMarkAsRead();
+  const patientMarkAsRead = usePatientMarkAsRead();
 
   // Gérer l'affichage du message selon son type
   const getDisplayMessage = () => {
@@ -70,12 +80,34 @@ export function ConversationItem({
     minute: "2-digit",
   });
 
+  const handleClick = () => {
+    // Si le dernier message est destiné à l'utilisateur courant et non lu, le marquer comme lu
+    const latest = conversation.latest_message;
+    const shouldMarkAsRead =
+      currentUserId && latest.receiver_id === currentUserId && !latest.read_at;
+
+    if (shouldMarkAsRead) {
+      if (isExpert) {
+        proMarkAsRead.mutate(latest.id);
+      } else {
+        patientMarkAsRead.mutate(latest.id);
+      }
+    }
+
+    onClick();
+  };
+
+  const isUnread =
+    currentUserId &&
+    conversation.latest_message.receiver_id === currentUserId &&
+    !conversation.latest_message.read_at;
+
   return (
     <div
       className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b border-[#e9e9e9] ${
         isSelected ? "bg-snow-blue" : ""
       }`}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <Avatar className="h-12 w-12 mr-3 border border-[#e9e9e9]">
         {conversation.profile.avatar ? (
@@ -92,8 +124,13 @@ export function ConversationItem({
           <h3 className="font-bold text-base text-exford-blue truncate font-figtree lg:font-semibold lg:text-gray-900">
             {displayName}
           </h3>
-          <span className="text-xs text-granite-gray lg:text-gray-500 ml-2">
-            {displayTime}
+          <span className="flex items-center gap-2">
+            <span className="text-xs text-granite-gray lg:text-gray-500 ml-2">
+              {displayTime}
+            </span>
+            {isUnread && (
+              <span className="h-2.5 w-2.5 rounded-full bg-[#FF4D4F]" />
+            )}
           </span>
         </div>
         <p className="text-sm text-slate-gray lg:text-gray-600 truncate font-figtree">

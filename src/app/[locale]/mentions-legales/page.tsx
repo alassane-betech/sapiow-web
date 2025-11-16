@@ -1,9 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import enMessages from "@/messages/en";
+import frMessages from "@/messages/fr";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 // Fonction pour générer les éléments de navigation avec traductions
 const getNavItems = (t: any) => [
@@ -21,8 +23,11 @@ const getNavItems = (t: any) => [
   },
 ];
 
-// Fonction pour générer les onglets avec traductions
-const getTabs = (t: any) => [
+// Fonction pour générer les onglets avec traductions et contenu spécifique
+const getTabs = (
+  t: any,
+  privacyHtml: string
+): { id: number; label: string; content: ReactNode; href: string }[] => [
   {
     id: 1,
     label: t("legalMentions.termsOfService"),
@@ -32,7 +37,14 @@ const getTabs = (t: any) => [
   {
     id: 2,
     label: t("legalMentions.privacyPolicy"),
-    content: t("legalMentions.privacyContent"),
+    content: (
+      <div
+        className="space-y-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h2]:text-xl [&_h2]:font-semibold [&_ul]:list-disc [&_ul]:ml-4 [&_p]:mb-2"
+        dangerouslySetInnerHTML={{
+          __html: privacyHtml,
+        }}
+      />
+    ),
     href: "/#",
   },
   {
@@ -45,6 +57,7 @@ const getTabs = (t: any) => [
 
 export default function MentionsLegales() {
   const t = useTranslations();
+  const locale = useLocale();
   const [activeIdx, setActiveIdx] = useState(0);
   const [showContent, setShowContent] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -54,17 +67,18 @@ export default function MentionsLegales() {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    
+    window.addEventListener("resize", checkIfMobile);
+
     return () => {
-      window.removeEventListener('resize', checkIfMobile);
+      window.removeEventListener("resize", checkIfMobile);
     };
   }, []);
 
   const navItems = getNavItems(t);
-  const TABS = getTabs(t);
+  const messages = locale === "fr" ? frMessages : enMessages;
+  const TABS = getTabs(t, messages.legalMentions.privacyContent as string);
   const activeTab = TABS[activeIdx];
 
   const handleTabClick = (idx: number) => {
@@ -122,7 +136,7 @@ export default function MentionsLegales() {
               // Contenu détaillé en mode mobile avec bouton retour
               <div className="bg-white rounded-2xl p-4 border border-light-blue-gray relative">
                 <div className="flex items-center mb-4">
-                  <button 
+                  <button
                     onClick={handleBackClick}
                     className="mr-3 p-2 rounded-full hover:bg-[#F7F9FB]"
                   >

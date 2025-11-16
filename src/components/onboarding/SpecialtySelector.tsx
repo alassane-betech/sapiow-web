@@ -1,6 +1,7 @@
 "use client";
 import { Expertise } from "@/api/domaine/useDomaine";
 import { getDomainIcon } from "@/constants/onboarding";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React from "react";
 
@@ -19,6 +20,7 @@ export const SpecialtySelector: React.FC<SpecialtySelectorProps> = ({
   isLoadingExpertises,
   onSpecialtyToggle,
 }) => {
+  const t = useTranslations();
   return (
     <div className="w-full max-w-[350px] sm:max-w-[380px] lg:max-w-[391px] flex flex-col items-center">
       {/* Domaine sélectionné */}
@@ -36,18 +38,20 @@ export const SpecialtySelector: React.FC<SpecialtySelectorProps> = ({
       </div>
 
       <h2 className="text-xl font-bold text-center mt-4.5 mb-6.5">
-        Choisissez vos spécialités
+        {t("onboarding.chooseYourSpecialties")}
       </h2>
 
       <div className="flex flex-wrap gap-3 justify-center mb-8">
         {isLoadingExpertises ? (
           <div className="text-center py-4">
-            <div className="text-ash-gray">Chargement des expertises...</div>
+            <div className="text-ash-gray">
+              {t("onboarding.loadingExpertises")}
+            </div>
           </div>
         ) : expertises.length === 0 ? (
           <div className="text-center py-4">
             <div className="text-ash-gray">
-              Aucune expertise disponible pour ce domaine
+              {t("onboarding.noExpertisesAvailable")}
             </div>
           </div>
         ) : (

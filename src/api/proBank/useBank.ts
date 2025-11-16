@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import { showToast } from "@/utils/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 // Types
@@ -80,6 +81,10 @@ export const useUpdateBank = () => {
   const mutation = useMutation<UpdateBankResponse, Error, UpdateBankRequest>({
     mutationFn: async (data: UpdateBankRequest) => {
       return await apiClient.put<UpdateBankResponse>("pro-bank-account", data);
+    },
+    onError: (error: any) => {
+      console.error("Failed to update bank account:", error);
+      showToast.error("bankUpdateError", error?.message);
     },
   });
   return mutation;

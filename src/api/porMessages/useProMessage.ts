@@ -1,4 +1,3 @@
-import { apiClient } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase/client";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -56,7 +55,7 @@ export const useProSendMessage = (senderId: string) => {
     mutationFn: async (data: SendMessageData) => {
       // Le backend attend des FormData
       const formData = new FormData();
-      
+
       // Gérer différents types de contenu comme dans le code de référence
       if (data.type === "audio" && data.content instanceof File) {
         formData.append("content", data.content);
@@ -87,10 +86,10 @@ export const useProSendMessage = (senderId: string) => {
     onSuccess: (data, variables) => {
       // Invalider les queries pour mettre à jour l'interface en temps réel
       queryClient.invalidateQueries({
-        queryKey: ["conversation", variables.receiverId],
+        queryKey: ["pro-conversation", variables.receiverId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["conversations"],
+        queryKey: ["pro-conversations"],
       });
     },
   });
@@ -103,15 +102,18 @@ export const useProGetConversations = () => {
   const queryClient = useQueryClient();
 
   const query = useQuery<Conversation[], Error>({
-    queryKey: ["conversations"],
+    queryKey: ["pro-conversations"],
     queryFn: async () => {
       if (!currentProId) return [];
-      
+
       try {
         // Utiliser Supabase Functions comme dans le code de référence
-        const { data, error } = await supabase.functions.invoke("pro-messages", {
-          method: "GET",
-        });
+        const { data, error } = await supabase.functions.invoke(
+          "pro-messages",
+          {
+            method: "GET",
+          }
+        );
 
         if (error) throw error;
         return data as Conversation[];
@@ -147,11 +149,11 @@ export const useProGetConversations = () => {
           console.log("Real-time pro messages update:", payload);
           // Invalider les conversations pour mettre à jour la liste
           queryClient.invalidateQueries({
-            queryKey: ["conversations"],
+            queryKey: ["pro-conversations"],
           });
           // Aussi invalider la conversation spécifique
           queryClient.invalidateQueries({
-            queryKey: ["conversation", payload.new.sender_id],
+            queryKey: ["pro-conversation", payload.new.sender_id],
           });
         }
       )
@@ -184,7 +186,7 @@ export const useProGetConversation = (
   const queryClient = useQueryClient();
 
   const query = useQuery<Message[], Error>({
-    queryKey: ["conversation", patientId],
+    queryKey: ["pro-conversation", patientId],
     queryFn: async () => {
       if (!patientId || !currentProId) return [];
 
@@ -231,11 +233,11 @@ export const useProGetConversation = (
           console.log("Real-time conversation update:", payload);
           // Invalider et refetch les messages de cette conversation
           queryClient.invalidateQueries({
-            queryKey: ["conversation", patientId],
+            queryKey: ["pro-conversation", patientId],
           });
           // Aussi invalider la liste des conversations pour mettre à jour le dernier message
           queryClient.invalidateQueries({
-            queryKey: ["conversations"],
+            queryKey: ["pro-conversations"],
           });
         }
       )
@@ -258,7 +260,7 @@ export const useProMarkAsRead = () => {
   return useMutation<Message, Error, string>({
     mutationFn: async (messageId: string) => {
       if (!currentProId) throw new Error("User ID is required");
-      
+
       const { data, error } = await supabase
         .from("messages")
         .update({ read_at: new Date().toISOString() })
@@ -271,7 +273,12 @@ export const useProMarkAsRead = () => {
     },
     onSuccess: () => {
       // Invalider les conversations pour mettre à jour les compteurs de messages non lus
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.invalidateQueries({ queryKey: ["pro-conversations"] });
+      // Forcer la mise à jour du badge de notifications messages
+      queryClient.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          Array.isArray(queryKey) && queryKey[0] === "unread-indicator",
+      });
     },
   });
 };

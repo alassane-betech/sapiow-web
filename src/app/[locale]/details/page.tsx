@@ -26,7 +26,6 @@ import { Expert, useSearchExperts } from "@/api/listExpert/useListExpert";
 import { useGetProExpertById } from "@/api/proExpert/useProExpert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
-import { useAddToCalendar } from "@/hooks/useAddToCalendar";
 import { useDetailsLogic } from "@/hooks/useDetailsLogic";
 import { useUserStore } from "@/store/useUser";
 import { useLocale, useTranslations } from "next-intl";
@@ -153,7 +152,6 @@ function ProfessionalDetailContent() {
   const searchParams = useSearchParams();
   const { isPaid } = usePayStore();
   const { isPlaning } = usePlaningStore();
-  const { handleAddToCalendar } = useAddToCalendar();
 
   // Récupérer l'ID depuis les paramètres de recherche
   const expertId = searchParams.get("id");
