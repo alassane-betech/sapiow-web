@@ -413,7 +413,11 @@ function ProfessionalDetailContent() {
                   <h2 className="text-xl font-bold">
                     {t("expertDetails.similarExperts")}
                   </h2>
-                  <ButtonUI variant="link" className="text-blue-600">
+                  <ButtonUI
+                    onClick={() => router.push("/")}
+                    variant="link"
+                    className="text-cobalt-blue font-figtree cursor-pointer"
+                  >
                     {t("expertDetails.seeAll")}{" "}
                     <ChevronRight className="h-4 w-4 ml-1" />
                   </ButtonUI>

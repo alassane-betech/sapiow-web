@@ -40,10 +40,14 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
     const errorId = error ? `${inputId}-error` : undefined;
     const helperId = helperText ? `${inputId}-helper` : undefined;
 
-    // Vérifier si le champ a du contenu (valeur ou focus)
+    // Normaliser la valeur pour éviter null/undefined
+    const normalizedValue = value == null ? "" : String(value);
+
+    // Vérifier si le champ a du contenu
     const [isFocused, setIsFocused] = React.useState(false);
-    console.log(isFocused);
-    const hasContent = Boolean(value);
+    const hasContent = Boolean(
+      normalizedValue && normalizedValue.trim() !== ""
+    );
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
       setIsFocused(true);
@@ -89,7 +93,7 @@ const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
             <Input
               ref={ref}
               id={inputId}
-              value={value}
+              value={normalizedValue}
               onFocus={handleFocus}
               onBlur={handleBlur}
               className={cn(

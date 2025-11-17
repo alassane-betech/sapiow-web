@@ -94,7 +94,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     date={dateDisplay}
                     time={timeDisplay}
                     profileImage={
-                      appointment.patient?.avatar || "/assets/prof.jpg"
+                      appointment.patient?.avatar || "/assets/icons/pro1.png"
                     }
                     name={patientName}
                     sessionDescription={
@@ -154,7 +154,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     date={dateDisplay}
                     time={timeDisplay}
                     profileImage={
-                      appointment.patient?.avatar || "/assets/prof.jpg"
+                      appointment.patient?.avatar || "/assets/icons/pro1.png"
                     }
                     name={
                       `${appointment.patient?.first_name || ""} ${
@@ -201,7 +201,7 @@ export const VisiosTabs = ({ onStartVideoCall }: VisiosTabsProps) => {
                     date={dateDisplay}
                     time={timeDisplay}
                     profileImage={
-                      appointment.patient?.avatar || "/assets/prof.jpg"
+                      appointment.patient?.avatar || "/assets/icons/pro1.png"
                     }
                     name={
                       `${appointment.patient?.first_name || ""} ${

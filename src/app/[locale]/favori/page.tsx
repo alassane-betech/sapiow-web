@@ -23,7 +23,7 @@ const mapFavoriteToProfessional = (favorite: any, t: any): Professional => {
       avatarPath.trim() === "" ||
       (!avatarPath.startsWith("http://") && !avatarPath.startsWith("https://"))
     ) {
-      return "/assets/icons/defaultUser.jpg";
+      return "/assets/icons/pro1.png";
     }
     return avatarPath;
   };

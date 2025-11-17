@@ -25,7 +25,7 @@ const mapExpertToProfessional = (expert: Expert): Professional => {
       avatarPath.trim() === "" ||
       (!avatarPath.startsWith("http://") && !avatarPath.startsWith("https://"))
     ) {
-      return "/assets/icons/defaultUser.jpg";
+      return "/assets/icons/pro1.png";
     }
 
     // Si c'est une URL complète, l'utiliser directement

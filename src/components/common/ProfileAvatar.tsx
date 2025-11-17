@@ -58,7 +58,7 @@ export const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       )}
     >
       <Image
-        src={isValidAvatarUrl(src) ? src : "/assets/memoji.jpg"}
+        src={isValidAvatarUrl(src) ? src : "/assets/icons/pro1.png"}
         alt={alt}
         width={sizeValues[size].width}
         height={sizeValues[size].height}
