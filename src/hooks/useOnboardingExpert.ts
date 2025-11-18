@@ -50,7 +50,7 @@ export const useOnboardingExpert = () => {
     error: expertisesError,
   } = useGetExpertises(selectedDomainId || 0);
 
-  const { mutate: updateProExpert } = useCreateProSession();
+  const { mutateAsync: createProSession } = useCreateProSession();
 
   // Validations
   const isFormValid =
@@ -62,8 +62,10 @@ export const useOnboardingExpert = () => {
 
   const isDomainValid = !!selectedDomain;
   const isSpecialtyValid = selectedSpecialties.length > 0;
-  // Les sessions ne sont pas obligatoires, donc toujours valide
-  const isVisioValid = true;
+  // Validation des sessions : si une session est activée, elle doit avoir un prix > 0
+  const isVisioValid = visioOptions.every(
+    (option) => !option.enabled || (option.price && Number(option.price) > 0)
+  );
 
   // Actions
   const nextStep = () => setStep((prev) => prev + 1);
@@ -129,6 +131,7 @@ export const useOnboardingExpert = () => {
   };
 
   // Fonction pour créer l'expert avec les sessions - utilisée pour "Terminer"
+  // Cette fonction envoie TOUTES les données remplies : infos personnelles, domaine, spécialités, description, liens, avatar, et sessions
   const completeOnboarding = async () => {
     try {
       // Mapper les spécialités vers le format API attendu
@@ -136,7 +139,7 @@ export const useOnboardingExpert = () => {
         expertise_id: expertiseId,
       }));
 
-      // Préparer les données pour l'API
+      // Préparer TOUTES les données pour l'API (étape 1 à 4)
       const onboardingData: OnboardingExpertData = {
         first_name: firstName.trim(),
         last_name: lastName.trim(),
@@ -152,15 +155,16 @@ export const useOnboardingExpert = () => {
         ...(avatar && { avatar }),
       };
 
-      // Soumettre l'expert à l'API
+      // ÉTAPE 1: Soumettre toutes les données de l'expert à l'API
       const expertResult = await onboardingMutation.mutateAsync(onboardingData);
 
-      // ÉTAPE 2: Créer les sessions si des options sont configurées
+      // ÉTAPE 2: Créer TOUTES les sessions activées avec un prix > 0
       const enabledOptions = visioOptions.filter(
         (option) => option.enabled && option.price && Number(option.price) > 0
       );
 
       if ((expertResult as any)?.id && enabledOptions.length > 0) {
+        // Créer toutes les sessions une par une en attendant chacune
         for (const option of enabledOptions) {
           const sessionData = {
             price: Number(option.price),
@@ -174,28 +178,17 @@ export const useOnboardingExpert = () => {
           };
 
           try {
-            await new Promise((resolve) => {
-              updateProExpert(sessionData, {
-                onSuccess: (result) => {
-                  resolve(result);
-                },
-                onError: (error) => {
-                  console.error(
-                    `❌ Erreur session ${option.duration}m:`,
-                    error
-                  );
-                  resolve(null);
-                },
-              });
-            });
+            // Utiliser mutateAsync pour attendre correctement chaque création
+            await createProSession(sessionData);
+            console.log(`✅ Session ${option.duration}m créée avec succès`);
           } catch (sessionError) {
             console.error(
               `❌ Erreur lors de la création de la session ${option.duration}m:`,
               sessionError
             );
+            // Continuer avec les autres sessions même en cas d'erreur
           }
         }
-      } else if (enabledOptions.length === 0) {
       }
 
       // Rediriger vers la page d'accueil après succès complet

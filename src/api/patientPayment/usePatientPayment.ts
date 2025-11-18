@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import { getSupabaseFunctionErrorMessage } from "@/lib/supabase/handleFunctionError";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -66,18 +67,20 @@ export const usePatientPaymentHistory = () => {
           }
         );
 
-        if (error) throw error;
+        if (error) {
+          const errorMessage = await getSupabaseFunctionErrorMessage(error);
+          throw new Error(errorMessage);
+        }
 
         // Retourner directement le tableau de transactions
         return (data as PaymentResponse).transactions || [];
       } catch (error: any) {
-        if (error.response?.data?.message) {
-          throw new Error(error.response.data.message);
+        // Si c'est déjà une Error avec message, la relancer
+        if (error instanceof Error) {
+          throw error;
         }
-
         throw new Error(
-          error.message ||
-            "Une erreur est survenue lors de la récupération de l'historique des paiements"
+          "Une erreur est survenue lors de la récupération de l'historique des paiements"
         );
       }
     },

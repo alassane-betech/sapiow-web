@@ -17,6 +17,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
  * Hook pour l'onboarding des seekers via multipart/form-data
  */
 export const useOnboardingSeeker = () => {
+  const queryClient = useQueryClient();
+
   return useMutation<
     OnboardingSeekerResponse,
     OnboardingSeekerError,
@@ -54,6 +56,9 @@ export const useOnboardingSeeker = () => {
 
         throw userError;
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer"] });
     },
   });
 };

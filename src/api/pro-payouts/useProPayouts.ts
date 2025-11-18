@@ -72,9 +72,41 @@ export const useProPayouts = (params: ProPayoutsParams = {}) => {
   const queryString = queryParams.toString();
   const endpoint = queryString ? `pro-payouts?${queryString}` : "pro-payouts";
 
-  return useQuery<ProPayoutsResponse>({
+  return useQuery<ProPayoutsResponse, Error>({
     queryKey: ["pro-payouts", params],
-    queryFn: () => apiClient.get<ProPayoutsResponse>(endpoint),
+    queryFn: async () => {
+      try {
+        return await apiClient.get<ProPayoutsResponse>(endpoint);
+      } catch (error: any) {
+        // Si l'erreur indique qu'aucun compte Stripe n'existe, traiter comme 404
+        const errorMessage = error?.message || "";
+        if (
+          errorMessage.includes("No Stripe account found") ||
+          errorMessage.includes("Stripe account not found")
+        ) {
+          // Retourner une réponse vide au lieu de lancer une erreur (ressource absente = 404)
+          return {
+            nextPayouts: [],
+            payments: [],
+            total: 0,
+          } as ProPayoutsResponse;
+        }
+        // Pour les autres erreurs, relancer l'erreur
+        throw error;
+      }
+    },
+    retry: (failureCount, error) => {
+      // Ne pas réessayer si c'est une erreur "account not found"
+      const errorMessage = error?.message || "";
+      if (
+        errorMessage.includes("No Stripe account found") ||
+        errorMessage.includes("Stripe account not found")
+      ) {
+        return false;
+      }
+      // Réessayer jusqu'à 3 fois pour les autres erreurs
+      return failureCount < 3;
+    },
   });
 };
 
