@@ -1,4 +1,5 @@
 "use client";
+import { useUnreadMessagesIndicator } from "@/hooks/useUnreadMessagesIndicator";
 import { usePayStore } from "@/store/usePay";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -43,8 +44,8 @@ export function AppSidebar({
   const t = useTranslations();
   const pathname = usePathname();
   const items = getItems(t);
-
   const { setIsPaid } = usePayStore();
+  const { hasUnread: hasUnreadMessages } = useUnreadMessagesIndicator();
 
   return (
     <>
@@ -76,7 +77,7 @@ export function AppSidebar({
                   onClick={() => setIsPaid(false)}
                 >
                   <div
-                    className={`p-2 transition-colors rounded-full ${
+                    className={`relative p-2 transition-colors rounded-full ${
                       isActive ? "bg-light-blue-gray" : ""
                     }`}
                   >
@@ -87,6 +88,9 @@ export function AppSidebar({
                       height={24}
                       className="w-6 h-6"
                     />
+                    {item.url === "/messages" && hasUnreadMessages && (
+                      <span className="absolute top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-0 border-white" />
+                    )}
                   </div>
                   <span
                     className={`text-xs font-medium font-figtree ${
@@ -118,13 +122,17 @@ export function AppSidebar({
                 href={item.url}
                 className="flex flex-col items-center gap-1 flex-1"
               >
-                <Image
-                  src={isActive ? item.iconActive : item.icon}
-                  alt={item.title}
-                  width={28}
-                  height={28}
-                  className="mx-auto"
-                />
+                <div className="relative mx-auto w-fit">
+                  <Image
+                    src={isActive ? item.iconActive : item.icon}
+                    alt={item.title}
+                    width={28}
+                    height={28}
+                  />
+                  {item.url === "/messages" && hasUnreadMessages && (
+                    <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-[#FF4D4F] border-2 border-white" />
+                  )}
+                </div>
                 <span
                   className={`text-[13px] font-medium ${
                     isActive ? "text-slate-900" : "text-slate-400"

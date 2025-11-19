@@ -29,6 +29,7 @@ export default function BankAccountSection({
   const hasStripeAccount = !!bankAccount?.account;
   const stripeAccount = bankAccount?.account;
   const externalAccount = stripeAccount?.external_accounts?.data?.[0];
+  const hasExternalAccount = !!externalAccount;
   const last4 = externalAccount?.last4;
   const country = externalAccount?.country || stripeAccount?.country;
   const [initiateBankAccount, setInitiateBankAccount] = useState(false);
@@ -52,7 +53,7 @@ export default function BankAccountSection({
   const handleModifyBankAccount = () => {
     // Récupérer l'ID du bank_account depuis external_accounts
     const bankAccountId = externalAccount?.id;
-    
+
     if (!bankAccountId) {
       console.error("Aucun compte bancaire trouvé");
       return;
@@ -79,6 +80,24 @@ export default function BankAccountSection({
       }
     );
   };
+
+  const handleCompleteConfiguration = () => {
+    setIsModifying(true);
+    initializeStripeAccount(undefined, {
+      onSuccess(data) {
+        if (data.onboarding_url) {
+          window.location.href = data.onboarding_url;
+        }
+      },
+      onError(error) {
+        setIsModifying(false);
+        console.error(
+          "Erreur lors de la complétion de la configuration:",
+          error
+        );
+      },
+    });
+  };
   return (
     <div className="space-y-6 ml-0 lg:ml-5">
       <h2 className="text-sm font-medium font-figtree text-charcoal-blue hidden lg:block">
@@ -89,7 +108,7 @@ export default function BankAccountSection({
         <CardContent className="p-4 h-full flex items-center">
           <div className="flex items-center justify-between w-full">
             {!hasStripeAccount ? (
-              // État initial : pas de compte bancaire
+              // État 1 : pas de compte Stripe
               <>
                 <div className="flex items-center gap-4 pb-6">
                   <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center">
@@ -114,11 +133,41 @@ export default function BankAccountSection({
                       : t("bankAccount.add")
                   }
                   onClick={handleAddBankAccount}
+                  disabled={initiateBankAccount}
                   className="border border-light-blue-gray rounded-full text-exford-blue font-bold font-figtree px-4 py-2 mb-6 bg-transparent text-sm shadow-none"
                 />
               </>
+            ) : !hasExternalAccount ? (
+              // État 2 : compte Stripe créé mais configuration incomplète
+              <>
+                <div className="flex items-center gap-4 pb-6">
+                  <div className="w-9 h-9 bg-orange-100 rounded-full border border-orange-200 flex items-center justify-center">
+                    <span className="text-orange-600 font-normal text-[10px]">
+                      Stripe
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="text-sm font-medium text-gray-900">
+                      Stripe Connect
+                    </div>
+                    <div className="text-xs text-orange-600">
+                      {t("bankAccount.incompleteConfig")}
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  label={
+                    isModifying
+                      ? t("bankAccount.inProgress")
+                      : t("bankAccount.completeConfig")
+                  }
+                  onClick={handleCompleteConfiguration}
+                  disabled={isModifying}
+                  className="border border-orange-300 text-orange-600 hover:bg-orange-50 px-4 py-2 bg-transparent text-sm mb-6"
+                />
+              </>
             ) : (
-              // État après ajout : compte Stripe Connect avec vraies données
+              // État 3 : configuration complète avec external account
               <>
                 <div className="flex items-center gap-4 pb-6">
                   <div className="w-9 h-9 bg-[#5B56F6] rounded-full border border-gray-200 flex items-center justify-center">

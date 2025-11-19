@@ -4,6 +4,7 @@ import { OnboardingExpertSteps } from "@/components/onboarding/OnboardingExpertS
 import { OnboardingSeekerSteps } from "@/components/onboarding/OnboardingSeekerSteps";
 import { UserTypeSelector } from "@/components/onboarding/UserTypeSelector";
 import { useOnboardingLogic } from "@/hooks/useOnboardingLogic";
+
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 

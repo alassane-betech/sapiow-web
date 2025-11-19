@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import { showToast } from "@/utils/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 // Types
@@ -56,10 +57,36 @@ interface AccountLinkResponse {
 }
 
 export const useGetInfoStripeAccount = () => {
-  const query = useQuery<GetBankResponse>({
+  const query = useQuery<GetBankResponse | null, Error>({
     queryKey: ["bank"],
     queryFn: async () => {
-      return await apiClient.get<GetBankResponse>("pro-bank-account");
+      try {
+        return await apiClient.get<GetBankResponse>("pro-bank-account");
+      } catch (error: any) {
+        // Si l'erreur indique qu'aucun compte Stripe n'existe, traiter comme 404
+        const errorMessage = error?.message || "";
+        if (
+          errorMessage.includes("No Stripe account found") ||
+          errorMessage.includes("Stripe account not found")
+        ) {
+          // Retourner null au lieu de lancer une erreur (ressource absente = 404)
+          return null;
+        }
+        // Pour les autres erreurs, relancer l'erreur
+        throw error;
+      }
+    },
+    retry: (failureCount, error) => {
+      // Ne pas réessayer si c'est une erreur "account not found"
+      const errorMessage = error?.message || "";
+      if (
+        errorMessage.includes("No Stripe account found") ||
+        errorMessage.includes("Stripe account not found")
+      ) {
+        return false;
+      }
+      // Réessayer jusqu'à 3 fois pour les autres erreurs
+      return failureCount < 3;
     },
   });
   return query;
@@ -69,7 +96,12 @@ export const useGetInfoStripeAccount = () => {
 export const useCreateAccountStripe = () => {
   const mutation = useMutation<CreateBankResponse, Error, void>({
     mutationFn: async () => {
-      return await apiClient.post<CreateBankResponse>("pro-bank-account");
+      try {
+        return await apiClient.post<CreateBankResponse>("pro-bank-account");
+      } catch (error: any) {
+        // apiClient extrait déjà le message d'erreur du JSON
+        throw error;
+      }
     },
   });
   return mutation;
@@ -79,7 +111,22 @@ export const useCreateAccountStripe = () => {
 export const useUpdateBank = () => {
   const mutation = useMutation<UpdateBankResponse, Error, UpdateBankRequest>({
     mutationFn: async (data: UpdateBankRequest) => {
-      return await apiClient.put<UpdateBankResponse>("pro-bank-account", data);
+      try {
+        return await apiClient.put<UpdateBankResponse>(
+          "pro-bank-account",
+          data
+        );
+      } catch (error: any) {
+        // apiClient extrait déjà le message d'erreur du JSON
+        throw error;
+      }
+    },
+    onError: (error: any) => {
+      console.error("Failed to update bank account:", error);
+      // Utiliser le message d'erreur extrait par apiClient
+      const errorMessage =
+        error?.message || "Erreur lors de la mise à jour du compte bancaire";
+      showToast.error("bankUpdateError", errorMessage);
     },
   });
   return mutation;
@@ -89,7 +136,12 @@ export const useUpdateBank = () => {
 export const useGenerateAccountLink = () => {
   const mutation = useMutation<AccountLinkResponse, Error, void>({
     mutationFn: async () => {
-      return await apiClient.post<AccountLinkResponse>("pro-bank-account");
+      try {
+        return await apiClient.post<AccountLinkResponse>("pro-bank-account");
+      } catch (error: any) {
+        // apiClient extrait déjà le message d'erreur du JSON
+        throw error;
+      }
     },
   });
   return mutation;

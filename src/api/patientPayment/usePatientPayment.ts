@@ -1,5 +1,5 @@
-import { apiClient } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase/client";
+import { getSupabaseFunctionErrorMessage } from "@/lib/supabase/handleFunctionError";
 import { useCurrentUserData } from "@/store/useCurrentUser";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -57,25 +57,30 @@ export const usePatientPaymentHistory = () => {
     queryKey: ["patient-payment-history"],
     queryFn: async () => {
       if (!currentPatientId) return [];
-      
+
       try {
         // Utiliser Supabase Functions pour récupérer l'historique des paiements
-        const { data, error } = await supabase.functions.invoke("patient-payment", {
-          method: "GET",
-        });
+        const { data, error } = await supabase.functions.invoke(
+          "patient-payment",
+          {
+            method: "GET",
+          }
+        );
 
-        if (error) throw error;
-        
+        if (error) {
+          const errorMessage = await getSupabaseFunctionErrorMessage(error);
+          throw new Error(errorMessage);
+        }
+
         // Retourner directement le tableau de transactions
         return (data as PaymentResponse).transactions || [];
       } catch (error: any) {
-        if (error.response?.data?.message) {
-          throw new Error(error.response.data.message);
+        // Si c'est déjà une Error avec message, la relancer
+        if (error instanceof Error) {
+          throw error;
         }
-
         throw new Error(
-          error.message ||
-            "Une erreur est survenue lors de la récupération de l'historique des paiements"
+          "Une erreur est survenue lors de la récupération de l'historique des paiements"
         );
       }
     },
@@ -106,7 +111,8 @@ export const transformTransactionForDisplay = (
   });
 
   // Nom complet de l'expert
-  const expertName = `${transaction.appointment.pro.first_name} ${transaction.appointment.pro.last_name}`.trim();
+  const expertName =
+    `${transaction.appointment.pro.first_name} ${transaction.appointment.pro.last_name}`.trim();
 
   // Mapping du statut - utilise les clés anglaises pour la compatibilité TypeScript
   const statusMapping: Record<string, "completed" | "pending" | "cancelled"> = {
@@ -140,9 +146,10 @@ export const usePatientPaymentHistoryDisplay = () => {
   const { data: transactions, ...queryResult } = usePatientPaymentHistory();
   const t = useTranslations();
 
-  const transformedData = transactions?.map((transaction) => 
-    transformTransactionForDisplay(transaction, t)
-  ) || [];
+  const transformedData =
+    transactions?.map((transaction) =>
+      transformTransactionForDisplay(transaction, t)
+    ) || [];
 
   return {
     ...queryResult,

@@ -44,7 +44,11 @@ export default function ProfessionalCard({
           </Badge>
         )}
         <Image
-          src={professional.image || professional.avatar || "/placeholder.svg"}
+          src={
+            professional.image ||
+            professional.avatar ||
+            "/assets/icons/pro1.png"
+          }
           alt={
             professional.name ||
             `${professional.first_name || ""} ${

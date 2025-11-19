@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 import { MessageItem } from "./MessageItem";
 
 interface MessagesListProps {
@@ -21,6 +22,14 @@ export function MessagesList({
   className = "",
 }: MessagesListProps) {
   const t = useTranslations();
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  // Toujours scroller vers le dernier message quand la conversation ou le nombre de messages change
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [selectedConversation, conversationMessages?.length]);
   if (!selectedConversation) {
     return (
       <div className={`flex items-center justify-center h-full ${className}`}>
@@ -97,6 +106,7 @@ export function MessagesList({
             />
           );
         })}
+      <div ref={bottomRef} />
     </div>
   );
 }

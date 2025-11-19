@@ -173,7 +173,7 @@ export default function Expert() {
             {pendingCount > 3 && (
               <Link
                 href="/visios"
-                className="flex items-center gap-2 text-cobalt-blue font-figtree"
+                className="flex items-center gap-2 text-cobalt-blue font-figtree cursor-pointer"
               >
                 {t("home.seeAll")} <ArrowRight className="w-4 h-4" />
               </Link>
@@ -205,7 +205,7 @@ export default function Expert() {
                       date={dateDisplay}
                       time={timeDisplay}
                       profileImage={
-                        appointment.patient?.avatar || "/assets/prof.jpg"
+                        appointment.patient?.avatar || "/assets/icons/pro1.png"
                       }
                       name={
                         `${appointment.patient?.first_name || ""} ${
@@ -293,7 +293,7 @@ export default function Expert() {
                         profileImage={
                           appointment.patient?.avatar !== "undefined"
                             ? appointment.patient?.avatar
-                            : "/assets/prof.jpg"
+                            : "/assets/icons/pro1.png"
                         }
                         name={
                           `${appointment.patient?.first_name || ""} ${

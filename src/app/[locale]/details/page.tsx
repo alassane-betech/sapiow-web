@@ -26,7 +26,6 @@ import { Expert, useSearchExperts } from "@/api/listExpert/useListExpert";
 import { useGetProExpertById } from "@/api/proExpert/useProExpert";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useIsMobileOrTablet } from "@/hooks/use-mobile-tablet";
-import { useAddToCalendar } from "@/hooks/useAddToCalendar";
 import { useDetailsLogic } from "@/hooks/useDetailsLogic";
 import { useUserStore } from "@/store/useUser";
 import { useLocale, useTranslations } from "next-intl";
@@ -153,7 +152,6 @@ function ProfessionalDetailContent() {
   const searchParams = useSearchParams();
   const { isPaid } = usePayStore();
   const { isPlaning } = usePlaningStore();
-  const { handleAddToCalendar } = useAddToCalendar();
 
   // Récupérer l'ID depuis les paramètres de recherche
   const expertId = searchParams.get("id");
@@ -415,7 +413,11 @@ function ProfessionalDetailContent() {
                   <h2 className="text-xl font-bold">
                     {t("expertDetails.similarExperts")}
                   </h2>
-                  <ButtonUI variant="link" className="text-blue-600">
+                  <ButtonUI
+                    onClick={() => router.push("/")}
+                    variant="link"
+                    className="text-cobalt-blue font-figtree cursor-pointer"
+                  >
                     {t("expertDetails.seeAll")}{" "}
                     <ChevronRight className="h-4 w-4 ml-1" />
                   </ButtonUI>

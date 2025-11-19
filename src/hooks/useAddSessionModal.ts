@@ -106,7 +106,11 @@ export const useAddSessionModal = ({
       const featuresArray = Array.isArray(existingFeatures)
         ? existingFeatures
         : [existingFeatures];
-      setLocalFeatures(featuresArray.map(f => ({ id: f.id, name: f.name })));
+      setLocalFeatures(
+        featuresArray
+          .filter((f) => f.id !== undefined && f.id !== null)
+          .map((f) => ({ id: String(f.id), name: f.name }))
+      );
       console.log("✅ Features chargées:", featuresArray);
     }
   }, [existingFeatures]);
@@ -225,9 +229,17 @@ export const useAddSessionModal = ({
 
         // En mode édition, gérer les features existantes vs nouvelles
         // 1. Supprimer les features qui ne sont plus dans localFeatures
-        const existingIds = existingFeatures ? 
-          (Array.isArray(existingFeatures) ? existingFeatures : [existingFeatures]).map(f => f.id) : [];
-        const localIds = localFeatures.filter(f => !f.id.startsWith('temp-')).map(f => f.id);
+        const existingIds = existingFeatures
+          ? (Array.isArray(existingFeatures)
+              ? existingFeatures
+              : [existingFeatures]
+            )
+              .filter((f) => f.id !== undefined && f.id !== null)
+              .map((f) => String(f.id))
+          : [];
+        const localIds = localFeatures
+          .filter((f) => typeof f.id === "string" && !f.id.startsWith("temp-"))
+          .map((f) => f.id);
         
         for (const existingId of existingIds) {
           if (!localIds.includes(existingId)) {
@@ -238,7 +250,7 @@ export const useAddSessionModal = ({
 
         // 2. Mettre à jour les features existantes qui ont changé
         for (const feature of localFeatures) {
-          if (!feature.id.startsWith('temp-')) {
+          if (typeof feature.id === "string" && !feature.id.startsWith("temp-")) {
             const existingFeature = existingIds.includes(feature.id);
             if (existingFeature) {
               await updateFeatureMutation.mutateAsync({
@@ -252,7 +264,7 @@ export const useAddSessionModal = ({
 
         // 3. Créer les nouvelles features (celles avec ID temporaire)
         for (const feature of localFeatures) {
-          if (feature.id.startsWith('temp-')) {
+          if (typeof feature.id === "string" && feature.id.startsWith("temp-")) {
             await createFeatureMutation.mutateAsync({
               id: sessionId,
               data: { name: feature.name },

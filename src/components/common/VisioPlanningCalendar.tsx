@@ -1,7 +1,6 @@
 "use client";
 import {
   useCreatePatientAppointment,
-  useGetProAppointmentBlocks,
   useGetProAppointments,
 } from "@/api/appointments/useAppointments";
 import { Button } from "@/components/common/Button";
@@ -31,67 +30,33 @@ const dayOfWeekMapping = {
   6: "saturday",
 };
 
-// Fonction pour générer les créneaux horaires basés sur les schedules
+// Fonction utilitaire pour obtenir une clé de date locale (YYYY-MM-DD)
+const getLocalDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// Fonction pour générer les créneaux horaires basés sur les schedules ou les "allow days"
 const generateTimeSlots = (
   schedules: any[],
   selectedDate: Date,
   duration: number,
-  existingAppointments: any[] = []
+  existingAppointments: any[] = [],
+  allowedWindowsForDate: any[] = []
 ) => {
-  if (!schedules || schedules.length === 0) return [];
-
-  const dayOfWeek =
-    dayOfWeekMapping[selectedDate.getDay() as keyof typeof dayOfWeekMapping];
-
-  // Trouver les schedules pour ce jour
-  const daySchedules = schedules.filter(
-    (schedule) => schedule.day_of_week === dayOfWeek
-  );
-
-  if (daySchedules.length === 0) return [];
-
   const timeSlots: any[] = [];
 
-  daySchedules.forEach((schedule) => {
-    // Parser les heures de début et fin
-    let startTime = new Date(
-      `1970-01-01T${schedule.start_time.replace("+00", "Z")}`
-    );
-    let endTime = new Date(
-      `1970-01-01T${schedule.end_time.replace("+00", "Z")}`
-    );
-
-    // Gérer les créneaux qui traversent minuit (end_time < start_time)
-    if (endTime < startTime) {
-      // L'heure de fin est le lendemain, ajouter 24 heures
-      endTime = new Date(endTime.getTime() + 24 * 60 * 60 * 1000);
-    }
-
-    // Validation : s'assurer que nous avons maintenant un créneau valide
-    if (startTime >= endTime) {
-      console.warn(
-        `Schedule invalide ignoré: ${schedule.start_time} - ${schedule.end_time}`
-      );
-      return; // Ignorer ce schedule
-    }
-
-    // Limiter endTime à 00h30 maximum du lendemain
-    // Créer une date pour 00h30 du lendemain (par rapport à 1970-01-01)
-    const maxEndTime = new Date("1970-01-02T00:30:00Z"); // 00h30 du lendemain
-
-    // Si endTime dépasse 00h30 du lendemain, le limiter à 00h30
-    if (endTime > maxEndTime) {
-      endTime = maxEndTime;
-    }
-
+  const buildSlotsForWindow = (start: Date, end: Date) => {
     // Générer les créneaux selon la durée sélectionnée
-    let currentTime = new Date(startTime);
+    let currentTime = new Date(start);
 
-    while (currentTime < endTime) {
+    while (currentTime < end) {
       const nextTime = new Date(currentTime.getTime() + duration * 60 * 1000);
 
       // Vérifier qu'il reste assez de temps pour ce créneau
-      if (nextTime <= endTime) {
+      if (nextTime <= end) {
         const timeString = currentTime.toLocaleTimeString("fr-FR", {
           hour: "2-digit",
           minute: "2-digit",
@@ -105,18 +70,17 @@ const generateTimeSlots = (
         const slotMinute = parseInt(minutes);
         slotDateTime.setHours(slotHour, slotMinute, 0, 0);
 
-        // Bloquer tous les créneaux qui commencent après 00h30 ou qui se terminent après 00h30
+        // Bloquer les créneaux nocturnes problématiques tout en gardant les créneaux matinaux normaux
 
-        // Cas 1: Créneaux qui commencent entre 00h31 et 23h59 du lendemain (après minuit)
+        // Cas 1: Créneaux qui commencent entre 00h31 et 00h59 (après minuit mais avant 01h00)
         if (slotHour === 0 && slotMinute > 30) {
-          // Créneau commence après 00h30 (ex: 00h45, 00h50, etc.)
           currentTime = nextTime;
           continue;
         }
 
-        // Cas 2: Créneaux qui commencent à partir de 01h00
-        if (slotHour >= 1 && slotHour < 12) {
-          // Créneau commence après 01h00 du matin (ex: 01h00, 02h00, etc.)
+        // Cas 2: Créneaux nocturnes problématiques (01h00 à 05h59)
+        // Permettre les créneaux matinaux normaux à partir de 06h00
+        if (slotHour >= 1 && slotHour < 6) {
           currentTime = nextTime;
           continue;
         }
@@ -184,7 +148,68 @@ const generateTimeSlots = (
       // Passer au créneau suivant (espacé de la durée)
       currentTime = nextTime;
     }
-  });
+  };
+
+  // 1) Si des "allow dates" existent pour ce jour, ils sont prioritaires
+  if (allowedWindowsForDate && allowedWindowsForDate.length > 0) {
+    allowedWindowsForDate.forEach((window: any) => {
+      if (!window?.start_date || !window?.end_date) return;
+      const windowStart = new Date(window.start_date);
+      const windowEnd = new Date(window.end_date);
+
+      if (windowStart >= windowEnd) return;
+
+      buildSlotsForWindow(windowStart, windowEnd);
+    });
+  } else {
+    // 2) Sinon, on utilise les schedules récurrents
+    if (!schedules || schedules.length === 0) return [];
+
+    const dayOfWeek =
+      dayOfWeekMapping[selectedDate.getDay() as keyof typeof dayOfWeekMapping];
+
+    // Trouver les schedules pour ce jour
+    const daySchedules = schedules.filter(
+      (schedule) => schedule.day_of_week === dayOfWeek
+    );
+
+    if (daySchedules.length === 0) return [];
+
+    daySchedules.forEach((schedule) => {
+      // Parser les heures de début et fin
+      let startTime = new Date(
+        `1970-01-01T${schedule.start_time.replace("+00", "Z")}`
+      );
+      let endTime = new Date(
+        `1970-01-01T${schedule.end_time.replace("+00", "Z")}`
+      );
+
+      // Gérer les créneaux qui traversent minuit (end_time < start_time)
+      if (endTime < startTime) {
+        // L'heure de fin est le lendemain, ajouter 24 heures
+        endTime = new Date(endTime.getTime() + 24 * 60 * 60 * 1000);
+      }
+
+      // Validation : s'assurer que nous avons maintenant un créneau valide
+      if (startTime >= endTime) {
+        console.warn(
+          `Schedule invalide ignoré: ${schedule.start_time} - ${schedule.end_time}`
+        );
+        return; // Ignorer ce schedule
+      }
+
+      // Limiter endTime à 00h30 maximum du lendemain
+      // Créer une date pour 00h30 du lendemain (par rapport à 1970-01-01)
+      const maxEndTime = new Date("1970-01-02T00:30:00Z"); // 00h30 du lendemain
+
+      // Si endTime dépasse 00h30 du lendemain, le limiter à 00h30
+      if (endTime > maxEndTime) {
+        endTime = maxEndTime;
+      }
+
+      buildSlotsForWindow(startTime, endTime);
+    });
+  }
 
   // Éliminer les doublons (créneaux avec la même heure)
   const uniqueTimeSlots = timeSlots.reduce((acc: any[], current) => {
@@ -261,6 +286,10 @@ export default function VisioPlanningCalendar({
   const expertId = searchParams.get("id");
   const { data: appointments } = useGetProAppointments(expertId?.toString());
 
+  // Nouvelles données pour la gestion des jours autorisés / bloqués
+  const appointmentAllowDays = expertData?.appointment_allow_day || [];
+  const appointmentBlocks = expertData?.appointment_blocks || [];
+
   const { setIsPlaning } = usePlaningStore();
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(
@@ -272,42 +301,26 @@ export default function VisioPlanningCalendar({
   // Hook pour créer un appointment
   const createAppointmentMutation = useCreatePatientAppointment();
 
-  // Hook pour récupérer les dates bloquées
-  const { data: blockedDates } = useGetProAppointmentBlocks();
-  console.log("blockedDates", blockedDates);
-  // Fonction pour vérifier si une date est bloquée
-  const isDateBlocked = (date: Date) => {
-    if (!blockedDates || !Array.isArray(blockedDates)) return false;
-    return blockedDates.some(
-      (block: any) =>
-        new Date(block.date).toDateString() === date.toDateString()
-    );
-  };
-
   // Créer les durées dynamiques basées sur les sessions de l'expert
 
-  const availableDurations = expertData?.sessions
-    ?.filter((session: any) => session.session_type && session.is_active)
-    .map((session: any) => ({
-      label:
-        session.session_type === "15m"
-          ? "15 min"
-          : session.session_type === "30m"
-          ? "30 min"
-          : session.session_type === "45m"
-          ? "45 min"
-          : session.session_type === "60m"
-          ? "60 min"
-          : `${session.session_type}`,
-      value: parseInt(session.session_type.replace("m", "")),
-      price: session.price,
-      sessionId: session.id,
-    })) || [
-    { label: "15 min", value: 15, price: 120, sessionId: null },
-    { label: "30 min", value: 30, price: 120, sessionId: null },
-    { label: "45 min", value: 45, price: 120, sessionId: null },
-    { label: "60 min", value: 60, price: 120, sessionId: null },
-  ];
+  const availableDurations =
+    expertData?.sessions
+      ?.filter((session: any) => session.session_type && session.is_active)
+      .map((session: any) => ({
+        label:
+          session.session_type === "15m"
+            ? "15 min"
+            : session.session_type === "30m"
+            ? "30 min"
+            : session.session_type === "45m"
+            ? "45 min"
+            : session.session_type === "60m"
+            ? "60 min"
+            : `${session.session_type}`,
+        value: parseInt(session.session_type.replace("m", "")),
+        price: session.price,
+        sessionId: session.id,
+      })) || [];
 
   const [selectedDuration, setSelectedDuration] = useState(
     availableDurations[0]?.value || 15
@@ -327,11 +340,37 @@ export default function VisioPlanningCalendar({
       currentDate.getMonth(),
       selectedDate
     );
+
+    // Clé de date locale au format YYYY-MM-DD pour comparaison avec les données backend
+    const dateKey = getLocalDateKey(selectedDateTime);
+
+    // Vérifier si cette date est bloquée dans appointment_blocks
+    const isBlockedDate =
+      Array.isArray(appointmentBlocks) &&
+      appointmentBlocks.some(
+        (block: any) => typeof block.date === "string" && block.date === dateKey
+      );
+
+    if (isBlockedDate) {
+      return [];
+    }
+
+    // Récupérer les fenêtres "allow" qui correspondent exactement à cette date
+    const allowedWindowsForDate = Array.isArray(appointmentAllowDays)
+      ? appointmentAllowDays.filter((allow: any) => {
+          if (!allow?.start_date) return false;
+          const allowStartDate = new Date(allow.start_date);
+          const allowDateKey = getLocalDateKey(allowStartDate);
+          return allowDateKey === dateKey;
+        })
+      : [];
+
     const slots = generateTimeSlots(
       expertData?.schedules || [],
       selectedDateTime,
       selectedDuration,
-      Array.isArray(appointments) ? appointments : []
+      Array.isArray(appointments) ? appointments : [],
+      allowedWindowsForDate
     );
 
     return slots;
@@ -341,6 +380,8 @@ export default function VisioPlanningCalendar({
     selectedDate,
     selectedDuration,
     appointments,
+    appointmentAllowDays,
+    appointmentBlocks,
   ]);
 
   const getDaysInMonth = (date: Date) => {
@@ -438,11 +479,34 @@ export default function VisioPlanningCalendar({
 
   // Fonction pour vérifier si une date a des créneaux disponibles
   const hasAvailableSlots = (date: Date) => {
+    const dateKey = getLocalDateKey(date);
+
+    // Si la date fait partie des "appointment_blocks", elle est totalement désactivée
+    if (
+      Array.isArray(appointmentBlocks) &&
+      appointmentBlocks.some(
+        (block: any) => typeof block.date === "string" && block.date === dateKey
+      )
+    ) {
+      return false;
+    }
+
+    // Récupérer les fenêtres "allow" qui correspondent à cette date
+    const allowedWindowsForDate = Array.isArray(appointmentAllowDays)
+      ? appointmentAllowDays.filter((allow: any) => {
+          if (!allow?.start_date) return false;
+          const allowStartDate = new Date(allow.start_date);
+          const allowDateKey = getLocalDateKey(allowStartDate);
+          return allowDateKey === dateKey;
+        })
+      : [];
+
     const slots = generateTimeSlots(
       expertData?.schedules || [],
       date,
       selectedDuration,
-      Array.isArray(appointments) ? appointments : []
+      Array.isArray(appointments) ? appointments : [],
+      allowedWindowsForDate
     );
     // Vérifier s'il y a au moins un créneau disponible (non pris)
     return slots.some((slot: any) => slot.available);
@@ -477,14 +541,10 @@ export default function VisioPlanningCalendar({
       // Vérifier si c'est un jour futur ou aujourd'hui
       const isFutureOrToday = dayDate >= todayAtMidnight;
 
-      // Le jour est cliquable s'il est aujourd'hui ou dans le futur, et non bloqué
-      const isBlocked = isDateBlocked(dayDate);
-
       // Vérifier si la date a des créneaux disponibles
-      const hasSlotsAvailable =
-        isFutureOrToday && !isBlocked && hasAvailableSlots(dayDate);
+      const hasSlotsAvailable = isFutureOrToday && hasAvailableSlots(dayDate);
 
-      const isClickable = isFutureOrToday && !isBlocked && hasSlotsAvailable;
+      const isClickable = isFutureOrToday && hasSlotsAvailable;
 
       days.push(
         <div

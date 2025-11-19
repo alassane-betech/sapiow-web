@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -24,6 +25,7 @@ export function useVerifyOtp(): UseVerifyOtpReturn {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // Récupérer le numéro de téléphone depuis localStorage
   useEffect(() => {
@@ -107,6 +109,10 @@ export function useVerifyOtp(): UseVerifyOtpReturn {
         // Nettoyer les données temporaires après vérification réussie
         localStorage.removeItem("phoneNumber");
         localStorage.removeItem("formattedPhone");
+
+        // Invalider la query customer pour forcer le rechargement des données
+        queryClient.invalidateQueries({ queryKey: ["customer"] });
+        queryClient.invalidateQueries({ queryKey: ["proExpert"] });
 
         // Rediriger vers onboarding - la logique de vérification des profils se fera là-bas
         router.push("/onboarding");

@@ -17,8 +17,8 @@ interface ConversationStore {
 export const useConversationStore = create<ConversationStore>((set) => ({
   selectedConversation: null,
   selectedProfessional: null,
-  setSelectedConversation: (conversationId) => 
+  setSelectedConversation: (conversationId) =>
     set({ selectedConversation: conversationId }),
-  setSelectedProfessional: (professional) => 
+  setSelectedProfessional: (professional) =>
     set({ selectedProfessional: professional }),
 }));

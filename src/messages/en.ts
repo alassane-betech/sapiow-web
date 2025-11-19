@@ -63,6 +63,9 @@ export default {
       "We need to know your domain of expertise to offer you the best opportunities.",
     specialties: "Your specialties",
     chooseSpecialties: "Choose your specialties in the selected domain.",
+    chooseYourSpecialties: "Choose your specialties",
+    loadingExpertises: "Loading expertises...",
+    noExpertisesAvailable: "No expertise available for this domain",
     aboutYou: "Tell us about yourself",
     describeYourself:
       "Describe yourself in a few words so your future clients can get to know you better.",
@@ -379,8 +382,161 @@ export default {
     openSourceLicenses: "Open Source Licenses",
     termsContent:
       "These Terms of Use govern the use of the Sapiow platform, accessible via our website and mobile application. Sapiow is a platform that allows experts to register and offer their services, and clients to view the list of available experts to schedule appointments with them. By using Sapiow, you agree to comply with these Terms of Use. Sapiow reserves the right to modify these terms at any time, and users will be informed of significant changes. Continued use of the platform after modification of the Terms of Use constitutes acceptance of these changes. Experts commit to providing accurate and up-to-date information regarding their profile, skills, and availability. Clients commit to respecting scheduled appointments and canceling within a reasonable timeframe if necessary. Sapiow is not responsible for the quality of services provided by experts, but strives to maintain a community of qualified experts.",
-    privacyContent:
-      "This Privacy Policy describes how Sapiow collects, uses, and protects your personal data when you use our platform. We place great importance on protecting your privacy and are committed to processing your data in accordance with applicable data protection laws. The information we collect includes your name, email address, phone number, and for experts, their professional skills and availability. This data is used to facilitate connections between experts and clients, improve our services, and send you relevant notifications. We only share your data with third parties when necessary to provide our services or if required by law. You have the right to access your data, correct it, delete it, or limit its processing. For any questions regarding our privacy policy, please contact us.",
+    privacyContent: `<h1><strong>Privacy Policy – Sapiow</strong></h1>
+
+<p><strong>Last updated:</strong> 30/10/2025</p>
+
+<p>This Privacy Policy explains how <strong>Sapiow</strong> (“we”, “our”, “us”) collects, uses, shares, and protects your personal information when you use our platform connecting individuals and experts.</p>
+
+<p>We take your privacy seriously and are committed to handling your data in accordance with the <strong>General Data Protection Regulation (GDPR)</strong>, applicable privacy laws, and the data protection requirements of <strong>Google</strong> and <strong>Stripe</strong>.</p>
+
+<h2><strong>1. Information We Collect</strong></h2>
+
+<p>We only collect the information necessary to provide and improve our services.</p>
+
+<h3>a. Information You Provide Directly</h3>
+
+<ul>
+  <li>Full name</li>
+  <li>Email address</li>
+  <li>Phone number</li>
+  <li>Profile photo (optional)</li>
+  <li>Professional skills, experience, and availability (for experts)</li>
+  <li>Messages or information exchanged through the platform</li>
+</ul>
+
+<h3>b. Information from Google</h3>
+
+<p>If you choose to connect your <strong>Google Account</strong>, we may access:</p>
+
+<ul>
+  <li>Your <strong>Google email address</strong></li>
+  <li>Your <strong>Google profile name</strong> and <strong>profile picture</strong></li>
+  <li>
+    <p>Your <strong>Google Calendar data</strong>, specifically to:</p>
+    <ul>
+      <li><strong>Create</strong>, <strong>edit</strong>, and <strong>delete</strong> calendar events related to appointments made through Sapiow</li>
+      <li><strong>Synchronize your availability</strong> to prevent scheduling conflicts</li>
+    </ul>
+  </li>
+</ul>
+
+<p>We <strong>never access your Gmail messages, Drive files, contacts, or any other unrelated Google data</strong>.</p>
+
+<h3>c. Payment Information (via Stripe)</h3>
+
+<p>Payments on Sapiow are processed securely through <strong>Stripe</strong>, a PCI-DSS certified payment processor.
+We <strong>do not store or process</strong> your credit card or bank information on our servers.
+All payment details are transmitted directly to Stripe and handled in accordance with their <a href="https://stripe.com/privacy">Privacy Policy</a>.</p>
+
+<h3>d. Technical Information</h3>
+
+<p>We may collect limited technical data such as:</p>
+
+<ul>
+  <li>IP address</li>
+  <li>Browser type and operating system</li>
+  <li>Device information</li>
+  <li>Cookies and connection logs (see our Cookie Policy if applicable)</li>
+</ul>
+
+<h2><strong>2. How We Use Your Information</strong></h2>
+
+<p>We use your data solely for the purposes of:</p>
+
+<ul>
+  <li>Managing your account and authentication</li>
+  <li>Facilitating connections between clients and experts</li>
+  <li>Scheduling and synchronizing appointments (via Google Calendar)</li>
+  <li>Processing secure payments and invoices (via Stripe)</li>
+  <li>Sending notifications, reminders, and service updates</li>
+  <li>Improving the quality and security of our platform</li>
+  <li>Providing customer support</li>
+</ul>
+
+<p>We <strong>do not sell</strong> your data or use it for advertising purposes.
+Google and Stripe data are used <strong>only as required to deliver core platform functionality</strong>.</p>
+
+<h2><strong>3. Data Sharing</strong></h2>
+
+<p>We share your data only when necessary:</p>
+
+<ul>
+  <li>With <strong>technical service providers</strong> (hosting, messaging, authentication) under strict confidentiality agreements;</li>
+  <li>With <strong>Stripe</strong> for secure payment processing;</li>
+  <li>With <strong>Google</strong> only when you have granted explicit permission for Calendar access;</li>
+  <li>With <strong>law enforcement or authorities</strong> when required by law.</li>
+</ul>
+
+<p>We never share or sell your information for marketing purposes.</p>
+
+<h2><strong>4. Data Storage and Security</strong></h2>
+
+<p>We implement robust technical and organizational measures to protect your data, including:</p>
+
+<ul>
+  <li>Encryption in transit (HTTPS / TLS) and at rest;</li>
+  <li>Secure servers located within the European Union or in GDPR-compliant regions;</li>
+  <li>Strict access controls and activity logging;</li>
+  <li>Regular security audits and software updates.</li>
+</ul>
+
+<p>Google and Stripe data are stored and processed in accordance with their respective security standards.
+Sapiow does <strong>not locally store Google or Stripe data</strong> beyond what is strictly necessary.</p>
+
+<h2><strong>5. Data Retention</strong></h2>
+
+<ul>
+  <li>We retain your personal data <strong>for as long as your account remains active</strong> or as needed to provide our services.</li>
+  <li>You may request <strong>account deletion</strong> at any time (see Section 6).</li>
+  <li>Payment-related data may be retained for up to <strong>10 years</strong> in accordance with legal obligations.</li>
+  <li>Google authorizations automatically expire if you revoke access through your Google Account.</li>
+</ul>
+
+<h2><strong>6. Your Rights</strong></h2>
+
+<p>Under the GDPR and applicable data protection laws, you have the right to:</p>
+
+<ul>
+  <li><strong>Access</strong> your personal data;</li>
+  <li><strong>Correct</strong> inaccurate information;</li>
+  <li><strong>Delete</strong> your personal data (“right to be forgotten”);</li>
+  <li><strong>Restrict or object</strong> to certain processing activities;</li>
+  <li><strong>Port</strong> your data to another service;</li>
+  <li><strong>Withdraw consent</strong> at any time for Google or Stripe integrations.</li>
+</ul>
+
+<p>To exercise these rights, please contact us at:
+<strong><a href="mailto:contact@sapiow.com">contact@sapiow.com</a></strong></p>
+
+<h2><strong>7. Deleting Google and Stripe Data</strong></h2>
+
+<p>You can take the following actions at any time:</p>
+
+<ul>
+  <li><strong>Revoke Google access</strong> by visiting <a href="https://myaccount.google.com/permissions">https://myaccount.google.com/permissions</a></li>
+  <li><strong>Delete your Sapiow account</strong>, which permanently removes all associated data, including synchronized calendar events</li>
+  <li><strong>Contact Stripe</strong> regarding payment data at <a href="mailto:privacy@stripe.com">privacy@stripe.com</a></li>
+</ul>
+
+<h2><strong>8. International Data Transfers</strong></h2>
+
+<p>Some of our service providers (including Google and Stripe) may process data outside the European Union.
+Such transfers occur only to countries recognized by the <strong>European Commission</strong> as providing an adequate level of protection or are governed by <strong>Standard Contractual Clauses (SCCs)</strong>.</p>
+
+<h2><strong>9. Updates to This Policy</strong></h2>
+
+<p>We may update this Privacy Policy from time to time to reflect legal, technical, or operational changes.
+The latest version will always be available at <strong><a href="https://sapiow-jfmsga3sp-betech-projects.vercel.app/mentions-legales">https://sapiow-jfmsga3sp-betech-projects.vercel.app/mentions-legales</a></strong>.
+We encourage you to review it periodically.</p>
+
+<h2><strong>10. Contact Us</strong></h2>
+
+<p>If you have any questions or concerns about this Privacy Policy or your personal data, please contact us at:</p>
+
+<p><strong>Sapiow – Privacy Department</strong>
+<br /><strong><a href="mailto:contact@sapiow.com">contact@sapiow.com</a></strong>
+<br /><a href="https://sapiow-jfmsga3sp-betech-projects.vercel.app/mentions-legales">https://sapiow-jfmsga3sp-betech-projects.vercel.app/mentions-legales</a></p>`,
     licensesContent:
       "Sapiow uses several open source software components for its operation. We are grateful to the open source community for their remarkable work. Our application is built with Next.js under the MIT license, React under the MIT license, and uses several libraries such as TailwindCSS, React Query, and next-international for translation management. All these libraries are used in accordance with their respective licenses. The complete licenses for these software components are available in our code repository or upon request. We are committed to respecting the terms of open source licenses and contributing to the open source community when possible. If you are a developer and would like to contribute to Sapiow, please don't hesitate to contact us. We believe in the power of collaboration and knowledge sharing to create quality products.",
   },
@@ -430,6 +586,9 @@ export default {
     addRib: "Add your bank details",
     add: "Add",
     modify: "Modify",
+    completeConfig: "Complete configuration",
+    incompleteConfig: "Incomplete configuration",
+    bankUpdateError: "Error updating bank account",
     inProgress: "In progress...",
     // Add Bank Account Modal
     addBankAccount: "Add a bank account",

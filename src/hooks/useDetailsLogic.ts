@@ -55,7 +55,7 @@ export const useDetailsLogic = (expertData: any) => {
       image:
         expertData.avatar && expertData.avatar.startsWith("http")
           ? expertData.avatar
-          : "/assets/icons/defaultUser.jpg",
+          : "/assets/icons/pro1.png",
       avatar: expertData.avatar,
       verified: true,
       category: "business",
