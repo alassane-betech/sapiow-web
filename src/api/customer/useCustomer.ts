@@ -97,7 +97,7 @@ export interface UpdateCustomerData {
  * Hook pour récupérer les données du client
  */
 export const useGetCustomer = () => {
-  return useQuery<Customer, ProExpertError>({
+  return useQuery<Customer | null, ProExpertError>({
     queryKey: ["customer"],
     queryFn: async () => {
       try {
@@ -106,6 +106,28 @@ export const useGetCustomer = () => {
         // L'API retourne directement l'objet client
         return response;
       } catch (error: any) {
+        // Détecter les erreurs spécifiques qui indiquent qu'aucun profil n'existe
+        const errorMessage = error?.message || "";
+        const errorData = error?.response?.data || {};
+
+        // Si l'erreur est "Cannot coerce the result to a single JSON object" ou erreur vide, traiter comme 404
+        if (
+          errorMessage === "Resource not found" ||
+          errorMessage.includes(
+            "Cannot coerce the result to a single JSON object"
+          ) ||
+          (typeof errorData === "object" &&
+            errorData !== null &&
+            Object.keys(errorData).length === 0) ||
+          (errorData?.error &&
+            typeof errorData.error === "object" &&
+            Object.keys(errorData.error).length === 0) ||
+          errorMessage === "{}"
+        ) {
+          // Retourner null au lieu de lancer une erreur (ressource absente = 404)
+          return null;
+        }
+
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
         }
@@ -115,6 +137,29 @@ export const useGetCustomer = () => {
             "Une erreur est survenue lors de la récupération du client"
         );
       }
+    },
+    retry: (failureCount, error) => {
+      // Ne pas réessayer si c'est une erreur "profile not found" ou erreur vide
+      const errorMessage = error?.message || "";
+      const errorData = (error as any)?.response?.data || {};
+
+      if (
+        errorMessage === "Resource not found" ||
+        errorMessage.includes(
+          "Cannot coerce the result to a single JSON object"
+        ) ||
+        (typeof errorData === "object" &&
+          errorData !== null &&
+          Object.keys(errorData).length === 0) ||
+        (errorData?.error &&
+          typeof errorData.error === "object" &&
+          Object.keys(errorData.error).length === 0) ||
+        errorMessage === "{}"
+      ) {
+        return false;
+      }
+      // Ne pas réessayer pour les autres erreurs non plus (profil patient optionnel)
+      return false;
     },
   });
 };

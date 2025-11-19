@@ -154,20 +154,31 @@ export const fetchApi = async <T>(
     }
 
     let errorMessage = `API error: ${response.statusText}`;
+    let errorData: any = null;
 
     try {
       // Essayer d'extraire le message d'erreur détaillé de la réponse
-      const errorData = await response.json();
+      errorData = await response.json();
 
       if (errorData.error) {
-        // Si l'erreur a un champ "error", l'utiliser
-        errorMessage = errorData.error;
+        // Si l'erreur a un champ "error"
+        if (typeof errorData.error === "object" && Object.keys(errorData.error).length === 0) {
+          // Objet vide {} - traiter comme ressource absente
+          errorMessage = "Resource not found";
+        } else if (typeof errorData.error === "string") {
+          errorMessage = errorData.error;
+        } else {
+          errorMessage = JSON.stringify(errorData.error);
+        }
       } else if (errorData.message) {
         // Sinon, utiliser le champ "message"
         errorMessage = errorData.message;
       } else if (typeof errorData === "string") {
         // Si c'est une chaîne simple
         errorMessage = errorData;
+      } else if (typeof errorData === "object" && Object.keys(errorData).length === 0) {
+        // Objet vide {} - traiter comme ressource absente
+        errorMessage = "Resource not found";
       }
     } catch (parseError) {
       // Si on ne peut pas parser la réponse JSON, garder le message par défaut
@@ -178,6 +189,8 @@ export const fetchApi = async <T>(
     const error = new Error(errorMessage) as ApiError;
     error.status = response.status;
     error.statusText = response.statusText;
+    // Stocker les données d'erreur brutes pour une inspection ultérieure
+    (error as any).response = { data: errorData };
 
     throw error;
   }

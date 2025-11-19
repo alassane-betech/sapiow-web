@@ -253,7 +253,7 @@ export const validateUpdateProExpertData = (
  * @param enabled - Permet de désactiver la requête (utile pour les clients sans profil expert)
  */
 export const useGetProExpert = (enabled: boolean = true) => {
-  return useQuery<ProExpert, ProExpertError>({
+  return useQuery<ProExpert | null, ProExpertError>({
     queryKey: ["proExpert"],
     queryFn: async () => {
       try {
@@ -262,6 +262,22 @@ export const useGetProExpert = (enabled: boolean = true) => {
         // L'API retourne directement l'objet expert
         return response;
       } catch (error: any) {
+        // Détecter les erreurs spécifiques qui indiquent qu'aucun profil n'existe
+        const errorMessage = error?.message || "";
+        const errorData = error?.response?.data || {};
+        
+        // Si l'erreur est vide {} ou un objet vide, traiter comme 404 (ressource absente)
+        if (
+          errorMessage === "Resource not found" ||
+          (typeof errorData === "object" && errorData !== null && Object.keys(errorData).length === 0) ||
+          (errorData?.error && typeof errorData.error === "object" && Object.keys(errorData.error).length === 0) ||
+          errorMessage === "{}" ||
+          errorMessage.includes("Cannot coerce the result")
+        ) {
+          // Retourner null au lieu de lancer une erreur (ressource absente = 404)
+          return null;
+        }
+
         if (error.response?.data?.message) {
           throw new Error(error.response.data.message);
         }
@@ -273,7 +289,23 @@ export const useGetProExpert = (enabled: boolean = true) => {
       }
     },
     enabled, // Permet de désactiver la requête
-    retry: false, // Ne pas réessayer si l'utilisateur n'a pas de profil expert
+    retry: (failureCount, error) => {
+      // Ne pas réessayer si c'est une erreur "profile not found" ou erreur vide
+      const errorMessage = error?.message || "";
+      const errorData = (error as any)?.response?.data || {};
+      
+      if (
+        errorMessage === "Resource not found" ||
+        (typeof errorData === "object" && errorData !== null && Object.keys(errorData).length === 0) ||
+        (errorData?.error && typeof errorData.error === "object" && Object.keys(errorData.error).length === 0) ||
+        errorMessage === "{}" ||
+        errorMessage.includes("Cannot coerce the result")
+      ) {
+        return false;
+      }
+      // Ne pas réessayer pour les autres erreurs non plus (profil expert optionnel)
+      return false;
+    },
   });
 };
 
