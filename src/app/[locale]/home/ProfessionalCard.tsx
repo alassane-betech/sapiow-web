@@ -153,6 +153,13 @@ export default function ProfessionalCard({
             width={25}
             height={25}
             className="transition-all duration-200"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (professional.linkedin) {
+                window.open(professional.linkedin, "_blank");
+              }
+            }}
+            style={{ cursor: "pointer" }}
           />
         )}
       </CardContent>
