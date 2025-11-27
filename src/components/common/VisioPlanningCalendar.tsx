@@ -123,7 +123,16 @@ const generateTimeSlots = (
         }
 
         // Vérifier si ce créneau est déjà pris par un rendez-vous existant
+        // Exclure les rendez-vous avec des statuts qui libèrent le créneau (refused, refunded, cancelled)
         const isSlotTaken = existingAppointments.some((appointment) => {
+          // Statuts qui libèrent le créneau (le rendez-vous n'est plus actif)
+          const inactiveStatuses = ["refused", "refunded", "cancelled"];
+
+          // Si le statut indique que le créneau est libre, l'ignorer
+          if (inactiveStatuses.includes(appointment.status?.toLowerCase())) {
+            return false;
+          }
+
           const appointmentDate = new Date(appointment.appointment_at);
           const appointmentTime = appointmentDate.toLocaleTimeString("fr-FR", {
             hour: "2-digit",
