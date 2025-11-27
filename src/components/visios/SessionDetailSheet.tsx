@@ -7,6 +7,7 @@ import {
   type AppointmentQuestion,
 } from "@/api/appointments/useAppointments";
 import BookedSessionCard from "@/components/common/BookedSessionCard";
+import { CancelAppointmentModal } from "@/components/common/CancelAppointmentModal";
 import { Button as ButtonUI } from "@/components/ui/button";
 import {
   Sheet,
@@ -71,6 +72,7 @@ export function SessionDetailSheet({
     null
   );
   const [editingQuestionText, setEditingQuestionText] = useState("");
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const submitQuestionMutation = useSubmitAppointmentQuestion();
   const updateQuestionMutation = useUpdateAppointmentQuestion();
@@ -481,7 +483,7 @@ export function SessionDetailSheet({
                     ) : (
                       <div
                         className="w-full flex items-center justify-between bg-white border border-[#E2E8F0] rounded-[8px] mb-2"
-                        onClick={handleCancelAppointment}
+                        onClick={() => setShowCancelModal(true)}
                       >
                         <Button
                           label={t("sessionDetail.cancelAppointment")}
@@ -542,6 +544,17 @@ export function SessionDetailSheet({
             </div>
           </>
         )}
+
+        {/* Cancel Appointment Modal */}
+        <CancelAppointmentModal
+          isOpen={showCancelModal}
+          onClose={() => setShowCancelModal(false)}
+          onConfirm={async () => {
+            setShowCancelModal(false);
+            await handleCancelAppointment();
+          }}
+          isCancelling={cancelAppointmentMutation.isPending}
+        />
       </SheetContent>
     </Sheet>
   );

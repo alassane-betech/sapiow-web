@@ -162,14 +162,12 @@ function ProfessionalDetailContent() {
     isLoading,
     error,
   } = useGetProExpertById(expertId || "");
-  console.log({ expertData });
+
   const {
     data: expertsimilar,
     isLoading: isLoadingExpertSimilar,
     error: errorExpertSimilar,
   } = useSearchExperts();
-
-  console.log({ expertsimilar });
 
   // Utilisation du hook pour isoler la logique
   const {
@@ -191,7 +189,6 @@ function ProfessionalDetailContent() {
 
   useEffect(() => {
     if (userClient.type === "expert") {
-      console.log("expert");
       router.push("/");
     }
   }, [userClient, router]);
@@ -252,6 +249,7 @@ function ProfessionalDetailContent() {
                   professional={{
                     ...professional,
                     description: professional.job || professional.description,
+                    topExpertise: professional.topExpertise || false,
                   }}
                   isLiked={isExpertLiked}
                   onToggleLike={() => toggleLike(String(professional.id))}

@@ -20,6 +20,7 @@ export const useOnboardingExpert = () => {
 
   // Hook pour l'appel API
   const onboardingMutation = useOnboardingExpertPro();
+  const [pendingAddSessions, setPendingAddSessions] = useState<boolean>(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [profession, setProfession] = useState("");
@@ -164,6 +165,7 @@ export const useOnboardingExpert = () => {
       );
 
       if ((expertResult as any)?.id && enabledOptions.length > 0) {
+        setPendingAddSessions(true);
         // Créer toutes les sessions une par une en attendant chacune
         for (const option of enabledOptions) {
           const sessionData = {
@@ -181,7 +183,9 @@ export const useOnboardingExpert = () => {
             // Utiliser mutateAsync pour attendre correctement chaque création
             await createProSession(sessionData);
             console.log(`✅ Session ${option.duration}m créée avec succès`);
+            setPendingAddSessions(false);
           } catch (sessionError) {
+            setPendingAddSessions(false);
             console.error(
               `❌ Erreur lors de la création de la session ${option.duration}m:`,
               sessionError
@@ -238,7 +242,7 @@ export const useOnboardingExpert = () => {
     isVisioValid,
 
     // Loading state
-    isSubmitting: onboardingMutation.isPending,
+    isSubmitting: onboardingMutation.isPending || pendingAddSessions,
     error: onboardingMutation.error,
 
     // Données des domaines et expertises

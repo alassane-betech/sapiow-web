@@ -107,18 +107,18 @@ export default function ProfessionalCard({
                 }`.trim() ||
                 "Nom non disponible"}
             </h3>
-            {professional.verified && (
+
+            {professional.topExpertise ? (
               <Image
-                src="/assets/icons/verified.svg"
+                src="/assets/icons/top-verified.svg"
                 alt="Verified"
                 width={iconSize}
                 height={iconSize}
                 className="transition-all duration-200"
               />
-            )}
-            {professional.topExpertise && (
+            ) : (
               <Image
-                src="/assets/icons/top-verified.svg"
+                src="/assets/icons/verified.svg"
                 alt="Verified"
                 width={iconSize}
                 height={iconSize}
@@ -153,6 +153,13 @@ export default function ProfessionalCard({
             width={25}
             height={25}
             className="transition-all duration-200"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (professional.linkedin) {
+                window.open(professional.linkedin, "_blank");
+              }
+            }}
+            style={{ cursor: "pointer" }}
           />
         )}
       </CardContent>

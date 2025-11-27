@@ -58,9 +58,9 @@ export const useDetailsLogic = (expertData: any) => {
           : "/assets/icons/pro1.png",
       avatar: expertData.avatar,
       verified: true,
+      topExpertise: expertData.badge === "gold",
       category: "business",
       domain: "Expert",
-      topExpertise: false,
       description:
         expertData.description || `Expert spécialisé en consultation`,
       linkedin: expertData.linkedin,
