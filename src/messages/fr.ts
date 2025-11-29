@@ -1091,6 +1091,17 @@ We encourage you to review it periodically.</p>
     allowDayUpdateError: "Erreur lors de la mise à jour de la période",
     allowDayDeleteError: "Erreur lors de la suppression de la période",
 
+    // Session Features (Fonctionnalités de session)
+    sessionFeatureCreated: "Fonctionnalité créée avec succès !",
+    sessionFeatureUpdated: "Fonctionnalité mise à jour avec succès !",
+    sessionFeatureDeleted: "Fonctionnalité supprimée avec succès !",
+    sessionFeatureCreateError:
+      "Erreur lors de la création de la fonctionnalité",
+    sessionFeatureUpdateError:
+      "Erreur lors de la mise à jour de la fonctionnalité",
+    sessionFeatureDeleteError:
+      "Erreur lors de la suppression de la fonctionnalité",
+
     // Video Call
     callConnectionError: "Erreur lors de la connexion à l'appel vidéo",
     callTokenError: "Erreur lors de la récupération du token d'appel",

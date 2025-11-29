@@ -1081,6 +1081,14 @@ We encourage you to review it periodically.</p>
     allowDayUpdateError: "Error updating availability period",
     allowDayDeleteError: "Error deleting availability period",
 
+    // Session Features
+    sessionFeatureCreated: "Feature created successfully!",
+    sessionFeatureUpdated: "Feature updated successfully!",
+    sessionFeatureDeleted: "Feature deleted successfully!",
+    sessionFeatureCreateError: "Error creating feature",
+    sessionFeatureUpdateError: "Error updating feature",
+    sessionFeatureDeleteError: "Error deleting feature",
+
     // Video Call
     callConnectionError: "Error connecting to video call",
     callTokenError: "Error retrieving call token",
