@@ -141,6 +141,7 @@ export default {
     selectConversation: "Sélectionnez une conversation",
     selectConversationToView:
       "Sélectionnez une conversation pour voir les messages",
+    loadingConversations: "Chargement des conversations...",
     errorLoadingMessages: "Erreur lors du chargement des messages",
     noMessagesInConversation: "Aucun message dans cette conversation",
     today: "Aujourd'hui",
@@ -595,6 +596,7 @@ We encourage you to review it periodically.</p>
     incompleteConfig: "Configuration incomplète",
     bankUpdateError: "Erreur lors de la mise à jour du compte bancaire",
     inProgress: "En cours...",
+    preparingRedirect: "Préparation de la redirection...",
     // Add Bank Account Modal
     addBankAccount: "Ajouter un compte bancaire",
     nameMatchId:
@@ -996,6 +998,7 @@ We encourage you to review it periodically.</p>
   // Payment History Page
   paymentHistory: {
     title: "Historique des paiements",
+    loading: "Chargement de l'historique...",
     searchPlaceholder: "Montant, transaction ...",
     filterBy: "Filtrer par",
     allTransactions: "Toutes les transactions",

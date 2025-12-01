@@ -7,6 +7,7 @@ import {
 import { SessionCreate, useUpdateProSession } from "@/api/sessions/useSessions";
 import AddAccompanimentModal from "@/components/common/AddAccompanimentModal";
 import { Button } from "@/components/common/Button";
+import { LoadingScreen } from "@/components/common/LoadingScreen";
 import SessionFeaturesList from "@/components/common/SessionFeaturesList";
 import VisioSessionsConfig from "@/components/common/VisioSessionsConfig";
 import { useProtectedPage } from "@/hooks/useProtectedPage";
@@ -206,8 +207,12 @@ export default function OffresPage() {
         </h1>
 
         {isLoading && (
-          <div className="flex items-center justify-center h-32">
-            <p className="text-slate-gray">{t("loading")}</p>
+          <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+            <LoadingScreen
+              message={t("loading")}
+              size="md"
+              fullScreen={false}
+            />
           </div>
         )}
 
